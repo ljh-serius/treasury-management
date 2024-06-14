@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Typography,
-  Fab, Menu, MenuItem, Button, Checkbox, IconButton, InputAdornment
+  Fab, Menu, MenuItem, Button, Checkbox, IconButton, InputAdornment, Grid
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import TreasuryChart from './TreasuryChart';
 
 const initialTransactions = {
   encaissements: [
@@ -22,12 +23,30 @@ const initialTransactions = {
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 const TreasuryTable = () => {
-  const [transactions, setTransactions] = useState(initialTransactions);
+  const [transactions, setTransactions] = useState(() => {
+    const savedTransactions = localStorage.getItem('transactions');
+    return savedTransactions ? JSON.parse(savedTransactions) : initialTransactions;
+  });
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [action, setAction] = useState('');
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState({ type: '', index: -1, month: -1 });
+  const [encaissementsData, setEncaissementsData] = useState([]);
+  const [decaissementsData, setDecaissementsData] = useState([]);
+  const [cumulativeTreasuryData, setCumulativeTreasuryData] = useState([]);
+  const [monthlyTreasuryData, setMonthlyTreasuryData] = useState([]);
+
+  useEffect(() => {
+    const updatedTransactions = calculateTotals(transactions);
+    setEncaissementsData(prepareChartData('encaissements', updatedTransactions));
+    setDecaissementsData(prepareChartData('decaissements', updatedTransactions));
+    setCumulativeTreasuryData(prepareCumulativeTreasuryData(updatedTransactions));
+    setMonthlyTreasuryData(prepareMonthlyTreasuryData(updatedTransactions));
+
+    localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+  }, [transactions]);
 
   const handleInputChange = (type, index, key, value) => {
     const updatedTransactions = { ...transactions };
@@ -56,6 +75,9 @@ const TreasuryTable = () => {
   };
 
   const handleMonthSelect = (month) => {
+    if (action === 'repeatUntil' && selectedMonths.length === 1) {
+      return;
+    }
     setSelectedMonths((prev) => {
       if (prev.includes(month)) {
         return prev.filter((m) => m !== month);
@@ -84,6 +106,12 @@ const TreasuryTable = () => {
       const amount = updatedTransactions[type][index].montants[month];
       updatedTransactions[type][index].montants[month] = 0;
       updatedTransactions[type][index].montants[newMonth] += amount;
+    } else if (action === 'repeatUntil' && selectedMonths.length === 1) {
+      const endMonth = selectedMonths[0];
+      const amount = updatedTransactions[type][index].montants[month];
+      for (let m = month + 1; m <= endMonth; m++) {
+        updatedTransactions[type][index].montants[m] += amount;
+      }
     }
 
     setTransactions(updatedTransactions);
@@ -95,7 +123,7 @@ const TreasuryTable = () => {
     setAction('');
   };
 
-  const calculateTotals = () => {
+  const calculateTotals = (transactions) => {
     const updatedTransactions = { ...transactions };
     ['encaissements', 'decaissements'].forEach((type) => {
       const total = { nature: `Total ${type.charAt(0).toUpperCase() + type.slice(1)}`, montantInitial: 0, montants: Array(12).fill(0) };
@@ -107,14 +135,10 @@ const TreasuryTable = () => {
       });
       updatedTransactions[type][updatedTransactions[type].length - 1] = total;
     });
-    setTransactions(updatedTransactions);
+    return updatedTransactions;
   };
 
-  useEffect(() => {
-    calculateTotals();
-  }, [transactions]);
-
-  const calculateMonthlyTreasury = () => {
+  const calculateMonthlyTreasury = (transactions) => {
     return Array.from({ length: 12 }, (_, month) => {
       const totalEncaissements = transactions.encaissements[transactions.encaissements.length - 1].montants[month];
       const totalDecaissements = transactions.decaissements[transactions.decaissements.length - 1].montants[month];
@@ -122,8 +146,8 @@ const TreasuryTable = () => {
     });
   };
 
-  const calculateAccumulatedTreasury = (initialSolde) => {
-    const monthlyTreasury = calculateMonthlyTreasury();
+  const calculateAccumulatedTreasury = (initialSolde, transactions) => {
+    const monthlyTreasury = calculateMonthlyTreasury(transactions);
     return monthlyTreasury.reduce((acc, value, index) => {
       if (index === 0) acc.push(value + initialSolde);
       else acc.push(acc[index - 1] + value);
@@ -131,23 +155,41 @@ const TreasuryTable = () => {
     }, []);
   };
 
-  const calculateTotal = (type, index) => {
+  const calculateTotal = (type, index, transactions) => {
     const transaction = transactions[type][index];
     return transaction.montants.reduce((acc, curr) => acc + curr, 0) + transaction.montantInitial;
   };
 
-  const totalEncaissements = transactions.encaissements[transactions.encaissements.length - 1].montants.reduce(
-    (acc, curr) => acc + curr,
-    transactions.encaissements[transactions.encaissements.length - 1].montantInitial
-  );
-  const totalDecaissements = transactions.decaissements[transactions.decaissements.length - 1].montants.reduce(
-    (acc, curr) => acc + curr,
-    transactions.decaissements[transactions.decaissements.length - 1].montantInitial
-  );
-  const monthlyTreasury = calculateMonthlyTreasury();
+  const prepareChartData = (type, transactions) => {
+    const data = transactions[type].map(transaction => ({
+      name: transaction.nature,
+      data: [transaction.montantInitial, ...transaction.montants]
+    })).slice(0, -1); // Remove total from chart data
+    return data;
+  };
+
+  const prepareCumulativeTreasuryData = (transactions) => {
+    const initialSolde = transactions.encaissements[transactions.encaissements.length - 1].montantInitial - 
+                         transactions.decaissements[transactions.decaissements.length - 1].montantInitial;
+    const data = calculateAccumulatedTreasury(initialSolde, transactions);
+    return [{
+      name: 'Trésorerie Cummulée',
+      data: [initialSolde, ...data]
+    }];
+  };
+
+  const prepareMonthlyTreasuryData = (transactions) => {
+    const data = calculateMonthlyTreasury(transactions);
+    return [{
+      name: 'Solde de Trésorie',
+      data: [0, ...data]
+    }];
+  };
+
+  const monthlyTreasury = calculateMonthlyTreasury(transactions);
   const initialSolde = transactions.encaissements[transactions.encaissements.length - 1].montantInitial - 
                        transactions.decaissements[transactions.decaissements.length - 1].montantInitial;
-  const accumulatedTreasury = calculateAccumulatedTreasury(initialSolde);
+  const accumulatedTreasury = calculateAccumulatedTreasury(initialSolde, transactions);
   const finalTreasury = accumulatedTreasury[accumulatedTreasury.length - 1];
 
   const handleFabClick = (event) => {
@@ -187,7 +229,8 @@ const TreasuryTable = () => {
                 const showCheckbox =
                   (action === 'repeat' && i > selectedTransaction.month) ||
                   (action === 'advance' && i < selectedTransaction.month) ||
-                  (action === 'postpone' && i > selectedTransaction.month);
+                  (action === 'postpone' && i > selectedTransaction.month) ||
+                  (action === 'repeatUntil' && i > selectedTransaction.month);
                 return (
                   <TableCell key={i} align="left" padding="normal">
                     {month}
@@ -264,7 +307,7 @@ const TreasuryTable = () => {
                         />
                       </TableCell>
                     ))}
-                    <TableCell align="right" padding="normal">{calculateTotal(type, index)}</TableCell>
+                    <TableCell align="right" padding="normal">{calculateTotal(type, index, transactions)}</TableCell>
                   </TableRow>
                 ))}
               </React.Fragment>
@@ -302,10 +345,25 @@ const TreasuryTable = () => {
         open={Boolean(menuAnchorEl)}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={() => handleActionClick('repeat')}>Repeat for month</MenuItem>
+        <MenuItem onClick={() => handleActionClick('repeat')}>Repeat for months</MenuItem>
         <MenuItem onClick={() => handleActionClick('advance')}>Advance transaction</MenuItem>
         <MenuItem onClick={() => handleActionClick('postpone')}>Postpone transaction</MenuItem>
+        <MenuItem onClick={() => handleActionClick('repeatUntil')}>Repeat until month</MenuItem>
       </Menu>
+      <Grid container spacing={3} style={{ marginTop: 16 }}>
+        <Grid item xs={12} md={6}>
+          <TreasuryChart title="Encaissements by Nature" data={encaissementsData} />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TreasuryChart title="Décaissements by Nature" data={decaissementsData} />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TreasuryChart title="Solde de Trésorie" data={monthlyTreasuryData} />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TreasuryChart title="Trésorerie Cummulée" data={cumulativeTreasuryData} />
+        </Grid>
+      </Grid>
     </>
   );
 };
