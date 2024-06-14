@@ -2,7 +2,7 @@ import React from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-const TreasuryChart = ({ title, data, onHover }) => {
+const TreasuryChart = ({ title, data, onHover, highlightedCumulativeMonth }) => {
   const options = {
     title: {
       text: title
@@ -15,7 +15,13 @@ const TreasuryChart = ({ title, data, onHover }) => {
         text: 'Amount'
       }
     },
-    series: data,
+    series: data.map(series => ({
+      ...series,
+      data: series.data.map((point, index) => ({
+        y: point,
+        color: highlightedCumulativeMonth !== null && index <= highlightedCumulativeMonth + 1 ? 'rgba(255, 0, 0, 0.5)' : null // Highlight up to the selected month
+      }))
+    })),
     credits: {
       enabled: false
     },
@@ -29,10 +35,11 @@ const TreasuryChart = ({ title, data, onHover }) => {
         point: {
           events: {
             mouseOver: function () {
-              onHover(this.series.name);
+              const monthIndex = this.index;
+              onHover(this.series.name, monthIndex);
             },
             mouseOut: function () {
-              onHover(null);
+              onHover(null, null);
             }
           }
         }

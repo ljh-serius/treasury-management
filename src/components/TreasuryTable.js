@@ -38,6 +38,8 @@ const TreasuryTable = () => {
   const [cumulativeTreasuryData, setCumulativeTreasuryData] = useState([]);
   const [monthlyTreasuryData, setMonthlyTreasuryData] = useState([]);
   const [highlightedRow, setHighlightedRow] = useState({ encaissements: null, decaissements: null });
+  const [highlightedMonth, setHighlightedMonth] = useState(null);
+  const [highlightedCumulativeMonth, setHighlightedCumulativeMonth] = useState(null); // New state variable
 
   useEffect(() => {
     const updatedTransactions = calculateTotals(transactions);
@@ -216,6 +218,14 @@ const TreasuryTable = () => {
     }));
   };
 
+  const handleMonthHighlight = (index) => {
+    setHighlightedMonth(index);
+  };
+
+  const handleCumulativeMonthHighlight = (index) => {
+    setHighlightedCumulativeMonth(index);
+  };
+  
   const updatedTransactions = calculateTotals(transactions);
   const monthlyTreasury = calculateMonthlyTreasury(updatedTransactions);
   const initialSolde = transactions.encaissements[transactions.encaissements.length - 1].montantInitial - 
@@ -323,7 +333,7 @@ const TreasuryTable = () => {
                           padding="normal"
                           key={i}
                           align="right"
-                          sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
+                          sx={{ backgroundColor: highlightedMonth === i ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : (highlightedCumulativeMonth !== null && i <= highlightedCumulativeMonth) ? 'rgba(0, 0, 255, 0.1)' : 'inherit'} }
                         >
                           <TextField
                             value={montant}
@@ -363,6 +373,7 @@ const TreasuryTable = () => {
                   key={index} 
                   align="right" 
                   padding="normal"
+                  sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit' }}
                 >
                   {treasury}
                 </TableCell>
@@ -376,6 +387,7 @@ const TreasuryTable = () => {
                   key={index} 
                   align="right" 
                   padding="normal"
+                  sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit' }}
                 >
                   {treasury}
                 </TableCell>
@@ -389,6 +401,7 @@ const TreasuryTable = () => {
                   key={index} 
                   align="right" 
                   padding="normal"
+                  sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit' }}
                 >
                   {expense}
                 </TableCell>
@@ -438,12 +451,15 @@ const TreasuryTable = () => {
           <TreasuryChart
             title="Solde de Trésorie"
             data={monthlyTreasuryData}
+            onHover={(seriesName, index) => handleMonthHighlight(index - 1)}
           />
         </Grid>
         <Grid item xs={12} md={6}>
           <TreasuryChart
             title="Trésorerie Cummulée"
             data={cumulativeTreasuryData}
+            onHover={(seriesName, index) => handleCumulativeMonthHighlight(index - 1)} // Update this
+            highlightedCumulativeMonth={highlightedCumulativeMonth} // Pass the new state variable
           />
         </Grid>
       </Grid>
