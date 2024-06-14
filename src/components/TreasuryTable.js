@@ -179,8 +179,8 @@ const TreasuryTable = () => {
   };
 
   const prepareCumulativeTreasuryData = (transactions) => {
-    const initialSolde = transactions.encaissements[transactions.encaissements.length - 1].montantInitial - 
-                         transactions.decaissements[transactions.decaissements.length - 1].montantInitial;
+    const initialSolde = transactions.encaissements[transactions.encaissements.length - 1].montantInitial -
+      transactions.decaissements[transactions.decaissements.length - 1].montantInitial;
     const data = calculateAccumulatedTreasury(initialSolde, transactions);
     return [{
       name: 'Trésorerie Cummulée',
@@ -225,11 +225,11 @@ const TreasuryTable = () => {
   const handleCumulativeMonthHighlight = (index) => {
     setHighlightedCumulativeMonth(index);
   };
-  
+
   const updatedTransactions = calculateTotals(transactions);
   const monthlyTreasury = calculateMonthlyTreasury(updatedTransactions);
-  const initialSolde = transactions.encaissements[transactions.encaissements.length - 1].montantInitial - 
-                       transactions.decaissements[transactions.decaissements.length - 1].montantInitial;
+  const initialSolde = transactions.encaissements[transactions.encaissements.length - 1].montantInitial -
+    transactions.decaissements[transactions.decaissements.length - 1].montantInitial;
   const accumulatedTreasury = calculateAccumulatedTreasury(initialSolde, updatedTransactions);
   const finalTreasury = accumulatedTreasury[accumulatedTreasury.length - 1];
   const monthlyExpenses = calculateMonthlyExpenses();
@@ -247,22 +247,6 @@ const TreasuryTable = () => {
             <Button variant="contained" color="secondary" onClick={handleCancel}>Cancel</Button>
           </div>
         )}
-        {action && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            {monthNames.slice(1).map((month, index) => (
-              <FormControlLabel
-                key={index}
-                control={
-                  <Checkbox
-                    checked={selectedMonths.includes(index)}
-                    onChange={() => handleMonthSelect(index)}
-                  />
-                }
-                label={month}
-              />
-            ))}
-          </div>
-        )}
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
@@ -271,18 +255,44 @@ const TreasuryTable = () => {
               <TableCell padding="normal">Solde Initial</TableCell>
               {monthNames.slice(1).map((month, i) => (
                 <TableCell key={i} align="left" padding="normal">
-                  {month}
+                  <Typography align="center" gutterBottom>
+                    {month}
+                  </Typography>
+                  {action && (
+                    <>
+                      {action === 'advance' && i < selectedTransaction.month && (
+                        <Checkbox
+                          checked={selectedMonths.includes(i)}
+                          onChange={() => handleMonthSelect(i)}
+                        />
+                      )}
+                      {action === 'postpone' && i > selectedTransaction.month && (
+                        <Checkbox
+                          checked={selectedMonths.includes(i)}
+                          onChange={() => handleMonthSelect(i)}
+                        />
+                      )}
+                      {action !== 'advance' && action !== 'postpone' && i !== selectedTransaction.month && (
+                        <Checkbox
+                          checked={selectedMonths.includes(i)}
+                          onChange={() => handleMonthSelect(i)}
+                        />
+                      )}
+                    </>
+                  )}
                 </TableCell>
               ))}
               <TableCell align="right" padding="normal">Total</TableCell>
             </TableRow>
           </TableHead>
+
+
           <TableBody>
             {Object.keys(transactions).map((type) => (
               <React.Fragment key={type}>
                 {transactions[type].map((transaction, index) => {
                   const isHighlighted = (type === 'encaissements' && highlightedRow.encaissements === transaction.nature) ||
-                                        (type === 'decaissements' && highlightedRow.decaissements === transaction.nature);
+                    (type === 'decaissements' && highlightedRow.decaissements === transaction.nature);
 
                   return (
                     <TableRow
@@ -293,7 +303,7 @@ const TreasuryTable = () => {
                           rowSpan={transactions[type].length}
                           padding="normal"
                           sx={{
-                            backgroundColor: transactions[type].some(t => 
+                            backgroundColor: transactions[type].some(t =>
                               (type === 'encaissements' && highlightedRow.encaissements === t.nature) ||
                               (type === 'decaissements' && highlightedRow.decaissements === t.nature)
                             ) ? 'rgba(0, 0, 255, 0.1)' : 'inherit'
@@ -333,7 +343,7 @@ const TreasuryTable = () => {
                           padding="normal"
                           key={i}
                           align="right"
-                          sx={{ backgroundColor: highlightedMonth === i ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : (highlightedCumulativeMonth !== null && i <= highlightedCumulativeMonth) ? 'rgba(0, 0, 255, 0.1)' : 'inherit'} }
+                          sx={{ backgroundColor: highlightedMonth === i ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : (highlightedCumulativeMonth !== null && i <= highlightedCumulativeMonth) ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
                         >
                           <TextField
                             value={montant}
@@ -369,9 +379,9 @@ const TreasuryTable = () => {
             <TableRow>
               <TableCell colSpan={3} padding="normal">Solde de la Trésorerie</TableCell>
               {monthlyTreasury.map((treasury, index) => (
-                <TableCell 
-                  key={index} 
-                  align="right" 
+                <TableCell
+                  key={index}
+                  align="right"
                   padding="normal"
                   sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit' }}
                 >
@@ -383,9 +393,9 @@ const TreasuryTable = () => {
             <TableRow>
               <TableCell colSpan={3} padding="normal">Trésorerie Accumulée</TableCell>
               {accumulatedTreasury.map((treasury, index) => (
-                <TableCell 
-                  key={index} 
-                  align="right" 
+                <TableCell
+                  key={index}
+                  align="right"
                   padding="normal"
                   sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit' }}
                 >
@@ -397,9 +407,9 @@ const TreasuryTable = () => {
             <TableRow>
               <TableCell colSpan={3} padding="normal">Dépenses Mensuelles</TableCell>
               {monthlyExpenses.map((expense, index) => (
-                <TableCell 
-                  key={index} 
-                  align="right" 
+                <TableCell
+                  key={index}
+                  align="right"
                   padding="normal"
                   sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit' }}
                 >
