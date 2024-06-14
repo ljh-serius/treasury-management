@@ -2,7 +2,7 @@ import React from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-const TreasuryChart = ({ title, data }) => {
+const TreasuryChart = ({ title, data, onHover }) => {
   const options = {
     title: {
       text: title
@@ -16,6 +16,9 @@ const TreasuryChart = ({ title, data }) => {
       }
     },
     series: data,
+    credits: {
+      enabled: false
+    },
     tooltip: {
       formatter: function () {
         return `Month: <b>${this.x}</b><br/>Value: <b>${this.y}</b>`;
@@ -23,18 +26,17 @@ const TreasuryChart = ({ title, data }) => {
     },
     plotOptions: {
       series: {
-        cursor: 'pointer',
         point: {
           events: {
-            click: function () {
-              alert(`Month: ${this.category}\nValue: ${this.y}`);
+            mouseOver: function () {
+              onHover(this.series.name);
+            },
+            mouseOut: function () {
+              onHover(null);
             }
           }
         }
       }
-    },
-    credits: {
-      enabled: false
     }
   };
 

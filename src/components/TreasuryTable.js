@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Typography,
-  Fab, Menu, MenuItem, Button, Checkbox, IconButton, InputAdornment, Grid
+  Fab, Menu, MenuItem, Button, IconButton, InputAdornment, Grid, Checkbox, FormControlLabel
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -20,7 +20,7 @@ const initialTransactions = {
   ]
 };
 
-const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const monthNames = ["Initial", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 const TreasuryTable = () => {
   const [transactions, setTransactions] = useState(() => {
@@ -37,6 +37,7 @@ const TreasuryTable = () => {
   const [decaissementsData, setDecaissementsData] = useState([]);
   const [cumulativeTreasuryData, setCumulativeTreasuryData] = useState([]);
   const [monthlyTreasuryData, setMonthlyTreasuryData] = useState([]);
+  const [highlightedRow, setHighlightedRow] = useState({ encaissements: null, decaissements: null });
 
   useEffect(() => {
     const updatedTransactions = calculateTotals(transactions);
@@ -75,9 +76,6 @@ const TreasuryTable = () => {
   };
 
   const handleMonthSelect = (month) => {
-    if (action === 'repeatUntil' && selectedMonths.length === 1) {
-      return;
-    }
     setSelectedMonths((prev) => {
       if (prev.includes(month)) {
         return prev.filter((m) => m !== month);
@@ -160,6 +158,16 @@ const TreasuryTable = () => {
     return transaction.montants.reduce((acc, curr) => acc + curr, 0) + transaction.montantInitial;
   };
 
+  const calculateMonthlyExpenses = () => {
+    return Array.from({ length: 12 }, (_, month) => {
+      return transactions.decaissements.reduce((total, decaissement) => total + decaissement.montants[month], 0);
+    });
+  };
+
+  const calculateTotalAnnualExpenses = () => {
+    return calculateMonthlyExpenses().reduce((total, monthlyExpense) => total + monthlyExpense, 0);
+  };
+
   const prepareChartData = (type, transactions) => {
     const data = transactions[type].map(transaction => ({
       name: transaction.nature,
@@ -186,12 +194,6 @@ const TreasuryTable = () => {
     }];
   };
 
-  const monthlyTreasury = calculateMonthlyTreasury(transactions);
-  const initialSolde = transactions.encaissements[transactions.encaissements.length - 1].montantInitial - 
-                       transactions.decaissements[transactions.decaissements.length - 1].montantInitial;
-  const accumulatedTreasury = calculateAccumulatedTreasury(initialSolde, transactions);
-  const finalTreasury = accumulatedTreasury[accumulatedTreasury.length - 1];
-
   const handleFabClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -207,6 +209,22 @@ const TreasuryTable = () => {
     handleMenuActionClose();
   };
 
+  const handleChartHover = (type, seriesName) => {
+    setHighlightedRow((prev) => ({
+      ...prev,
+      [type]: seriesName
+    }));
+  };
+
+  const updatedTransactions = calculateTotals(transactions);
+  const monthlyTreasury = calculateMonthlyTreasury(updatedTransactions);
+  const initialSolde = transactions.encaissements[transactions.encaissements.length - 1].montantInitial - 
+                       transactions.decaissements[transactions.decaissements.length - 1].montantInitial;
+  const accumulatedTreasury = calculateAccumulatedTreasury(initialSolde, updatedTransactions);
+  const finalTreasury = accumulatedTreasury[accumulatedTreasury.length - 1];
+  const monthlyExpenses = calculateMonthlyExpenses();
+  const totalAnnualExpenses = calculateTotalAnnualExpenses();
+
   return (
     <>
       <TableContainer component={Paper}>
@@ -219,112 +237,163 @@ const TreasuryTable = () => {
             <Button variant="contained" color="secondary" onClick={handleCancel}>Cancel</Button>
           </div>
         )}
+        {action && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+            {monthNames.slice(1).map((month, index) => (
+              <FormControlLabel
+                key={index}
+                control={
+                  <Checkbox
+                    checked={selectedMonths.includes(index)}
+                    onChange={() => handleMonthSelect(index)}
+                  />
+                }
+                label={month}
+              />
+            ))}
+          </div>
+        )}
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
               <TableCell padding="normal">Type</TableCell>
               <TableCell padding="normal">Nature de la transaction</TableCell>
               <TableCell padding="normal">Solde Initial</TableCell>
-              {monthNames.map((month, i) => {
-                const showCheckbox =
-                  (action === 'repeat' && i > selectedTransaction.month) ||
-                  (action === 'advance' && i < selectedTransaction.month) ||
-                  (action === 'postpone' && i > selectedTransaction.month) ||
-                  (action === 'repeatUntil' && i > selectedTransaction.month);
-                return (
-                  <TableCell key={i} align="left" padding="normal">
-                    {month}
-                    {showCheckbox && (
-                      <Checkbox
-                        checked={selectedMonths.includes(i)}
-                        onChange={() => handleMonthSelect(i)}
-                      />
-                    )}
-                  </TableCell>
-                );
-              })}
+              {monthNames.slice(1).map((month, i) => (
+                <TableCell key={i} align="left" padding="normal">
+                  {month}
+                </TableCell>
+              ))}
               <TableCell align="right" padding="normal">Total</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {Object.keys(transactions).map((type) => (
               <React.Fragment key={type}>
-                {transactions[type].map((transaction, index) => (
-                  <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    {index === 0 && (
-                      <TableCell rowSpan={transactions[type].length} padding="normal">
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </TableCell>
-                    )}
-                    <TableCell padding="normal">
-                      <TextField
-                        value={transaction.nature}
-                        onChange={(e) => handleInputChange(type, index, 'nature', e.target.value)}
-                        variant="standard"
-                        size="small"
-                        fullWidth
-                        InputProps={{
-                          disableUnderline: true,
-                          style: { height: '100%', padding: 8 }, // Added padding
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell padding="normal">
-                      <TextField
-                        value={transaction.montantInitial}
-                        onChange={(e) => handleInputChange(type, index, 'montantInitial', e.target.value)}
-                        variant="standard"
-                        size="small"
-                        fullWidth
-                        InputProps={{
-                          disableUnderline: true,
-                          style: { height: '100%', padding: 8 }, // Added padding
-                        }}
-                      />
-                    </TableCell>
-                    {transaction.montants.map((montant, i) => (
-                      <TableCell padding="normal" key={i} align="right">
+                {transactions[type].map((transaction, index) => {
+                  const isHighlighted = (type === 'encaissements' && highlightedRow.encaissements === transaction.nature) ||
+                                        (type === 'decaissements' && highlightedRow.decaissements === transaction.nature);
+
+                  return (
+                    <TableRow
+                      key={index}
+                    >
+                      {index === 0 && (
+                        <TableCell
+                          rowSpan={transactions[type].length}
+                          padding="normal"
+                          sx={{
+                            backgroundColor: transactions[type].some(t => 
+                              (type === 'encaissements' && highlightedRow.encaissements === t.nature) ||
+                              (type === 'decaissements' && highlightedRow.decaissements === t.nature)
+                            ) ? 'rgba(0, 0, 255, 0.1)' : 'inherit'
+                          }}
+                        >
+                          {type.charAt(0).toUpperCase() + type.slice(1)}
+                        </TableCell>
+                      )}
+                      <TableCell padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
                         <TextField
-                          value={montant}
-                          onChange={(e) => handleInputChange(type, index, i, e.target.value)}
+                          value={transaction.nature}
+                          onChange={(e) => handleInputChange(type, index, 'nature', e.target.value)}
                           variant="standard"
                           size="small"
                           fullWidth
                           InputProps={{
                             disableUnderline: true,
                             style: { height: '100%', padding: 8 }, // Added padding
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton
-                                  aria-label="open menu"
-                                  onClick={(event) => handleMenuOpen(event, type, index, i)}
-                                >
-                                  <MoreVertIcon />
-                                </IconButton>
-                              </InputAdornment>
-                            ),
                           }}
                         />
                       </TableCell>
-                    ))}
-                    <TableCell align="right" padding="normal">{calculateTotal(type, index, transactions)}</TableCell>
-                  </TableRow>
-                ))}
+                      <TableCell padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
+                        <TextField
+                          value={transaction.montantInitial}
+                          onChange={(e) => handleInputChange(type, index, 'montantInitial', e.target.value)}
+                          variant="standard"
+                          size="small"
+                          fullWidth
+                          InputProps={{
+                            disableUnderline: true,
+                            style: { height: '100%', padding: 8 }, // Added padding
+                          }}
+                        />
+                      </TableCell>
+                      {transaction.montants.map((montant, i) => (
+                        <TableCell
+                          padding="normal"
+                          key={i}
+                          align="right"
+                          sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
+                        >
+                          <TextField
+                            value={montant}
+                            onChange={(e) => handleInputChange(type, index, i, e.target.value)}
+                            variant="standard"
+                            size="small"
+                            fullWidth
+                            InputProps={{
+                              disableUnderline: true,
+                              style: { height: '100%', padding: 8 }, // Added padding
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    aria-label="open menu"
+                                    onClick={(event) => handleMenuOpen(event, type, index, i)}
+                                  >
+                                    <MoreVertIcon />
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                        </TableCell>
+                      ))}
+                      <TableCell align="right" padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
+                        {calculateTotal(type, index, transactions)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </React.Fragment>
             ))}
             <TableRow>
               <TableCell colSpan={3} padding="normal">Solde de la Trésorerie</TableCell>
               {monthlyTreasury.map((treasury, index) => (
-                <TableCell key={index} align="right" padding="normal">{treasury}</TableCell>
+                <TableCell 
+                  key={index} 
+                  align="right" 
+                  padding="normal"
+                >
+                  {treasury}
+                </TableCell>
               ))}
               <TableCell align="right" padding="normal">{finalTreasury}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell colSpan={3} padding="normal">Trésorerie Accumulée</TableCell>
               {accumulatedTreasury.map((treasury, index) => (
-                <TableCell key={index} align="right" padding="normal">{treasury}</TableCell>
+                <TableCell 
+                  key={index} 
+                  align="right" 
+                  padding="normal"
+                >
+                  {treasury}
+                </TableCell>
               ))}
               <TableCell align="right" padding="normal">{finalTreasury}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell colSpan={3} padding="normal">Dépenses Mensuelles</TableCell>
+              {monthlyExpenses.map((expense, index) => (
+                <TableCell 
+                  key={index} 
+                  align="right" 
+                  padding="normal"
+                >
+                  {expense}
+                </TableCell>
+              ))}
+              <TableCell align="right" padding="normal">{totalAnnualExpenses}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -352,16 +421,30 @@ const TreasuryTable = () => {
       </Menu>
       <Grid container spacing={3} style={{ marginTop: 16 }}>
         <Grid item xs={12} md={6}>
-          <TreasuryChart title="Encaissements by Nature" data={encaissementsData} />
+          <TreasuryChart
+            title="Encaissements by Nature"
+            data={encaissementsData}
+            onHover={(seriesName) => handleChartHover('encaissements', seriesName)}
+          />
         </Grid>
         <Grid item xs={12} md={6}>
-          <TreasuryChart title="Décaissements by Nature" data={decaissementsData} />
+          <TreasuryChart
+            title="Décaissements by Nature"
+            data={decaissementsData}
+            onHover={(seriesName) => handleChartHover('decaissements', seriesName)}
+          />
         </Grid>
         <Grid item xs={12} md={6}>
-          <TreasuryChart title="Solde de Trésorie" data={monthlyTreasuryData} />
+          <TreasuryChart
+            title="Solde de Trésorie"
+            data={monthlyTreasuryData}
+          />
         </Grid>
         <Grid item xs={12} md={6}>
-          <TreasuryChart title="Trésorerie Cummulée" data={cumulativeTreasuryData} />
+          <TreasuryChart
+            title="Trésorerie Cummulée"
+            data={cumulativeTreasuryData}
+          />
         </Grid>
       </Grid>
     </>
