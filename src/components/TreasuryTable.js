@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Typography,
-  Fab, Menu, MenuItem
+  Fab, Menu, MenuItem, Button, Checkbox, IconButton, InputAdornment
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 const initialTransactions = {
   encaissements: [
@@ -18,9 +19,15 @@ const initialTransactions = {
   ]
 };
 
+const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
 const TreasuryTable = () => {
   const [transactions, setTransactions] = useState(initialTransactions);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [action, setAction] = useState('');
+  const [selectedMonths, setSelectedMonths] = useState([]);
+  const [selectedTransaction, setSelectedTransaction] = useState({ type: '', index: -1, month: -1 });
 
   const handleInputChange = (type, index, key, value) => {
     const updatedTransactions = { ...transactions };
@@ -32,6 +39,60 @@ const TreasuryTable = () => {
       updatedTransactions[type][index].montants[key] = parseFloat(value) || 0;
     }
     setTransactions(updatedTransactions);
+  };
+
+  const handleMenuOpen = (event, type, index, month) => {
+    setSelectedTransaction({ type, index, month });
+    setMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+
+  const handleActionClick = (actionType) => {
+    setAction(actionType);
+    setSelectedMonths([]);
+  };
+
+  const handleMonthSelect = (month) => {
+    setSelectedMonths((prev) => {
+      if (prev.includes(month)) {
+        return prev.filter((m) => m !== month);
+      } else {
+        return [...prev, month];
+      }
+    });
+  };
+
+  const handleConfirm = () => {
+    const { type, index, month } = selectedTransaction;
+    const updatedTransactions = { ...transactions };
+
+    if (action === 'repeat') {
+      const amount = updatedTransactions[type][index].montants[month];
+      selectedMonths.forEach((m) => {
+        updatedTransactions[type][index].montants[m] = amount;
+      });
+    } else if (action === 'advance' && selectedMonths.length === 1) {
+      const newMonth = selectedMonths[0];
+      const amount = updatedTransactions[type][index].montants[month];
+      updatedTransactions[type][index].montants[month] = 0;
+      updatedTransactions[type][index].montants[newMonth] += amount;
+    } else if (action === 'postpone' && selectedMonths.length === 1) {
+      const newMonth = selectedMonths[0];
+      const amount = updatedTransactions[type][index].montants[month];
+      updatedTransactions[type][index].montants[month] = 0;
+      updatedTransactions[type][index].montants[newMonth] += amount;
+    }
+
+    setTransactions(updatedTransactions);
+    handleMenuClose();
+    setAction('');
+  };
+
+  const handleCancel = () => {
+    setAction('');
   };
 
   const calculateTotals = () => {
@@ -93,7 +154,7 @@ const TreasuryTable = () => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuClose = () => {
+  const handleMenuActionClose = () => {
     setAnchorEl(null);
   };
 
@@ -101,7 +162,7 @@ const TreasuryTable = () => {
     const updatedTransactions = { ...transactions };
     updatedTransactions[type].splice(updatedTransactions[type].length - 1, 0, { nature: '', montantInitial: 0, montants: Array(12).fill(0) });
     setTransactions(updatedTransactions);
-    handleMenuClose();
+    handleMenuActionClose();
   };
 
   return (
@@ -110,16 +171,36 @@ const TreasuryTable = () => {
         <Typography variant="h4" align="center" gutterBottom>
           Gestion de Trésorerie
         </Typography>
+        {action && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+            <Button variant="contained" color="primary" onClick={handleConfirm} style={{ marginRight: 8 }}>Confirm</Button>
+            <Button variant="contained" color="secondary" onClick={handleCancel}>Cancel</Button>
+          </div>
+        )}
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
-              <TableCell>Type</TableCell>
-              <TableCell>Nature de la transaction</TableCell>
-              <TableCell>Solde Initial</TableCell>
-              {[...Array(12).keys()].map((i) => (
-                <TableCell key={i} align="right">Mois {i + 1}</TableCell>
-              ))}
-              <TableCell align="right">Total</TableCell>
+              <TableCell padding="normal">Type</TableCell>
+              <TableCell padding="normal">Nature de la transaction</TableCell>
+              <TableCell padding="normal">Solde Initial</TableCell>
+              {monthNames.map((month, i) => {
+                const showCheckbox =
+                  (action === 'repeat' && i > selectedTransaction.month) ||
+                  (action === 'advance' && i < selectedTransaction.month) ||
+                  (action === 'postpone' && i > selectedTransaction.month);
+                return (
+                  <TableCell key={i} align="left" padding="normal">
+                    {month}
+                    {showCheckbox && (
+                      <Checkbox
+                        checked={selectedMonths.includes(i)}
+                        onChange={() => handleMonthSelect(i)}
+                      />
+                    )}
+                  </TableCell>
+                );
+              })}
+              <TableCell align="right" padding="normal">Total</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -128,11 +209,11 @@ const TreasuryTable = () => {
                 {transactions[type].map((transaction, index) => (
                   <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     {index === 0 && (
-                      <TableCell rowSpan={transactions[type].length}>
+                      <TableCell rowSpan={transactions[type].length} padding="normal">
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                       </TableCell>
                     )}
-                    <TableCell padding="none">
+                    <TableCell padding="normal">
                       <TextField
                         value={transaction.nature}
                         onChange={(e) => handleInputChange(type, index, 'nature', e.target.value)}
@@ -141,11 +222,11 @@ const TreasuryTable = () => {
                         fullWidth
                         InputProps={{
                           disableUnderline: true,
-                          style: { height: '100%', padding: 0 },
+                          style: { height: '100%', padding: 8 }, // Added padding
                         }}
                       />
                     </TableCell>
-                    <TableCell padding="none">
+                    <TableCell padding="normal">
                       <TextField
                         value={transaction.montantInitial}
                         onChange={(e) => handleInputChange(type, index, 'montantInitial', e.target.value)}
@@ -154,12 +235,12 @@ const TreasuryTable = () => {
                         fullWidth
                         InputProps={{
                           disableUnderline: true,
-                          style: { height: '100%', padding: 0 },
+                          style: { height: '100%', padding: 8 }, // Added padding
                         }}
                       />
                     </TableCell>
                     {transaction.montants.map((montant, i) => (
-                      <TableCell padding="none" key={i} align="right">
+                      <TableCell padding="normal" key={i} align="right">
                         <TextField
                           value={montant}
                           onChange={(e) => handleInputChange(type, index, i, e.target.value)}
@@ -168,29 +249,39 @@ const TreasuryTable = () => {
                           fullWidth
                           InputProps={{
                             disableUnderline: true,
-                            style: { height: '100%', padding: 0 },
+                            style: { height: '100%', padding: 8 }, // Added padding
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton
+                                  aria-label="open menu"
+                                  onClick={(event) => handleMenuOpen(event, type, index, i)}
+                                >
+                                  <MoreVertIcon />
+                                </IconButton>
+                              </InputAdornment>
+                            ),
                           }}
                         />
                       </TableCell>
                     ))}
-                    <TableCell align="right">{calculateTotal(type, index)}</TableCell>
+                    <TableCell align="right" padding="normal">{calculateTotal(type, index)}</TableCell>
                   </TableRow>
                 ))}
               </React.Fragment>
             ))}
             <TableRow>
-              <TableCell colSpan={3}>Solde de la Trésorerie</TableCell>
+              <TableCell colSpan={3} padding="normal">Solde de la Trésorerie</TableCell>
               {monthlyTreasury.map((treasury, index) => (
-                <TableCell key={index} align="right">{treasury}</TableCell>
+                <TableCell key={index} align="right" padding="normal">{treasury}</TableCell>
               ))}
-              <TableCell align="right">{finalTreasury}</TableCell>
+              <TableCell align="right" padding="normal">{finalTreasury}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell colSpan={3}>Trésorerie Accumulée</TableCell>
+              <TableCell colSpan={3} padding="normal">Trésorerie Accumulée</TableCell>
               {accumulatedTreasury.map((treasury, index) => (
-                <TableCell key={index} align="right">{treasury}</TableCell>
+                <TableCell key={index} align="right" padding="normal">{treasury}</TableCell>
               ))}
-              <TableCell align="right">{finalTreasury}</TableCell>
+              <TableCell align="right" padding="normal">{finalTreasury}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -201,10 +292,19 @@ const TreasuryTable = () => {
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
+        onClose={handleMenuActionClose}
       >
         <MenuItem onClick={() => handleAddTransaction('encaissements')}>Encaissement</MenuItem>
         <MenuItem onClick={() => handleAddTransaction('decaissements')}>Décaissement</MenuItem>
+      </Menu>
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={() => handleActionClick('repeat')}>Repeat for month</MenuItem>
+        <MenuItem onClick={() => handleActionClick('advance')}>Advance transaction</MenuItem>
+        <MenuItem onClick={() => handleActionClick('postpone')}>Postpone transaction</MenuItem>
       </Menu>
     </>
   );
