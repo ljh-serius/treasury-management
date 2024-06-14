@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/treasury-management/static/css/main.d7eb3721.css",
-    "main.js": "/treasury-management/static/js/main.5c9903fd.js",
+    "main.js": "/treasury-management/static/js/main.9feb33fa.js",
     "static/js/453.15b74628.chunk.js": "/treasury-management/static/js/453.15b74628.chunk.js",
     "static/media/roboto-latin-500-normal.woff2": "/treasury-management/static/media/roboto-latin-500-normal.f25d774ecfe0996f8eb5.woff2",
     "static/media/roboto-latin-700-normal.woff2": "/treasury-management/static/media/roboto-latin-700-normal.227c93190fe7f82de3f8.woff2",
@@ -61,11 +61,11 @@
     "static/media/roboto-greek-ext-700-normal.woff": "/treasury-management/static/media/roboto-greek-ext-700-normal.249853776d22a271b2b5.woff",
     "index.html": "/treasury-management/index.html",
     "main.d7eb3721.css.map": "/treasury-management/static/css/main.d7eb3721.css.map",
-    "main.5c9903fd.js.map": "/treasury-management/static/js/main.5c9903fd.js.map",
+    "main.9feb33fa.js.map": "/treasury-management/static/js/main.9feb33fa.js.map",
     "453.15b74628.chunk.js.map": "/treasury-management/static/js/453.15b74628.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.d7eb3721.css",
-    "static/js/main.5c9903fd.js"
+    "static/js/main.9feb33fa.js"
   ]
 }
