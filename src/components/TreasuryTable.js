@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Typography,
-  Fab, Menu, MenuItem, Button, IconButton, InputAdornment, Grid, Checkbox, FormControlLabel
+  Fab, Menu, MenuItem, Button, IconButton, InputAdornment, Grid, Modal, Box, FormControlLabel, Checkbox
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import TreasuryChart from './TreasuryChart';
 import { useTheme, useMediaQuery } from '@mui/material';
+import debounce from 'lodash.debounce';
+import * as XLSX from 'xlsx';
 
 const initialTransactions = {
   encaissements: [
@@ -23,11 +25,23 @@ const initialTransactions = {
 
 const monthNames = ["Initial", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '80vw',
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 4,
+};
+
 const TreasuryTable = () => {
   const [transactions, setTransactions] = useState(() => {
     const savedTransactions = localStorage.getItem('transactions');
     return savedTransactions ? JSON.parse(savedTransactions) : initialTransactions;
   });
+  const [inputValues, setInputValues] = useState(transactions);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
@@ -41,6 +55,7 @@ const TreasuryTable = () => {
   const [highlightedRow, setHighlightedRow] = useState({ encaissements: null, decaissements: null });
   const [highlightedMonth, setHighlightedMonth] = useState(null);
   const [highlightedCumulativeMonth, setHighlightedCumulativeMonth] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -55,16 +70,24 @@ const TreasuryTable = () => {
     localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
   }, [transactions]);
 
+  const debouncedSetTransactions = useCallback(
+    debounce((newTransactions) => {
+      setTransactions(newTransactions);
+    }, 500),
+    []
+  );
+
   const handleInputChange = (type, index, key, value) => {
-    const updatedTransactions = { ...transactions };
+    const updatedInputValues = { ...inputValues };
     if (key === 'montantInitial') {
-      updatedTransactions[type][index][key] = parseFloat(value) || 0;
+      updatedInputValues[type][index][key] = parseFloat(value) || 0;
     } else if (key === 'nature') {
-      updatedTransactions[type][index][key] = value;
+      updatedInputValues[type][index][key] = value;
     } else {
-      updatedTransactions[type][index].montants[key] = parseFloat(value) || 0;
+      updatedInputValues[type][index].montants[key] = parseFloat(value) || 0;
     }
-    setTransactions(updatedTransactions);
+    setInputValues(updatedInputValues);
+    debouncedSetTransactions(updatedInputValues);
   };
 
   const handleMenuOpen = (event, type, index, month) => {
@@ -79,6 +102,7 @@ const TreasuryTable = () => {
   const handleActionClick = (actionType) => {
     setAction(actionType);
     setSelectedMonths([]);
+    setModalOpen(true);
   };
 
   const handleMonthSelect = (month) => {
@@ -91,14 +115,18 @@ const TreasuryTable = () => {
     });
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = (addSum = false) => {
     const { type, index, month } = selectedTransaction;
     const updatedTransactions = { ...transactions };
 
     if (action === 'repeat') {
       const amount = updatedTransactions[type][index].montants[month];
       selectedMonths.forEach((m) => {
-        updatedTransactions[type][index].montants[m] = amount;
+        if (addSum) {
+          updatedTransactions[type][index].montants[m] += amount;
+        } else {
+          updatedTransactions[type][index].montants[m] = amount;
+        }
       });
     } else if (action === 'advance' && selectedMonths.length === 1) {
       const newMonth = selectedMonths[0];
@@ -114,17 +142,23 @@ const TreasuryTable = () => {
       const endMonth = selectedMonths[0];
       const amount = updatedTransactions[type][index].montants[month];
       for (let m = month + 1; m <= endMonth; m++) {
-        updatedTransactions[type][index].montants[m] += amount;
+        if (addSum) {
+          updatedTransactions[type][index].montants[m] += amount;
+        } else {
+          updatedTransactions[type][index].montants[m] = amount;
+        }
       }
     }
 
     setTransactions(updatedTransactions);
     handleMenuClose();
+    setModalOpen(false);
     setAction('');
   };
 
   const handleCancel = () => {
     setAction('');
+    setModalOpen(false);
   };
 
   const calculateTotals = (transactions) => {
@@ -220,26 +254,89 @@ const TreasuryTable = () => {
     setHighlightedCumulativeMonth(index);
   };
 
-  const updatedTransactions = calculateTotals(transactions);
+  const exportToSpreadsheet = () => {
+    const wb = XLSX.utils.book_new();
+    const wsData = [
+      ["Type", "Nature de la transaction", "Solde Initial", ...monthNames.slice(1), "Total"]
+    ];
+
+    Object.keys(transactions).forEach((type) => {
+      transactions[type].forEach((transaction, index) => {
+        const rowData = [
+          type.charAt(0).toUpperCase() + type.slice(1),
+          transaction.nature,
+          transaction.montantInitial,
+          ...transaction.montants,
+          calculateTotal(type, index, transactions)
+        ];
+        wsData.push(rowData);
+      });
+    });
+
+    const monthlyTreasury = calculateMonthlyTreasury(transactions);
+    const accumulatedTreasury = calculateAccumulatedTreasury(
+      transactions.encaissements[transactions.encaissements.length - 1].montantInitial -
+      transactions.decaissements[transactions.decaissements.length - 1].montantInitial,
+      transactions
+    );
+
+    wsData.push(["", "Solde de la Trésorerie", "", ...monthlyTreasury, monthlyTreasury.reduce((acc, curr) => acc + curr, 0)]);
+    wsData.push(["", "Trésorerie Accumulée", "", ...accumulatedTreasury, accumulatedTreasury[accumulatedTreasury.length - 1]]);
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, ws, "Transactions");
+
+    // Exporting chart data
+    const exportChartData = (chartData, title) => {
+      const chartWsData = [["Month", ...chartData.map(d => d.name)]];
+      for (let i = 0; i < 13; i++) {
+        chartWsData.push([
+          monthNames[i],
+          ...chartData.map(d => d.data[i])
+        ]);
+      }
+      const chartWs = XLSX.utils.aoa_to_sheet(chartWsData);
+      XLSX.utils.book_append_sheet(wb, chartWs, title);
+    };
+
+    exportChartData(encaissementsData, "Encaissements");
+    exportChartData(decaissementsData, "Décaissements");
+    exportChartData(monthlyTreasuryData, "Solde de Trésorie");
+    exportChartData(cumulativeTreasuryData, "Trésorerie Cummulée");
+
+    XLSX.writeFile(wb, "treasury_data.xlsx");
+  };
+
+  const calculateDifference = (cumulativeTreasury) => {
+    return cumulativeTreasury.map((treasury, index) => {
+      if (index === 0) return 0;
+      return treasury - cumulativeTreasury[index - 1];
+    });
+  };
+
+  const calculatePercentageBalanceVsEncaissements = (monthlyTreasury, encaissements) => {
+    return monthlyTreasury.map((treasury, index) => {
+      if (encaissements[index] === 0) return 0;
+      return (treasury / encaissements[index]) * 100;
+    });
+  };
+
+  const updatedTransactions = calculateTotals(inputValues);
   const monthlyTreasury = calculateMonthlyTreasury(updatedTransactions);
   const initialSolde = transactions.encaissements[transactions.encaissements.length - 1].montantInitial -
     transactions.decaissements[transactions.decaissements.length - 1].montantInitial;
   const accumulatedTreasury = calculateAccumulatedTreasury(initialSolde, updatedTransactions);
   const finalTreasury = accumulatedTreasury[accumulatedTreasury.length - 1];
+  const difference = calculateDifference(accumulatedTreasury);
+  const percentageBalanceVsEncaissements = calculatePercentageBalanceVsEncaissements(monthlyTreasury, updatedTransactions.encaissements[updatedTransactions.encaissements.length - 1].montants);
 
   return (
     <>
-      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+      <TableContainer component={Paper} sx={{ overflowX: 'auto', width: '100vw' }}>
         <Typography variant="h4" align="center" gutterBottom>
           Gestion de Trésorerie
         </Typography>
-        {action && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <Button variant="contained" color="primary" onClick={handleConfirm} style={{ marginRight: 8 }}>Confirm</Button>
-            <Button variant="contained" color="secondary" onClick={handleCancel}>Cancel</Button>
-          </div>
-        )}
-        <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+        <Table sx={{ minWidth: 650, width: '100vw' }} size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
               <TableCell padding="normal">Type</TableCell>
@@ -250,39 +347,15 @@ const TreasuryTable = () => {
                   <Typography align="center" gutterBottom>
                     {month}
                   </Typography>
-                  {action && (
-                    <>
-                      {action === 'advance' && i < selectedTransaction.month && (
-                        <Checkbox
-                          checked={selectedMonths.includes(i)}
-                          onChange={() => handleMonthSelect(i)}
-                        />
-                      )}
-                      {action === 'postpone' && i > selectedTransaction.month && (
-                        <Checkbox
-                          checked={selectedMonths.includes(i)}
-                          onChange={() => handleMonthSelect(i)}
-                        />
-                      )}
-                      {action !== 'advance' && action !== 'postpone' && i !== selectedTransaction.month && (
-                        <Checkbox
-                          checked={selectedMonths.includes(i)}
-                          onChange={() => handleMonthSelect(i)}
-                        />
-                      )}
-                    </>
-                  )}
                 </TableCell>
               ))}
               <TableCell align="right" padding="normal">Total</TableCell>
             </TableRow>
           </TableHead>
-
-
           <TableBody>
-            {Object.keys(transactions).map((type) => (
+            {Object.keys(inputValues).map((type) => (
               <React.Fragment key={type}>
-                {transactions[type].map((transaction, index) => {
+                {inputValues[type].map((transaction, index) => {
                   const isHighlighted = (type === 'encaissements' && highlightedRow.encaissements === transaction.nature) ||
                     (type === 'decaissements' && highlightedRow.decaissements === transaction.nature);
 
@@ -292,10 +365,10 @@ const TreasuryTable = () => {
                     >
                       {index === 0 && (
                         <TableCell
-                          rowSpan={transactions[type].length}
+                          rowSpan={inputValues[type].length}
                           padding="normal"
                           sx={{
-                            backgroundColor: transactions[type].some(t =>
+                            backgroundColor: inputValues[type].some(t =>
                               (type === 'encaissements' && highlightedRow.encaissements === t.nature) ||
                               (type === 'decaissements' && highlightedRow.decaissements === t.nature)
                             ) ? 'rgba(0, 0, 255, 0.1)' : 'inherit'
@@ -361,7 +434,7 @@ const TreasuryTable = () => {
                         </TableCell>
                       ))}
                       <TableCell align="right" padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit', fontWeight: 'bold' }}>
-                        {calculateTotal(type, index, transactions)}
+                        {calculateTotal(type, index, inputValues)}
                       </TableCell>
                     </TableRow>
                   );
@@ -396,12 +469,48 @@ const TreasuryTable = () => {
               ))}
               <TableCell align="right" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
             </TableRow>
+            <TableRow>
+              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }}>Difference</TableCell>
+              {difference.map((value, index) => (
+                <TableCell
+                  key={index}
+                  align="right"
+                  padding="normal"
+                  sx={{ backgroundColor: value < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
+                >
+                  {value}
+                </TableCell>
+              ))}
+              <TableCell align="right" padding="normal" sx={{ fontWeight: 'bold' }}>-</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }}>Percentage of Treasury vs Encaissements</TableCell>
+              {percentageBalanceVsEncaissements.map((value, index) => (
+                <TableCell
+                  key={index}
+                  align="right"
+                  padding="normal"
+                  sx={{ backgroundColor: value < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
+                >
+                  {value.toFixed(2)}%
+                </TableCell>
+              ))}
+              <TableCell align="right" padding="normal" sx={{ fontWeight: 'bold' }}>-</TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </TableContainer>
       <Fab color="primary" aria-label="add" onClick={handleFabClick} style={{ position: 'fixed', bottom: 16, right: 16 }}>
         <AddIcon />
       </Fab>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={exportToSpreadsheet}
+        style={{ position: 'fixed', bottom: 16, height: 52, right: 100, zIndex: 1000 }}
+      >
+        Export as Spreadsheet
+      </Button>
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -420,6 +529,40 @@ const TreasuryTable = () => {
         <MenuItem onClick={() => handleActionClick('postpone')}>Postpone transaction</MenuItem>
         <MenuItem onClick={() => handleActionClick('repeatUntil')}>Repeat until month</MenuItem>
       </Menu>
+      <Modal
+        open={modalOpen}
+        onClose={handleCancel}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="modal-title" variant="h6" component="h2">
+            Select Months
+          </Typography>
+          <Grid container spacing={2} sx={{ mt: 2 }}>
+            {monthNames.slice(1).map((month, i) => (
+              (i !== selectedTransaction.month) && (
+                <Grid item xs={6} sm={4} md={3} key={i}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={selectedMonths.includes(i)}
+                        onChange={() => handleMonthSelect(i)}
+                      />
+                    }
+                    label={month}
+                  />
+                </Grid>
+              )
+            ))}
+          </Grid>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+            <Button variant="contained" color="primary" onClick={() => handleConfirm(false)} style={{ marginRight: 8 }}>Copy</Button>
+            <Button variant="contained" color="primary" onClick={() => handleConfirm(true)} style={{ marginRight: 8 }}>Add Sum</Button>
+            <Button variant="contained" color="secondary" onClick={handleCancel}>Cancel</Button>
+          </div>
+        </Box>
+      </Modal>
       <Grid container spacing={3} style={{ marginTop: 16 }}>
         <Grid item xs={12} md={6}>
           <TreasuryChart
