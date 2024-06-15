@@ -6,6 +6,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import TreasuryChart from './TreasuryChart';
+import { useTheme, useMediaQuery } from '@mui/material';
 
 const initialTransactions = {
   encaissements: [
@@ -39,7 +40,10 @@ const TreasuryTable = () => {
   const [monthlyTreasuryData, setMonthlyTreasuryData] = useState([]);
   const [highlightedRow, setHighlightedRow] = useState({ encaissements: null, decaissements: null });
   const [highlightedMonth, setHighlightedMonth] = useState(null);
-  const [highlightedCumulativeMonth, setHighlightedCumulativeMonth] = useState(null); // New state variable
+  const [highlightedCumulativeMonth, setHighlightedCumulativeMonth] = useState(null);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     const updatedTransactions = calculateTotals(transactions);
@@ -160,16 +164,6 @@ const TreasuryTable = () => {
     return transaction.montants.reduce((acc, curr) => acc + curr, 0) + transaction.montantInitial;
   };
 
-  const calculateMonthlyExpenses = () => {
-    return Array.from({ length: 12 }, (_, month) => {
-      return transactions.decaissements.reduce((total, decaissement) => total + decaissement.montants[month], 0);
-    });
-  };
-
-  const calculateTotalAnnualExpenses = () => {
-    return calculateMonthlyExpenses().reduce((total, monthlyExpense) => total + monthlyExpense, 0);
-  };
-
   const prepareChartData = (type, transactions) => {
     const data = transactions[type].map(transaction => ({
       name: transaction.nature,
@@ -232,12 +226,10 @@ const TreasuryTable = () => {
     transactions.decaissements[transactions.decaissements.length - 1].montantInitial;
   const accumulatedTreasury = calculateAccumulatedTreasury(initialSolde, updatedTransactions);
   const finalTreasury = accumulatedTreasury[accumulatedTreasury.length - 1];
-  const monthlyExpenses = calculateMonthlyExpenses();
-  const totalAnnualExpenses = calculateTotalAnnualExpenses();
 
   return (
     <>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
         <Typography variant="h4" align="center" gutterBottom>
           Gestion de Trésorerie
         </Typography>
@@ -321,7 +313,7 @@ const TreasuryTable = () => {
                           fullWidth
                           InputProps={{
                             disableUnderline: true,
-                            style: { height: '100%', padding: 8 }, // Added padding
+                            style: { height: '100%', padding: 8, width: '120px' }, // Fixed width
                           }}
                         />
                       </TableCell>
@@ -334,7 +326,7 @@ const TreasuryTable = () => {
                           fullWidth
                           InputProps={{
                             disableUnderline: true,
-                            style: { height: '100%', padding: 8 }, // Added padding
+                            style: { height: '100%', padding: 8, width: '120px' }, // Fixed width
                           }}
                         />
                       </TableCell>
@@ -353,7 +345,7 @@ const TreasuryTable = () => {
                             fullWidth
                             InputProps={{
                               disableUnderline: true,
-                              style: { height: '100%', padding: 8 }, // Added padding
+                              style: { height: '100%', padding: 8, width: '120px' }, // Fixed width
                               endAdornment: (
                                 <InputAdornment position="end">
                                   <IconButton
@@ -368,7 +360,7 @@ const TreasuryTable = () => {
                           />
                         </TableCell>
                       ))}
-                      <TableCell align="right" padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
+                      <TableCell align="right" padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit', fontWeight: 'bold' }}>
                         {calculateTotal(type, index, transactions)}
                       </TableCell>
                     </TableRow>
@@ -377,46 +369,32 @@ const TreasuryTable = () => {
               </React.Fragment>
             ))}
             <TableRow>
-              <TableCell colSpan={3} padding="normal">Solde de la Trésorerie</TableCell>
+              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }}>Solde de la Trésorerie</TableCell>
               {monthlyTreasury.map((treasury, index) => (
                 <TableCell
                   key={index}
                   align="right"
                   padding="normal"
-                  sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit' }}
+                  sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit', fontWeight: 'bold' }}
                 >
                   {treasury}
                 </TableCell>
               ))}
-              <TableCell align="right" padding="normal">{finalTreasury}</TableCell>
+              <TableCell align="right" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell colSpan={3} padding="normal">Trésorerie Accumulée</TableCell>
+              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }}>Trésorerie Accumulée</TableCell>
               {accumulatedTreasury.map((treasury, index) => (
                 <TableCell
                   key={index}
                   align="right"
                   padding="normal"
-                  sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit' }}
+                  sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit', fontWeight: 'bold' }}
                 >
                   {treasury}
                 </TableCell>
               ))}
-              <TableCell align="right" padding="normal">{finalTreasury}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell colSpan={3} padding="normal">Dépenses Mensuelles</TableCell>
-              {monthlyExpenses.map((expense, index) => (
-                <TableCell
-                  key={index}
-                  align="right"
-                  padding="normal"
-                  sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit' }}
-                >
-                  {expense}
-                </TableCell>
-              ))}
-              <TableCell align="right" padding="normal">{totalAnnualExpenses}</TableCell>
+              <TableCell align="right" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -468,8 +446,7 @@ const TreasuryTable = () => {
           <TreasuryChart
             title="Trésorerie Cummulée"
             data={cumulativeTreasuryData}
-            onHover={(seriesName, index) => handleCumulativeMonthHighlight(index - 1)} // Update this
-            highlightedCumulativeMonth={highlightedCumulativeMonth} // Pass the new state variable
+            onHover={(seriesName, index) => handleCumulativeMonthHighlight(index - 1)}
           />
         </Grid>
       </Grid>
