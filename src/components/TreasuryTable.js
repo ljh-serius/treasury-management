@@ -470,20 +470,6 @@ const TreasuryTable = () => {
               <TableCell align="right" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }}>Difference</TableCell>
-              {difference.map((value, index) => (
-                <TableCell
-                  key={index}
-                  align="right"
-                  padding="normal"
-                  sx={{ backgroundColor: value < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
-                >
-                  {value}
-                </TableCell>
-              ))}
-              <TableCell align="right" padding="normal" sx={{ fontWeight: 'bold' }}>-</TableCell>
-            </TableRow>
-            <TableRow>
               <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }}>Percentage of Treasury vs Encaissements</TableCell>
               {percentageBalanceVsEncaissements.map((value, index) => (
                 <TableCell
