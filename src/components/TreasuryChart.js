@@ -47,7 +47,11 @@ const TreasuryChart = ({ title, data, onHover, highlightedCumulativeMonth }) => 
     }
   };
 
-  return <HighchartsReact highcharts={Highcharts} options={options} />;
+  return (
+    <div className="chart-container">
+      <HighchartsReact highcharts={Highcharts} options={options} />
+    </div>
+  );
 };
 
 export default TreasuryChart;

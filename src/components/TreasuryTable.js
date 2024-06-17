@@ -9,6 +9,9 @@ import TreasuryChart from './TreasuryChart';
 import { useTheme, useMediaQuery } from '@mui/material';
 import debounce from 'lodash.debounce';
 import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import html2canvas from 'html2canvas';
 
 const initialTransactions = {
   encaissements: [
@@ -192,7 +195,7 @@ const TreasuryTable = () => {
       return acc;
     }, []);
   };
-
+  
   const calculateTotal = (type, index, transactions) => {
     const transaction = transactions[type][index];
     return transaction.montants.reduce((acc, curr) => acc + curr, 0) + transaction.montantInitial;
@@ -254,12 +257,15 @@ const TreasuryTable = () => {
     setHighlightedCumulativeMonth(index);
   };
 
-  const exportToSpreadsheet = () => {
-    const wb = XLSX.utils.book_new();
+  const exportToSpreadsheet = async () => {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Transactions');
+  
+    // Adding the transaction data
     const wsData = [
       ["Type", "Nature de la transaction", "Solde Initial", ...monthNames.slice(1), "Total"]
     ];
-
+  
     Object.keys(transactions).forEach((type) => {
       transactions[type].forEach((transaction, index) => {
         const rowData = [
@@ -272,41 +278,38 @@ const TreasuryTable = () => {
         wsData.push(rowData);
       });
     });
-
+  
     const monthlyTreasury = calculateMonthlyTreasury(transactions);
     const accumulatedTreasury = calculateAccumulatedTreasury(
       transactions.encaissements[transactions.encaissements.length - 1].montantInitial -
       transactions.decaissements[transactions.decaissements.length - 1].montantInitial,
       transactions
     );
-
+  
     wsData.push(["", "Solde de la Trésorerie", "", ...monthlyTreasury, monthlyTreasury.reduce((acc, curr) => acc + curr, 0)]);
     wsData.push(["", "Trésorerie Accumulée", "", ...accumulatedTreasury, accumulatedTreasury[accumulatedTreasury.length - 1]]);
-
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    XLSX.utils.book_append_sheet(wb, ws, "Transactions");
-
-    // Exporting chart data
-    const exportChartData = (chartData, title) => {
-      const chartWsData = [["Month", ...chartData.map(d => d.name)]];
-      for (let i = 0; i < 13; i++) {
-        chartWsData.push([
-          monthNames[i],
-          ...chartData.map(d => d.data[i])
-        ]);
-      }
-      const chartWs = XLSX.utils.aoa_to_sheet(chartWsData);
-      XLSX.utils.book_append_sheet(wb, chartWs, title);
-    };
-
-    exportChartData(encaissementsData, "Encaissements");
-    exportChartData(decaissementsData, "Décaissements");
-    exportChartData(monthlyTreasuryData, "Solde de Trésorie");
-    exportChartData(cumulativeTreasuryData, "Trésorerie Cummulée");
-
-    XLSX.writeFile(wb, "treasury_data.xlsx");
+  
+    ws.addRows(wsData);
+  
+    // Capturing and adding charts to the Excel file
+    const chartContainers = document.querySelectorAll('.chart-container'); // Ensure your chart containers have this class
+  
+    for (let i = 0; i < chartContainers.length; i++) {
+      const canvas = await html2canvas(chartContainers[i]);
+      const imgData = canvas.toDataURL('image/png');
+  
+      const imageId = wb.addImage({
+        base64: imgData,
+        extension: 'png',
+      });
+  
+      ws.addImage(imageId, `A${wsData.length + (i * 20) + 3}:P${wsData.length + (i * 20) + 20}`);
+    }
+  
+    // Saving the workbook
+    const buffer = await wb.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), 'treasury_data_with_charts.xlsx');
   };
-
   const calculateDifference = (cumulativeTreasury) => {
     return cumulativeTreasury.map((treasury, index) => {
       if (index === 0) return 0;
