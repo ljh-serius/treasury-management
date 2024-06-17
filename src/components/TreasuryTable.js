@@ -6,9 +6,8 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import TreasuryChart from './TreasuryChart';
-import { useTheme, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material';
 import debounce from 'lodash.debounce';
-import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
@@ -61,7 +60,6 @@ const TreasuryTable = () => {
   const [modalOpen, setModalOpen] = useState(false);
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     const updatedTransactions = calculateTotals(transactions);
@@ -330,7 +328,6 @@ const TreasuryTable = () => {
     transactions.decaissements[transactions.decaissements.length - 1].montantInitial;
   const accumulatedTreasury = calculateAccumulatedTreasury(initialSolde, updatedTransactions);
   const finalTreasury = accumulatedTreasury[accumulatedTreasury.length - 1];
-  const difference = calculateDifference(accumulatedTreasury);
   const percentageBalanceVsEncaissements = calculatePercentageBalanceVsEncaissements(monthlyTreasury, updatedTransactions.encaissements[updatedTransactions.encaissements.length - 1].montants);
 
   return (
