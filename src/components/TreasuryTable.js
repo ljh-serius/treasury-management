@@ -138,7 +138,7 @@ const TreasuryTable = () => {
   const handleConfirm = (addSum = false) => {
     const { type, index, month } = selectedTransaction;
     const updatedTransactions = { ...transactions };
-
+  
     if (action === 'repeat') {
       const amount = updatedTransactions[type][index].montants[month];
       selectedMonths.forEach((m) => {
@@ -157,25 +157,21 @@ const TreasuryTable = () => {
       const newMonth = selectedMonths[0];
       const amount = updatedTransactions[type][index].montants[month];
       updatedTransactions[type][index].montants[month] = 0;
-      updatedTransactions[type][index].montants[newMonth] += amount;
+      updatedTransactions[type][index].montants[month + newMonth + 1] += amount;
     } else if (action === 'repeatUntil' && selectedMonths.length === 1) {
       const endMonth = selectedMonths[0];
       const amount = updatedTransactions[type][index].montants[month];
-      for (let m = month + 1; m <= endMonth; m++) {
-        if (addSum) {
-          updatedTransactions[type][index].montants[m] += amount;
-        } else {
-          updatedTransactions[type][index].montants[m] = amount;
-        }
+      for (let m = month + 1; m <= month + 1 + endMonth; m++) {
+        updatedTransactions[type][index].montants[m] = amount;
       }
     }
-
+  
     setTransactions(updatedTransactions);
     handleMenuClose();
     setModalOpen(false);
     setAction('');
   };
-
+  
   const handleCancel = () => {
     setAction('');
     setModalOpen(false);
@@ -468,6 +464,8 @@ const TreasuryTable = () => {
 
   const getAvailableMonths = () => {
     const { month } = selectedTransaction;
+    let monthsWithIndexes = [];
+
     if (action === 'postpone') {
       return monthNames.slice(month + 2); // Start from month + 2 to exclude the current and previous months
     }
@@ -802,7 +800,7 @@ const TreasuryTable = () => {
             Select Month
           </Typography>
           <Grid container spacing={2} sx={{ mt: 2 }}>
-            {getAvailableMonths().length > 0 ? getAvailableMonths().map((month, i) => (
+            {getAvailableMonths().map((month, i) => (
               (i !== selectedTransaction.month) && (
                 <Grid item xs={6} sm={4} md={3} key={i}>
                   {(action === 'postpone' || action === 'advance' || action === 'repeatUntil') ? (
@@ -828,11 +826,7 @@ const TreasuryTable = () => {
                   )}
                 </Grid>
               )
-            )) : (
-              <span>
-                No months to select from
-              </span>
-            )}
+            ))}
           </Grid>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
             <Button variant="contained" color="primary" onClick={() => handleConfirm(false)} style={{ marginRight: 8 }}>Confirm</Button>
