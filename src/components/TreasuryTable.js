@@ -110,8 +110,9 @@ const TreasuryTable = () => {
   };
 
   const handleMenuOpen = (event, type, index, month) => {
+    const rect = event.currentTarget.getBoundingClientRect();
     setSelectedTransaction({ type, index, month });
-    setMenuAnchorEl(event.currentTarget);
+    setMenuAnchorEl({ top: rect.bottom, left: rect.left });
   };
 
   const handleMenuClose = () => {
@@ -335,7 +336,7 @@ const TreasuryTable = () => {
   };
 
   console.log("udpated Transactions ", transactions);
-  
+
   const updatedTransactions = calculateTotals(inputValues);
   const monthlyTreasury = calculateMonthlyTreasury(updatedTransactions);
   const initialSolde = transactions.encaissements[transactions.encaissements.length - 1].montantInitial -
@@ -389,43 +390,54 @@ const TreasuryTable = () => {
   const handleCopyColumn = () => {
     const { month } = selectedTransaction;
     const columnData = [];
-
+  
     Object.keys(transactions).forEach((type) => {
       transactions[type].forEach((transaction) => {
-        columnData.push(transaction.montants[month]);
+        if (month === -1) {
+          columnData.push(transaction.montantInitial); // Handle "Solde Initial" column
+        } else {
+          columnData.push(transaction.montants[month]);
+        }
       });
     });
-
+  
     navigator.clipboard.writeText(JSON.stringify(columnData));
     handleColumnMenuClose();
-    setSnackbarMessage(`Copied data of month ${monthNames[month + 1]}`);
+    setSnackbarMessage(`Copied data of ${month === -1 ? 'Solde Initial' : 'month ' + monthNames[month + 1]}`);
     setSnackbarOpen(true);
   };
-
+  
   const handlePasteColumn = () => {
     const { month } = selectedTransaction;
-
+  
     navigator.clipboard.readText().then((text) => {
       const columnData = JSON.parse(text);
       const updatedTransactions = { ...transactions };
-
+  
       let rowIndex = 0;
       Object.keys(transactions).forEach((type) => {
         transactions[type].forEach((transaction, index) => {
           if (rowIndex < columnData.length) {
-            updatedTransactions[type][index].montants[month] = columnData[rowIndex];
+            if (month === -1) {
+              updatedTransactions[type][index].montantInitial = columnData[rowIndex]; // Handle "Solde Initial" column
+            } else {
+              updatedTransactions[type][index].montants[month] = columnData[rowIndex];
+            }
             rowIndex++;
           }
         });
       });
-
+  
       setTransactions(updatedTransactions);
+      setInputValues(updatedTransactions);
+      localStorage.setItem(transactionName, JSON.stringify(updatedTransactions));
     });
     handleColumnMenuClose();
-    setSnackbarMessage(`Pasted data to month ${monthNames[month + 1]}`);
+    setSnackbarMessage(`Pasted data to ${month === -1 ? 'Solde Initial' : 'month ' + monthNames[month + 1]}`);
     setSnackbarOpen(true);
   };
-
+  
+  
   const handleCopyNatureRow = () => {
     const { type, index } = selectedTransaction;
     const rowData = transactions[type][index];
@@ -438,18 +450,22 @@ const TreasuryTable = () => {
 
   const handlePasteNatureRow = () => {
     const { type, index } = selectedTransaction;
-
+  
     navigator.clipboard.readText().then((text) => {
       const rowData = JSON.parse(text);
       const updatedTransactions = { ...transactions };
-
+  
       updatedTransactions[type][index] = { ...rowData }; // Create a copy of the row data to avoid modifying the source
+  
       setTransactions(updatedTransactions);
+      setInputValues(updatedTransactions);
+      localStorage.setItem(transactionName, JSON.stringify(updatedTransactions));
     });
     handleNatureMenuClose();
     setSnackbarMessage(`Pasted row to ${type.charAt(0).toUpperCase() + type.slice(1)}`);
     setSnackbarOpen(true);
   };
+  
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -633,14 +649,14 @@ const TreasuryTable = () => {
                           ) : (
                             <div onClick={() => handleFocus(type, index, i)} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                               {montant}
-                                <IconButton
-                                  aria-label="open menu"
-                                  onClick={(event) => handleMenuOpen(event, type, index, i)}
-                                  edge="end"
-                                  size="small"
-                                >
-                                  <MoreVertIcon />
-                                </IconButton>
+                              <IconButton
+                                aria-label="open menu"
+                                onClick={(event) => handleMenuOpen(event, type, index, i)}
+                                edge="end"
+                                size="small"
+                              >
+                                <MoreVertIcon />
+                              </IconButton>
                             </div>
                           )}
                         </TableCell>
@@ -719,9 +735,18 @@ const TreasuryTable = () => {
         <MenuItem onClick={() => handleAddTransaction('decaissements')}>Décaissement</MenuItem>
       </Menu>
       <Menu
-        anchorEl={menuAnchorEl}
+        anchorReference="anchorPosition"
+        anchorPosition={menuAnchorEl}
         open={Boolean(menuAnchorEl)}
         onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
       >
         <MenuItem onClick={() => handleActionClick('repeat')}>Repeat for months</MenuItem>
         <MenuItem onClick={() => handleActionClick('advance')}>Advance transaction</MenuItem>
