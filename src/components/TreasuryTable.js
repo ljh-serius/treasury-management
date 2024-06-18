@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Typography,
-  Fab, Menu, MenuItem, Button, IconButton, InputAdornment, Grid, Modal, Box, FormControlLabel, Checkbox
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography,
+  Fab, Menu, MenuItem, Button, IconButton, InputAdornment, Grid, Modal, Box, FormControlLabel, Checkbox, TextField, Select, FormControl, InputLabel, OutlinedInput
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import TreasuryChart from './TreasuryChart';
 import { useTheme } from '@mui/material';
-import debounce from 'lodash.debounce';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
@@ -40,10 +39,13 @@ const modalStyle = {
 
 const TreasuryTable = () => {
   const [transactions, setTransactions] = useState(() => {
-    const savedTransactions = localStorage.getItem('transactions');
+    const savedTransactions = localStorage.getItem('currentTransaction');
     return savedTransactions ? JSON.parse(savedTransactions) : initialTransactions;
   });
   const [inputValues, setInputValues] = useState(transactions);
+  const [editingCell, setEditingCell] = useState(null);
+  const [transactionName, setTransactionName] = useState('currentTransaction');
+  const [availableTransactions, setAvailableTransactions] = useState([]);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
@@ -68,15 +70,13 @@ const TreasuryTable = () => {
     setCumulativeTreasuryData(prepareCumulativeTreasuryData(updatedTransactions));
     setMonthlyTreasuryData(prepareMonthlyTreasuryData(updatedTransactions));
 
-    localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
-  }, [transactions]);
+    localStorage.setItem(transactionName, JSON.stringify(updatedTransactions));
+  }, [transactions, transactionName]);
 
-  const debouncedSetTransactions = useCallback(
-    debounce((newTransactions) => {
-      setTransactions(newTransactions);
-    }, 500),
-    []
-  );
+  useEffect(() => {
+    const keys = Object.keys(localStorage);
+    setAvailableTransactions(keys);
+  }, []);
 
   const handleInputChange = (type, index, key, value) => {
     const updatedInputValues = { ...inputValues };
@@ -88,7 +88,21 @@ const TreasuryTable = () => {
       updatedInputValues[type][index].montants[key] = parseFloat(value) || 0;
     }
     setInputValues(updatedInputValues);
-    debouncedSetTransactions(updatedInputValues);
+  };
+
+  const handleBlur = () => {
+    setTransactions(inputValues);
+    setEditingCell(null);
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleBlur();
+    }
+  };
+
+  const handleFocus = (type, index, key) => {
+    setEditingCell({ type, index, key });
   };
 
   const handleMenuOpen = (event, type, index, month) => {
@@ -193,7 +207,7 @@ const TreasuryTable = () => {
       return acc;
     }, []);
   };
-  
+
   const calculateTotal = (type, index, transactions) => {
     const transaction = transactions[type][index];
     return transaction.montants.reduce((acc, curr) => acc + curr, 0) + transaction.montantInitial;
@@ -258,12 +272,12 @@ const TreasuryTable = () => {
   const exportToSpreadsheet = async () => {
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('Transactions');
-  
+
     // Adding the transaction data
     const wsData = [
       ["Type", "Nature de la transaction", "Solde Initial", ...monthNames.slice(1), "Total"]
     ];
-  
+
     Object.keys(transactions).forEach((type) => {
       transactions[type].forEach((transaction, index) => {
         const rowData = [
@@ -276,43 +290,37 @@ const TreasuryTable = () => {
         wsData.push(rowData);
       });
     });
-  
+
     const monthlyTreasury = calculateMonthlyTreasury(transactions);
     const accumulatedTreasury = calculateAccumulatedTreasury(
       transactions.encaissements[transactions.encaissements.length - 1].montantInitial -
       transactions.decaissements[transactions.decaissements.length - 1].montantInitial,
       transactions
     );
-  
+
     wsData.push(["", "Solde de la Trésorerie", "", ...monthlyTreasury, monthlyTreasury.reduce((acc, curr) => acc + curr, 0)]);
     wsData.push(["", "Trésorerie Accumulée", "", ...accumulatedTreasury, accumulatedTreasury[accumulatedTreasury.length - 1]]);
-  
+
     ws.addRows(wsData);
-  
+
     // Capturing and adding charts to the Excel file
     const chartContainers = document.querySelectorAll('.chart-container'); // Ensure your chart containers have this class
-  
+
     for (let i = 0; i < chartContainers.length; i++) {
       const canvas = await html2canvas(chartContainers[i]);
       const imgData = canvas.toDataURL('image/png');
-  
+
       const imageId = wb.addImage({
         base64: imgData,
         extension: 'png',
       });
-  
+
       ws.addImage(imageId, `A${wsData.length + (i * 20) + 3}:P${wsData.length + (i * 20) + 20}`);
     }
-  
+
     // Saving the workbook
     const buffer = await wb.xlsx.writeBuffer();
     saveAs(new Blob([buffer]), 'treasury_data_with_charts.xlsx');
-  };
-  const calculateDifference = (cumulativeTreasury) => {
-    return cumulativeTreasury.map((treasury, index) => {
-      if (index === 0) return 0;
-      return treasury - cumulativeTreasury[index - 1];
-    });
   };
 
   const calculatePercentageBalanceVsEncaissements = (monthlyTreasury, encaissements) => {
@@ -330,8 +338,50 @@ const TreasuryTable = () => {
   const finalTreasury = accumulatedTreasury[accumulatedTreasury.length - 1];
   const percentageBalanceVsEncaissements = calculatePercentageBalanceVsEncaissements(monthlyTreasury, updatedTransactions.encaissements[updatedTransactions.encaissements.length - 1].montants);
 
+  const handleTransactionChange = (event) => {
+    const name = event.target.value;
+    setTransactionName(name);
+    const savedTransactions = localStorage.getItem(name);
+    if (savedTransactions) {
+      setTransactions(JSON.parse(savedTransactions));
+      setInputValues(JSON.parse(savedTransactions));
+    } else {
+      setTransactions(initialTransactions);
+      setInputValues(initialTransactions);
+    }
+  };
+
+  const handleNewTransaction = () => {
+    const name = prompt('Enter name for new transaction set:');
+    if (name) {
+      localStorage.setItem(name, JSON.stringify(initialTransactions));
+      setAvailableTransactions([...availableTransactions, name]);
+      setTransactionName(name);
+      setTransactions(initialTransactions);
+      setInputValues(initialTransactions);
+    }
+  };
+
   return (
     <>
+      <div style={{ marginBottom: 20 }}>
+        <FormControl>
+          <InputLabel id="transaction-select-label">Select Transaction</InputLabel>
+          <Select
+            labelId="transaction-select-label"
+            value={transactionName}
+            onChange={handleTransactionChange}
+          >
+            {availableTransactions.map((name) => (
+              <MenuItem key={name} value={name}>{name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Button variant="contained" color="primary" onClick={handleNewTransaction} style={{ marginLeft: 20 }}>
+          New Transaction Set
+        </Button>
+      </div>
+      <div style={{ position: 'absolute', visibility: 'hidden', height: 0, whiteSpace: 'nowrap' }} />
       <TableContainer component={Paper} sx={{ overflowX: 'auto', width: '100vw' }}>
         <Typography variant="h4" align="center" gutterBottom>
           Gestion de Trésorerie
@@ -339,9 +389,9 @@ const TreasuryTable = () => {
         <Table sx={{ minWidth: 650, width: '100vw' }} size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
-              <TableCell padding="normal">Type</TableCell>
-              <TableCell padding="normal">Nature de la transaction</TableCell>
-              <TableCell padding="normal">Solde Initial</TableCell>
+              <TableCell padding="normal" align="left">Type</TableCell>
+              <TableCell padding="normal" align="left">Nature de la transaction</TableCell>
+              <TableCell padding="normal" align="left">Solde Initial</TableCell>
               {monthNames.slice(1).map((month, i) => (
                 <TableCell key={i} align="left" padding="normal">
                   <Typography align="center" gutterBottom>
@@ -349,7 +399,7 @@ const TreasuryTable = () => {
                   </Typography>
                 </TableCell>
               ))}
-              <TableCell align="right" padding="normal">Total</TableCell>
+              <TableCell align="left" padding="normal">Total</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -367,6 +417,7 @@ const TreasuryTable = () => {
                         <TableCell
                           rowSpan={inputValues[type].length}
                           padding="normal"
+                          align="left"
                           sx={{
                             backgroundColor: inputValues[type].some(t =>
                               (type === 'encaissements' && highlightedRow.encaissements === t.nature) ||
@@ -377,63 +428,91 @@ const TreasuryTable = () => {
                           {type.charAt(0).toUpperCase() + type.slice(1)}
                         </TableCell>
                       )}
-                      <TableCell padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
-                        <TextField
-                          value={transaction.nature}
-                          onChange={(e) => handleInputChange(type, index, 'nature', e.target.value)}
-                          variant="standard"
-                          size="small"
-                          fullWidth
-                          InputProps={{
-                            disableUnderline: true,
-                            style: { height: '100%', padding: 8, width: '120px' }, // Fixed width
-                          }}
-                        />
+                      <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
+                        {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'nature' ? (
+                          <TextField
+                            value={transaction.nature}
+                            onChange={(e) => handleInputChange(type, index, 'nature', e.target.value)}
+                            onBlur={handleBlur}
+                            onKeyDown={handleKeyDown}
+                            fullWidth
+                            inputProps={{
+                              style: { height: '36px', padding: '0 8px', minWidth: '120px' }, // Adjust width automatically
+                            }}
+                          />
+                        ) : (
+                          <div onClick={() => handleFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            {transaction.nature}
+                          </div>
+                        )}
                       </TableCell>
-                      <TableCell padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
-                        <TextField
-                          value={transaction.montantInitial}
-                          onChange={(e) => handleInputChange(type, index, 'montantInitial', e.target.value)}
-                          variant="standard"
-                          size="small"
-                          fullWidth
-                          InputProps={{
-                            disableUnderline: true,
-                            style: { height: '100%', padding: 8, width: '120px' }, // Fixed width
-                          }}
-                        />
+
+
+                      <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
+                        {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'montantInitial' ? (
+                          <TextField
+                            value={transaction.montantInitial}
+                            onChange={(e) => handleInputChange(type, index, 'montantInitial', e.target.value)}
+                            onBlur={handleBlur}
+                            onKeyDown={handleKeyDown}
+                            fullWidth
+                            inputProps={{
+                              style: { height: '36px', padding: '0 8px', minWidth: '120px' }, // Adjust width automatically
+                            }}
+                          />
+                        ) : (
+                          <div onClick={() => handleFocus(type, index, 'montantInitial')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            {transaction.montantInitial}
+                          </div>
+                        )}
                       </TableCell>
                       {transaction.montants.map((montant, i) => (
                         <TableCell
                           padding="normal"
                           key={i}
-                          align="right"
                           sx={{ backgroundColor: highlightedMonth === i ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : (highlightedCumulativeMonth !== null && i <= highlightedCumulativeMonth) ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
                         >
-                          <TextField
-                            value={montant}
-                            onChange={(e) => handleInputChange(type, index, i, e.target.value)}
-                            variant="standard"
-                            size="small"
-                            fullWidth
-                            InputProps={{
-                              disableUnderline: true,
-                              style: { height: '100%', padding: 8, width: '120px' }, // Fixed width
-                              endAdornment: (
-                                <InputAdornment position="end">
-                                  <IconButton
-                                    aria-label="open menu"
-                                    onClick={(event) => handleMenuOpen(event, type, index, i)}
-                                  >
-                                    <MoreVertIcon />
-                                  </IconButton>
-                                </InputAdornment>
-                              ),
-                            }}
-                          />
+                          {editingCell?.type === type && editingCell?.index === index && editingCell?.key === i ? (
+                            <TextField
+                              value={montant}
+                              onChange={(e) => handleInputChange(type, index, i, e.target.value)}
+                              onBlur={handleBlur}
+                              onKeyDown={handleKeyDown}
+                              fullWidth
+                              InputProps={{
+                                sx: { height: '36px', minWidth: '120px', padding: '0 2px', '& input': { padding: '5px' } }, // Adjust width automatically and set input padding
+                                endAdornment: (
+                                  <InputAdornment position="end">
+                                    <IconButton
+                                      aria-label="open menu"
+                                      onClick={(event) => handleMenuOpen(event, type, index, i)}
+                                      edge="end"
+                                      size="small"
+                                    >
+                                      <MoreVertIcon />
+                                    </IconButton>
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          ) : (
+                            <div onClick={() => handleFocus(type, index, i)} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              {montant}
+                              <IconButton
+                                aria-label="open menu"
+                                onClick={(event) => handleMenuOpen(event, type, index, i)}
+                                style={{ position: 'absolute', right: 0 }}
+                                edge="end"
+                                size="small"
+                              >
+                                <MoreVertIcon />
+                              </IconButton>
+                            </div>
+                          )}
                         </TableCell>
                       ))}
-                      <TableCell align="right" padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit', fontWeight: 'bold' }}>
+
+                      <TableCell align="left" padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit', fontWeight: 'bold' }}>
                         {calculateTotal(type, index, inputValues)}
                       </TableCell>
                     </TableRow>
@@ -442,46 +521,46 @@ const TreasuryTable = () => {
               </React.Fragment>
             ))}
             <TableRow>
-              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }}>Solde de la Trésorerie</TableCell>
+              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Solde de la Trésorerie</TableCell>
               {monthlyTreasury.map((treasury, index) => (
                 <TableCell
                   key={index}
-                  align="right"
+                  align="left"
                   padding="normal"
                   sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit', fontWeight: 'bold' }}
                 >
                   {treasury}
                 </TableCell>
               ))}
-              <TableCell align="right" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
+              <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }}>Trésorerie Accumulée</TableCell>
+              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Trésorerie Accumulée</TableCell>
               {accumulatedTreasury.map((treasury, index) => (
                 <TableCell
                   key={index}
-                  align="right"
+                  align="left"
                   padding="normal"
                   sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit', fontWeight: 'bold' }}
                 >
                   {treasury}
                 </TableCell>
               ))}
-              <TableCell align="right" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
+              <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }}>Percentage of Treasury vs Encaissements</TableCell>
+              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Percentage of Treasury vs Encaissements</TableCell>
               {percentageBalanceVsEncaissements.map((value, index) => (
                 <TableCell
                   key={index}
-                  align="right"
+                  align="left"
                   padding="normal"
                   sx={{ backgroundColor: value < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
                 >
                   {value.toFixed(2)}%
                 </TableCell>
               ))}
-              <TableCell align="right" padding="normal" sx={{ fontWeight: 'bold' }}>-</TableCell>
+              <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>-</TableCell>
             </TableRow>
           </TableBody>
         </Table>
