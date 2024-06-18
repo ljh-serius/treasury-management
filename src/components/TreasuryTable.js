@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography,
-  Fab, Menu, MenuItem, Button, IconButton, InputAdornment, Grid, Modal, Box, FormControlLabel, Checkbox, TextField, Select, FormControl, InputLabel, OutlinedInput
+  Fab, Menu, MenuItem, Button, IconButton, InputAdornment, Grid, Modal, Box, FormControlLabel, Checkbox, TextField, Select, FormControl, InputLabel
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -49,6 +49,8 @@ const TreasuryTable = () => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [columnMenuAnchorEl, setColumnMenuAnchorEl] = useState(null);
+  const [natureMenuAnchorEl, setNatureMenuAnchorEl] = useState(null);
   const [action, setAction] = useState('');
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState({ type: '', index: -1, month: -1 });
@@ -362,6 +364,81 @@ const TreasuryTable = () => {
     }
   };
 
+  const handleColumnMenuOpen = (event, monthIndex) => {
+    setSelectedTransaction({ type: '', index: -1, month: monthIndex });
+    setColumnMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleNatureMenuOpen = (event, type, index) => {
+    setSelectedTransaction({ type, index, month: -1 });
+    setNatureMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleColumnMenuClose = () => {
+    setColumnMenuAnchorEl(null);
+  };
+
+  const handleNatureMenuClose = () => {
+    setNatureMenuAnchorEl(null);
+  };
+
+  const handleCopyColumn = () => {
+    const { month } = selectedTransaction;
+    const columnData = [];
+
+    Object.keys(transactions).forEach((type) => {
+      transactions[type].forEach((transaction) => {
+        columnData.push(transaction.montants[month]);
+      });
+    });
+
+    navigator.clipboard.writeText(JSON.stringify(columnData));
+    handleColumnMenuClose();
+  };
+
+  const handlePasteColumn = () => {
+    const { month } = selectedTransaction;
+
+    navigator.clipboard.readText().then((text) => {
+      const columnData = JSON.parse(text);
+      const updatedTransactions = { ...transactions };
+
+      let rowIndex = 0;
+      Object.keys(transactions).forEach((type) => {
+        transactions[type].forEach((transaction, index) => {
+          if (rowIndex < columnData.length) {
+            updatedTransactions[type][index].montants[month] = columnData[rowIndex];
+            rowIndex++;
+          }
+        });
+      });
+
+      setTransactions(updatedTransactions);
+    });
+    handleColumnMenuClose();
+  };
+
+  const handleCopyNatureRow = () => {
+    const { type, index } = selectedTransaction;
+    const rowData = transactions[type][index];
+
+    navigator.clipboard.writeText(JSON.stringify(rowData));
+    handleNatureMenuClose();
+  };
+
+  const handlePasteNatureRow = () => {
+    const { type, index } = selectedTransaction;
+
+    navigator.clipboard.readText().then((text) => {
+      const rowData = JSON.parse(text);
+      const updatedTransactions = { ...transactions };
+
+      updatedTransactions[type][index] = { ...rowData }; // Create a copy of the row data to avoid modifying the source
+      setTransactions(updatedTransactions);
+    });
+    handleNatureMenuClose();
+  };
+
   return (
     <>
       <div style={{ marginBottom: 20 }}>
@@ -387,182 +464,201 @@ const TreasuryTable = () => {
           Gestion de Trésorerie
         </Typography>
         <Table sx={{ minWidth: 650, width: '100vw' }} size="small" aria-label="a dense table">
-          <TableHead>
-            <TableRow>
-              <TableCell padding="normal" align="left">Type</TableCell>
-              <TableCell padding="normal" align="left">Nature de la transaction</TableCell>
-              <TableCell padding="normal" align="left">Solde Initial</TableCell>
-              {monthNames.slice(1).map((month, i) => (
-                <TableCell key={i} align="left" padding="normal">
-                  <Typography align="center" gutterBottom>
-                    {month}
-                  </Typography>
-                </TableCell>
-              ))}
-              <TableCell align="left" padding="normal">Total</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(inputValues).map((type) => (
-              <React.Fragment key={type}>
-                {inputValues[type].map((transaction, index) => {
-                  const isHighlighted = (type === 'encaissements' && highlightedRow.encaissements === transaction.nature) ||
-                    (type === 'decaissements' && highlightedRow.decaissements === transaction.nature);
+        <TableHead>
+  <TableRow>
+    <TableCell padding="normal" align="left">Type</TableCell>
+    <TableCell padding="normal" align="left">Nature de la transaction</TableCell>
+    <TableCell padding="normal" align="left">Solde Initial</TableCell>
+    {monthNames.slice(1).map((month, i) => (
+      <TableCell key={i} align="left" padding="normal">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography align="left" gutterBottom style={{ flexGrow: 1 }}>
+            {month}
+          </Typography>
+          <IconButton
+            aria-label="open column menu"
+            onClick={(event) => handleColumnMenuOpen(event, i)}
+            edge="end"
+            size="small"
+            style={{ marginLeft: 'auto' }}
+          >
+            <MoreVertIcon />
+          </IconButton>
+        </div>
+      </TableCell>
+    ))}
+    <TableCell align="left" padding="normal">Total</TableCell>
+  </TableRow>
+</TableHead>
+<TableBody>
+  {Object.keys(inputValues).map((type) => (
+    <React.Fragment key={type}>
+      {inputValues[type].map((transaction, index) => {
+        const isHighlighted = (type === 'encaissements' && highlightedRow.encaissements === transaction.nature) ||
+          (type === 'decaissements' && highlightedRow.decaissements === transaction.nature);
 
-                  return (
-                    <TableRow
-                      key={index}
-                    >
-                      {index === 0 && (
-                        <TableCell
-                          rowSpan={inputValues[type].length}
-                          padding="normal"
-                          align="left"
-                          sx={{
-                            backgroundColor: inputValues[type].some(t =>
-                              (type === 'encaissements' && highlightedRow.encaissements === t.nature) ||
-                              (type === 'decaissements' && highlightedRow.decaissements === t.nature)
-                            ) ? 'rgba(0, 0, 255, 0.1)' : 'inherit'
-                          }}
-                        >
-                          {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </TableCell>
-                      )}
-                      <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
-                        {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'nature' ? (
-                          <TextField
-                            value={transaction.nature}
-                            onChange={(e) => handleInputChange(type, index, 'nature', e.target.value)}
-                            onBlur={handleBlur}
-                            onKeyDown={handleKeyDown}
-                            fullWidth
-                            inputProps={{
-                              style: { height: '36px', padding: '0 8px', minWidth: '120px' }, // Adjust width automatically
-                            }}
-                          />
-                        ) : (
-                          <div onClick={() => handleFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            {transaction.nature}
-                          </div>
-                        )}
-                      </TableCell>
-
-
-                      <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
-                        {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'montantInitial' ? (
-                          <TextField
-                            value={transaction.montantInitial}
-                            onChange={(e) => handleInputChange(type, index, 'montantInitial', e.target.value)}
-                            onBlur={handleBlur}
-                            onKeyDown={handleKeyDown}
-                            fullWidth
-                            inputProps={{
-                              style: { height: '36px', padding: '0 8px', minWidth: '120px' }, // Adjust width automatically
-                            }}
-                          />
-                        ) : (
-                          <div onClick={() => handleFocus(type, index, 'montantInitial')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            {transaction.montantInitial}
-                          </div>
-                        )}
-                      </TableCell>
-                      {transaction.montants.map((montant, i) => (
-                        <TableCell
-                          padding="normal"
-                          key={i}
-                          sx={{ backgroundColor: highlightedMonth === i ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : (highlightedCumulativeMonth !== null && i <= highlightedCumulativeMonth) ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
-                        >
-                          {editingCell?.type === type && editingCell?.index === index && editingCell?.key === i ? (
-                            <TextField
-                              value={montant}
-                              onChange={(e) => handleInputChange(type, index, i, e.target.value)}
-                              onBlur={handleBlur}
-                              onKeyDown={handleKeyDown}
-                              fullWidth
-                              InputProps={{
-                                sx: { height: '36px', minWidth: '120px', padding: '0 2px', '& input': { padding: '5px' } }, // Adjust width automatically and set input padding
-                                endAdornment: (
-                                  <InputAdornment position="end">
-                                    <IconButton
-                                      aria-label="open menu"
-                                      onClick={(event) => handleMenuOpen(event, type, index, i)}
-                                      edge="end"
-                                      size="small"
-                                    >
-                                      <MoreVertIcon />
-                                    </IconButton>
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          ) : (
-                            <div onClick={() => handleFocus(type, index, i)} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              {montant}
-                              <IconButton
-                                aria-label="open menu"
-                                onClick={(event) => handleMenuOpen(event, type, index, i)}
-                                style={{ position: 'absolute', right: 0 }}
-                                edge="end"
-                                size="small"
-                              >
-                                <MoreVertIcon />
-                              </IconButton>
-                            </div>
-                          )}
-                        </TableCell>
-                      ))}
-
-                      <TableCell align="left" padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit', fontWeight: 'bold' }}>
-                        {calculateTotal(type, index, inputValues)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </React.Fragment>
+        return (
+          <TableRow key={index}>
+            {index === 0 && (
+              <TableCell
+                rowSpan={inputValues[type].length}
+                padding="normal"
+                align="left"
+                sx={{
+                  backgroundColor: inputValues[type].some(t =>
+                    (type === 'encaissements' && highlightedRow.encaissements === t.nature) ||
+                    (type === 'decaissements' && highlightedRow.decaissements === t.nature)
+                  ) ? 'rgba(0, 0, 255, 0.1)' : 'inherit'
+                }}
+              >
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </TableCell>
+            )}
+            <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
+              {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'nature' ? (
+                <TextField
+                  value={transaction.nature}
+                  onChange={(e) => handleInputChange(type, index, 'nature', e.target.value)}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  fullWidth
+                  inputProps={{
+                    style: { height: '36px', padding: '0 8px', minWidth: '120px' },
+                  }}
+                />
+              ) : (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div onClick={() => handleFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', whiteSpace: 'nowrap', flexGrow: 1 }}>
+                    {transaction.nature}
+                  </div>
+                  <IconButton
+                    aria-label="open nature menu"
+                    onClick={(event) => handleNatureMenuOpen(event, type, index)}
+                    edge="end"
+                    size="small"
+                    style={{ marginLeft: 'auto' }}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                </div>
+              )}
+            </TableCell>
+            <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
+              {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'montantInitial' ? (
+                <TextField
+                  value={transaction.montantInitial}
+                  onChange={(e) => handleInputChange(type, index, 'montantInitial', e.target.value)}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  fullWidth
+                  inputProps={{
+                    style: { height: '36px', padding: '0 8px', minWidth: '120px' },
+                  }}
+                />
+              ) : (
+                <div onClick={() => handleFocus(type, index, 'montantInitial')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  {transaction.montantInitial}
+                </div>
+              )}
+            </TableCell>
+            {transaction.montants.map((montant, i) => (
+              <TableCell
+                padding="normal"
+                key={i}
+                sx={{ backgroundColor: highlightedMonth === i ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : (highlightedCumulativeMonth !== null && i <= highlightedCumulativeMonth) ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
+              >
+                {editingCell?.type === type && editingCell?.index === index && editingCell?.key === i ? (
+                  <TextField
+                    value={montant}
+                    onChange={(e) => handleInputChange(type, index, i, e.target.value)}
+                    onBlur={handleBlur}
+                    onKeyDown={handleKeyDown}
+                    fullWidth
+                    InputProps={{
+                      sx: { height: '36px', minWidth: '120px', padding: '0 2px', '& input': { padding: '5px' } },
+                      endAdornment: i !== 11 && (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="open menu"
+                            onClick={(event) => handleMenuOpen(event, type, index, i)}
+                            edge="end"
+                            size="small"
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                ) : (
+                  <div onClick={() => handleFocus(type, index, i)} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    {montant}
+                    {i !== 11 && (
+                      <IconButton
+                        aria-label="open menu"
+                        onClick={(event) => handleMenuOpen(event, type, index, i)}
+                        edge="end"
+                        size="small"
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                    )}
+                  </div>
+                )}
+              </TableCell>
             ))}
-            <TableRow>
-              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Solde de la Trésorerie</TableCell>
-              {monthlyTreasury.map((treasury, index) => (
-                <TableCell
-                  key={index}
-                  align="left"
-                  padding="normal"
-                  sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit', fontWeight: 'bold' }}
-                >
-                  {treasury}
-                </TableCell>
-              ))}
-              <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Trésorerie Accumulée</TableCell>
-              {accumulatedTreasury.map((treasury, index) => (
-                <TableCell
-                  key={index}
-                  align="left"
-                  padding="normal"
-                  sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit', fontWeight: 'bold' }}
-                >
-                  {treasury}
-                </TableCell>
-              ))}
-              <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Percentage of Treasury vs Encaissements</TableCell>
-              {percentageBalanceVsEncaissements.map((value, index) => (
-                <TableCell
-                  key={index}
-                  align="left"
-                  padding="normal"
-                  sx={{ backgroundColor: value < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
-                >
-                  {value.toFixed(2)}%
-                </TableCell>
-              ))}
-              <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>-</TableCell>
-            </TableRow>
-          </TableBody>
+            <TableCell align="left" padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit', fontWeight: 'bold' }}>
+              {calculateTotal(type, index, inputValues)}
+            </TableCell>
+          </TableRow>
+        );
+      })}
+    </React.Fragment>
+  ))}
+  <TableRow>
+    <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Solde de la Trésorerie</TableCell>
+    {monthlyTreasury.map((treasury, index) => (
+      <TableCell
+        key={index}
+        align="left"
+        padding="normal"
+        sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit', fontWeight: 'bold' }}
+      >
+        {treasury}
+      </TableCell>
+    ))}
+    <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
+  </TableRow>
+  <TableRow>
+    <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Trésorerie Accumulée</TableCell>
+    {accumulatedTreasury.map((treasury, index) => (
+      <TableCell
+        key={index}
+        align="left"
+        padding="normal"
+        sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit', fontWeight: 'bold' }}
+      >
+        {treasury}
+      </TableCell>
+    ))}
+    <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
+  </TableRow>
+  <TableRow>
+    <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Percentage of Treasury vs Encaissements</TableCell>
+    {percentageBalanceVsEncaissements.map((value, index) => (
+      <TableCell
+        key={index}
+        align="left"
+        padding="normal"
+        sx={{ backgroundColor: value < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
+      >
+        {value.toFixed(2)}%
+      </TableCell>
+    ))}
+    <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>-</TableCell>
+  </TableRow>
+</TableBody>
+
         </Table>
       </TableContainer>
       <Fab color="primary" aria-label="add" onClick={handleFabClick} style={{ position: 'fixed', bottom: 16, right: 16 }}>
@@ -593,6 +689,38 @@ const TreasuryTable = () => {
         <MenuItem onClick={() => handleActionClick('advance')}>Advance transaction</MenuItem>
         <MenuItem onClick={() => handleActionClick('postpone')}>Postpone transaction</MenuItem>
         <MenuItem onClick={() => handleActionClick('repeatUntil')}>Repeat until month</MenuItem>
+      </Menu>
+      <Menu
+        anchorEl={columnMenuAnchorEl}
+        open={Boolean(columnMenuAnchorEl)}
+        onClose={handleColumnMenuClose}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={handleCopyColumn}>Copy Column</MenuItem>
+        <MenuItem onClick={handlePasteColumn}>Paste Column</MenuItem>
+      </Menu>
+      <Menu
+        anchorEl={natureMenuAnchorEl}
+        open={Boolean(natureMenuAnchorEl)}
+        onClose={handleNatureMenuClose}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={handleCopyNatureRow}>Copy Row</MenuItem>
+        <MenuItem onClick={handlePasteNatureRow}>Paste Row</MenuItem>
       </Menu>
       <Modal
         open={modalOpen}
