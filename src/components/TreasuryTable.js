@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography,
-  Fab, Menu, MenuItem, Button, IconButton, InputAdornment, Grid, Modal, Box, FormControlLabel, Checkbox, TextField, Select, FormControl, InputLabel, Snackbar
+  Fab, Menu, MenuItem, Button, IconButton, InputAdornment, Grid, Modal, Box, FormControlLabel, Checkbox, TextField, Select, FormControl, InputLabel, Snackbar, Radio
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -390,7 +390,7 @@ const TreasuryTable = () => {
   const handleCopyColumn = () => {
     const { month } = selectedTransaction;
     const columnData = [];
-  
+
     Object.keys(transactions).forEach((type) => {
       transactions[type].forEach((transaction) => {
         if (month === -1) {
@@ -400,20 +400,20 @@ const TreasuryTable = () => {
         }
       });
     });
-  
+
     navigator.clipboard.writeText(JSON.stringify(columnData));
     handleColumnMenuClose();
     setSnackbarMessage(`Copied data of ${month === -1 ? 'Solde Initial' : 'month ' + monthNames[month + 1]}`);
     setSnackbarOpen(true);
   };
-  
+
   const handlePasteColumn = () => {
     const { month } = selectedTransaction;
-  
+
     navigator.clipboard.readText().then((text) => {
       const columnData = JSON.parse(text);
       const updatedTransactions = { ...transactions };
-  
+
       let rowIndex = 0;
       Object.keys(transactions).forEach((type) => {
         transactions[type].forEach((transaction, index) => {
@@ -427,7 +427,7 @@ const TreasuryTable = () => {
           }
         });
       });
-  
+
       setTransactions(updatedTransactions);
       setInputValues(updatedTransactions);
       localStorage.setItem(transactionName, JSON.stringify(updatedTransactions));
@@ -436,8 +436,8 @@ const TreasuryTable = () => {
     setSnackbarMessage(`Pasted data to ${month === -1 ? 'Solde Initial' : 'month ' + monthNames[month + 1]}`);
     setSnackbarOpen(true);
   };
-  
-  
+
+
   const handleCopyNatureRow = () => {
     const { type, index } = selectedTransaction;
     const rowData = transactions[type][index];
@@ -450,13 +450,13 @@ const TreasuryTable = () => {
 
   const handlePasteNatureRow = () => {
     const { type, index } = selectedTransaction;
-  
+
     navigator.clipboard.readText().then((text) => {
       const rowData = JSON.parse(text);
       const updatedTransactions = { ...transactions };
-  
+
       updatedTransactions[type][index] = { ...rowData }; // Create a copy of the row data to avoid modifying the source
-  
+
       setTransactions(updatedTransactions);
       setInputValues(updatedTransactions);
       localStorage.setItem(transactionName, JSON.stringify(updatedTransactions));
@@ -465,7 +465,21 @@ const TreasuryTable = () => {
     setSnackbarMessage(`Pasted row to ${type.charAt(0).toUpperCase() + type.slice(1)}`);
     setSnackbarOpen(true);
   };
-  
+
+  const getAvailableMonths = () => {
+    const { month } = selectedTransaction;
+    if (action === 'postpone') {
+      return monthNames.slice(month + 2); // Start from month + 2 to exclude the current and previous months
+    }
+    if (action === 'advance') {
+      return monthNames.slice(1, month + 1); // List previous months up to the month before the selected month
+    }
+    if (action === 'repeatUntil') {
+      return monthNames.slice(month + 2); // Start from month + 2 to exclude the current and previous months
+    }
+    return monthNames.slice(1); // Default case to show all months
+  };
+
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -606,14 +620,6 @@ const TreasuryTable = () => {
                         ) : (
                           <div onClick={() => handleFocus(type, index, 'montantInitial')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             {transaction.montantInitial}
-                            <IconButton
-                              aria-label="open menu"
-                              onClick={(event) => handleMenuOpen(event, type, index, -1)}
-                              edge="end"
-                              size="small"
-                            >
-                              <MoreVertIcon />
-                            </IconButton>
                           </div>
                         )}
                       </TableCell>
@@ -793,32 +799,48 @@ const TreasuryTable = () => {
       >
         <Box sx={modalStyle}>
           <Typography id="modal-title" variant="h6" component="h2">
-            Select Months
+            Select Month
           </Typography>
           <Grid container spacing={2} sx={{ mt: 2 }}>
-            {monthNames.slice(1).map((month, i) => (
+            {getAvailableMonths().length > 0 ? getAvailableMonths().map((month, i) => (
               (i !== selectedTransaction.month) && (
                 <Grid item xs={6} sm={4} md={3} key={i}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedMonths.includes(i)}
-                        onChange={() => handleMonthSelect(i)}
-                      />
-                    }
-                    label={month}
-                  />
+                  {(action === 'postpone' || action === 'advance' || action === 'repeatUntil') ? (
+                    <FormControlLabel
+                      control={
+                        <Radio
+                          checked={selectedMonths.includes(i)}
+                          onChange={() => setSelectedMonths([i])} // Ensure only one month is selected
+                        />
+                      }
+                      label={month}
+                    />
+                  ) : (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={selectedMonths.includes(i)}
+                          onChange={() => handleMonthSelect(i)}
+                        />
+                      }
+                      label={month}
+                    />
+                  )}
                 </Grid>
               )
-            ))}
+            )) : (
+              <span>
+                No months to select from
+              </span>
+            )}
           </Grid>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
-            <Button variant="contained" color="primary" onClick={() => handleConfirm(false)} style={{ marginRight: 8 }}>Copy</Button>
-            <Button variant="contained" color="primary" onClick={() => handleConfirm(true)} style={{ marginRight: 8 }}>Add Sum</Button>
+            <Button variant="contained" color="primary" onClick={() => handleConfirm(false)} style={{ marginRight: 8 }}>Confirm</Button>
             <Button variant="contained" color="secondary" onClick={handleCancel}>Cancel</Button>
           </div>
         </Box>
       </Modal>
+
       <Grid container spacing={3} style={{ marginTop: 16 }}>
         <Grid item xs={12} md={6}>
           <TreasuryChart
