@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography,
-  Fab, Menu, MenuItem, Button, IconButton, InputAdornment, Grid, Modal, Box, FormControlLabel, Checkbox, TextField, Select, FormControl, InputLabel
+  Fab, Menu, MenuItem, Button, IconButton, InputAdornment, Grid, Modal, Box, FormControlLabel, Checkbox, TextField, Select, FormControl, InputLabel, Snackbar
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -62,6 +62,8 @@ const TreasuryTable = () => {
   const [highlightedMonth, setHighlightedMonth] = useState(null);
   const [highlightedCumulativeMonth, setHighlightedCumulativeMonth] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const theme = useTheme();
 
@@ -332,6 +334,8 @@ const TreasuryTable = () => {
     });
   };
 
+  console.log("udpated Transactions ", transactions);
+  
   const updatedTransactions = calculateTotals(inputValues);
   const monthlyTreasury = calculateMonthlyTreasury(updatedTransactions);
   const initialSolde = transactions.encaissements[transactions.encaissements.length - 1].montantInitial -
@@ -394,6 +398,8 @@ const TreasuryTable = () => {
 
     navigator.clipboard.writeText(JSON.stringify(columnData));
     handleColumnMenuClose();
+    setSnackbarMessage(`Copied data of month ${monthNames[month + 1]}`);
+    setSnackbarOpen(true);
   };
 
   const handlePasteColumn = () => {
@@ -416,6 +422,8 @@ const TreasuryTable = () => {
       setTransactions(updatedTransactions);
     });
     handleColumnMenuClose();
+    setSnackbarMessage(`Pasted data to month ${monthNames[month + 1]}`);
+    setSnackbarOpen(true);
   };
 
   const handleCopyNatureRow = () => {
@@ -424,6 +432,8 @@ const TreasuryTable = () => {
 
     navigator.clipboard.writeText(JSON.stringify(rowData));
     handleNatureMenuClose();
+    setSnackbarMessage(`Copied row ${rowData.nature}`);
+    setSnackbarOpen(true);
   };
 
   const handlePasteNatureRow = () => {
@@ -437,6 +447,13 @@ const TreasuryTable = () => {
       setTransactions(updatedTransactions);
     });
     handleNatureMenuClose();
+    setSnackbarMessage(`Pasted row to ${type.charAt(0).toUpperCase() + type.slice(1)}`);
+    setSnackbarOpen(true);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+    setSnackbarMessage('');
   };
 
   return (
@@ -464,76 +481,18 @@ const TreasuryTable = () => {
           Gestion de Trésorerie
         </Typography>
         <Table sx={{ minWidth: 650, width: '100vw' }} size="small" aria-label="a dense table">
-        <TableHead>
-  <TableRow>
-    <TableCell padding="normal" align="left">Type</TableCell>
-    <TableCell padding="normal" align="left">Nature de la transaction</TableCell>
-    <TableCell padding="normal" align="left">Solde Initial</TableCell>
-    {monthNames.slice(1).map((month, i) => (
-      <TableCell key={i} align="left" padding="normal">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography align="left" gutterBottom style={{ flexGrow: 1 }}>
-            {month}
-          </Typography>
-          <IconButton
-            aria-label="open column menu"
-            onClick={(event) => handleColumnMenuOpen(event, i)}
-            edge="end"
-            size="small"
-            style={{ marginLeft: 'auto' }}
-          >
-            <MoreVertIcon />
-          </IconButton>
-        </div>
-      </TableCell>
-    ))}
-    <TableCell align="left" padding="normal">Total</TableCell>
-  </TableRow>
-</TableHead>
-<TableBody>
-  {Object.keys(inputValues).map((type) => (
-    <React.Fragment key={type}>
-      {inputValues[type].map((transaction, index) => {
-        const isHighlighted = (type === 'encaissements' && highlightedRow.encaissements === transaction.nature) ||
-          (type === 'decaissements' && highlightedRow.decaissements === transaction.nature);
-
-        return (
-          <TableRow key={index}>
-            {index === 0 && (
-              <TableCell
-                rowSpan={inputValues[type].length}
-                padding="normal"
-                align="left"
-                sx={{
-                  backgroundColor: inputValues[type].some(t =>
-                    (type === 'encaissements' && highlightedRow.encaissements === t.nature) ||
-                    (type === 'decaissements' && highlightedRow.decaissements === t.nature)
-                  ) ? 'rgba(0, 0, 255, 0.1)' : 'inherit'
-                }}
-              >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-              </TableCell>
-            )}
-            <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
-              {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'nature' ? (
-                <TextField
-                  value={transaction.nature}
-                  onChange={(e) => handleInputChange(type, index, 'nature', e.target.value)}
-                  onBlur={handleBlur}
-                  onKeyDown={handleKeyDown}
-                  fullWidth
-                  inputProps={{
-                    style: { height: '36px', padding: '0 8px', minWidth: '120px' },
-                  }}
-                />
-              ) : (
+          <TableHead>
+            <TableRow>
+              <TableCell padding="normal" align="left">Type</TableCell>
+              <TableCell padding="normal" align="left">Nature de la transaction</TableCell>
+              <TableCell padding="normal" align="left">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div onClick={() => handleFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', whiteSpace: 'nowrap', flexGrow: 1 }}>
-                    {transaction.nature}
-                  </div>
+                  <Typography align="left" gutterBottom style={{ flexGrow: 1 }}>
+                    Solde Initial
+                  </Typography>
                   <IconButton
-                    aria-label="open nature menu"
-                    onClick={(event) => handleNatureMenuOpen(event, type, index)}
+                    aria-label="open column menu"
+                    onClick={(event) => handleColumnMenuOpen(event, -1)}
                     edge="end"
                     size="small"
                     style={{ marginLeft: 'auto' }}
@@ -541,123 +500,202 @@ const TreasuryTable = () => {
                     <MoreVertIcon />
                   </IconButton>
                 </div>
-              )}
-            </TableCell>
-            <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
-              {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'montantInitial' ? (
-                <TextField
-                  value={transaction.montantInitial}
-                  onChange={(e) => handleInputChange(type, index, 'montantInitial', e.target.value)}
-                  onBlur={handleBlur}
-                  onKeyDown={handleKeyDown}
-                  fullWidth
-                  inputProps={{
-                    style: { height: '36px', padding: '0 8px', minWidth: '120px' },
-                  }}
-                />
-              ) : (
-                <div onClick={() => handleFocus(type, index, 'montantInitial')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  {transaction.montantInitial}
-                </div>
-              )}
-            </TableCell>
-            {transaction.montants.map((montant, i) => (
-              <TableCell
-                padding="normal"
-                key={i}
-                sx={{ backgroundColor: highlightedMonth === i ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : (highlightedCumulativeMonth !== null && i <= highlightedCumulativeMonth) ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
-              >
-                {editingCell?.type === type && editingCell?.index === index && editingCell?.key === i ? (
-                  <TextField
-                    value={montant}
-                    onChange={(e) => handleInputChange(type, index, i, e.target.value)}
-                    onBlur={handleBlur}
-                    onKeyDown={handleKeyDown}
-                    fullWidth
-                    InputProps={{
-                      sx: { height: '36px', minWidth: '120px', padding: '0 2px', '& input': { padding: '5px' } },
-                      endAdornment: i !== 11 && (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="open menu"
-                            onClick={(event) => handleMenuOpen(event, type, index, i)}
-                            edge="end"
-                            size="small"
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                ) : (
-                  <div onClick={() => handleFocus(type, index, i)} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    {montant}
-                    {i !== 11 && (
-                      <IconButton
-                        aria-label="open menu"
-                        onClick={(event) => handleMenuOpen(event, type, index, i)}
-                        edge="end"
-                        size="small"
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
-                    )}
-                  </div>
-                )}
               </TableCell>
+              {monthNames.slice(1).map((month, i) => (
+                <TableCell key={i} align="left" padding="normal">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography align="left" gutterBottom style={{ flexGrow: 1 }}>
+                      {month}
+                    </Typography>
+                    <IconButton
+                      aria-label="open column menu"
+                      onClick={(event) => handleColumnMenuOpen(event, i)}
+                      edge="end"
+                      size="small"
+                      style={{ marginLeft: 'auto' }}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                  </div>
+                </TableCell>
+              ))}
+              <TableCell align="left" padding="normal">Total</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {Object.keys(inputValues).map((type) => (
+              <React.Fragment key={type}>
+                {inputValues[type].map((transaction, index) => {
+                  const isHighlighted = (type === 'encaissements' && highlightedRow.encaissements === transaction.nature) ||
+                    (type === 'decaissements' && highlightedRow.decaissements === transaction.nature);
+
+                  return (
+                    <TableRow key={index}>
+                      {index === 0 && (
+                        <TableCell
+                          rowSpan={inputValues[type].length}
+                          padding="normal"
+                          align="left"
+                          sx={{
+                            backgroundColor: inputValues[type].some(t =>
+                              (type === 'encaissements' && highlightedRow.encaissements === t.nature) ||
+                              (type === 'decaissements' && highlightedRow.decaissements === t.nature)
+                            ) ? 'rgba(0, 0, 255, 0.1)' : 'inherit'
+                          }}
+                        >
+                          {type.charAt(0).toUpperCase() + type.slice(1)}
+                        </TableCell>
+                      )}
+                      <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
+                        {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'nature' ? (
+                          <TextField
+                            value={transaction.nature}
+                            onChange={(e) => handleInputChange(type, index, 'nature', e.target.value)}
+                            onBlur={handleBlur}
+                            onKeyDown={handleKeyDown}
+                            fullWidth
+                            inputProps={{
+                              style: { height: '36px', padding: '0 8px', minWidth: '120px' },
+                            }}
+                          />
+                        ) : (
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div onClick={() => handleFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', whiteSpace: 'nowrap', flexGrow: 1 }}>
+                              {transaction.nature}
+                            </div>
+                            <IconButton
+                              aria-label="open nature menu"
+                              onClick={(event) => handleNatureMenuOpen(event, type, index)}
+                              edge="end"
+                              size="small"
+                              style={{ marginLeft: 'auto' }}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
+                        {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'montantInitial' ? (
+                          <TextField
+                            value={transaction.montantInitial}
+                            onChange={(e) => handleInputChange(type, index, 'montantInitial', e.target.value)}
+                            onBlur={handleBlur}
+                            onKeyDown={handleKeyDown}
+                            fullWidth
+                            inputProps={{
+                              style: { height: '36px', padding: '0 8px', minWidth: '120px' },
+                            }}
+                          />
+                        ) : (
+                          <div onClick={() => handleFocus(type, index, 'montantInitial')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            {transaction.montantInitial}
+                            <IconButton
+                              aria-label="open menu"
+                              onClick={(event) => handleMenuOpen(event, type, index, -1)}
+                              edge="end"
+                              size="small"
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+                          </div>
+                        )}
+                      </TableCell>
+                      {transaction.montants.map((montant, i) => (
+                        <TableCell
+                          padding="normal"
+                          key={i}
+                          sx={{ backgroundColor: highlightedMonth === i ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : (highlightedCumulativeMonth !== null && i <= highlightedCumulativeMonth) ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
+                        >
+                          {editingCell?.type === type && editingCell?.index === index && editingCell?.key === i ? (
+                            <TextField
+                              value={montant}
+                              onChange={(e) => handleInputChange(type, index, i, e.target.value)}
+                              onBlur={handleBlur}
+                              onKeyDown={handleKeyDown}
+                              fullWidth
+                              InputProps={{
+                                sx: { height: '36px', minWidth: '120px', padding: '0 2px', '& input': { padding: '5px' } },
+                                endAdornment: i !== 11 && (
+                                  <InputAdornment position="end">
+                                    <IconButton
+                                      aria-label="open menu"
+                                      onClick={(event) => handleMenuOpen(event, type, index, i)}
+                                      edge="end"
+                                      size="small"
+                                    >
+                                      <MoreVertIcon />
+                                    </IconButton>
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          ) : (
+                            <div onClick={() => handleFocus(type, index, i)} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              {montant}
+                                <IconButton
+                                  aria-label="open menu"
+                                  onClick={(event) => handleMenuOpen(event, type, index, i)}
+                                  edge="end"
+                                  size="small"
+                                >
+                                  <MoreVertIcon />
+                                </IconButton>
+                            </div>
+                          )}
+                        </TableCell>
+                      ))}
+                      <TableCell align="left" padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit', fontWeight: 'bold' }}>
+                        {calculateTotal(type, index, inputValues)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </React.Fragment>
             ))}
-            <TableCell align="left" padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit', fontWeight: 'bold' }}>
-              {calculateTotal(type, index, inputValues)}
-            </TableCell>
-          </TableRow>
-        );
-      })}
-    </React.Fragment>
-  ))}
-  <TableRow>
-    <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Solde de la Trésorerie</TableCell>
-    {monthlyTreasury.map((treasury, index) => (
-      <TableCell
-        key={index}
-        align="left"
-        padding="normal"
-        sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit', fontWeight: 'bold' }}
-      >
-        {treasury}
-      </TableCell>
-    ))}
-    <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
-  </TableRow>
-  <TableRow>
-    <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Trésorerie Accumulée</TableCell>
-    {accumulatedTreasury.map((treasury, index) => (
-      <TableCell
-        key={index}
-        align="left"
-        padding="normal"
-        sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit', fontWeight: 'bold' }}
-      >
-        {treasury}
-      </TableCell>
-    ))}
-    <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
-  </TableRow>
-  <TableRow>
-    <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Percentage of Treasury vs Encaissements</TableCell>
-    {percentageBalanceVsEncaissements.map((value, index) => (
-      <TableCell
-        key={index}
-        align="left"
-        padding="normal"
-        sx={{ backgroundColor: value < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
-      >
-        {value.toFixed(2)}%
-      </TableCell>
-    ))}
-    <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>-</TableCell>
-  </TableRow>
-</TableBody>
+            <TableRow>
+              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Solde de la Trésorerie</TableCell>
+              {monthlyTreasury.map((treasury, index) => (
+                <TableCell
+                  key={index}
+                  align="left"
+                  padding="normal"
+                  sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit', fontWeight: 'bold' }}
+                >
+                  {treasury}
+                </TableCell>
+              ))}
+              <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Trésorerie Accumulée</TableCell>
+              {accumulatedTreasury.map((treasury, index) => (
+                <TableCell
+                  key={index}
+                  align="left"
+                  padding="normal"
+                  sx={{ backgroundColor: highlightedMonth === index ? 'rgba(255, 0, 0, 0.1)' : 'inherit', fontWeight: 'bold' }}
+                >
+                  {treasury}
+                </TableCell>
+              ))}
+              <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>{finalTreasury}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Percentage of Treasury vs Encaissements</TableCell>
+              {percentageBalanceVsEncaissements.map((value, index) => (
+                <TableCell
+                  key={index}
+                  align="left"
+                  padding="normal"
+                  sx={{ backgroundColor: value < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
+                >
+                  {value.toFixed(2)}%
+                </TableCell>
+              ))}
+              <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>-</TableCell>
+            </TableRow>
+          </TableBody>
 
         </Table>
       </TableContainer>
@@ -786,6 +824,13 @@ const TreasuryTable = () => {
           />
         </Grid>
       </Grid>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      />
     </>
   );
 };
