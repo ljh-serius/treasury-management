@@ -15,8 +15,10 @@ const Dashboard = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
-    const updatedTransactions = calculateTotals(transactions);
-    localStorage.setItem(transactionName, JSON.stringify(updatedTransactions));
+    // const updatedTransactions = calculateTotals(transactions);
+    localStorage.setItem(transactionName, JSON.stringify(transactions));
+    console.log("transactionName", transactionName);
+    console.log("transactions", transactions);
   }, [transactions, transactionName]);
 
   useEffect(() => {
@@ -49,6 +51,7 @@ const Dashboard = () => {
     setSnackbarMessage('');
   };
 
+  console.log(transactions)
   return (
     <div>
       <Typography variant="h4" align="center" gutterBottom>

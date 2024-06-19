@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Fab, Button, Grid
-} from '@mui/material';
+import { Fab, Button, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
@@ -34,6 +32,10 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
   const [action, setAction] = useState('');
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState({ type: '', index: -1, month: -1 });
+
+  useEffect(() => {
+    setInputValues(transactions); // Synchronize inputValues with transactions prop
+  }, [transactions]);
 
   useEffect(() => {
     const updatedTransactions = calculateTotals(transactions);
@@ -89,9 +91,6 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
     const { type, index, month } = selectedTransaction;
     const updatedTransactions = { ...transactions };
 
-    console.log("selectedTransaction", selectedTransaction);
-    console.log("updatedTransactions", updatedTransactions);
-    
     if (!updatedTransactions[type] || !updatedTransactions[type][index] || !updatedTransactions[type][index].montants) {
       console.error("Invalid transaction structure or data");
       handleMenuClose();
@@ -396,36 +395,37 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
         action={action}
         selectedTransaction={selectedTransaction}
       />
-      <Grid container spacing={3} style={{ marginTop: 16 }}>
-        <Grid item xs={12} md={12}>
-          <ChartContainer
-            title="Encaissements by Nature"
-            data={encaissementsData}
-            onHover={(seriesName) => handleChartHover('encaissements', seriesName)}
-          />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <ChartContainer
-            title="Décaissements by Nature"
-            data={decaissementsData}
-            onHover={(seriesName) => handleChartHover('decaissements', seriesName)}
-          />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <ChartContainer
-            title="Solde de Trésorie"
-            data={monthlyTreasuryData}
-            onHover={(seriesName, index) => handleMonthHighlight(index - 1)}
-          />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <ChartContainer
-            title="Trésorerie Cummulée"
-            data={cumulativeTreasuryData}
-            onHover={(seriesName, index) => handleCumulativeMonthHighlight(index - 1)}
-          />
-        </Grid>
-      </Grid>
+     <Grid container spacing={1} style={{ marginTop: 16 }}> 
+  <Grid item xs={12} md={6}>
+    <ChartContainer
+      title="Encaissements by Nature"
+      data={encaissementsData}
+      onHover={(seriesName) => handleChartHover('encaissements', seriesName)}
+    />
+  </Grid>
+  <Grid item xs={12} md={6}>
+    <ChartContainer
+      title="Décaissements by Nature"
+      data={decaissementsData}
+      onHover={(seriesName) => handleChartHover('decaissements', seriesName)}
+    />
+  </Grid>
+  <Grid item xs={12} md={12}>
+    <ChartContainer
+      title="Solde de Trésorie"
+      data={monthlyTreasuryData}
+      onHover={(seriesName, index) => handleMonthHighlight(index - 1)}
+    />
+  </Grid>
+  <Grid item xs={12} md={12}>
+    <ChartContainer
+      title="Trésorerie Cummulée"
+      data={cumulativeTreasuryData}
+      onHover={(seriesName, index) => handleCumulativeMonthHighlight(index - 1)}
+    />
+  </Grid>
+</Grid>
+
     </>
   );
 };
