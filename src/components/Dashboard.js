@@ -111,7 +111,7 @@ const Dashboard = () => {
           />
         </Toolbar>
       </AppBar>
-      <Container maxWidth="xl" sx={{ paddingTop: isMobile ? 3 : 10, maxWidth: '100%' }}>
+      <Container maxWidth="xl" sx={{ paddingTop: isMobile ? 3 : 10, paddingBottom: isMobile ? 7 : 10, maxWidth: '100%' }}>
         <Typography variant="h4" align="left" gutterBottom>
           {transactionName}
         </Typography>

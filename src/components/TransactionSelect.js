@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormControl, InputLabel, Select, MenuItem, Button, Box } from '@mui/material';
+import { FormControl, Select, MenuItem, Button, Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
