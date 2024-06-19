@@ -115,7 +115,7 @@ const Dashboard = () => {
         <Typography variant="h4" align="left" gutterBottom>
           {transactionName}
         </Typography>
-        <Grid container spacing={2} width="100%">
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <BudgetSummary transactions={transactions}></BudgetSummary>
           </Grid>
