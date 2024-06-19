@@ -3,8 +3,6 @@ import {
   Fab, Button, Grid
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { useTheme } from '@mui/material';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
 import ExcelJS from 'exceljs';
@@ -15,7 +13,7 @@ import ChartContainer from './ChartContainer';
 import {
   monthNames, calculateTotals, calculateMonthlyTreasury,
   calculateAccumulatedTreasury, prepareChartData, prepareCumulativeTreasuryData,
-  prepareMonthlyTreasuryData, calculatePercentageBalanceVsEncaissements, calculateTotal
+  prepareMonthlyTreasuryData, calculateTotal
 } from './transactionHelpers';
 
 const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnackbarMessage, setSnackbarOpen }) => {
@@ -36,8 +34,6 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
   const [action, setAction] = useState('');
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState({ type: '', index: -1, month: -1 });
-
-  const theme = useTheme();
 
   useEffect(() => {
     const updatedTransactions = calculateTotals(transactions);
@@ -87,16 +83,6 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
     setAction(actionType);
     setSelectedMonths([]);
     setModalOpen(true);
-  };
-
-  const handleMonthSelect = (month) => {
-    setSelectedMonths((prev) => {
-      if (prev.includes(month)) {
-        return prev.filter((m) => m !== month);
-      } else {
-        return [...prev, month];
-      }
-    });
   };
 
   const handleConfirm = (addSum = false) => {
