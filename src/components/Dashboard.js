@@ -22,10 +22,10 @@ const Dashboard = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [transactions, setTransactions] = useState(() => {
-    const savedTransactions = localStorage.getItem('currentTransaction');
+    const savedTransactions = localStorage.getItem('Main transaction book');
     return savedTransactions ? JSON.parse(savedTransactions) : initialTransactions;
   });
-  const [transactionName, setTransactionName] = useState('currentTransaction');
+  const [transactionName, setTransactionName] = useState('Main transaction book');
   const [availableTransactions, setAvailableTransactions] = useState([]);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -113,13 +113,13 @@ const Dashboard = () => {
       </AppBar>
       <Container maxWidth="xl" sx={{ paddingTop: isMobile ? 3 : 10, maxWidth: '100%' }}>
         <Typography variant="h4" align="left" gutterBottom>
-          Dashboard
+          {transactionName}
         </Typography>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} width="100%">
           <Grid item xs={12}>
             <BudgetSummary transactions={transactions}></BudgetSummary>
           </Grid>
-          <Grid item xs={12} style={{ margin: '0 auto', overflowX: 'auto' }}>
+          <Grid item xs={12} style={{ margin: '0 auto' }}>
             <TreasuryTable
               transactions={transactions}
               setTransactions={setTransactions}

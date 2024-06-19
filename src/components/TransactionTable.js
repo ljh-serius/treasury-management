@@ -11,7 +11,7 @@ const TransactionTable = ({
   highlightedRow, highlightedMonth, highlightedCumulativeMonth
 }) => {
   return (
-    <TableContainer component={Paper} sx={{ overflowX: 'auto', width: '100vw' }}>
+    <TableContainer component={Paper} sx={{ overflowX: 'auto', width: '100%' }}>
       <Table sx={{ minWidth: 650, width: '100vw' }} size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
