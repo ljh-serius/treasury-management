@@ -12,9 +12,6 @@ const TransactionTable = ({
 }) => {
   return (
     <TableContainer component={Paper} sx={{ overflowX: 'auto', width: '100vw' }}>
-      <Typography variant="h4" align="center" gutterBottom>
-        Gestion de Trésorerie
-      </Typography>
       <Table sx={{ minWidth: 650, width: '100vw' }} size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>

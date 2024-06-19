@@ -3,7 +3,7 @@ import TreasuryTable from './TreasuryTable';
 import TransactionSelect from './TransactionSelect';
 import { initialTransactions } from './transactionHelpers';
 import TransactionActionsMenu from './TransactionActionsMenu';
-import { AppBar, Toolbar, useMediaQuery, Typography, Grid, Fab, Snackbar, Container } from '@mui/material';
+import { AppBar, Toolbar, useMediaQuery, Typography, Grid, Fab, Snackbar, Container, Box } from '@mui/material';
 import { useTheme, styled } from '@mui/material/styles';
 import { Add as AddIcon } from '@mui/icons-material';
 import BudgetSummary from './BudgetSummary'; // Import the new component
@@ -97,29 +97,29 @@ const Dashboard = () => {
   };
 
   return (
-    <div>
+    <Box sx={{ overflowX: 'hidden' }}>
       <AppBar position="fixed" color="primary" sx={{ top: isMobile ? 'auto' : 0, bottom: isMobile ? 0 : 'auto' }}>
         <Toolbar>
           <StyledFab color="secondary" aria-label="add" onClick={handleAddClick}>
             <AddIcon />
           </StyledFab>
           <TransactionSelect
-              transactionName={transactionName}
-              availableTransactions={availableTransactions}
-              handleTransactionChange={handleTransactionChange}
-              handleNewTransaction={handleNewTransaction}
-            />
+            transactionName={transactionName}
+            availableTransactions={availableTransactions}
+            handleTransactionChange={handleTransactionChange}
+            handleNewTransaction={handleNewTransaction}
+          />
         </Toolbar>
       </AppBar>
-      <Container maxWidth="xl">
-        <Typography variant="h4" align="center" gutterBottom>
+      <Container maxWidth="xl" sx={{ paddingTop: isMobile ? 3 : 10, maxWidth: '100%' }}>
+        <Typography variant="h4" align="left" gutterBottom>
           Dashboard
         </Typography>
-        <Grid container>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <BudgetSummary transactions={transactions}></BudgetSummary>
           </Grid>
-          <Grid item xs={12} style={{ margin: '0 auto' }}>
+          <Grid item xs={12} style={{ margin: '0 auto', overflowX: 'auto' }}>
             <TreasuryTable
               transactions={transactions}
               setTransactions={setTransactions}
@@ -142,7 +142,7 @@ const Dashboard = () => {
         message={snackbarMessage}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       />
-    </div>
+    </Box>
   );
 };
 
