@@ -1,25 +1,58 @@
 import React from 'react';
-import { FormControl, InputLabel, Select, MenuItem, Button } from '@mui/material';
+import { FormControl, InputLabel, Select, MenuItem, Button, Box } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
-const TransactionSelect = ({ transactionName, availableTransactions, handleTransactionChange, handleNewTransaction }) => {
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  backgroundColor: 'white',
+  minWidth: 200,
+  marginRight: '10px',
+  borderRadius: 4,
+  height: 36,
+  '& .MuiInputBase-root': {
+    height: 36,
+    alignItems: 'center',
+  },
+  '& .MuiSelect-select': {
+    display: 'flex',
+    alignItems: 'center',
+    height: '100%',
+  },
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  backgroundColor: theme.palette.secondary.main,
+  color: 'white',
+  height: 36,
+  '&:hover': {
+    backgroundColor: theme.palette.secondary.dark,
+  },
+}));
+
+const TransactionSelect = ({
+  transactionName,
+  availableTransactions,
+  handleTransactionChange,
+  handleNewTransaction,
+}) => {
   return (
-    <div style={{ marginBottom: 20 }}>
-      <FormControl>
-        <InputLabel id="transaction-select-label">Select Transaction</InputLabel>
+    <Box display="flex" alignItems="center">
+      <StyledFormControl>
         <Select
-          labelId="transaction-select-label"
           value={transactionName}
           onChange={(e) => handleTransactionChange(e.target.value)}
+          label="Transaction"
         >
           {availableTransactions.map((name) => (
-            <MenuItem key={name} value={name}>{name}</MenuItem>
+            <MenuItem key={name} value={name}>
+              {name}
+            </MenuItem>
           ))}
         </Select>
-      </FormControl>
-      <Button variant="contained" color="primary" onClick={handleNewTransaction} style={{ marginLeft: 20 }}>
-        New Transaction Set
-      </Button>
-    </div>
+      </StyledFormControl>
+      <StyledButton onClick={handleNewTransaction}>
+        New Book
+      </StyledButton>
+    </Box>
   );
 };
 

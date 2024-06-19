@@ -25,7 +25,6 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
   const [highlightedMonth, setHighlightedMonth] = useState(null);
   const [highlightedCumulativeMonth, setHighlightedCumulativeMonth] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [columnMenuAnchorEl, setColumnMenuAnchorEl] = useState(null);
   const [natureMenuAnchorEl, setNatureMenuAnchorEl] = useState(null);
@@ -137,23 +136,6 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
     setModalOpen(false);
   };
 
-  const handleFabClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuActionClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleAddTransaction = (type) => {
-    const updatedTransactions = { ...transactions };
-    if (!updatedTransactions[type]) {
-      updatedTransactions[type] = [];
-    }
-    updatedTransactions[type].splice(updatedTransactions[type].length - 1, 0, { nature: '', montantInitial: 0, montants: Array(12).fill(0) });
-    setTransactions(updatedTransactions);
-    handleMenuActionClose();
-  };
 
   const handleChartHover = (type, seriesName) => {
     setHighlightedRow((prev) => ({
@@ -349,9 +331,6 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
         highlightedMonth={highlightedMonth}
         highlightedCumulativeMonth={highlightedCumulativeMonth}
       />
-      <Fab color="primary" aria-label="add" onClick={handleFabClick} style={{ position: 'fixed', bottom: 16, right: 16 }}>
-        <AddIcon />
-      </Fab>
       <Button
         variant="contained"
         color="primary"
@@ -360,11 +339,6 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
       >
         Export as Spreadsheet
       </Button>
-      <TransactionActionsMenu
-        anchorEl={anchorEl}
-        handleMenuActionClose={handleMenuActionClose}
-        handleAddTransaction={handleAddTransaction}
-      />
       <TransactionActionsMenu
         anchorEl={menuAnchorEl}
         handleMenuClose={handleMenuClose}

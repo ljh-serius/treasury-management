@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Grid, Snackbar } from '@mui/material';
 import TreasuryTable from './TreasuryTable';
 import TransactionSelect from './TransactionSelect';
-import { initialTransactions, calculateTotals } from './transactionHelpers';
+import { initialTransactions } from './transactionHelpers';
+import TransactionActionsMenu from './TransactionActionsMenu';
+import { AppBar, Toolbar, useMediaQuery, Typography, Grid, Fab, Snackbar } from '@mui/material';
+import { useTheme, styled } from '@mui/material/styles';
+import { Add as AddIcon } from '@mui/icons-material';
+
+const StyledFab = styled(Fab)({
+  position: 'absolute',
+  zIndex: 1,
+  right: 0,
+  margin: '20px'
+});
 
 const Dashboard = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [transactions, setTransactions] = useState(() => {
     const savedTransactions = localStorage.getItem('currentTransaction');
     return savedTransactions ? JSON.parse(savedTransactions) : initialTransactions;
@@ -13,12 +26,10 @@ const Dashboard = () => {
   const [availableTransactions, setAvailableTransactions] = useState([]);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
 
   useEffect(() => {
-    // const updatedTransactions = calculateTotals(transactions);
     localStorage.setItem(transactionName, JSON.stringify(transactions));
-    console.log("transactionName", transactionName);
-    console.log("transactions", transactions);
   }, [transactions, transactionName]);
 
   useEffect(() => {
@@ -51,31 +62,73 @@ const Dashboard = () => {
     setSnackbarMessage('');
   };
 
-  console.log(transactions)
+  const handleAddClick = (event) => {
+    setAddAnchorEl(event.currentTarget);
+  };
+
+  const handleAddClose = () => {
+    setAddAnchorEl(null);
+  };
+
+  const handleAddTransaction = (type) => {
+    if (type === 'encaissements') {
+      setTransactions((prevTransactions) => ({
+        ...prevTransactions,
+        encaissements: [
+          { nature: 'New Encaissement', montantInitial: 0, montants: Array(12).fill(0) },
+          ...prevTransactions.encaissements
+        ]
+      }));
+    } else if (type === 'decaissements') {
+      setTransactions((prevTransactions) => ({
+        ...prevTransactions,
+        decaissements: [
+          { nature: 'New Décaissement', montantInitial: 0, montants: Array(12).fill(0) },
+          ...prevTransactions.decaissements
+        ]
+      }));
+    }
+    setSnackbarMessage(`Added ${type} transaction`);
+    setSnackbarOpen(true);
+    setAddAnchorEl(null);
+  };
+
   return (
     <div>
-      <Typography variant="h4" align="center" gutterBottom>
-        Dashboard
-      </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
+      <AppBar position="fixed" color="primary" sx={{ top: isMobile ? 'auto' : 0, bottom: isMobile ? 0 : 'auto' }}>
+        <Toolbar>
+          <StyledFab color="secondary" aria-label="add" onClick={handleAddClick}>
+            <AddIcon />
+          </StyledFab>
           <TransactionSelect
-            transactionName={transactionName}
-            availableTransactions={availableTransactions}
-            handleTransactionChange={handleTransactionChange}
-            handleNewTransaction={handleNewTransaction}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <TreasuryTable
-            transactions={transactions}
-            setTransactions={setTransactions}
-            transactionName={transactionName}
-            setSnackbarMessage={setSnackbarMessage}
-            setSnackbarOpen={setSnackbarOpen}
-          />
+              transactionName={transactionName}
+              availableTransactions={availableTransactions}
+              handleTransactionChange={handleTransactionChange}
+              handleNewTransaction={handleNewTransaction}
+            />
+        </Toolbar>
+      </AppBar>
+      <Grid container>
+        <Typography variant="h4" align="center" gutterBottom>
+          Dashboard
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TreasuryTable
+              transactions={transactions}
+              setTransactions={setTransactions}
+              transactionName={transactionName}
+              setSnackbarMessage={setSnackbarMessage}
+              setSnackbarOpen={setSnackbarOpen}
+            />
+          </Grid>
         </Grid>
       </Grid>
+      <TransactionActionsMenu
+        anchorEl={addAnchorEl}
+        handleMenuClose={handleAddClose}
+        handleAddTransaction={handleAddTransaction}
+      />
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
