@@ -3,14 +3,17 @@ import TreasuryTable from './TreasuryTable';
 import TransactionSelect from './TransactionSelect';
 import { initialTransactions } from './transactionHelpers';
 import TransactionActionsMenu from './TransactionActionsMenu';
-import { AppBar, Toolbar, useMediaQuery, Typography, Grid, Fab, Snackbar } from '@mui/material';
+import { AppBar, Toolbar, useMediaQuery, Typography, Grid, Fab, Snackbar, Container } from '@mui/material';
 import { useTheme, styled } from '@mui/material/styles';
 import { Add as AddIcon } from '@mui/icons-material';
+import BudgetSummary from './BudgetSummary'; // Import the new component
 
 const StyledFab = styled(Fab)({
   position: 'absolute',
   zIndex: 1,
   right: 0,
+  height: 36,
+  width: 36,
   margin: '20px'
 });
 
@@ -108,12 +111,15 @@ const Dashboard = () => {
             />
         </Toolbar>
       </AppBar>
-      <Grid container>
+      <Container maxWidth="xl">
         <Typography variant="h4" align="center" gutterBottom>
           Dashboard
         </Typography>
-        <Grid container spacing={2}>
+        <Grid container>
           <Grid item xs={12}>
+            <BudgetSummary transactions={transactions}></BudgetSummary>
+          </Grid>
+          <Grid item xs={12} style={{ margin: '0 auto' }}>
             <TreasuryTable
               transactions={transactions}
               setTransactions={setTransactions}
@@ -123,7 +129,7 @@ const Dashboard = () => {
             />
           </Grid>
         </Grid>
-      </Grid>
+      </Container>
       <TransactionActionsMenu
         anchorEl={addAnchorEl}
         handleMenuClose={handleAddClose}

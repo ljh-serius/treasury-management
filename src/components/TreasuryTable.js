@@ -331,6 +331,7 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
         highlightedMonth={highlightedMonth}
         highlightedCumulativeMonth={highlightedCumulativeMonth}
       />
+    
       <Button
         variant="contained"
         color="primary"
