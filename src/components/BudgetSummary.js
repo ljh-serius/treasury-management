@@ -12,7 +12,7 @@ const BudgetSummary = ({ transactions }) => {
     return (
         <Grid container spacing={2}>
             <Grid item xs={12} md={4}>
-                <Card sx={{ margin: '10px 0' }}>
+                <Card sx={{ margin: '5px 0' }}>
                     <CardContent>
                         <Typography variant="h6" align="left" gutterBottom>
                             Total Encaissements
@@ -24,7 +24,7 @@ const BudgetSummary = ({ transactions }) => {
                 </Card>
             </Grid>
             <Grid item xs={12} md={4}>
-                <Card sx={{ margin: '10px 0' }}>
+                <Card sx={{ margin: '5px 0' }}>
                     <CardContent>
                         <Typography variant="h6" align="left" gutterBottom>
                             Total Décaissements
@@ -36,7 +36,7 @@ const BudgetSummary = ({ transactions }) => {
                 </Card>
             </Grid>
             <Grid item xs={12} md={4}>
-                <Card sx={{ margin: '10px 0' }}>
+                <Card sx={{ margin: '5px 0' }}>
                     <CardContent>
                         <Typography variant="h6" align="left" gutterBottom>
                             Net Treasury Balance
