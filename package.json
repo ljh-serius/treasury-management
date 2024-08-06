@@ -1,6 +1,5 @@
 {
   "name": "tresorerie-management",
-  "homepage": "https://hamza-eljaouhari.github.io/treasury-management",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
