@@ -19,9 +19,6 @@ const TransactionTable = ({
     )
   );
 
-  console.log(displayedMonths)
-  console.log(inputValues)
-
   const displayedMonthIndices = displayedMonths.map(month => presentedMonths.indexOf(month));
 
   const monthlyTreasury = calculateMonthlyTreasury(transactions);
