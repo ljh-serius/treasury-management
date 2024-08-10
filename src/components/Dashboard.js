@@ -3,10 +3,11 @@ import TreasuryTable from './TreasuryTable';
 import TransactionSelect from './TransactionSelect';
 import { initialTransactions } from './transactionHelpers';
 import TransactionActionsMenu from './TransactionActionsMenu';
-import { AppBar, Toolbar, useMediaQuery, Typography, Grid, Fab, Snackbar, Container, Box } from '@mui/material';
+import { AppBar, Toolbar, useMediaQuery, Typography, Grid, Fab, Snackbar, Container, Box, Menu, MenuItem } from '@mui/material';
 import { useTheme, styled } from '@mui/material/styles';
 import { Add as AddIcon } from '@mui/icons-material';
-import BudgetSummary from './BudgetSummary'; // Import the new component
+import BudgetSummary from './BudgetSummary'; 
+import AddTransactionModal from './AddTransactionModal'; 
 
 const StyledFab = styled(Fab)({
   position: 'absolute',
@@ -22,38 +23,49 @@ const Dashboard = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [transactions, setTransactions] = useState(() => {
-    const savedTransactions = localStorage.getItem('Main transaction book');
-    return savedTransactions ? JSON.parse(savedTransactions) : initialTransactions;
+    const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
+    return savedBooks['Main transaction book'] || { encaissements: [], decaissements: [] }; // Provide a default structure
   });
+
   const [transactionName, setTransactionName] = useState('Main transaction book');
   const [availableTransactions, setAvailableTransactions] = useState([]);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [newTransactionType, setNewTransactionType] = useState('');
+  const [newTransactionName, setNewTransactionName] = useState('');
+  const [newTransactionAmount, setNewTransactionAmount] = useState(0);
+  const [selectedMonths, setSelectedMonths] = useState([]);
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June', 
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   useEffect(() => {
-    localStorage.setItem(transactionName, JSON.stringify(transactions));
+    const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
+    savedBooks[transactionName] = transactions;
+    localStorage.setItem('books', JSON.stringify(savedBooks));
   }, [transactions, transactionName]);
 
   useEffect(() => {
-    const keys = Object.keys(localStorage);
-    setAvailableTransactions(keys);
+    const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
+    setAvailableTransactions(Object.keys(savedBooks));
   }, []);
 
   const handleTransactionChange = (name) => {
+    const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
     setTransactionName(name);
-    const savedTransactions = localStorage.getItem(name);
-    if (savedTransactions) {
-      setTransactions(JSON.parse(savedTransactions));
-    } else {
-      setTransactions(initialTransactions);
-    }
+    setTransactions(savedBooks[name] || initialTransactions);
   };
 
   const handleNewTransaction = () => {
     const name = prompt('Enter name for new transaction set:');
     if (name) {
-      localStorage.setItem(name, JSON.stringify(initialTransactions));
+      const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
+      savedBooks[name] = initialTransactions;
+      localStorage.setItem('books', JSON.stringify(savedBooks));
       setAvailableTransactions([...availableTransactions, name]);
       setTransactionName(name);
       setTransactions(initialTransactions);
@@ -66,35 +78,61 @@ const Dashboard = () => {
   };
 
   const handleAddClick = (event) => {
-    setAddAnchorEl(event.currentTarget);
+    setMenuAnchorEl(event.currentTarget);
   };
 
-  const handleAddClose = () => {
-    setAddAnchorEl(null);
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+
+  const openTransactionModal = (type) => {
+    setNewTransactionType(type);
+    setModalOpen(true);
   };
 
   const handleAddTransaction = (type) => {
-    if (type === 'encaissements') {
-      setTransactions((prevTransactions) => ({
-        ...prevTransactions,
-        encaissements: [
-          { nature: 'New Encaissement', montantInitial: 0, montants: Array(12).fill(0) },
-          ...prevTransactions.encaissements
-        ]
-      }));
-    } else if (type === 'decaissements') {
-      setTransactions((prevTransactions) => ({
-        ...prevTransactions,
-        decaissements: [
-          { nature: 'New Décaissement', montantInitial: 0, montants: Array(12).fill(0) },
-          ...prevTransactions.decaissements
-        ]
-      }));
-    }
-    setSnackbarMessage(`Added ${type} transaction`);
-    setSnackbarOpen(true);
-    setAddAnchorEl(null);
+    handleMenuClose();
+    openTransactionModal(type);
   };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    setNewTransactionName('');
+    setNewTransactionAmount(0);
+    setSelectedMonths([]);
+  };
+
+  const handleModalSubmit = () => {
+    const existingTransaction = transactions[newTransactionType]?.find(t => t.nature === newTransactionName);
+
+    let updatedTransactions = { ...transactions };
+    if (existingTransaction) {
+      selectedMonths.forEach(monthIndex => {
+        existingTransaction.montants[monthIndex] = newTransactionAmount;
+      });
+    } else {
+      const newTransaction = {
+        nature: newTransactionName,
+        montantInitial: newTransactionAmount,
+        montants: Array(12).fill(0)
+      };
+      selectedMonths.forEach(monthIndex => {
+        newTransaction.montants[monthIndex] = newTransactionAmount;
+      });
+      updatedTransactions[newTransactionType] = [newTransaction, ...updatedTransactions[newTransactionType]];
+    }
+
+    setTransactions(updatedTransactions);
+    handleModalClose();
+  };
+
+  const getRelevantTransactions = () => {
+    if (transactions && transactions[newTransactionType]) {
+      return transactions[newTransactionType].map(transaction => transaction.nature);
+    }
+    return []; // Return an empty array if transactions or newTransactionType is not defined
+  };
+  
 
   return (
     <Box sx={{ overflowX: 'hidden' }}>
@@ -111,6 +149,32 @@ const Dashboard = () => {
           />
         </Toolbar>
       </AppBar>
+
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={() => handleAddTransaction('encaissements')}>Encaissements</MenuItem>
+        <MenuItem onClick={() => handleAddTransaction('decaissements')}>Décaissements</MenuItem>
+      </Menu>
+
+      <AddTransactionModal
+        modalOpen={modalOpen}
+        handleModalClose={handleModalClose}
+        newTransactionType={newTransactionType}
+        newTransactionName={newTransactionName}
+        setNewTransactionName={setNewTransactionName}
+        availableTransactions={getRelevantTransactions()}
+        newTransactionAmount={newTransactionAmount}
+        setNewTransactionAmount={setNewTransactionAmount}
+        selectedMonths={selectedMonths}
+        setSelectedMonths={setSelectedMonths}
+        handleModalSubmit={handleModalSubmit}
+        monthNames={monthNames}
+        transactions={transactions} // Pass the transactions prop
+      />
+
       <Container maxWidth="xl" sx={{ paddingTop: isMobile ? 3 : 10, paddingBottom: isMobile ? 7 : 0, maxWidth: '100%' }}>
         <Typography variant="h4" align="left" gutterBottom>
           {transactionName}
@@ -130,11 +194,6 @@ const Dashboard = () => {
           </Grid>
         </Grid>
       </Container>
-      <TransactionActionsMenu
-        anchorEl={addAnchorEl}
-        handleMenuClose={handleAddClose}
-        handleAddTransaction={handleAddTransaction}
-      />
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

@@ -3,13 +3,22 @@ import {
   Table, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, IconButton, InputAdornment
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { calculateTotal, monthNames, calculateMonthlyTreasury, calculateAccumulatedTreasury, calculatePercentageBalanceVsEncaissements } from './transactionHelpers';
+import {
+  calculateTotal, monthNames, calculateMonthlyTreasury, calculateAccumulatedTreasury, calculatePercentageBalanceVsEncaissements
+} from './transactionHelpers';
 
 const TransactionTable = ({
   transactions, inputValues, handleInputChange,
   handleFocus, handleBlur, handleKeyDown, handleMenuOpen, handleColumnMenuOpen, handleNatureMenuOpen, editingCell,
   highlightedRow, highlightedMonth, highlightedCumulativeMonth
 }) => {
+  // Calculate which months have any values and should be displayed
+  const displayedMonths = monthNames.slice(1).filter((_, monthIndex) =>
+    Object.keys(inputValues).some(type =>
+      inputValues[type].some(transaction => transaction.montants[monthIndex] !== 0)
+    )
+  );
+
   return (
     <TableContainer component={Paper} sx={{ overflowX: 'auto', width: '100%' }}>
       <Table sx={{ minWidth: 650, width: '100vw' }} size="small" aria-label="a dense table">
@@ -33,7 +42,7 @@ const TransactionTable = ({
                 </IconButton>
               </div>
             </TableCell>
-            {monthNames.slice(1).map((month, i) => (
+            {displayedMonths.map((month, i) => (
               <TableCell key={i} align="left" padding="normal">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography align="left" gutterBottom style={{ flexGrow: 1 }}>
@@ -125,15 +134,15 @@ const TransactionTable = ({
                         </div>
                       )}
                     </TableCell>
-                    {transaction.montants.map((montant, i) => (
+                    {displayedMonths.map((month, i) => (
                       <TableCell
                         padding="normal"
                         key={i}
-                        sx={{ backgroundColor: highlightedMonth === i ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : (highlightedCumulativeMonth !== null && i <= highlightedCumulativeMonth) ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
+                        sx={{ backgroundColor: highlightedMonth === i ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
                       >
                         {editingCell?.type === type && editingCell?.index === index && editingCell?.key === i ? (
                           <TextField
-                            value={montant}
+                            value={transaction.montants[i]}
                             onChange={(e) => handleInputChange(type, index, i, e.target.value)}
                             onBlur={handleBlur}
                             onKeyDown={handleKeyDown}
@@ -144,7 +153,7 @@ const TransactionTable = ({
                                 <InputAdornment position="end">
                                   <IconButton
                                     aria-label="open menu"
-                                    onClick={(event) => handleMenuOpen(event, type,  index, i)}
+                                    onClick={(event) => handleMenuOpen(event, type, index, i)}
                                     edge="end"
                                     size="small"
                                   >
@@ -156,7 +165,7 @@ const TransactionTable = ({
                           />
                         ) : (
                           <div onClick={() => handleFocus(type, index, i)} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            {montant}
+                            {transaction.montants[i]}
                           </div>
                         )}
                       </TableCell>

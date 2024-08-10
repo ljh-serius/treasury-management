@@ -1,3 +1,5 @@
+// TreasuryTable.js
+
 import React, { useState, useEffect } from 'react';
 import { Button, Grid } from '@mui/material';
 import { saveAs } from 'file-saver';
@@ -5,7 +7,7 @@ import html2canvas from 'html2canvas';
 import ExcelJS from 'exceljs';
 import TransactionTable from './TransactionTable';
 import TransactionActionsMenu from './TransactionActionsMenu';
-import ModalDialog from './ModalDialog';
+import AddTransactionModal from './AddTransactionModal';
 import ChartContainer from './ChartContainer';
 import {
   monthNames, calculateTotals, calculateMonthlyTreasury,
@@ -80,52 +82,27 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
   };
 
   const handleActionClick = (actionType) => {
-    setAction(actionType);
-    setSelectedMonths([]);
-    setModalOpen(true);
+    if (actionType === 'setMonths') {
+      // Open modal for setting transaction details across months
+      setModalOpen(true);
+    } else {
+      setAction(actionType);
+      setSelectedMonths([]);
+      setModalOpen(true);
+    }
   };
 
-  const handleConfirm = (addSum = false) => {
-    const { type, index, month } = selectedTransaction;
+  const handleConfirm = (name, amount) => {
+    const { type, index } = selectedTransaction;
     const updatedTransactions = { ...transactions };
 
-    if (!updatedTransactions[type] || !updatedTransactions[type][index] || !updatedTransactions[type][index].montants) {
-      console.error("Invalid transaction structure or data");
-      handleMenuClose();
-      setModalOpen(false);
-      setAction('');
-      return;
-    }
+    selectedMonths.forEach((month) => {
+      updatedTransactions[type][index].montants[month] = parseFloat(amount);
+    });
 
-    if (action === 'repeat') {
-      const amount = updatedTransactions[type][index].montants[month];
-      selectedMonths.forEach((m) => {
-        if (addSum) {
-          updatedTransactions[type][index].montants[m] += amount;
-        } else {
-          updatedTransactions[type][index].montants[m] = amount;
-        }
-      });
-    } else if (action === 'advance' && selectedMonths.length === 1) {
-      const newMonth = selectedMonths[0];
-      const amount = updatedTransactions[type][index].montants[month];
-      updatedTransactions[type][index].montants[month] = 0;
-      updatedTransactions[type][index].montants[newMonth] += amount;
-    } else if (action === 'postpone' && selectedMonths.length === 1) {
-      const newMonth = selectedMonths[0];
-      const amount = updatedTransactions[type][index].montants[month];
-      updatedTransactions[type][index].montants[month] = 0;
-      updatedTransactions[type][index].montants[month + newMonth + 1] += amount;
-    } else if (action === 'repeatUntil' && selectedMonths.length === 1) {
-      const endMonth = selectedMonths[0];
-      const amount = updatedTransactions[type][index].montants[month];
-      for (let m = month + 1; m <= month + 1 + endMonth; m++) {
-        updatedTransactions[type][index].montants[m] = amount;
-      }
-    }
+    updatedTransactions[type][index].nature = name;
 
     setTransactions(updatedTransactions);
-    handleMenuClose();
     setModalOpen(false);
     setAction('');
   };
@@ -134,7 +111,6 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
     setAction('');
     setModalOpen(false);
   };
-
 
   const handleChartHover = (type, seriesName) => {
     setHighlightedRow((prev) => ({
@@ -297,112 +273,100 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
     setSnackbarOpen(true);
   };
 
-  const getAvailableMonths = () => {
-    const { month } = selectedTransaction;
-    if (action === 'postpone') {
-      return monthNames.slice(month + 2); // Start from month + 2 to exclude the current and previous months
-    }
-    if (action === 'advance') {
-      return monthNames.slice(1, month + 1); // List previous months up to the month before the selected month
-    }
-    if (action === 'repeatUntil') {
-      return monthNames.slice(month + 2); // Start from month + 2 to exclude the current and previous months
-    }
-    return monthNames.slice(1); // Default case to show all months
+    useEffect(() => {
+      setInputValues(transactions); 
+    }, [transactions]);
+  
+    useEffect(() => {
+      const updatedTransactions = calculateTotals(transactions);
+      setEncaissementsData(prepareChartData('encaissements', updatedTransactions));
+      setDecaissementsData(prepareChartData('decaissements', updatedTransactions));
+      setCumulativeTreasuryData(prepareCumulativeTreasuryData(updatedTransactions));
+      setMonthlyTreasuryData(prepareMonthlyTreasuryData(updatedTransactions));
+    }, [transactions]);
+  
+    return (
+      <>
+        <TransactionTable
+          transactions={transactions}
+          inputValues={inputValues}
+          setInputValues={setInputValues}
+          handleInputChange={handleInputChange}
+          setSelectedTransaction={setSelectedTransaction}
+          handleFocus={handleFocus}
+          handleBlur={handleBlur}
+          handleKeyDown={handleKeyDown}
+          handleMenuOpen={handleMenuOpen}
+          handleColumnMenuOpen={handleColumnMenuOpen}
+          handleNatureMenuOpen={handleNatureMenuOpen}
+          editingCell={editingCell}
+          highlightedRow={highlightedRow}
+          highlightedMonth={highlightedMonth}
+          highlightedCumulativeMonth={highlightedCumulativeMonth}
+        />
+  
+        <TransactionActionsMenu
+          anchorEl={menuAnchorEl}
+          handleMenuClose={handleMenuClose}
+          handleActionClick={handleActionClick}
+          type="amount"
+        />
+        <TransactionActionsMenu
+          anchorEl={columnMenuAnchorEl}
+          handleMenuClose={handleColumnMenuClose}
+          handleCopyColumn={handleCopyColumn}
+          handlePasteColumn={handlePasteColumn}
+          type="column"
+        />
+        <TransactionActionsMenu
+          anchorEl={natureMenuAnchorEl}
+          handleMenuClose={handleNatureMenuClose}
+          handleCopyNatureRow={handleCopyNatureRow}
+          handlePasteNatureRow={handlePasteNatureRow}
+          type="nature"
+        />
+        <Grid container style={{ marginTop: 16 }}>
+          <Grid item xs={12} md={6}>
+            <ChartContainer
+              title="Encaissements by Nature"
+              data={encaissementsData}
+              onHover={(seriesName) => handleChartHover('encaissements', seriesName)}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <ChartContainer
+              title="Décaissements by Nature"
+              data={decaissementsData}
+              onHover={(seriesName) => handleChartHover('decaissements', seriesName)}
+            />
+          </Grid>
+          <Grid item xs={12} md={12}>
+            <ChartContainer
+              title="Solde de Trésorie"
+              data={monthlyTreasuryData}
+              onHover={(seriesName, index) => handleMonthHighlight(index - 1)}
+            />
+          </Grid>
+          <Grid item xs={12} md={12}>
+            <ChartContainer
+              title="Trésorerie Cummulée"
+              data={cumulativeTreasuryData}
+              onHover={(seriesName, index) => handleCumulativeMonthHighlight(index - 1)}
+            />
+          </Grid>
+          <Button
+          variant="contained"
+          color="primary"
+          onClick={exportToSpreadsheet}
+          style={{ height: 36, marginLeft: 'auto', marginTop: 15, marginBottom: 20 }}
+        >
+          Export as Spreadsheet
+        </Button>
+        </Grid>
+  
+  
+      </>
+    );
   };
-
-  return (
-    <>
-      <TransactionTable
-        transactions={transactions}
-        inputValues={inputValues}
-        setInputValues={setInputValues}
-        handleInputChange={handleInputChange}
-        setSelectedTransaction={setSelectedTransaction}
-        handleFocus={handleFocus}
-        handleBlur={handleBlur}
-        handleKeyDown={handleKeyDown}
-        handleMenuOpen={handleMenuOpen}
-        handleColumnMenuOpen={handleColumnMenuOpen}
-        handleNatureMenuOpen={handleNatureMenuOpen}
-        editingCell={editingCell}
-        highlightedRow={highlightedRow}
-        highlightedMonth={highlightedMonth}
-        highlightedCumulativeMonth={highlightedCumulativeMonth}
-      />
-
-      <TransactionActionsMenu
-        anchorEl={menuAnchorEl}
-        handleMenuClose={handleMenuClose}
-        handleActionClick={handleActionClick}
-        type="amount"
-      />
-      <TransactionActionsMenu
-        anchorEl={columnMenuAnchorEl}
-        handleMenuClose={handleColumnMenuClose}
-        handleCopyColumn={handleCopyColumn}
-        handlePasteColumn={handlePasteColumn}
-        type="column"
-      />
-      <TransactionActionsMenu
-        anchorEl={natureMenuAnchorEl}
-        handleMenuClose={handleNatureMenuClose}
-        handleCopyNatureRow={handleCopyNatureRow}
-        handlePasteNatureRow={handlePasteNatureRow}
-        type="nature"
-      />
-      <ModalDialog
-        modalOpen={modalOpen}
-        handleCancel={handleCancel}
-        getAvailableMonths={getAvailableMonths}
-        selectedMonths={selectedMonths}
-        setSelectedMonths={setSelectedMonths}
-        handleConfirm={handleConfirm}
-        action={action}
-        selectedTransaction={selectedTransaction}
-      />
-      <Grid container style={{ marginTop: 16 }}>
-        <Grid item xs={12} md={6}>
-          <ChartContainer
-            title="Encaissements by Nature"
-            data={encaissementsData}
-            onHover={(seriesName) => handleChartHover('encaissements', seriesName)}
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <ChartContainer
-            title="Décaissements by Nature"
-            data={decaissementsData}
-            onHover={(seriesName) => handleChartHover('decaissements', seriesName)}
-          />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <ChartContainer
-            title="Solde de Trésorie"
-            data={monthlyTreasuryData}
-            onHover={(seriesName, index) => handleMonthHighlight(index - 1)}
-          />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <ChartContainer
-            title="Trésorerie Cummulée"
-            data={cumulativeTreasuryData}
-            onHover={(seriesName, index) => handleCumulativeMonthHighlight(index - 1)}
-          />
-        </Grid>
-        <Button
-        variant="contained"
-        color="primary"
-        onClick={exportToSpreadsheet}
-        style={{ height: 36, marginLeft: 'auto', marginTop: 15, marginBottom: 20 }}
-      >
-        Export as Spreadsheet
-      </Button>
-      </Grid>
-
-
-    </>
-  );
-};
-
-export default TreasuryTable;
+  
+  export default TreasuryTable;
