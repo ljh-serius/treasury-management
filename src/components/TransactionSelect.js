@@ -33,7 +33,12 @@ const TransactionSelect = ({
   availableTransactions,
   handleTransactionChange,
   handleNewTransaction,
+  showTransactionControls = true, // New prop to control visibility
 }) => {
+  if (!showTransactionControls) {
+    return null; // Return nothing if showTransactionControls is false
+  }
+
   return (
     <Box display="flex" alignItems="center">
       <StyledFormControl>

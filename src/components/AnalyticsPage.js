@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Container, Typography, Box, FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { AppBar, Toolbar  } from '@mui/material';
+import { AppBar, Toolbar, Button  } from '@mui/material';
+import { Link } from 'react-router-dom';
+import Header from './Header';
 
 // Define month names
 const monthNames = [
@@ -116,14 +118,13 @@ const AnalyticsPage = () => {
   };
 
   return (
-    <Container>
-    <AppBar position="fixed" color="primary">
-        <Toolbar>
-        </Toolbar>
-      </AppBar>
-      <Typography variant="h4" gutterBottom>
-        Comparative Analytics
-      </Typography>
+    <Container mt={15}>
+        <Header
+        showTransactionControls={false}
+        ></Header>
+        <Typography variant="h4" gutterBottom>
+            Comparative Analytics
+        </Typography>
 
       <FormControl fullWidth margin="normal">
         <InputLabel>Select Books</InputLabel>

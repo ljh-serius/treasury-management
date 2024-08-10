@@ -6,20 +6,8 @@ import { AppBar, Toolbar, useMediaQuery, Typography, Grid, Fab, Snackbar, Contai
 import { useTheme, styled } from '@mui/material/styles';
 import { Add as AddIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 import BudgetSummary from './BudgetSummary'; 
+import Header from './Header'; 
 import AddTransactionModal from './AddTransactionModal'; 
-
-const StyledFab = styled(Fab)({
-  position: 'absolute',
-  zIndex: 1,
-  right: 0,
-  height: 36,
-  width: 36,
-  margin: '20px'
-});
-
-const RandomButton = styled(Button)({
-  marginRight: '20px'
-});
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -187,23 +175,15 @@ const Dashboard = () => {
 
   return (
     <Box sx={{ overflowX: 'hidden' }}>
-      <AppBar position="fixed" color="primary" sx={{ top: isMobile ? 'auto' : 0, bottom: isMobile ? 0 : 'auto' }}>
-        <Toolbar>
-          <StyledFab color="secondary" aria-label="add" onClick={handleAddClick}>
-            <AddIcon />
-          </StyledFab>
-          <RandomButton color="secondary" variant="contained" startIcon={<RefreshIcon />} onClick={generateRandomTransactions}>
-            Generate Random Transactions
-          </RandomButton>
-          <TransactionSelect
-            transactionName={transactionName}
-            availableTransactions={availableTransactions}
-            handleTransactionChange={handleTransactionChange}
-            handleNewTransaction={handleNewTransaction}
-          />
-        </Toolbar>
-      </AppBar>
-
+      <Header
+        isMobile={isMobile}
+        handleAddClick={handleAddClick}
+        generateRandomTransactions={generateRandomTransactions}
+        transactionName={transactionName}
+        availableTransactions={availableTransactions}
+        handleTransactionChange={handleTransactionChange}
+        handleNewTransaction={handleNewTransaction}
+      />
       <Menu
         anchorEl={menuAnchorEl}
         open={Boolean(menuAnchorEl)}
