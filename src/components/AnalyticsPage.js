@@ -98,7 +98,7 @@ const AnalyticsPage = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 12 }}>
+    <Container maxWidth="xl" sx={{ mt: 12, mb: 12 }}>
         <Header showTransactionControls={false} />
         <Typography variant="h4" gutterBottom>
             Comparative Analytics
