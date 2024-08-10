@@ -50,27 +50,35 @@ const AnalyticsPage = () => {
     const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
     setBooks(savedBooks);
     setBookOptions(Object.keys(savedBooks));
-  }, []);
+  
+    // If no books are selected, select all by default
+    if (Object.keys(savedBooks).length > 0 && selectedBooks.length === 0) {
+      setSelectedBooks(Object.keys(savedBooks));
+    }
+  }, [selectedBooks]);
 
   const handleBookChange = (event) => {
     setSelectedBooks(event.target.value);
   };
 
   useEffect(() => {
-    if (selectedBooks.length) {
-      const options = generateChartOptions(selectedBooks);
+    // Use all books if none are selected
+    const booksToAnalyze = selectedBooks.length > 0 ? selectedBooks : Object.keys(books);
+  
+    if (booksToAnalyze.length > 0) {
+      const options = generateChartOptions(booksToAnalyze);
       setChartOptions(options);
-
-      const pieOptions = generatePieChartOptions(selectedBooks);
+  
+      const pieOptions = generatePieChartOptions(booksToAnalyze);
       setPieChartOptions(pieOptions);
-
-      const lineOptions = generateLineChartOptions(selectedBooks);
+  
+      const lineOptions = generateLineChartOptions(booksToAnalyze);
       setLineChartOptions(lineOptions);
-
-      const barOptions = generateBarChartOptions(selectedBooks);
+  
+      const barOptions = generateBarChartOptions(booksToAnalyze);
       setBarChartOptions(barOptions);
-
-      const heatmapOptions = generateHeatmapOptions(selectedBooks);
+  
+      const heatmapOptions = generateHeatmapOptions(booksToAnalyze);
       setHeatmapOptions(heatmapOptions);
     }
   }, [selectedBooks, selectedMonths, books]);
@@ -430,6 +438,46 @@ const AnalyticsPage = () => {
         </Grid>
       </Grid>
 
+      {selectedBooks.length > 0 && (
+        <Box mt={4}>
+          <Typography variant="h6" gutterBottom>
+            Annual :
+          </Typography>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Book</TableCell>
+                  <TableCell>Initial Balance</TableCell>
+                  <TableCell>Total Encaissements</TableCell>
+                  <TableCell>Total Decaissements</TableCell>
+                  <TableCell>Final Treasury</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {selectedBooks.map((bookName) => {
+                  const summary = calculateBudgetSummary(
+                    calculateTotals(books[bookName])
+                  );
+                  return (
+                    <TableRow key={bookName}>
+                      <TableCell>{bookName}</TableCell>
+                      <TableCell>{summary.initialBalance.toFixed(2)}</TableCell>
+                      <TableCell>
+                        {summary.totalEncaissements.toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        {summary.totalDecaissements.toFixed(2)}
+                      </TableCell>
+                      <TableCell>{summary.finalTreasury.toFixed(2)}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      )}
       <Box mt={4}>
         {Object.keys(chartOptions).length > 0 && (
           <HighchartsReact highcharts={Highcharts} options={chartOptions} />
@@ -475,47 +523,6 @@ const AnalyticsPage = () => {
           )}
         </Grid>
       </Box>
-
-      {selectedBooks.length > 0 && (
-        <Box mt={4}>
-          <Typography variant="h6" gutterBottom>
-            Comparative Analysis Table
-          </Typography>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Book</TableCell>
-                  <TableCell>Initial Balance</TableCell>
-                  <TableCell>Total Encaissements</TableCell>
-                  <TableCell>Total Decaissements</TableCell>
-                  <TableCell>Final Treasury</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {selectedBooks.map((bookName) => {
-                  const summary = calculateBudgetSummary(
-                    calculateTotals(books[bookName])
-                  );
-                  return (
-                    <TableRow key={bookName}>
-                      <TableCell>{bookName}</TableCell>
-                      <TableCell>{summary.initialBalance.toFixed(2)}</TableCell>
-                      <TableCell>
-                        {summary.totalEncaissements.toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        {summary.totalDecaissements.toFixed(2)}
-                      </TableCell>
-                      <TableCell>{summary.finalTreasury.toFixed(2)}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-      )}
     </Container>
   );
 };
