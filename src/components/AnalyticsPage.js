@@ -2,16 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Container, Typography, Box, FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { AppBar, Toolbar, Button  } from '@mui/material';
-import { Link } from 'react-router-dom';
 import Header from './Header';
-
-// Define month names
-const monthNames = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
-
+import {
+    calculateBudgetSummary,
+    calculateTotals
+  } from './transactionHelpers';
+  
 const AnalyticsPage = () => {
   const [books, setBooks] = useState({});
   const [selectedBooks, setSelectedBooks] = useState([]);
@@ -36,38 +32,22 @@ const AnalyticsPage = () => {
   };
 
   const generateChartOptions = (booksToAnalyze) => {
-    const initialEncaissements = {};
-    const totalMonthlyEncaissements = {};
-    const initialDecaissements = {};
-    const totalMonthlyDecaissements = {};
+    const initialBalances = {};
+    const totalEncaissements = {};
+    const totalDecaissements = {};
+    const finalTreasuries = {};
 
     booksToAnalyze.forEach(bookName => {
-      const book = books[bookName];
-      let initialIncome = 0;
-      let monthlyIncome = 0;
-      let initialExpense = 0;
-      let monthlyExpense = 0;
-
-      // Handle encaissements
-      const encaissementTotal = book.encaissements.find(e => e.nature === 'Total Encaissements') || { montantInitial: 0, montants: [] };
-      initialIncome = encaissementTotal.montantInitial || 0;
-      monthlyIncome = encaissementTotal.montants.reduce((a, b) => a + b, 0);
-
-      // Handle décaissements
-      const decaissementTotal = book.decaissements.find(d => d.nature === 'Total Decaissements') || { montantInitial: 0, montants: [] };
-      initialExpense = decaissementTotal.montantInitial || 0;
-      monthlyExpense = decaissementTotal.montants.reduce((a, b) => a + b, 0);
-
-      // Store results
-      initialEncaissements[bookName] = initialIncome;
-      totalMonthlyEncaissements[bookName] = monthlyIncome;
-      initialDecaissements[bookName] = initialExpense;
-      totalMonthlyDecaissements[bookName] = monthlyExpense;
+      const summary = calculateBudgetSummary(calculateTotals(books[bookName]));
+      initialBalances[bookName] = summary.initialBalance;
+      totalEncaissements[bookName] = summary.totalEncaissements;
+      totalDecaissements[bookName] = summary.totalDecaissements;
+      finalTreasuries[bookName] = summary.finalTreasury;
     });
 
     return {
       title: {
-        text: 'Comparative Analysis of Transaction Books'
+        text: 'Comparative Analysis of Budget Summaries'
       },
       xAxis: {
         categories: booksToAnalyze,
@@ -83,31 +63,31 @@ const AnalyticsPage = () => {
       },
       series: [
         {
-          name: 'Initial Encaissements',
-          data: booksToAnalyze.map(bookName => initialEncaissements[bookName]),
+          name: 'Initial Balance',
+          data: booksToAnalyze.map(bookName => initialBalances[bookName]),
+          type: 'column',
+          color: '#007bff', // Blue
+          dataLabels: { enabled: true }
+        },
+        {
+          name: 'Total Encaissements',
+          data: booksToAnalyze.map(bookName => totalEncaissements[bookName]),
           type: 'column',
           color: '#28a745', // Green
           dataLabels: { enabled: true }
         },
         {
-          name: 'Monthly Encaissements',
-          data: booksToAnalyze.map(bookName => totalMonthlyEncaissements[bookName]),
-          type: 'column',
-          color: '#6c757d', // Gray
-          dataLabels: { enabled: true }
-        },
-        {
-          name: 'Initial Décaissements',
-          data: booksToAnalyze.map(bookName => initialDecaissements[bookName]),
+          name: 'Total Decaissements',
+          data: booksToAnalyze.map(bookName => totalDecaissements[bookName]),
           type: 'column',
           color: '#dc3545', // Red
           dataLabels: { enabled: true }
         },
         {
-          name: 'Monthly Décaissements',
-          data: booksToAnalyze.map(bookName => totalMonthlyDecaissements[bookName]),
+          name: 'Final Treasury',
+          data: booksToAnalyze.map(bookName => finalTreasuries[bookName]),
           type: 'column',
-          color: '#adb5bd', // Light Gray
+          color: '#ffc107', // Yellow
           dataLabels: { enabled: true }
         }
       ],
@@ -119,12 +99,10 @@ const AnalyticsPage = () => {
 
   return (
     <Container mt={15}>
-        <Header
-        showTransactionControls={false}
-        ></Header>
-        <Typography variant="h4" gutterBottom>
-            Comparative Analytics
-        </Typography>
+      <Header showTransactionControls={false} />
+      <Typography variant="h4" gutterBottom>
+        Comparative Analytics
+      </Typography>
 
       <FormControl fullWidth margin="normal">
         <InputLabel>Select Books</InputLabel>
@@ -162,30 +140,22 @@ const AnalyticsPage = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>Book</TableCell>
-                  <TableCell>Initial Encaissements</TableCell>
-                  <TableCell>Monthly Encaissements</TableCell>
-                  <TableCell>Initial Décaissements</TableCell>
-                  <TableCell>Monthly Décaissements</TableCell>
+                  <TableCell>Initial Balance</TableCell>
+                  <TableCell>Total Encaissements</TableCell>
+                  <TableCell>Total Decaissements</TableCell>
+                  <TableCell>Final Treasury</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {selectedBooks.map(bookName => {
-                  const book = books[bookName];
-                  const encaissementTotal = book.encaissements.find(e => e.nature === 'Total Encaissements') || { montantInitial: 0, montants: [] };
-                  const decaissementTotal = book.decaissements.find(d => d.nature === 'Total Decaissements') || { montantInitial: 0, montants: [] };
-
-                  const initialIncome = encaissementTotal.montantInitial || 0;
-                  const monthlyIncome = encaissementTotal.montants.reduce((a, b) => a + b, 0);
-                  const initialExpense = decaissementTotal.montantInitial || 0;
-                  const monthlyExpense = decaissementTotal.montants.reduce((a, b) => a + b, 0);
-
+                  const summary = calculateBudgetSummary(calculateTotals(books[bookName]));
                   return (
                     <TableRow key={bookName}>
                       <TableCell>{bookName}</TableCell>
-                      <TableCell>{initialIncome.toFixed(2)}</TableCell>
-                      <TableCell>{monthlyIncome.toFixed(2)}</TableCell>
-                      <TableCell>{initialExpense.toFixed(2)}</TableCell>
-                      <TableCell>{monthlyExpense.toFixed(2)}</TableCell>
+                      <TableCell>{summary.initialBalance.toFixed(2)}</TableCell>
+                      <TableCell>{summary.totalEncaissements.toFixed(2)}</TableCell>
+                      <TableCell>{summary.totalDecaissements.toFixed(2)}</TableCell>
+                      <TableCell>{summary.finalTreasury.toFixed(2)}</TableCell>
                     </TableRow>
                   );
                 })}

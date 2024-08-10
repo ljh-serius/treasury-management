@@ -2,28 +2,14 @@ import React from 'react';
 import { Card, CardContent, Typography, Grid, Paper } from '@mui/material';
 import {
   calculateTotals,
-  calculateMonthlyTreasury,
-  calculateAccumulatedTreasury,
-  calculateTotal,
-  initialTransactions,
+  calculateBudgetSummary
 } from './transactionHelpers';
 
 const BudgetSummary = ({transactions}) => {
   // Calculate totals for encaissements and decaissements
   const totals = calculateTotals(transactions);
 
-  // Initial balances
-  const initialEncaissements = totals.encaissements[totals.encaissements.length - 1].montantInitial;
-  const initialDecaissements = totals.decaissements[totals.encaissements.length - 1].montantInitial;
-  const initialBalance = initialEncaissements - initialDecaissements;
-
-  // Total amounts
-  const totalEncaissements = calculateTotal('encaissements', totals.encaissements.length - 1, transactions);
-  const totalDecaissements = calculateTotal('decaissements', totals.decaissements.length - 1, transactions);
-
-  console.log(totalEncaissements)
-  // Final treasury balance
-  const finalTreasury = totalEncaissements - totalDecaissements;
+  const {initialBalance, totalEncaissements, totalDecaissements, finalTreasury} = calculateBudgetSummary(totals);
 
   return (
     <Paper sx={{ padding: 2, backgroundColor: '#f5f5f5' }}>

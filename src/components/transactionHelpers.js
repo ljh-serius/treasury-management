@@ -93,3 +93,21 @@ export const calculatePercentageBalanceVsEncaissements = (monthlyTreasury, encai
     return (treasury / encaissements[index]) * 100;
   });
 };
+
+export const calculateBudgetSummary = (book) => {
+  // Calculate Initial Balance
+  const initialEncaissements = book.encaissements[0]?.montantInitial || 0;
+  const initialDecaissements = book.decaissements[0]?.montantInitial || 0;
+  const initialBalance = initialEncaissements - initialDecaissements;
+
+  // Calculate Total Encaissements
+  const totalEncaissements = book.encaissements[book.encaissements.length - 1]?.montants.reduce((a, b) => a + b, 0) + book.encaissements[book.encaissements.length - 1]?.montantInitial || 0;
+
+  // Calculate Total Decaissements
+  const totalDecaissements = book.decaissements[book.decaissements.length - 1]?.montants.reduce((a, b) => a + b, 0) + book.decaissements[book.decaissements.length - 1]?.montantInitial || 0;
+
+  // Calculate Final Treasury
+  const finalTreasury = initialBalance + totalEncaissements - totalDecaissements;
+
+  return { initialBalance, totalEncaissements, totalDecaissements, finalTreasury };
+};
