@@ -1,16 +1,15 @@
-import React from 'react';
-import Dashboard from './components/Dashboard';
-import './App.css';
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Dashboard from './components/Dashboard'; // Your existing dashboard component
+import AnalyticsPage from './components/AnalyticsPage'; // The new analytics page component
 
 function App() {
   return (
-    <div className="container">
-      <Dashboard />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/transaction-books" element={<Dashboard />} />
+        <Route path="/analytical-comparison" element={<AnalyticsPage />} />
+      </Routes>
+    </Router>
   );
 }
 

@@ -18,8 +18,7 @@ const StyledFab = styled(Fab)({
 });
 
 const RandomButton = styled(Button)({
-  marginLeft: '20px',
-  marginRight: '8px', // 8 px margin-right
+  marginRight: '20px'
 });
 
 const Dashboard = () => {
@@ -28,7 +27,7 @@ const Dashboard = () => {
 
   const [transactions, setTransactions] = useState(() => {
     const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
-    return savedBooks['Main transaction book'] || JSON.parse(JSON.stringify(initialTransactions));
+    return savedBooks['Main transaction book'] || JSON.parse(JSON.stringify(initialTransactions)); // Provide a fresh copy of initialTransactions
   });
 
   const [transactionName, setTransactionName] = useState('Main transaction book');
@@ -68,11 +67,11 @@ const Dashboard = () => {
     const name = prompt('Enter name for new transaction set:');
     if (name) {
       const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
-      savedBooks[name] = JSON.parse(JSON.stringify(initialTransactions));
+      savedBooks[name] = JSON.parse(JSON.stringify(initialTransactions)); // Use deep copy to ensure fresh data
       localStorage.setItem('books', JSON.stringify(savedBooks));
       setAvailableTransactions([...availableTransactions, name]);
       setTransactionName(name);
-      setTransactions(JSON.parse(JSON.stringify(initialTransactions)));
+      setTransactions(JSON.parse(JSON.stringify(initialTransactions))); // Reset transactions to a fresh copy of initialTransactions
     }
   };
 
@@ -107,40 +106,52 @@ const Dashboard = () => {
   };
 
   const handleModalSubmit = () => {
+    // Ensure we have a fresh copy of the transactions state
     const updatedTransactions = { ...transactions };
 
+    // Initialize all months if not already present
     const initializeMonths = (transaction) => {
         if (!transaction.montants) {
             transaction.montants = Array(12).fill(0);
         }
     };
 
+    // Handle new or existing transaction
     const processTransaction = (type, name, amount, months) => {
+        // Find if the transaction already exists
         const existingTransaction = updatedTransactions[type]?.find(t => t.nature === name);
 
         if (existingTransaction) {
+            // Update the existing transaction's amount for selected months
             initializeMonths(existingTransaction);
             months.forEach(monthIndex => {
                 existingTransaction.montants[monthIndex] = amount;
             });
         } else {
+            // Create a new transaction entry
             const newTransaction = {
                 nature: name,
-                montantInitial: 0,
-                montants: Array(12).fill(0)
+                montantInitial: 0, // Or set an appropriate initial amount if required
+                montants: Array(12).fill(0) // Initialize all months with zero
             };
 
+            // Set the amount for the selected months
             months.forEach(monthIndex => {
                 newTransaction.montants[monthIndex] = amount;
             });
 
+            // Add the new transaction to the relevant type array
             updatedTransactions[type] = [...(updatedTransactions[type] || []), newTransaction];
         }
     };
 
+    // Process the new transaction
     processTransaction(newTransactionType, newTransactionName, newTransactionAmount, selectedMonths);
 
+    // Update the state with the newly updated transactions
     setTransactions(updatedTransactions);
+
+    // Close the modal
     handleModalClose();
   };
 
@@ -148,28 +159,30 @@ const Dashboard = () => {
     if (transactions && transactions[newTransactionType]) {
       return transactions[newTransactionType].map(transaction => transaction.nature);
     }
-    return [];
+    return []; // Return an empty array if transactions or newTransactionType is not defined
   };
 
   const generateRandomTransactions = () => {
-    const newTransactions = {
-      encaissements: Array.from({ length: 5 }, (_, i) => ({
-        nature: `Encaissement ${i + 1}`,
-        montantInitial: Math.floor(Math.random() * 1000),
-        montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500))
-      })),
-      decaissements: Array.from({ length: 5 }, (_, i) => ({
-        nature: `Décaissement ${i + 1}`,
-        montantInitial: Math.floor(Math.random() * 1000),
-        montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500))
-      }))
+    const randomBooks = {
+      'Main transaction book': {
+        encaissements: Array.from({ length: 5 }, (_, i) => ({
+          nature: `Encaissement ${i + 1}`,
+          montantInitial: Math.floor(Math.random() * 1000),
+          montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500))
+        })),
+        decaissements: Array.from({ length: 5 }, (_, i) => ({
+          nature: `Décaissement ${i + 1}`,
+          montantInitial: Math.floor(Math.random() * 1000),
+          montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500))
+        }))
+      }
     };
 
-    const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
-    savedBooks[transactionName] = newTransactions;
-    localStorage.setItem('books', JSON.stringify(savedBooks));
-
-    setTransactions(newTransactions);
+    // Update localStorage and state
+    localStorage.setItem('books', JSON.stringify(randomBooks));
+    setAvailableTransactions(Object.keys(randomBooks));
+    setTransactionName('Main transaction book');
+    setTransactions(randomBooks['Main transaction book']);
   };
 
   return (
@@ -213,7 +226,7 @@ const Dashboard = () => {
         setSelectedMonths={setSelectedMonths}
         handleModalSubmit={handleModalSubmit}
         monthNames={monthNames}
-        transactions={transactions}
+        transactions={transactions} // Pass the transactions prop
       />
 
       <Container maxWidth="xl" sx={{ paddingTop: isMobile ? 3 : 10, paddingBottom: isMobile ? 7 : 0, maxWidth: '100%' }}>
@@ -222,7 +235,7 @@ const Dashboard = () => {
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <BudgetSummary transactions={transactions} />
+            <BudgetSummary transactions={transactions}></BudgetSummary>
           </Grid>
           <Grid item xs={12} style={{ margin: '0 auto' }}>
             <TreasuryTable
