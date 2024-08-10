@@ -96,8 +96,8 @@ export const calculatePercentageBalanceVsEncaissements = (monthlyTreasury, encai
 
 export const calculateBudgetSummary = (book) => {
   // Calculate Initial Balance
-  const initialEncaissements = book.encaissements[0]?.montantInitial || 0;
-  const initialDecaissements = book.decaissements[0]?.montantInitial || 0;
+  const initialEncaissements = book.encaissements[book.encaissements.length - 1]?.montantInitial || 0;
+  const initialDecaissements = book.decaissements[book.encaissements.length - 1]?.montantInitial || 0;
   const initialBalance = initialEncaissements - initialDecaissements;
 
   // Calculate Total Encaissements
@@ -107,7 +107,7 @@ export const calculateBudgetSummary = (book) => {
   const totalDecaissements = book.decaissements[book.decaissements.length - 1]?.montants.reduce((a, b) => a + b, 0) + book.decaissements[book.decaissements.length - 1]?.montantInitial || 0;
 
   // Calculate Final Treasury
-  const finalTreasury = initialBalance + totalEncaissements - totalDecaissements;
+  const finalTreasury = totalEncaissements - totalDecaissements;
 
   return { initialBalance, totalEncaissements, totalDecaissements, finalTreasury };
 };
