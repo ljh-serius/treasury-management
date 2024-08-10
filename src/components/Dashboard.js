@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import TreasuryTable from './TreasuryTable';
-import TransactionSelect from './TransactionSelect';
 import { initialTransactions } from './transactionHelpers';
 import { useTheme } from '@mui/material/styles';
-import { AppBar, Toolbar, useMediaQuery, Typography, Grid, Snackbar, Container, Box, Menu, MenuItem, Button } from '@mui/material';
-import { Add as AddIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { AppBar, Toolbar, useMediaQuery, Typography, Grid, Snackbar, Container, Box, Button } from '@mui/material';
 import BudgetSummary from './BudgetSummary'; 
 import Header from './Header'; 
 import AddTransactionModal from './AddTransactionModal'; 
@@ -117,13 +115,11 @@ const Dashboard = () => {
       let existingTransaction = updatedTransactions[type]?.find(t => t.nature === name);
   
       if (existingTransaction) {
-        // If the transaction already exists, update the relevant months
         initializeMonths(existingTransaction);
         months.forEach(monthIndex => {
           existingTransaction.montants[monthIndex] += amount;
         });
       } else {
-        // If the transaction does not exist, create it
         const newTransaction = {
           nature: name,
           montantInitial: 0,
@@ -134,21 +130,18 @@ const Dashboard = () => {
           newTransaction.montants[monthIndex] = amount;
         });
   
-        // Insert the new transaction before the "Total" line by adding it at the start of the array
         updatedTransactions[type] = [newTransaction, ...(updatedTransactions[type] || [])];
       }
     };
   
     processTransaction(newTransactionType, newTransactionName, newTransactionAmount, selectedMonths);
   
-    // Update the state and save to localStorage
     setTransactions({ ...updatedTransactions });
     localStorage.setItem('books', JSON.stringify({ ...JSON.parse(localStorage.getItem('books')), [transactionName]: updatedTransactions }));
     
-    // Close the modal
     handleModalClose();
   };
-  
+
   const getRelevantTransactions = () => {
     if (transactions && transactions[newTransactionType]) {
       return transactions[newTransactionType].map(transaction => transaction.nature);
@@ -165,6 +158,7 @@ const Dashboard = () => {
         generateRandomTransactions={generateRandomTransactions}
         handleTransactionChange={handleTransactionChange}
         handleNewTransaction={handleNewTransaction}
+        availableTransactionsBooks={availableTransactions}  // Pass the available transaction books here
       />
       
       <AddTransactionModal

@@ -15,7 +15,6 @@ const Randomize = styled(Button)(({ theme }) => ({
     },
   }));
   
-
 const Header = ({
   isMobile,
   generateRandomTransactions,
@@ -24,6 +23,7 @@ const Header = ({
   availableTransactions,
   handleTransactionChange,
   handleNewTransaction,
+  availableTransactionsBooks,
   showTransactionControls = true, // Default to true
 }) => {
   
@@ -54,7 +54,7 @@ const Header = ({
           <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center' }}>
             <TransactionSelect
               transactionName={transactionName}
-              availableTransactions={availableTransactions}
+              availableTransactions={availableTransactionsBooks}
               handleTransactionChange={handleTransactionChange}
               handleNewTransaction={handleNewTransaction}
             />
