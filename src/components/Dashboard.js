@@ -24,7 +24,7 @@ const Dashboard = () => {
 
   const [transactions, setTransactions] = useState(() => {
     const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
-    return savedBooks['Main transaction book'] || { encaissements: [], decaissements: [] }; // Provide a default structure
+    return savedBooks['Main transaction book'] || JSON.parse(JSON.stringify(initialTransactions)); // Provide a fresh copy of initialTransactions
   });
 
   const [transactionName, setTransactionName] = useState('Main transaction book');
@@ -57,18 +57,18 @@ const Dashboard = () => {
   const handleTransactionChange = (name) => {
     const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
     setTransactionName(name);
-    setTransactions(savedBooks[name] || initialTransactions);
+    setTransactions(savedBooks[name] || JSON.parse(JSON.stringify(initialTransactions)));
   };
 
   const handleNewTransaction = () => {
     const name = prompt('Enter name for new transaction set:');
     if (name) {
       const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
-      savedBooks[name] = initialTransactions;
+      savedBooks[name] = JSON.parse(JSON.stringify(initialTransactions)); // Use deep copy to ensure fresh data
       localStorage.setItem('books', JSON.stringify(savedBooks));
       setAvailableTransactions([...availableTransactions, name]);
       setTransactionName(name);
-      setTransactions(initialTransactions);
+      setTransactions(JSON.parse(JSON.stringify(initialTransactions))); // Reset transactions to a fresh copy of initialTransactions
     }
   };
 
@@ -101,30 +101,56 @@ const Dashboard = () => {
     setNewTransactionAmount(0);
     setSelectedMonths([]);
   };
-
   const handleModalSubmit = () => {
-    const existingTransaction = transactions[newTransactionType]?.find(t => t.nature === newTransactionName);
+    // Ensure we have a fresh copy of the transactions state
+    const updatedTransactions = { ...transactions };
 
-    let updatedTransactions = { ...transactions };
-    if (existingTransaction) {
-      selectedMonths.forEach(monthIndex => {
-        existingTransaction.montants[monthIndex] = newTransactionAmount;
-      });
-    } else {
-      const newTransaction = {
-        nature: newTransactionName,
-        montantInitial: newTransactionAmount,
-        montants: Array(12).fill(0)
-      };
-      selectedMonths.forEach(monthIndex => {
-        newTransaction.montants[monthIndex] = newTransactionAmount;
-      });
-      updatedTransactions[newTransactionType] = [newTransaction, ...updatedTransactions[newTransactionType]];
-    }
+    // Initialize all months if not already present
+    const initializeMonths = (transaction) => {
+        if (!transaction.montants) {
+            transaction.montants = Array(12).fill(0);
+        }
+    };
 
+    // Handle new or existing transaction
+    const processTransaction = (type, name, amount, months) => {
+        // Find if the transaction already exists
+        const existingTransaction = updatedTransactions[type]?.find(t => t.nature === name);
+
+        if (existingTransaction) {
+            // Update the existing transaction's amount for selected months
+            initializeMonths(existingTransaction);
+            months.forEach(monthIndex => {
+                existingTransaction.montants[monthIndex] = amount;
+            });
+        } else {
+            // Create a new transaction entry
+            const newTransaction = {
+                nature: name,
+                montantInitial: 0, // Or set an appropriate initial amount if required
+                montants: Array(12).fill(0) // Initialize all months with zero
+            };
+
+            // Set the amount for the selected months
+            months.forEach(monthIndex => {
+                newTransaction.montants[monthIndex] = amount;
+            });
+
+            // Add the new transaction to the relevant type array
+            updatedTransactions[type] = [...(updatedTransactions[type] || []), newTransaction];
+        }
+    };
+
+    // Process the new transaction
+    processTransaction(newTransactionType, newTransactionName, newTransactionAmount, selectedMonths);
+
+    // Update the state with the newly updated transactions
     setTransactions(updatedTransactions);
+
+    // Close the modal
     handleModalClose();
-  };
+};
+
 
   const getRelevantTransactions = () => {
     if (transactions && transactions[newTransactionType]) {
@@ -132,7 +158,6 @@ const Dashboard = () => {
     }
     return []; // Return an empty array if transactions or newTransactionType is not defined
   };
-  
 
   return (
     <Box sx={{ overflowX: 'hidden' }}>

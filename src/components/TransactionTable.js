@@ -10,14 +10,40 @@ import {
 const TransactionTable = ({
   transactions, inputValues, handleInputChange,
   handleFocus, handleBlur, handleKeyDown, handleMenuOpen, handleColumnMenuOpen, handleNatureMenuOpen, editingCell,
-  highlightedRow, highlightedMonth, highlightedCumulativeMonth
+  highlightedRow, highlightedMonth
 }) => {
-  // Calculate which months have any values and should be displayed
-  const displayedMonths = monthNames.slice(1).filter((_, monthIndex) =>
+  const presentedMonths = monthNames.slice(1);
+  const displayedMonths = presentedMonths.filter((_, monthIndex) =>
     Object.keys(inputValues).some(type =>
       inputValues[type].some(transaction => transaction.montants[monthIndex] !== 0)
     )
   );
+
+  console.log(displayedMonths)
+  console.log(inputValues)
+
+  const displayedMonthIndices = displayedMonths.map(month => presentedMonths.indexOf(month));
+
+  const monthlyTreasury = calculateMonthlyTreasury(transactions);
+  const accumulatedTreasury = calculateAccumulatedTreasury(
+    transactions.encaissements[transactions.encaissements.length - 1]?.montantInitial - 
+    transactions.decaissements[transactions.decaissements.length - 1]?.montantInitial, 
+    transactions
+  );
+  const percentageVsEncaissements = calculatePercentageBalanceVsEncaissements(
+    monthlyTreasury,
+    transactions.encaissements[transactions.encaissements.length - 1]?.montants
+  );
+
+  const handleCellEdit = (type, index, monthIndex, value) => {
+    // Ensure the value is updated correctly for the cell being edited
+    handleInputChange(type, index, monthIndex, value);
+  };
+
+  const handleCellFocus = (type, index, monthIndex) => {
+    // Focus should be applied correctly to the cell being edited
+    handleFocus(type, index, monthIndex);
+  };
 
   return (
     <TableContainer component={Paper} sx={{ overflowX: 'auto', width: '100%' }}>
@@ -43,7 +69,7 @@ const TransactionTable = ({
               </div>
             </TableCell>
             {displayedMonths.map((month, i) => (
-              <TableCell key={i} align="left" padding="normal">
+              <TableCell key={month} align="left" padding="normal">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography align="left" gutterBottom style={{ flexGrow: 1 }}>
                     {month}
@@ -91,7 +117,7 @@ const TransactionTable = ({
                       {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'nature' ? (
                         <TextField
                           value={transaction.nature}
-                          onChange={(e) => handleInputChange(type, index, 'nature', e.target.value)}
+                          onChange={(e) => handleCellEdit(type, index, 'nature', e.target.value)}
                           onBlur={handleBlur}
                           onKeyDown={handleKeyDown}
                           fullWidth
@@ -101,7 +127,7 @@ const TransactionTable = ({
                         />
                       ) : (
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div onClick={() => handleFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', whiteSpace: 'nowrap', flexGrow: 1 }}>
+                          <div onClick={() => handleCellFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', whiteSpace: 'nowrap', flexGrow: 1 }}>
                             {transaction.nature}
                           </div>
                           <IconButton
@@ -120,7 +146,7 @@ const TransactionTable = ({
                       {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'montantInitial' ? (
                         <TextField
                           value={transaction.montantInitial}
-                          onChange={(e) => handleInputChange(type, index, 'montantInitial', e.target.value)}
+                          onChange={(e) => handleCellEdit(type, index, 'montantInitial', e.target.value)}
                           onBlur={handleBlur}
                           onKeyDown={handleKeyDown}
                           fullWidth
@@ -129,21 +155,21 @@ const TransactionTable = ({
                           }}
                         />
                       ) : (
-                        <div onClick={() => handleFocus(type, index, 'montantInitial')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div onClick={() => handleCellFocus(type, index, 'montantInitial')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           {transaction.montantInitial}
                         </div>
                       )}
                     </TableCell>
-                    {displayedMonths.map((month, i) => (
+                    {displayedMonths.map((presentedMonth, monthIndex) => (
                       <TableCell
                         padding="normal"
-                        key={i}
-                        sx={{ backgroundColor: highlightedMonth === i ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
+                        key={presentedMonth}
+                        sx={{ backgroundColor: highlightedMonth === displayedMonthIndices[monthIndex] ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
                       >
-                        {editingCell?.type === type && editingCell?.index === index && editingCell?.key === i ? (
+                        {editingCell?.type === type && editingCell?.index === index && editingCell?.key === monthIndex ? (
                           <TextField
-                            value={transaction.montants[i]}
-                            onChange={(e) => handleInputChange(type, index, i, e.target.value)}
+                            value={transaction.montants[displayedMonthIndices[monthIndex]]}
+                            onChange={(e) => handleCellEdit(type, index, displayedMonthIndices[monthIndex], e.target.value)}
                             onBlur={handleBlur}
                             onKeyDown={handleKeyDown}
                             fullWidth
@@ -153,7 +179,7 @@ const TransactionTable = ({
                                 <InputAdornment position="end">
                                   <IconButton
                                     aria-label="open menu"
-                                    onClick={(event) => handleMenuOpen(event, type, index, i)}
+                                    onClick={(event) => handleMenuOpen(event, type, index, displayedMonthIndices[monthIndex])}
                                     edge="end"
                                     size="small"
                                   >
@@ -164,8 +190,8 @@ const TransactionTable = ({
                             }}
                           />
                         ) : (
-                          <div onClick={() => handleFocus(type, index, i)} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            {transaction.montants[i]}
+                          <div onClick={() => handleCellFocus(type, index, displayedMonthIndices[monthIndex] - 1)} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            {transaction.montants[displayedMonthIndices[monthIndex]]}
                           </div>
                         )}
                       </TableCell>
@@ -180,42 +206,46 @@ const TransactionTable = ({
           ))}
           <TableRow>
             <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Solde de la Trésorerie</TableCell>
-            {calculateMonthlyTreasury(transactions).map((treasury, index) => (
+            {displayedMonthIndices.map((monthIndex) => (
               <TableCell
-                key={index}
+                key={monthIndex}
                 align="left"
                 padding="normal"
-                sx={{ backgroundColor: treasury < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
+                sx={{ backgroundColor: monthlyTreasury[monthIndex] < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
               >
-                {treasury}
+                {monthlyTreasury[monthIndex]}
               </TableCell>
             ))}
-            <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>{calculateMonthlyTreasury(transactions).reduce((acc, curr) => acc + curr, 0)}</TableCell>
+            <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>
+              {monthlyTreasury.reduce((acc, curr) => acc + curr, 0)}
+            </TableCell>
           </TableRow>
           <TableRow>
             <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Trésorerie Accumulée</TableCell>
-            {calculateAccumulatedTreasury(transactions.encaissements[transactions.encaissements.length - 1].montantInitial - transactions.decaissements[transactions.decaissements.length - 1].montantInitial, transactions).map((treasury, index) => (
+            {displayedMonthIndices.map((monthIndex) => (
               <TableCell
-                key={index}
+                key={monthIndex}
                 align="left"
                 padding="normal"
-                sx={{ backgroundColor: treasury < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
+                sx={{ backgroundColor: accumulatedTreasury[monthIndex] < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
               >
-                {treasury}
+                {accumulatedTreasury[monthIndex]}
               </TableCell>
             ))}
-            <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>{calculateAccumulatedTreasury(transactions.encaissements[transactions.encaissements.length - 1].montantInitial - transactions.decaissements[transactions.decaissements.length - 1].montantInitial, transactions).slice(-1)[0]}</TableCell>
+            <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>
+              {accumulatedTreasury.slice(-1)[0]}
+            </TableCell>
           </TableRow>
           <TableRow>
             <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold' }} align="left">Percentage of Treasury vs Encaissements</TableCell>
-            {calculatePercentageBalanceVsEncaissements(calculateMonthlyTreasury(transactions), transactions.encaissements[transactions.encaissements.length - 1].montants).map((value, index) => (
+            {displayedMonthIndices.map((monthIndex) => (
               <TableCell
-                key={index}
+                key={monthIndex}
                 align="left"
                 padding="normal"
-                sx={{ backgroundColor: value < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
+                sx={{ backgroundColor: percentageVsEncaissements[monthIndex] < 0 ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)', fontWeight: 'bold' }}
               >
-                {value.toFixed(2)}%
+                {percentageVsEncaissements[monthIndex]?.toFixed(2)}%
               </TableCell>
             ))}
             <TableCell align="left" padding="normal" sx={{ fontWeight: 'bold' }}>-</TableCell>
