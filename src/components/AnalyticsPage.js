@@ -98,11 +98,11 @@ const AnalyticsPage = () => {
   };
 
   return (
-    <Container mt={15}>
-      <Header showTransactionControls={false} />
-      <Typography variant="h4" gutterBottom>
-        Comparative Analytics
-      </Typography>
+    <Container maxWidth="xl" sx={{ mt: 12 }}>
+        <Header showTransactionControls={false} />
+        <Typography variant="h4" gutterBottom>
+            Comparative Analytics
+        </Typography>
 
       <FormControl fullWidth margin="normal">
         <InputLabel>Select Books</InputLabel>

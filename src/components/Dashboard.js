@@ -209,7 +209,7 @@ const Dashboard = () => {
         transactions={transactions} // Pass the transactions prop
       />
 
-      <Container maxWidth="xl" sx={{ paddingTop: isMobile ? 3 : 10, paddingBottom: isMobile ? 7 : 0, maxWidth: '100%' }}>
+      <Container maxWidth="xl" sx={{ paddingTop: isMobile ? 3 : 12, paddingBottom: isMobile ? 7 : 0, maxWidth: '100%' }}>
         <Typography variant="h4" align="left" gutterBottom>
           {transactionName}
         </Typography>
