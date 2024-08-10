@@ -30,7 +30,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
 
 const TransactionSelect = ({
   transactionName,
-  availableTransactions,
+  availableTransactions = [], // Default to empty array
   handleTransactionChange,
   handleNewTransaction,
   showTransactionControls = true, // New prop to control visibility

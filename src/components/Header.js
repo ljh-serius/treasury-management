@@ -1,9 +1,10 @@
-import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import TransactionSelect from './TransactionSelect';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { styled } from '@mui/material/styles';
+import { AppBar, Toolbar, IconButton, Typography, Menu, MenuItem, Button, Box } from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
 
 const Randomize = styled(Button)(({ theme }) => ({
     backgroundColor: theme.palette.secondary.main,
@@ -17,14 +18,28 @@ const Randomize = styled(Button)(({ theme }) => ({
 
 const Header = ({
   isMobile,
-  handleAddClick,
   generateRandomTransactions,
   transactionName,
+  handleAddTransaction,
   availableTransactions,
   handleTransactionChange,
   handleNewTransaction,
   showTransactionControls = true, // Default to true
 }) => {
+  
+    const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+
+  // Handler to open the menu
+  const handleAddClick = (event) => {
+    setMenuAnchorEl(event.currentTarget);
+  };
+
+  // Handler to close the menu
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+
+
   return (
     <AppBar
       position="fixed"
@@ -51,6 +66,17 @@ const Header = ({
             >
               Generate Random Transactions
             </Randomize>
+            <IconButton color="inherit" onClick={handleAddClick}>
+          <AddIcon />
+        </IconButton>
+        <Menu
+          anchorEl={menuAnchorEl}
+          open={Boolean(menuAnchorEl)}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={() => handleAddTransaction('encaissements')}>Encaissements</MenuItem>
+          <MenuItem onClick={() => handleAddTransaction('decaissements')}>Décaissements</MenuItem>
+        </Menu>
           </Box>
         )}
         <Button color="inherit" component={Link} to="/">
