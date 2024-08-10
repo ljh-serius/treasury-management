@@ -2,6 +2,18 @@ import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import TransactionSelect from './TransactionSelect';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { styled } from '@mui/material/styles';
+
+const Randomize = styled(Button)(({ theme }) => ({
+    backgroundColor: theme.palette.secondary.main,
+    color: 'white',
+    height: 36,
+    '&:hover': {
+      backgroundColor: theme.palette.secondary.dark,
+    },
+  }));
+  
 
 const Header = ({
   isMobile,
@@ -31,6 +43,14 @@ const Header = ({
               handleTransactionChange={handleTransactionChange}
               handleNewTransaction={handleNewTransaction}
             />
+            <Randomize
+              color="inherit"
+              startIcon={<RefreshIcon />}
+              onClick={generateRandomTransactions}
+              sx={{ ml: 2 }}
+            >
+              Generate Random Transactions
+            </Randomize>
           </Box>
         )}
         <Button color="inherit" component={Link} to="/">
@@ -42,7 +62,6 @@ const Header = ({
         <Button color="inherit" component={Link} to="/analytical-comparison">
           Analytical Comparison
         </Button>
-        
       </Toolbar>
     </AppBar>
   );
