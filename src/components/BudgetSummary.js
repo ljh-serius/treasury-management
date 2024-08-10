@@ -1,78 +1,82 @@
 import React from 'react';
-import { Card, CardContent, Typography, Grid } from '@mui/material';
+import { Card, CardContent, Typography, Grid, Paper } from '@mui/material';
+import {
+  calculateTotals,
+  calculateMonthlyTreasury,
+  calculateAccumulatedTreasury,
+  calculateTotal,
+  initialTransactions,
+} from './transactionHelpers';
 
-const BudgetSummary = ({ transactions }) => {
-    const encaissements = transactions.encaissements || [];
-    const decaissements = transactions.decaissements || [];
+const BudgetSummary = ({transactions}) => {
+  // Calculate totals for encaissements and decaissements
+  const totals = calculateTotals(transactions);
 
-    // Ensure that the totals are present
-    const encaissementTotal = encaissements.find(e => e.nature === 'Total Encaissements') || { montants: [] };
-    const decaissementTotal = decaissements.find(d => d.nature === 'Total Decaissements') || { montants: [] };
+  // Initial balances
+  const initialEncaissements = totals.encaissements[totals.encaissements.length - 1].montantInitial;
+  const initialDecaissements = totals.decaissements[totals.encaissements.length - 1].montantInitial;
+  const initialBalance = initialEncaissements - initialDecaissements;
 
-    // Calculate totals
-    const totalEncaissements = encaissementTotal.montants.reduce((acc, val) => acc + val, 0);
-    const totalDecaissements = decaissementTotal.montants.reduce((acc, val) => acc + val, 0);
+  // Total amounts
+  const totalEncaissements = calculateTotal('encaissements', totals.encaissements.length - 1, transactions);
+  const totalDecaissements = calculateTotal('decaissements', totals.decaissements.length - 1, transactions);
 
-    // Calculate initial balances
-    const totalInitialEncaissements = encaissementTotal.montantInitial || 0;
-    const totalInitialDecaissements = decaissementTotal.montantInitial || 0;
-    const totalInitialBalances = totalInitialEncaissements - totalInitialDecaissements;
+  console.log(totalEncaissements)
+  // Final treasury balance
+  const finalTreasury = totalEncaissements - totalDecaissements;
 
-    // Calculate net treasury balance
-    const netTreasuryBalance = totalEncaissements - totalDecaissements + totalInitialBalances;
-
-    return (
-        <Grid container spacing={2}>
-            <Grid item xs={12} md={3}>
-                <Card sx={{ margin: '5px 0' }}>
-                    <CardContent>
-                        <Typography variant="h6" align="left" gutterBottom>
-                            Total Initial Balances
-                        </Typography>
-                        <Typography variant="h4" align="left">
-                            {totalInitialBalances.toFixed(2)} €
-                        </Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
-            <Grid item xs={12} md={3}>
-                <Card sx={{ margin: '5px 0' }}>
-                    <CardContent>
-                        <Typography variant="h6" align="left" gutterBottom>
-                            Total Encaissements
-                        </Typography>
-                        <Typography variant="h4" align="left">
-                            {totalEncaissements.toFixed(2)} €
-                        </Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
-            <Grid item xs={12} md={3}>
-                <Card sx={{ margin: '5px 0' }}>
-                    <CardContent>
-                        <Typography variant="h6" align="left" gutterBottom>
-                            Total Décaissements
-                        </Typography>
-                        <Typography variant="h4" align="left">
-                            {totalDecaissements.toFixed(2)} €
-                        </Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
-            <Grid item xs={12} md={3}>
-                <Card sx={{ margin: '5px 0' }}>
-                    <CardContent>
-                        <Typography variant="h6" align="left" gutterBottom>
-                            Net Treasury Balance
-                        </Typography>
-                        <Typography variant="h4" align="left" color={netTreasuryBalance < 0 ? 'error' : 'primary'}>
-                            {netTreasuryBalance.toFixed(2)} €
-                        </Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
+  return (
+    <Paper sx={{ padding: 2, backgroundColor: '#f5f5f5' }}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ backgroundColor: '#e3f2fd' }}>
+            <CardContent>
+              <Typography variant="h6">Initial Balance</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                {initialBalance.toFixed(2)}
+              </Typography>
+            </CardContent>
+          </Card>
         </Grid>
-    );
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ backgroundColor: '#e8f5e9' }}>
+            <CardContent>
+              <Typography variant="h6">Total Encaissements</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                {totalEncaissements.toFixed(2)}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ backgroundColor: '#ffebee' }}>
+            <CardContent>
+              <Typography variant="h6">Total Decaissements</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                {totalDecaissements.toFixed(2)}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ backgroundColor: finalTreasury < 0 ? '#ffebee' : '#e8f5e9' }}>
+            <CardContent>
+              <Typography variant="h6">Final Treasury</Typography>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 'bold',
+                  color: finalTreasury < 0 ? 'red' : 'green',
+                }}
+              >
+                {finalTreasury.toFixed(2)}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Paper>
+  );
 };
 
 export default BudgetSummary;
