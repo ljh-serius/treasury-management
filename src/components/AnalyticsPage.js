@@ -16,6 +16,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Grid
 } from '@mui/material';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -29,9 +30,15 @@ import {
 // Initialize the heatmap module
 heatmap(Highcharts);
 
+const monthNames = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
 const AnalyticsPage = () => {
   const [books, setBooks] = useState({});
   const [selectedBooks, setSelectedBooks] = useState([]);
+  const [selectedMonths, setSelectedMonths] = useState([]);
   const [chartOptions, setChartOptions] = useState({});
   const [bookOptions, setBookOptions] = useState([]);
   const [pieChartOptions, setPieChartOptions] = useState({});
@@ -45,9 +52,12 @@ const AnalyticsPage = () => {
     setBookOptions(Object.keys(savedBooks));
   }, []);
 
+  const handleBookChange = (event) => {
+    setSelectedBooks(event.target.value);
+  };
+
   useEffect(() => {
     if (selectedBooks.length) {
-      console.log(selectedBooks)
       const options = generateChartOptions(selectedBooks);
       setChartOptions(options);
 
@@ -63,27 +73,34 @@ const AnalyticsPage = () => {
       const heatmapOptions = generateHeatmapOptions(selectedBooks);
       setHeatmapOptions(heatmapOptions);
     }
-  }, [selectedBooks, books]);
-
-  const handleBookChange = (event) => {
-    setSelectedBooks(event.target.value);
-  };
+  }, [selectedBooks, selectedMonths, books]);
 
   const generateChartOptions = (booksToAnalyze) => {
     const initialBalances = {};
     const totalEncaissements = {};
     const totalDecaissements = {};
     const finalTreasuries = {};
-
+  
     booksToAnalyze.forEach((bookName) => {
-      console.log(books[bookName]);
       const summary = calculateBudgetSummary(calculateTotals(books[bookName]));
+      
       initialBalances[bookName] = summary.initialBalance;
-      totalEncaissements[bookName] = summary.totalEncaissements;
-      totalDecaissements[bookName] = summary.totalDecaissements;
-      finalTreasuries[bookName] = summary.finalTreasury;
+  
+      // Ensure totalEncaissements and totalDecaissements are arrays or handle them appropriately
+      const encaissementsArray = Array.isArray(summary.totalEncaissements) ? summary.totalEncaissements : [summary.totalEncaissements];
+      const decaissementsArray = Array.isArray(summary.totalDecaissements) ? summary.totalDecaissements : [summary.totalDecaissements];
+  
+      totalEncaissements[bookName] = selectedMonths.length > 0
+        ? encaissementsArray.filter((_, index) => selectedMonths.includes(index)).reduce((a, b) => a + b, 0)
+        : encaissementsArray.reduce((a, b) => a + b, 0);
+  
+      totalDecaissements[bookName] = selectedMonths.length > 0
+        ? decaissementsArray.filter((_, index) => selectedMonths.includes(index)).reduce((a, b) => a + b, 0)
+        : decaissementsArray.reduce((a, b) => a + b, 0);
+  
+      finalTreasuries[bookName] = initialBalances[bookName] + totalEncaissements[bookName] - totalDecaissements[bookName];
     });
-
+  
     return {
       title: {
         text: 'Comparative Analysis of Budget Summaries',
@@ -105,28 +122,28 @@ const AnalyticsPage = () => {
           name: 'Initial Balance',
           data: booksToAnalyze.map((bookName) => initialBalances[bookName]),
           type: 'column',
-          color: '#007bff', // Blue
+          color: '#007bff',
           dataLabels: { enabled: true },
         },
         {
           name: 'Total Encaissements',
           data: booksToAnalyze.map((bookName) => totalEncaissements[bookName]),
           type: 'column',
-          color: '#28a745', // Green
+          color: '#28a745',
           dataLabels: { enabled: true },
         },
         {
           name: 'Total Decaissements',
           data: booksToAnalyze.map((bookName) => totalDecaissements[bookName]),
           type: 'column',
-          color: '#dc3545', // Red
+          color: '#dc3545',
           dataLabels: { enabled: true },
         },
         {
           name: 'Final Treasury',
           data: booksToAnalyze.map((bookName) => finalTreasuries[bookName]),
           type: 'column',
-          color: '#ffc107', // Yellow
+          color: '#ffc107',
           dataLabels: { enabled: true },
         },
       ],
@@ -139,25 +156,29 @@ const AnalyticsPage = () => {
   const generatePieChartOptions = (booksToAnalyze) => {
     const encaissementsData = {};
     const decaissementsData = {};
-  
+
     booksToAnalyze.forEach((bookName) => {
       const book = books[bookName];
-  
+
       // Process encaissements
       book.encaissements.forEach((enc) => {
-        encaissementsData[enc.nature] = encaissementsData[enc.nature] || 0;
-        const sumMontants = enc.montants.reduce((a, b) => a + b, 0);
-        encaissementsData[enc.nature] += sumMontants;
+        enc.montants.forEach((amount, month) => {
+          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+            encaissementsData[enc.nature] = (encaissementsData[enc.nature] || 0) + amount;
+          }
+        });
       });
-  
+
       // Process decaissements
       book.decaissements.forEach((dec) => {
-        decaissementsData[dec.nature] = decaissementsData[dec.nature] || 0;
-        const sumMontants = dec.montants.reduce((a, b) => a + b, 0);
-        decaissementsData[dec.nature] += sumMontants;
+        dec.montants.forEach((amount, month) => {
+          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+            decaissementsData[dec.nature] = (decaissementsData[dec.nature] || 0) + amount;
+          }
+        });
       });
     });
-  
+
     return {
       encaissements: {
         chart: {
@@ -199,36 +220,40 @@ const AnalyticsPage = () => {
       },
     };
   };
-  
+
   const generateLineChartOptions = (booksToAnalyze) => {
     const timeSeriesData = {};
-  
+
     booksToAnalyze.forEach((bookName) => {
       const book = books[bookName];
-  
+
       book.encaissements.forEach((enc) => {
         enc.montants.forEach((amount, month) => {
-          timeSeriesData[month] = timeSeriesData[month] || { encaissements: 0, decaissements: 0 };
-          timeSeriesData[month].encaissements += amount;
+          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+            timeSeriesData[month] = timeSeriesData[month] || { encaissements: 0, decaissements: 0 };
+            timeSeriesData[month].encaissements += amount;
+          }
         });
       });
-  
+
       book.decaissements.forEach((dec) => {
         dec.montants.forEach((amount, month) => {
-          timeSeriesData[month].decaissements += amount;
+          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+            timeSeriesData[month].decaissements += amount;
+          }
         });
       });
     });
-  
+
     const months = Object.keys(timeSeriesData).sort();
     const encaissementsSeries = months.map(month => timeSeriesData[month].encaissements);
     const decaissementsSeries = months.map(month => timeSeriesData[month].decaissements);
-  
+
     return {
       chart: { type: 'line' },
       title: { text: 'Treasury Evolution Over Time' },
       xAxis: {
-        categories: months.map(m => `Month ${+m + 1}`),
+        categories: months.map(month => monthNames[month]),
         title: { text: 'Time' },
       },
       yAxis: { title: { text: 'Amount' }, min: 0 },
@@ -249,42 +274,47 @@ const AnalyticsPage = () => {
       credits: { enabled: false },
     };
   };
+
   const generateBarChartOptions = (booksToAnalyze) => {
     const monthlyTotals = {};
-  
+
     booksToAnalyze.forEach((bookName) => {
       const book = books[bookName];
-  
+
       // Process encaissements
       book.encaissements.forEach((enc) => {
         enc.montants.forEach((amount, month) => {
-          monthlyTotals[month] = monthlyTotals[month] || {
-            encaissements: 0,
-            decaissements: 0,
-          };
-          monthlyTotals[month].encaissements += amount;
+          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+            monthlyTotals[month] = monthlyTotals[month] || {
+              encaissements: 0,
+              decaissements: 0,
+            };
+            monthlyTotals[month].encaissements += amount;
+          }
         });
       });
-  
+
       // Process decaissements
       book.decaissements.forEach((dec) => {
         dec.montants.forEach((amount, month) => {
-          monthlyTotals[month] = monthlyTotals[month] || {
-            encaissements: 0,
-            decaissements: 0,
-          };
-          monthlyTotals[month].decaissements += amount;
+          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+            monthlyTotals[month] = monthlyTotals[month] || {
+              encaissements: 0,
+              decaissements: 0,
+            };
+            monthlyTotals[month].decaissements += amount;
+          }
         });
       });
     });
-  
+
     const months = Object.keys(monthlyTotals).sort();
-  
+
     return {
       chart: { type: 'column' },
       title: { text: 'Monthly Totals' },
       xAxis: {
-        categories: months.map((month) => `Month ${+month + 1}`),
+        categories: months.map(month => monthNames[month]),
         title: { text: 'Month' },
       },
       yAxis: { title: { text: 'Amount' }, min: 0 },
@@ -292,38 +322,41 @@ const AnalyticsPage = () => {
         {
           name: 'Total Encaissements',
           data: months.map((month) => monthlyTotals[month].encaissements),
-          color: '#28a745', // Green
+          color: '#28a745',
         },
         {
           name: 'Total Decaissements',
           data: months.map((month) => monthlyTotals[month].decaissements),
-          color: '#dc3545', // Red
+          color: '#dc3545',
         },
       ],
       credits: { enabled: false },
     };
   };
-  
 
   const generateHeatmapOptions = (booksToAnalyze) => {
     const heatmapData = [];
-  
+
     booksToAnalyze.forEach((bookName, bookIndex) => {
       const book = books[bookName];
-  
+
       book.encaissements.forEach((enc) => {
         enc.montants.forEach((amount, month) => {
-          heatmapData.push([bookIndex, month, amount]);
+          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+            heatmapData.push([bookIndex, month, amount]);
+          }
         });
       });
-  
+
       book.decaissements.forEach((dec) => {
         dec.montants.forEach((amount, month) => {
-          heatmapData.push([bookIndex, month, -amount]); // Negative for decaissements
+          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+            heatmapData.push([bookIndex, month, -amount]); // Negative for decaissements
+          }
         });
       });
     });
-  
+
     return {
       chart: { type: 'heatmap' },
       title: { text: 'Monthly Transaction Heatmap' },
@@ -332,7 +365,7 @@ const AnalyticsPage = () => {
         title: { text: 'Books' },
       },
       yAxis: {
-        categories: Array.from({ length: 12 }, (_, i) => `Month ${i + 1}`),
+        categories: monthNames,
         title: { text: 'Month' },
       },
       colorAxis: {
@@ -350,7 +383,6 @@ const AnalyticsPage = () => {
       credits: { enabled: false },
     };
   };
-  
 
   return (
     <Container maxWidth="xl" sx={{ mt: 12, mb: 12 }}>
@@ -359,22 +391,44 @@ const AnalyticsPage = () => {
         Comparative Analytics
       </Typography>
 
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Select Books</InputLabel>
-        <Select
-          multiple
-          value={selectedBooks}
-          onChange={handleBookChange}
-          renderValue={(selected) => selected.join(', ')}
-        >
-          {bookOptions.map((book) => (
-            <MenuItem key={book} value={book}>
-              <Checkbox checked={selectedBooks.indexOf(book) > -1} />
-              <ListItemText primary={book} />
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Select Books</InputLabel>
+            <Select
+              multiple
+              value={selectedBooks}
+              onChange={handleBookChange}
+              renderValue={(selected) => selected.join(', ')}
+            >
+              {bookOptions.map((book) => (
+                <MenuItem key={book} value={book}>
+                  <Checkbox checked={selectedBooks.indexOf(book) > -1} />
+                  <ListItemText primary={book} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Select Months</InputLabel>
+            <Select
+              multiple
+              value={selectedMonths}
+              onChange={(event) => setSelectedMonths(event.target.value)}
+              renderValue={(selected) => selected.map(month => monthNames[month]).join(', ')}
+            >
+              {monthNames.map((month, index) => (
+                <MenuItem key={index} value={index}>
+                  <Checkbox checked={selectedMonths.indexOf(index) > -1} />
+                  <ListItemText primary={month} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
 
       <Box mt={4}>
         {Object.keys(chartOptions).length > 0 && (
@@ -384,16 +438,20 @@ const AnalyticsPage = () => {
 
       <Box mt={4}>
         {Object.keys(pieChartOptions).length > 0 && (
-          <>
-            <HighchartsReact
-              highcharts={Highcharts}
-              options={pieChartOptions.encaissements}
-            />
-            <HighchartsReact
-              highcharts={Highcharts}
-              options={pieChartOptions.decaissements}
-            />
-          </>
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={6}>
+              <HighchartsReact
+                highcharts={Highcharts}
+                options={pieChartOptions.encaissements}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <HighchartsReact
+                highcharts={Highcharts}
+                options={pieChartOptions.decaissements}
+              />
+            </Grid>
+          </Grid>
         )}
       </Box>
 
@@ -404,15 +462,18 @@ const AnalyticsPage = () => {
       </Box>
 
       <Box mt={4}>
-        {Object.keys(barChartOptions).length > 0 && (
-          <HighchartsReact highcharts={Highcharts} options={barChartOptions} />
-        )}
-      </Box>
-
-      <Box mt={4}>
-        {Object.keys(heatmapOptions).length > 0 && (
-          <HighchartsReact highcharts={Highcharts} options={heatmapOptions} />
-        )}
+        <Grid container spacing={4}>
+          {Object.keys(barChartOptions).length > 0 && (
+            <Grid item xs={12} md={6}>
+              <HighchartsReact highcharts={Highcharts} options={barChartOptions} />
+            </Grid>
+          )}
+          {Object.keys(heatmapOptions).length > 0 && (
+            <Grid item xs={12} md={6}>
+              <HighchartsReact highcharts={Highcharts} options={heatmapOptions} />
+            </Grid>
+          )}
+        </Grid>
       </Box>
 
       {selectedBooks.length > 0 && (
