@@ -1,24 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import TreasuryTable from './TreasuryTable';
 import BudgetSummary from './BudgetSummary';
 import Snackbar from '@mui/material/Snackbar';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import { initialTransactions } from './transactionHelpers';
 
-const TransactionBooks = ({ transactionName }) => {
-  const [transactions, setTransactions] = useState(() => {
-    const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
-    return savedBooks[transactionName] || JSON.parse(JSON.stringify(initialTransactions));
-  });
-
+const TransactionBooks = ({ transactions }) => {
+  const [localTransactions, setLocalTransactions] = useState(transactions);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
-    const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
-    setTransactions(savedBooks[transactionName] || JSON.parse(JSON.stringify(initialTransactions)));
-  }, [transactionName]);
+    setLocalTransactions(transactions);
+  }, [transactions]);
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -29,13 +23,12 @@ const TransactionBooks = ({ transactionName }) => {
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <BudgetSummary transactions={transactions} />
+          <BudgetSummary transactions={localTransactions} />
         </Grid>
         <Grid item xs={12} style={{ margin: '0 auto' }}>
           <TreasuryTable
-            transactions={transactions}
-            setTransactions={setTransactions}
-            transactionName={transactionName}
+            transactions={localTransactions}
+            setTransactions={setLocalTransactions}
             setSnackbarMessage={setSnackbarMessage}
             setSnackbarOpen={setSnackbarOpen}
           />

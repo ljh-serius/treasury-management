@@ -80,9 +80,6 @@ const Header = ({
           </Box>
         )}
         <Button color="inherit" component={Link} to="/">
-          Home
-        </Button>
-        <Button color="inherit" component={Link} to="/transaction-books">
           Transaction Books
         </Button>
         <Button color="inherit" component={Link} to="/analytical-comparison">

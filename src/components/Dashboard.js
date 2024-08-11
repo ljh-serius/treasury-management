@@ -69,11 +69,6 @@ const Dashboard = ({ children }) => {
   };
 
   const generateRandomTransactions = () => {
-    if (!transactionName) {
-      console.error('No transaction book is currently selected.');
-      return;
-    }
-  
     const randomTransactions = {
       encaissements: Array.from({ length: 5 }, (_, i) => ({
         nature: `Encaissement ${i + 1}`,
@@ -86,16 +81,15 @@ const Dashboard = ({ children }) => {
         montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
       })),
     };
-  
-    // Update the transaction book with generated data
+
     const updatedBooks = {
       ...transactions,
       [transactionName]: randomTransactions,
     };
-  
+
     // Save to local storage
     localStorage.setItem('books', JSON.stringify(updatedBooks));
-  
+
     // Update state to trigger re-render
     setTransactions(updatedBooks);
   };
@@ -112,13 +106,14 @@ const Dashboard = ({ children }) => {
     }
   };
 
+  
   const drawer = (
     <div>
       <Toolbar />
       <Divider />
       <List>
         <ListItem key="books" disablePadding>
-          <ListItemButton component={Link} to="/transaction-books">
+          <ListItemButton component={Link} to="/">
             <ListItemIcon>
               <MailIcon />
             </ListItemIcon>
@@ -181,7 +176,7 @@ const Dashboard = ({ children }) => {
           >
             <MenuIcon />
           </IconButton>
-          {currentLocation.pathname === '/transaction-books' && (
+          {currentLocation.pathname === '/' && (
             <TransactionSelect
               transactionName={transactionName}
               availableTransactions={availableTransactions}
@@ -227,8 +222,9 @@ const Dashboard = ({ children }) => {
       >
         <Toolbar />
         {/* Conditionally render based on child type */}
-        {isTransactionBooks && <TransactionBooks transactionName={transactionName} />}
-        {children}
+        {isTransactionBooks && (
+          <TransactionBooks transactionName={transactionName} transactions={transactions[transactionName]} />
+        ) || children}
       </Box>
     </Box>
   );

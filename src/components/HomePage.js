@@ -33,7 +33,7 @@ const HomePage = () => {
         <Box mt={4}>
           <Button
             component={Link}
-            to="/transaction-books"
+            to="/"
             variant="contained"
             color="primary"
           >

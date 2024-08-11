@@ -8,7 +8,7 @@ const App = () => (
   <Router>
     <Routes>
       <Route
-        path="/transaction-books"
+        path="/"
         element={
           <Dashboard>
             <TransactionBooks />
@@ -20,14 +20,6 @@ const App = () => (
         element={
           <Dashboard>
             <Analytics />
-          </Dashboard>
-        }
-      />
-      <Route
-        path="/"
-        element={
-          <Dashboard>
-            <div>Welcome to the Dashboard</div>
           </Dashboard>
         }
       />
