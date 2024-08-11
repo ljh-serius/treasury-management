@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import HeatmapModule from 'highcharts/modules/heatmap';
+import ExportingModule from 'highcharts/modules/exporting';
+
+// Initialize Highcharts modules
+HeatmapModule(Highcharts);
+ExportingModule(Highcharts);
 
 const generateDetailedRandomSubElements = (totalAmount) => {
   const productUnits = [];
@@ -144,6 +150,127 @@ const AccountingSummary = () => {
     };
   };
 
+  const renderProfitableProductsChart = (detailedMontants) => {
+    const productProfits = {};
+
+    detailedMontants.forEach((monthDetail) => {
+      monthDetail.productUnits.forEach((unit) => {
+        if (productProfits[unit.id]) {
+          productProfits[unit.id] += unit.finalAmount;
+        } else {
+          productProfits[unit.id] = unit.finalAmount;
+        }
+      });
+    });
+
+    const sortedProductProfits = Object.entries(productProfits).sort(
+      (a, b) => b[1] - a[1]
+    );
+
+    return {
+      chart: {
+        type: 'bar'
+      },
+      title: {
+        text: 'Most Profitable Products'
+      },
+      xAxis: {
+        categories: sortedProductProfits.map(([product]) => product),
+        title: {
+          text: null
+        }
+      },
+      yAxis: {
+        min: 0,
+        title: {
+          text: 'Total Profit (€)',
+          align: 'high'
+        },
+        labels: {
+          overflow: 'justify'
+        }
+      },
+      tooltip: {
+        valueSuffix: ' €'
+      },
+      plotOptions: {
+        bar: {
+          dataLabels: {
+            enabled: true
+          }
+        }
+      },
+      series: [
+        {
+          name: 'Profit',
+          data: sortedProductProfits.map(([_, profit]) => profit)
+        }
+      ]
+    };
+  };
+
+  const renderSalesHeatmapOptions = (detailedMontants) => {
+    const heatmapData = [];
+
+    detailedMontants.forEach((monthDetail, monthIndex) => {
+      monthDetail.productUnits.forEach((unit) => {
+        const productIndex = parseInt(unit.id.split(' ')[1], 10) - 1;
+        heatmapData.push([productIndex, monthIndex, unit.quantity]);
+      });
+    });
+
+    const productIds = Array.from(
+      new Set(detailedMontants.flatMap((monthDetail) => monthDetail.productUnits.map((unit) => unit.id)))
+    );
+
+    return {
+      chart: {
+        type: 'heatmap',
+        marginTop: 40,
+        marginBottom: 80
+      },
+      title: {
+        text: 'Product Sales Heatmap'
+      },
+      xAxis: {
+        categories: productIds
+      },
+      yAxis: {
+        categories: detailedMontants.map((_, index) => `Month ${index + 1}`),
+        title: null
+      },
+      colorAxis: {
+        min: 0,
+        minColor: '#FFFFFF',
+        maxColor: '#FF5733'
+      },
+      legend: {
+        align: 'right',
+        layout: 'vertical',
+        margin: 0,
+        verticalAlign: 'top',
+        y: 25,
+        symbolHeight: 280
+      },
+      tooltip: {
+        formatter: function () {
+          return `<b>${this.series.xAxis.categories[this.point.x]}</b><br><b>${this.point.value}</b> units sold in <br><b>${this.series.yAxis.categories[this.point.y]}</b>`;
+        }
+      },
+      series: [
+        {
+          name: 'Sales per Product',
+          borderWidth: 1,
+          data: heatmapData,
+          dataLabels: {
+            enabled: true,
+            color: '#000000'
+          }
+        }
+      ]
+    };
+  };
+
   if (!transactionRow) {
     return <div>Loading...</div>;
   }
@@ -217,6 +344,12 @@ const AccountingSummary = () => {
 
       <h3>Financial Overview</h3>
       <HighchartsReact highcharts={Highcharts} options={renderGraphOptions(detailedMontants)} />
+
+      <h3>Most Profitable Products</h3>
+      <HighchartsReact highcharts={Highcharts} options={renderProfitableProductsChart(detailedMontants)} />
+
+      <h3>Product Sales Heatmap</h3>
+      <HighchartsReact highcharts={Highcharts} options={renderSalesHeatmapOptions(detailedMontants)} />
     </div>
   );
 };
