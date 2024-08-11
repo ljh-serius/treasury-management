@@ -172,9 +172,55 @@ const Dashboard = ({ children }) => {
   };
 
   const handleModalSubmit = () => {
-    // Existing code for handling modal submission...
+    const updatedTransactions = { ...transactions[transactionName] };
+  
+    const initializeMonths = (transaction) => {
+      if (!transaction.montants) {
+        transaction.montants = Array(12).fill(0);
+      }
+    };
+  
+    const processTransaction = (type, name, amount, months) => {
+      if (!updatedTransactions[type]) {
+        updatedTransactions[type] = [];
+      }
+  
+      let existingTransaction = updatedTransactions[type].find(t => t.nature === name);
+  
+      if (existingTransaction) {
+        initializeMonths(existingTransaction);
+        months.forEach(monthIndex => {
+          existingTransaction.montants[monthIndex] += amount;
+        });
+      } else {
+        const newTransaction = {
+          nature: name,
+          montantInitial: 0,
+          montants: Array(12).fill(0),
+        };
+  
+        months.forEach(monthIndex => {
+          newTransaction.montants[monthIndex] = amount;
+        });
+  
+        // Insert the new transaction at the beginning of the array (n - 1 order)
+        updatedTransactions[type] = [newTransaction, ...(updatedTransactions[type] || [])];
+      }
+    };
+  
+    processTransaction(newTransactionType, newTransactionName, newTransactionAmount, selectedMonths);
+  
+    const updatedBooks = {
+      ...transactions,
+      [transactionName]: updatedTransactions, // Store only within the relevant book
+    };
+  
+    setTransactions(updatedBooks);
+    localStorage.setItem('books', JSON.stringify(updatedBooks));
+  
+    handleModalClose();
   };
-
+  
   const drawer = (
     <div>
       <Toolbar />

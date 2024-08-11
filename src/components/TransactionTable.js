@@ -210,41 +210,42 @@ const TransactionTable = ({
                       )}
                     </TableCell>
                     {displayedMonths.map((presentedMonth, monthIndex) => (
-                      <TableCell
-                        padding="normal"
-                        key={presentedMonth}
-                        sx={{ backgroundColor: highlightedMonth === displayedMonthIndices[monthIndex] ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
-                      >
-                        {editingCell?.type === type && editingCell?.index === index && editingCell?.key === monthIndex ? (
-                          <TextField
-                            value={transaction.montants?.[displayedMonthIndices[monthIndex]] || ''}
-                            onChange={(e) => handleCellEdit(type, index, displayedMonthIndices[monthIndex], e.target.value)}
-                            onBlur={handleBlur}
-                            onKeyDown={handleKeyDown}
-                            fullWidth
-                            InputProps={{
-                              sx: { height: '36px', minWidth: '120px', padding: '0 2px', '& input': { padding: '5px' } },
-                              endAdornment: (
-                                <InputAdornment position="end">
-                                  <IconButton
-                                    aria-label="open menu"
-                                    onClick={(event) => handleMenuOpen(event, type, index, displayedMonthIndices[monthIndex])}
-                                    edge="end"
-                                    size="small"
-                                  >
-                                    <MoreVertIcon />
-                                  </IconButton>
-                                </InputAdornment>
-                              ),
-                            }}
-                          />
-                        ) : (
-                          <div onClick={() => handleCellFocus(type, index, displayedMonthIndices[monthIndex] - 1)} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            {transaction.montants?.[displayedMonthIndices[monthIndex]] || ''}
-                          </div>
-                        )}
-                      </TableCell>
-                    ))}
+  <TableCell
+    padding="normal"
+    key={presentedMonth}
+    sx={{ backgroundColor: highlightedMonth === displayedMonthIndices[monthIndex] ? 'rgba(255, 0, 0, 0.1)' : isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}
+  >
+    {editingCell?.type === type && editingCell?.index === index && editingCell?.key === monthIndex ? (
+      <TextField
+        value={transaction.montants?.[displayedMonthIndices[monthIndex]] || ''}
+        onChange={(e) => handleCellEdit(type, index, displayedMonthIndices[monthIndex], e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        fullWidth
+        InputProps={{
+          sx: { height: '36px', minWidth: '120px', padding: '0 2px', '& input': { padding: '5px' } },
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="open menu"
+                onClick={(event) => handleMenuOpen(event, type, index, displayedMonthIndices[monthIndex])}
+                edge="end"
+                size="small"
+              >
+                <MoreVertIcon />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+    ) : (
+      <div onClick={() => handleCellFocus(type, index, displayedMonthIndices[monthIndex])} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {transaction.montants?.[displayedMonthIndices[monthIndex]] || ''}
+      </div>
+    )}
+  </TableCell>
+))}
+
                     <TableCell align="left" padding="normal" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit', fontWeight: 'bold' }}>
                       {calculateTotal(type, index, inputValues)}
                     </TableCell>
