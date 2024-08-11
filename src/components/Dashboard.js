@@ -79,8 +79,64 @@ const Dashboard = ({ children }) => {
   };
 
   const generateRandomTransactions = () => {
-    // Existing code for generating random transactions...
-  };
+    // Generate random transactions
+    const encaissements = Array.from({ length: 5 }, (_, i) => ({
+      nature: `Encaissement ${i + 1}`,
+      montantInitial: Math.floor(Math.random() * 1000),
+      montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
+    }));
+  
+    const decaissements = Array.from({ length: 5 }, (_, i) => ({
+      nature: `Décaissement ${i + 1}`,
+      montantInitial: Math.floor(Math.random() * 1000),
+      montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
+    }));
+  
+    // Calculate totals for encaissements and decaissements
+    const totalEncaissement = encaissements.reduce((total, transaction) => {
+      return {
+      nature: 'Total Encaissements',
+        montantInitial: total.montantInitial + transaction.montantInitial,
+        montants: total.montants.map((monthTotal, index) => monthTotal + transaction.montants[index]),
+      };
+    }, {
+      nature: 'Total Encaissements',
+      montantInitial: 0,
+      montants: Array(12).fill(0),
+    });
+  
+    const totalDecaissement = decaissements.reduce((total, transaction) => {
+      return {
+        nature: 'Total Décaissements',
+        montantInitial: total.montantInitial + transaction.montantInitial,
+        montants: total.montants.map((monthTotal, index) => monthTotal + transaction.montants[index]),
+      };
+    }, {
+      nature: 'Total Décaissements',
+      montantInitial: 0,
+      montants: Array(12).fill(0),
+    });
+  
+    // Add totals to the arrays
+    encaissements.push(totalEncaissement);
+    decaissements.push(totalDecaissement);
+  
+    const randomTransactions = {
+      encaissements,
+      decaissements,
+    };
+  
+    const updatedBooks = {
+      ...transactions,
+      [transactionName]: randomTransactions,
+    };
+  
+    // Save to local storage
+    localStorage.setItem('books', JSON.stringify(updatedBooks));
+  
+    // Update state to trigger re-render
+    setTransactions(updatedBooks);
+  }
 
   const handleNewTransaction = () => {
     const name = prompt('Enter name for new transaction set:');
