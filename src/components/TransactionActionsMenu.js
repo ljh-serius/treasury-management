@@ -45,8 +45,8 @@ const TransactionActionsMenu = ({
         <MenuItem key="pasteNatureRow" onClick={handlePasteNatureRow}>
           Paste Row
         </MenuItem>,
-        <MenuItem key="pasteNatureRow" onClick={handlePasteNatureRow}>
-          <Link key="seeDetailsTransactionNature" to="/details">
+        <MenuItem key="seeDetailsTransactionNature">
+          <Link to="/details">
             See Details
           </Link>
         </MenuItem>
