@@ -134,7 +134,7 @@ const TransactionTable = ({
                           </div>
                           <IconButton
                             aria-label="open nature menu"
-                            onClick={(event) => handleNatureMenuOpen(event, type, index)}
+                            onClick={(event) => handleNatureMenuOpen(event, type, index, transaction)}
                             edge="end"
                             size="small"
                             style={{ marginLeft: 'auto' }}

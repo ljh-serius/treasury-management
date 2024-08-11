@@ -1,5 +1,7 @@
 import React from 'react';
 import { Menu, MenuItem } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import {Link} from "react-router-dom";
 
 const TransactionActionsMenu = ({
   anchorEl,
@@ -11,6 +13,7 @@ const TransactionActionsMenu = ({
   handleCopyNatureRow,
   handlePasteNatureRow,
   type,
+  selectedTransaction, // Ensure this prop is passed in containing the transaction row data
 }) => {
 
   return (
@@ -27,48 +30,27 @@ const TransactionActionsMenu = ({
         horizontal: 'right',
       }}
     >
-      {type === 'amount' &&
-        [
-          <MenuItem key="repeat" onClick={() => handleActionClick('repeat')}>
-            Repeat for months
-          </MenuItem>,
-          <MenuItem key="advance" onClick={() => handleActionClick('advance')}>
-            Advance transaction
-          </MenuItem>,
-          <MenuItem key="postpone" onClick={() => handleActionClick('postpone')}>
-            Postpone transaction
-          </MenuItem>,
-          <MenuItem key="repeatUntil" onClick={() => handleActionClick('repeatUntil')}>
-            Repeat until month
-          </MenuItem>,
-        ]}
-      {type === 'column' &&
-        [
-          <MenuItem key="copyColumn" onClick={handleCopyColumn}>
-            Copy Column
-          </MenuItem>,
-          <MenuItem key="pasteColumn" onClick={handlePasteColumn}>
-            Paste Column
-          </MenuItem>,
-        ]}
-      {type === 'nature' &&
-        [
-          <MenuItem key="copyNatureRow" onClick={handleCopyNatureRow}>
-            Copy Row
-          </MenuItem>,
-          <MenuItem key="pasteNatureRow" onClick={handlePasteNatureRow}>
-            Paste Row
-          </MenuItem>,
-        ]}
-      {handleAddTransaction &&
-        [
-          <MenuItem key="encaissements" onClick={() => handleAddTransaction('encaissements')}>
-            Encaissement
-          </MenuItem>,
-          <MenuItem key="decaissements" onClick={() => handleAddTransaction('decaissements')}>
-            Décaissement
-          </MenuItem>,
-        ]}
+      {type === 'column' && [
+        <MenuItem key="copyColumn" onClick={handleCopyColumn}>
+          Copy Column
+        </MenuItem>,
+        <MenuItem key="pasteColumn" onClick={handlePasteColumn}>
+          Paste Column
+        </MenuItem>,
+      ]}
+      {type === 'nature' && [
+        <MenuItem key="copyNatureRow" onClick={handleCopyNatureRow}>
+          Copy Row
+        </MenuItem>,
+        <MenuItem key="pasteNatureRow" onClick={handlePasteNatureRow}>
+          Paste Row
+        </MenuItem>,
+        <MenuItem key="pasteNatureRow" onClick={handlePasteNatureRow}>
+          <Link key="seeDetailsTransactionNature" to="/details">
+            See Details
+          </Link>
+        </MenuItem>
+      ]}
     </Menu>
   );
 };

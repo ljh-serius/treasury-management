@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import TransactionBooks from './components/TransactionBooks';
 import Analytics from './components/Analytics';
+import TransactionDetails from './components/TransactionDetails';
 
 const App = () => (
   <Router>
@@ -20,6 +21,14 @@ const App = () => (
         element={
           <Dashboard>
             <Analytics />
+          </Dashboard>
+        }
+      />
+      <Route
+        path="/details"
+        element={
+          <Dashboard>
+            <TransactionDetails />
           </Dashboard>
         }
       />

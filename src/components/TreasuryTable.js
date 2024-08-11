@@ -187,7 +187,8 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
     setColumnMenuAnchorEl(event.currentTarget);
   };
 
-  const handleNatureMenuOpen = (event, type, index) => {
+  const handleNatureMenuOpen = (event, type, index, transaction) => {
+    localStorage.setItem("selectedTransaction", JSON.stringify(transaction));
     setSelectedTransaction({ type, index, month: -1 });
     setNatureMenuAnchorEl(event.currentTarget);
   };
@@ -326,7 +327,7 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
           handlePasteNatureRow={handlePasteNatureRow}
           type="nature"
         />
-        <Grid container style={{ marginTop: 16 }}>
+        <Grid container style={{ mhandleNatureMenuOpenarginTop: 16 }}>
           <Grid item xs={12} md={6}>
             <ChartContainer
               title="Encaissements by Nature"
