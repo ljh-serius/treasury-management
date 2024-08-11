@@ -17,6 +17,7 @@ import {
   Switch,
   Box
 } from '@mui/material';
+import DownloadExcelButton from './DownloadExcelButton'; // Import the download button
 
 // Initialize Highcharts modules
 HeatmapModule(Highcharts);
@@ -94,6 +95,7 @@ const generateDetailedRandomSubElements = (totalAmount) => {
     }
   }
 
+  console.log({ productUnits, workUnits })
   return { productUnits, workUnits };
 };
 
@@ -383,6 +385,7 @@ const AccountingSummary = () => {
           }
           label={viewCharts ? "Show Charts" : "Show Tables"}
         />
+        <DownloadExcelButton detailedMontants={detailedMontants} />
       </Box>
 
       {!viewCharts && (
@@ -466,7 +469,7 @@ const AccountingSummary = () => {
       )}
 
       {viewCharts && (
-        <>
+        <div className="chart-container">
           <Typography variant="h5" gutterBottom>
             Financial Overview
           </Typography>
@@ -486,7 +489,7 @@ const AccountingSummary = () => {
             Product Purchase Trends
           </Typography>
           <HighchartsReact highcharts={Highcharts} options={renderPurchaseTrendsChart(detailedMontants)} />
-        </>
+        </div>
       )}
     </Container>
   );

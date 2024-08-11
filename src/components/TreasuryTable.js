@@ -7,7 +7,6 @@ import html2canvas from 'html2canvas';
 import ExcelJS from 'exceljs';
 import TransactionTable from './TransactionTable';
 import TransactionActionsMenu from './TransactionActionsMenu';
-import AddTransactionModal from './AddTransactionModal';
 import ChartContainer from './ChartContainer';
 import {
   monthNames, calculateTotals, calculateMonthlyTreasury,
@@ -291,6 +290,14 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
   
     return (
       <>
+       <Button
+          variant="contained"
+          color="primary"
+          onClick={exportToSpreadsheet}
+          style={{ height: 36, float: 'right', marginTop: 15, marginBottom: 20 }}
+        >
+          Export as Spreadsheet
+        </Button>
         <TransactionTable
           transactions={transactions}
           inputValues={inputValues}
@@ -358,17 +365,7 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
               onHover={(seriesName, index) => handleCumulativeMonthHighlight(index - 1)}
             />
           </Grid>
-          <Button
-          variant="contained"
-          color="primary"
-          onClick={exportToSpreadsheet}
-          style={{ height: 36, marginLeft: 'auto', marginTop: 15, marginBottom: 20 }}
-        >
-          Export as Spreadsheet
-        </Button>
         </Grid>
-  
-  
       </>
     );
   };
