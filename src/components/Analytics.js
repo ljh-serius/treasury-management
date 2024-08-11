@@ -21,7 +21,6 @@ import {
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import heatmap from 'highcharts/modules/heatmap'; // Import heatmap module
-import Header from './Header';
 import {
   calculateBudgetSummary,
   calculateTotals,
@@ -35,7 +34,7 @@ const monthNames = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-const AnalyticsPage = () => {
+const Analytics = () => {
   const [books, setBooks] = useState({});
   const [selectedBooks, setSelectedBooks] = useState([]);
   const [selectedMonths, setSelectedMonths] = useState([]);
@@ -98,13 +97,17 @@ const AnalyticsPage = () => {
       const encaissementsArray = Array.isArray(summary.totalEncaissements) ? summary.totalEncaissements : [summary.totalEncaissements];
       const decaissementsArray = Array.isArray(summary.totalDecaissements) ? summary.totalDecaissements : [summary.totalDecaissements];
   
-      totalEncaissements[bookName] = selectedMonths.length > 0
-        ? encaissementsArray.filter((_, index) => selectedMonths.includes(index)).reduce((a, b) => a + b, 0)
-        : encaissementsArray.reduce((a, b) => a + b, 0);
+      // Filter by selected months if any are selected
+      const filteredEncaissements = selectedMonths.length > 0
+        ? encaissementsArray.filter((_, index) => selectedMonths.includes(index))
+        : encaissementsArray;
   
-      totalDecaissements[bookName] = selectedMonths.length > 0
-        ? decaissementsArray.filter((_, index) => selectedMonths.includes(index)).reduce((a, b) => a + b, 0)
-        : decaissementsArray.reduce((a, b) => a + b, 0);
+      const filteredDecaissements = selectedMonths.length > 0
+        ? decaissementsArray.filter((_, index) => selectedMonths.includes(index))
+        : decaissementsArray;
+  
+      totalEncaissements[bookName] = filteredEncaissements.reduce((a, b) => a + b, 0);
+      totalDecaissements[bookName] = filteredDecaissements.reduce((a, b) => a + b, 0);
   
       finalTreasuries[bookName] = initialBalances[bookName] + totalEncaissements[bookName] - totalDecaissements[bookName];
     });
@@ -160,6 +163,7 @@ const AnalyticsPage = () => {
       },
     };
   };
+  
 
   const generatePieChartOptions = (booksToAnalyze) => {
     const encaissementsData = {};
@@ -394,7 +398,6 @@ const AnalyticsPage = () => {
 
   return (
     <Container maxWidth="xl" sx={{ mt: 12, mb: 12 }}>
-      <Header showTransactionControls={false} />
       <Typography variant="h4" gutterBottom>
         Comparative Analytics
       </Typography>
@@ -441,7 +444,7 @@ const AnalyticsPage = () => {
       {selectedBooks.length > 0 && (
         <Box mt={4}>
           <Typography variant="h6" gutterBottom>
-            Annual :
+            Global Annual :
           </Typography>
           <TableContainer component={Paper}>
             <Table>
@@ -485,6 +488,9 @@ const AnalyticsPage = () => {
       </Box>
 
       <Box mt={4}>
+        <Typography variant="h6" gutterBottom>
+          Queryable Charts :
+        </Typography>
         {Object.keys(pieChartOptions).length > 0 && (
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
@@ -527,4 +533,4 @@ const AnalyticsPage = () => {
   );
 };
 
-export default AnalyticsPage;
+export default Analytics;

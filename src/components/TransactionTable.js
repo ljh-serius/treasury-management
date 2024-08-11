@@ -13,6 +13,8 @@ const TransactionTable = ({
   highlightedRow, highlightedMonth
 }) => {
   const presentedMonths = monthNames.slice(1);
+
+  // Filter displayed months based on input values
   const displayedMonths = presentedMonths.filter((_, monthIndex) =>
     Object.keys(inputValues).some(type =>
       inputValues[type].some(transaction => transaction.montants[monthIndex] !== 0)
@@ -21,24 +23,21 @@ const TransactionTable = ({
 
   const displayedMonthIndices = displayedMonths.map(month => presentedMonths.indexOf(month));
 
+  // Calculate monthly and accumulated treasury, with checks for undefined properties
   const monthlyTreasury = calculateMonthlyTreasury(transactions);
-  const accumulatedTreasury = calculateAccumulatedTreasury(
-    transactions.encaissements[transactions.encaissements.length - 1]?.montantInitial - 
-    transactions.decaissements[transactions.decaissements.length - 1]?.montantInitial, 
-    transactions
-  );
+  const initialEncaissement = transactions?.encaissements?.[transactions.encaissements.length - 1]?.montantInitial || 0;
+  const initialDecaissement = transactions?.decaissements?.[transactions.decaissements.length - 1]?.montantInitial || 0;
+  const accumulatedTreasury = calculateAccumulatedTreasury(initialEncaissement - initialDecaissement, transactions);
   const percentageVsEncaissements = calculatePercentageBalanceVsEncaissements(
     monthlyTreasury,
-    transactions.encaissements[transactions.encaissements.length - 1]?.montants
+    transactions?.encaissements?.[transactions.encaissements.length - 1]?.montants || []
   );
 
   const handleCellEdit = (type, index, monthIndex, value) => {
-    // Ensure the value is updated correctly for the cell being edited
     handleInputChange(type, index, monthIndex, value);
   };
 
   const handleCellFocus = (type, index, monthIndex) => {
-    // Focus should be applied correctly to the cell being edited
     handleFocus(type, index, monthIndex);
   };
 
@@ -123,19 +122,8 @@ const TransactionTable = ({
                           }}
                         />
                       ) : (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div onClick={() => handleCellFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', whiteSpace: 'nowrap', flexGrow: 1 }}>
-                            {transaction.nature}
-                          </div>
-                          <IconButton
-                            aria-label="open nature menu"
-                            onClick={(event) => handleNatureMenuOpen(event, type, index)}
-                            edge="end"
-                            size="small"
-                            style={{ marginLeft: 'auto' }}
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
+                        <div onClick={() => handleCellFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', whiteSpace: 'nowrap', flexGrow: 1 }}>
+                          {transaction.nature}
                         </div>
                       )}
                     </TableCell>
@@ -165,7 +153,7 @@ const TransactionTable = ({
                       >
                         {editingCell?.type === type && editingCell?.index === index && editingCell?.key === monthIndex ? (
                           <TextField
-                            value={transaction.montants[displayedMonthIndices[monthIndex]]}
+                            value={transaction.montants?.[displayedMonthIndices[monthIndex]] || ''}
                             onChange={(e) => handleCellEdit(type, index, displayedMonthIndices[monthIndex], e.target.value)}
                             onBlur={handleBlur}
                             onKeyDown={handleKeyDown}
@@ -188,7 +176,7 @@ const TransactionTable = ({
                           />
                         ) : (
                           <div onClick={() => handleCellFocus(type, index, displayedMonthIndices[monthIndex] - 1)} style={{ height: '36px', padding: '0 8px', minWidth: '120px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            {transaction.montants[displayedMonthIndices[monthIndex]]}
+                            {transaction.montants?.[displayedMonthIndices[monthIndex]] || ''}
                           </div>
                         )}
                       </TableCell>

@@ -25,24 +25,60 @@ export const modalStyle = {
 };
 
 export const calculateTotals = (transactions) => {
-  const updatedTransactions = { ...transactions };
+  // Ensure transactions are properly initialized and contain valid arrays
+  const updatedTransactions = {
+    encaissements: Array.isArray(transactions?.encaissements) ? [...transactions.encaissements] : [],
+    decaissements: Array.isArray(transactions?.decaissements) ? [...transactions.decaissements] : [],
+  };
+
   ['encaissements', 'decaissements'].forEach((type) => {
+    // Initialize the total transaction object with zero values
     const total = { nature: `Total ${type.charAt(0).toUpperCase() + type.slice(1)}`, montantInitial: 0, montants: Array(12).fill(0) };
-    updatedTransactions[type].slice(0, -1).forEach((transaction) => {
-      total.montantInitial += transaction.montantInitial;
-      transaction.montants.forEach((montant, i) => {
-        total.montants[i] += montant;
+
+    // Ensure that the array has at least one item to avoid errors
+    if (updatedTransactions[type].length > 0) {
+      // Use slice safely by checking the length
+      updatedTransactions[type].slice(0, -1).forEach((transaction) => {
+        total.montantInitial += transaction.montantInitial || 0;
+        transaction.montants?.forEach((montant, i) => {
+          total.montants[i] += montant || 0;
+        });
       });
-    });
-    updatedTransactions[type][updatedTransactions[type].length - 1] = total;
+
+      // Update the last entry in the array with the calculated totals
+      updatedTransactions[type][updatedTransactions[type].length - 1] = total;
+    } else {
+      // If the array is empty, just add the total object
+      updatedTransactions[type].push(total);
+    }
   });
+
   return updatedTransactions;
 };
 
 export const calculateMonthlyTreasury = (transactions) => {
+  // Ensure transactions are properly initialized and contain valid arrays
+  if (
+    !transactions ||
+    !Array.isArray(transactions.encaissements) ||
+    !Array.isArray(transactions.decaissements)
+  ) {
+    // Return an array of zeros (or another default) if transactions are not correctly initialized
+    return Array(12).fill(0);
+  }
+
+  // Ensure that both encaissements and decaissements have the correct structure
+  const encaissements = transactions.encaissements.length > 0
+    ? transactions.encaissements[transactions.encaissements.length - 1].montants
+    : Array(12).fill(0);
+
+  const decaissements = transactions.decaissements.length > 0
+    ? transactions.decaissements[transactions.decaissements.length - 1].montants
+    : Array(12).fill(0);
+
   return Array.from({ length: 12 }, (_, month) => {
-    const totalEncaissements = transactions.encaissements[transactions.encaissements.length - 1].montants[month];
-    const totalDecaissements = transactions.decaissements[transactions.decaissements.length - 1].montants[month];
+    const totalEncaissements = encaissements[month] || 0;
+    const totalDecaissements = decaissements[month] || 0;
     return totalEncaissements - totalDecaissements;
   });
 };

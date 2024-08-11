@@ -50,9 +50,9 @@ const TransactionSelect = ({
           ))}
         </Select>
       </StyledFormControl>
-      <StyledButton onClick={handleNewTransaction}>
+      {/* <StyledButton onClick={handleNewTransaction}>
         New Book
-      </StyledButton>
+      </StyledButton> */}
     </Box>
   );
 };

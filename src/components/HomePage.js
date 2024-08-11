@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Container, Typography, Box, Button } from '@mui/material';
-import Header from './Header';
-import { Link } from "react-router-dom";
 
 const HomePage = () => {
   const [transactionName, setTransactionName] = useState('');
@@ -17,13 +15,6 @@ const HomePage = () => {
 
   return (
     <Container>
-      <Header
-        transactionName={transactionName}
-        availableTransactions={availableTransactions}
-        handleTransactionChange={handleTransactionChange}
-        handleNewTransaction={handleNewTransaction}
-        showTransactionControls={false}
-      />
       <Box mt={12}>
         <Typography variant="h2" gutterBottom>
           Welcome to Our Project
@@ -50,7 +41,7 @@ const HomePage = () => {
           </Button>
           <Button
             component={Link}
-            to="/analytical-comparison"
+            to="/analytics"
             variant="contained"
             color="secondary"
             sx={{ ml: 2 }}
