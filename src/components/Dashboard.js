@@ -288,15 +288,20 @@ const handleModalSubmit = () => {
             <MenuIcon />
           </IconButton>
           {currentLocation.pathname === '/' && (
-            <div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
               <TransactionSelect
                 transactionName={transactionName}
                 availableTransactions={availableTransactions}
                 handleTransactionChange={handleTransactionChange}
               />
 
-              <IconButton color="inherit" onClick={handleAddClick}>
-                <AddIcon />
+              <IconButton
+                color="default"
+                variant="round"
+                onClick={handleAddClick}
+                style={{ backgroundColor: 'purple', marginLeft: '10px' }}
+              >
+                <AddIcon style={{ fontSize: '1.5rem' }} />
               </IconButton>
 
               <Menu
