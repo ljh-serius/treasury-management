@@ -203,7 +203,7 @@ const Dashboard = ({ children }) => {
           >
             Blog
           </Typography>
-          {currentLocation.pathname === '/books' && (
+            {currentLocation.pathname === '/books' && (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <TransactionSelect
                 transactionName={transactionName}

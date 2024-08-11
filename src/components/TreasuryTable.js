@@ -189,6 +189,8 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
 
   const handleNatureMenuOpen = (event, type, index, transaction) => {
     localStorage.setItem("selectedTransaction", JSON.stringify(transaction));
+    console.log(type)
+    localStorage.setItem("selectedTransactionType", type);
     setSelectedTransaction({ type, index, month: -1 });
     setNatureMenuAnchorEl(event.currentTarget);
   };

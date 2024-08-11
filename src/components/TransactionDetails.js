@@ -36,7 +36,6 @@ const generateDetailedRandomSubElements = (totalAmount) => {
     const totalBeforeDiscount = unitPrice * quantity;
     const discountedTotal = totalBeforeDiscount - (totalBeforeDiscount * discount) / 100;
 
-    // Add purchase date for each product unit
     const purchaseDate = new Date(Date.now() - Math.floor(Math.random() * 10000000000)); // Random date in the past
 
     if (i === numProductUnits - 1) {
@@ -102,9 +101,13 @@ const AccountingSummary = () => {
   const [transactionRow, setTransactionRow] = useState(null);
   const [detailedMontants, setDetailedMontants] = useState([]);
   const [viewCharts, setViewCharts] = useState(false);  // State to control view
+  const [transactionType, setTransactionType] = useState('');
 
   useEffect(() => {
     const savedTransaction = JSON.parse(localStorage.getItem('selectedTransaction'));
+    const selectedTransactionType = localStorage.getItem('selectedTransactionType') || '';
+    setTransactionType(selectedTransactionType);
+
     setTransactionRow(savedTransaction);
 
     if (savedTransaction) {
@@ -115,6 +118,31 @@ const AccountingSummary = () => {
       setDetailedMontants(detailed);
     }
   }, []);
+
+  const getTranslatedText = (key) => {
+    const translations = {
+      decaissements: {
+        initialAmount: 'Initial Outflow Amount',
+        productSales: 'Product Purchases',
+        workEarnings: 'Work Payments',
+        financialOverview: 'Expenditure Overview',
+        mostProfitableProducts: 'Most Expensive Products',
+        productSalesHeatmap: 'Purchase Frequency Heatmap',
+        productPurchaseTrends: 'Product Purchase Trends',
+      },
+      encaissements: {
+        initialAmount: 'Initial Inflow Amount',
+        productSales: 'Product Sales',
+        workEarnings: 'Work Earnings',
+        financialOverview: 'Revenue Overview',
+        mostProfitableProducts: 'Most Profitable Products',
+        productSalesHeatmap: 'Sales Heatmap',
+        productPurchaseTrends: 'Product Sales Trends',
+      },
+    };
+
+    return translations[transactionType]?.[key] || key;
+  };
 
   const renderGraphOptions = (detailedMontants) => {
     const months = detailedMontants.map((_, index) => `Month ${index + 1}`);
@@ -159,11 +187,11 @@ const AccountingSummary = () => {
       },
       series: [
         {
-          name: 'Product Sales',
+          name: getTranslatedText('productSales'),
           data: productAmounts
         },
         {
-          name: 'Work Earnings',
+          name: getTranslatedText('workEarnings'),
           data: workAmounts
         }
       ]
@@ -342,7 +370,7 @@ const AccountingSummary = () => {
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h4" gutterBottom>
-          Accounting Summary for: {transactionRow.nature}
+          {getTranslatedText('financialOverview')} for: {transactionRow.nature}
         </Typography>
         <FormControlLabel
           control={
@@ -360,7 +388,7 @@ const AccountingSummary = () => {
       {!viewCharts && (
         <>
           <Typography variant="h6" gutterBottom>
-            Initial Amount: {transactionRow.montantInitial}€
+            {getTranslatedText('initialAmount')}: {transactionRow.montantInitial}€
           </Typography>
 
           <Typography variant="h5" gutterBottom>
@@ -371,7 +399,7 @@ const AccountingSummary = () => {
               <Typography variant="h6">Month {index + 1}</Typography>
               <Typography variant="subtitle1">Total Amount: {monthDetail.totalAmount}€</Typography>
 
-              <Typography variant="subtitle2">Product Units</Typography>
+              <Typography variant="subtitle2">{getTranslatedText('productSales')}</Typography>
               <TableContainer component={Paper}>
                 <Table>
                   <TableHead>
@@ -406,7 +434,7 @@ const AccountingSummary = () => {
               </TableContainer>
 
               <Typography variant="subtitle2" style={{ marginTop: '20px' }}>
-                Work Units
+                {getTranslatedText('workEarnings')}
               </Typography>
               <TableContainer component={Paper}>
                 <Table>
