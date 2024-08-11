@@ -132,14 +132,6 @@ const Dashboard = ({ children }) => {
             <ListItemText primary="Transaction Books" />
           </ListItemButton>
         </ListItem>
-        <ListItem key="blog" disablePadding>
-          <ListItemButton component={Link} to="/blog">
-            <ListItemIcon>
-              <MailIcon />
-            </ListItemIcon>
-            <ListItemText primary="Blog" />
-          </ListItemButton>
-        </ListItem>
       </List>
       <Divider />
       <List>
