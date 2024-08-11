@@ -14,14 +14,18 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
+import AddIcon from '@mui/icons-material/Add'; // Import AddIcon for the button
 import { Link, useLocation } from 'react-router-dom';
 import TransactionSelect from './TransactionSelect';
 import TransactionBooks from './TransactionBooks'; // Import TransactionBooks
-import { initialTransactions } from './transactionHelpers';
+import AddTransactionModal from './AddTransactionModal'; // Import AddTransactionModal
+import { initialTransactions, monthNames } from './transactionHelpers';
 
 const drawerWidth = 240;
 
@@ -35,6 +39,12 @@ const Dashboard = ({ children }) => {
   const [availableTransactions, setAvailableTransactions] = useState([]);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null); // State to manage the menu anchor
+  const [modalOpen, setModalOpen] = useState(false); // State to manage modal visibility
+  const [newTransactionType, setNewTransactionType] = useState(''); // To store the type of transaction being added
+  const [newTransactionName, setNewTransactionName] = useState(''); // Name of the new transaction
+  const [newTransactionAmount, setNewTransactionAmount] = useState(''); // Amount of the new transaction
+  const [selectedMonths, setSelectedMonths] = useState([]); // Months selected for the transaction
 
   // Load transaction books from local storage on mount
   useEffect(() => {
@@ -69,27 +79,61 @@ const Dashboard = ({ children }) => {
   };
 
   const generateRandomTransactions = () => {
+    // Generate random transactions
+    const encaissements = Array.from({ length: 5 }, (_, i) => ({
+      nature: `Encaissement ${i + 1}`,
+      montantInitial: Math.floor(Math.random() * 1000),
+      montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
+    }));
+  
+    const decaissements = Array.from({ length: 5 }, (_, i) => ({
+      nature: `Décaissement ${i + 1}`,
+      montantInitial: Math.floor(Math.random() * 1000),
+      montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
+    }));
+  
+    // Calculate totals for encaissements and decaissements
+    const totalEncaissement = encaissements.reduce((total, transaction) => {
+      return {
+      nature: 'Total Encaissements',
+        montantInitial: total.montantInitial + transaction.montantInitial,
+        montants: total.montants.map((monthTotal, index) => monthTotal + transaction.montants[index]),
+      };
+    }, {
+      nature: 'Total Encaissements',
+      montantInitial: 0,
+      montants: Array(12).fill(0),
+    });
+  
+    const totalDecaissement = decaissements.reduce((total, transaction) => {
+      return {
+        nature: 'Total Décaissements',
+        montantInitial: total.montantInitial + transaction.montantInitial,
+        montants: total.montants.map((monthTotal, index) => monthTotal + transaction.montants[index]),
+      };
+    }, {
+      nature: 'Total Décaissements',
+      montantInitial: 0,
+      montants: Array(12).fill(0),
+    });
+  
+    // Add totals to the arrays
+    encaissements.push(totalEncaissement);
+    decaissements.push(totalDecaissement);
+  
     const randomTransactions = {
-      encaissements: Array.from({ length: 5 }, (_, i) => ({
-        nature: `Encaissement ${i + 1}`,
-        montantInitial: Math.floor(Math.random() * 1000),
-        montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
-      })),
-      decaissements: Array.from({ length: 5 }, (_, i) => ({
-        nature: `Décaissement ${i + 1}`,
-        montantInitial: Math.floor(Math.random() * 1000),
-        montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
-      })),
+      encaissements,
+      decaissements,
     };
-
+  
     const updatedBooks = {
       ...transactions,
       [transactionName]: randomTransactions,
     };
-
+  
     // Save to local storage
     localStorage.setItem('books', JSON.stringify(updatedBooks));
-
+  
     // Update state to trigger re-render
     setTransactions(updatedBooks);
   };
@@ -106,7 +150,56 @@ const Dashboard = ({ children }) => {
     }
   };
 
-  
+  // Handle menu open
+  const handleAddClick = (event) => {
+    setMenuAnchorEl(event.currentTarget);
+  };
+
+  // Handle menu close
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+
+  // Handle adding transactions (Encaissements/Decaissements)
+  const handleAddTransaction = (type) => {
+    setNewTransactionType(type); // Set the type of transaction being added
+    setModalOpen(true); // Open the modal
+    handleMenuClose(); // Close the menu
+  };
+
+// Handle modal close
+const handleModalClose = () => {
+  setModalOpen(false);
+  setNewTransactionName('');
+  setNewTransactionAmount('');
+  setSelectedMonths([]);
+};
+
+// Handle modal submit
+const handleModalSubmit = () => {
+  const updatedTransactions = { ...transactions };
+  const newTransaction = {
+    nature: newTransactionName,
+    montantInitial: newTransactionAmount,
+    montants: Array(12).fill(0),
+  };
+
+  selectedMonths.forEach((month) => {
+    newTransaction.montants[month] = newTransactionAmount;
+  });
+
+  // Get the array of transactions for the selected type
+  const transactionArray = updatedTransactions[transactionName][newTransactionType];
+
+  // Insert the new transaction n-1 order from the bottom
+  transactionArray.splice(transactionArray.length - 1, 0, newTransaction);
+
+  // Update the state and local storage
+  setTransactions(updatedTransactions);
+  localStorage.setItem('books', JSON.stringify(updatedTransactions));
+  handleModalClose();
+};
+
   const drawer = (
     <div>
       <Toolbar />
@@ -177,11 +270,26 @@ const Dashboard = ({ children }) => {
             <MenuIcon />
           </IconButton>
           {currentLocation.pathname === '/' && (
-            <TransactionSelect
-              transactionName={transactionName}
-              availableTransactions={availableTransactions}
-              handleTransactionChange={handleTransactionChange}
-            />
+            <div>
+              <TransactionSelect
+                transactionName={transactionName}
+                availableTransactions={availableTransactions}
+                handleTransactionChange={handleTransactionChange}
+              />
+
+              <IconButton color="inherit" onClick={handleAddClick}>
+                <AddIcon />
+              </IconButton>
+
+              <Menu
+                anchorEl={menuAnchorEl}
+                open={Boolean(menuAnchorEl)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={() => handleAddTransaction('encaissements')}>Encaissements</MenuItem>
+                <MenuItem onClick={() => handleAddTransaction('decaissements')}>Décaissements</MenuItem>
+              </Menu>
+            </div>
           )}
         </Toolbar>
       </AppBar>
@@ -225,6 +333,24 @@ const Dashboard = ({ children }) => {
         {isTransactionBooks && (
           <TransactionBooks transactionName={transactionName} transactions={transactions[transactionName]} />
         ) || children}
+
+        {/* Render the AddTransactionModal */}
+        <AddTransactionModal
+          modalOpen={modalOpen}
+          handleModalClose={handleModalClose}
+          newTransactionType={newTransactionType}
+          newTransactionName={newTransactionName}
+          setNewTransactionName={setNewTransactionName}
+          availableTransactions={availableTransactions}
+          newTransactionAmount={newTransactionAmount}
+          setNewTransactionAmount={setNewTransactionAmount}
+          selectedMonths={selectedMonths}
+          setSelectedMonths={setSelectedMonths}
+          handleModalSubmit={handleModalSubmit}
+          availableMonths={monthNames.slice(1)}
+          monthNames={Array.from({ length: 12 }, (_, i) => `Month ${i + 1}`)}
+          transactions={transactions[transactionName]} // Pass the current transactions to the modal
+        />
       </Box>
     </Box>
   );

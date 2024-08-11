@@ -54,14 +54,15 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
     } else {
       updatedInputValues[type][index].montants[key] = parseFloat(value) || 0;
     }
-    setInputValues(updatedInputValues);
+    setInputValues(updatedInputValues); // Update the input values state
   };
 
   const handleBlur = () => {
-    setTransactions(inputValues);
+    const updatedTransactions = calculateTotals(inputValues); // Recalculate totals
+    setTransactions(updatedTransactions); // Update the transactions state with recalculated totals
     setEditingCell(null);
   };
-
+  
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       handleBlur();

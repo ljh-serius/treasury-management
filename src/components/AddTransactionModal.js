@@ -14,22 +14,13 @@ const AddTransactionModal = ({
   setSelectedMonths,
   handleModalSubmit,
   monthNames,
-  transactions, // Pass the transactions prop here
+  transactions,
+  availableMonths// Pass the transactions prop here
 }) => {
   
   const handleInputChange = (event) => {
     setNewTransactionName(event.target.value);
   };
-
-  const availableMonths = useMemo(() => {
-    if (newTransactionName && transactions?.[newTransactionType]) {
-      const existingTransaction = transactions[newTransactionType].find(t => t.nature === newTransactionName);
-      if (existingTransaction) {
-        return monthNames.filter((_, index) => existingTransaction.montants[index] === 0);
-      }
-    }
-    return monthNames;
-  }, [newTransactionName, transactions, newTransactionType, monthNames]);
 
   return (
     <Modal

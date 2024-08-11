@@ -24,37 +24,58 @@ export const modalStyle = {
   p: 4,
 };
 
-export const calculateTotals = (transactions) => {
-  // Ensure transactions are properly initialized and contain valid arrays
-  const updatedTransactions = {
-    encaissements: Array.isArray(transactions?.encaissements) ? [...transactions.encaissements] : [],
-    decaissements: Array.isArray(transactions?.decaissements) ? [...transactions.decaissements] : [],
-  };
+export const calculateTotals = (transactions = {}) => {
+  const updatedTransactions = { ...transactions };
 
-  ['encaissements', 'decaissements'].forEach((type) => {
-    // Initialize the total transaction object with zero values
-    const total = { nature: `Total ${type.charAt(0).toUpperCase() + type.slice(1)}`, montantInitial: 0, montants: Array(12).fill(0) };
+  // Ensure encaissements and decaissements are arrays, or provide default empty arrays
+  const encaissements = updatedTransactions.encaissements || [];
+  const decaissements = updatedTransactions.decaissements || [];
 
-    // Ensure that the array has at least one item to avoid errors
-    if (updatedTransactions[type].length > 0) {
-      // Use slice safely by checking the length
-      updatedTransactions[type].slice(0, -1).forEach((transaction) => {
-        total.montantInitial += transaction.montantInitial || 0;
-        transaction.montants?.forEach((montant, i) => {
-          total.montants[i] += montant || 0;
-        });
-      });
-
-      // Update the last entry in the array with the calculated totals
-      updatedTransactions[type][updatedTransactions[type].length - 1] = total;
-    } else {
-      // If the array is empty, just add the total object
-      updatedTransactions[type].push(total);
+  // Calculate total encaissements
+  const totalEncaissement = encaissements.reduce((total, transaction) => {
+    if (transaction.nature !== 'Total Encaissements') {
+      total.montantInitial += transaction.montantInitial || 0;
+      total.montants = total.montants.map((monthTotal, index) => monthTotal + (transaction.montants[index] || 0));
     }
+    return total;
+  }, {
+    nature: 'Total Encaissements',
+    montantInitial: 0,
+    montants: Array(12).fill(0),
   });
+
+  // Calculate total décaissements
+  const totalDecaissement = decaissements.reduce((total, transaction) => {
+    if (transaction.nature !== 'Total Décaissements') {
+      total.montantInitial += transaction.montantInitial || 0;
+      total.montants = total.montants.map((monthTotal, index) => monthTotal + (transaction.montants[index] || 0));
+    }
+    return total;
+  }, {
+    nature: 'Total Décaissements',
+    montantInitial: 0,
+    montants: Array(12).fill(0),
+  });
+
+  // Replace or append the totals in the arrays
+  if (encaissements.length > 0) {
+    encaissements[encaissements.length - 1] = totalEncaissement;
+  } else {
+    encaissements.push(totalEncaissement);
+  }
+
+  if (decaissements.length > 0) {
+    decaissements[decaissements.length - 1] = totalDecaissement;
+  } else {
+    decaissements.push(totalDecaissement);
+  }
+
+  updatedTransactions.encaissements = encaissements;
+  updatedTransactions.decaissements = decaissements;
 
   return updatedTransactions;
 };
+
 
 export const calculateMonthlyTreasury = (transactions) => {
   // Ensure transactions are properly initialized and contain valid arrays
