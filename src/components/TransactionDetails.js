@@ -13,6 +13,9 @@ import {
   Paper,
   Typography,
   Container,
+  FormControlLabel,
+  Switch,
+  Box
 } from '@mui/material';
 
 // Initialize Highcharts modules
@@ -33,6 +36,9 @@ const generateDetailedRandomSubElements = (totalAmount) => {
     const totalBeforeDiscount = unitPrice * quantity;
     const discountedTotal = totalBeforeDiscount - (totalBeforeDiscount * discount) / 100;
 
+    // Add purchase date for each product unit
+    const purchaseDate = new Date(Date.now() - Math.floor(Math.random() * 10000000000)); // Random date in the past
+
     if (i === numProductUnits - 1) {
       productUnits.push({
         id: `Product ${i + 1}`,
@@ -43,6 +49,7 @@ const generateDetailedRandomSubElements = (totalAmount) => {
         totalBeforeDiscount,
         finalAmount: remainingAmount,
         notes: `Includes a discount of ${discount}%`,
+        purchaseDate,
       });
     } else {
       productUnits.push({
@@ -54,6 +61,7 @@ const generateDetailedRandomSubElements = (totalAmount) => {
         totalBeforeDiscount,
         finalAmount: discountedTotal,
         notes: `Includes a discount of ${discount}%`,
+        purchaseDate,
       });
       remainingAmount -= discountedTotal;
     }
@@ -93,6 +101,7 @@ const generateDetailedRandomSubElements = (totalAmount) => {
 const AccountingSummary = () => {
   const [transactionRow, setTransactionRow] = useState(null);
   const [detailedMontants, setDetailedMontants] = useState([]);
+  const [viewCharts, setViewCharts] = useState(false);  // State to control view
 
   useEffect(() => {
     const savedTransaction = JSON.parse(localStorage.getItem('selectedTransaction'));
@@ -282,103 +291,175 @@ const AccountingSummary = () => {
     };
   };
 
+  const renderPurchaseTrendsChart = (detailedMontants) => {
+    const purchaseData = [];
+
+    detailedMontants.forEach((monthDetail) => {
+      monthDetail.productUnits.forEach((unit) => {
+        purchaseData.push([unit.purchaseDate.getTime(), unit.finalAmount]);
+      });
+    });
+
+    return {
+      chart: {
+        type: 'scatter'
+      },
+      title: {
+        text: 'Product Purchase Trends'
+      },
+      xAxis: {
+        type: 'datetime',
+        title: {
+          text: 'Date'
+        }
+      },
+      yAxis: {
+        title: {
+          text: 'Amount (€)'
+        }
+      },
+      tooltip: {
+        formatter: function () {
+          return `<b>${Highcharts.dateFormat('%A, %b %e, %Y', this.x)}</b><br>Amount: <b>${this.y} €</b>`;
+        }
+      },
+      series: [{
+        name: 'Purchases',
+        data: purchaseData,
+        marker: {
+          radius: 5,
+          symbol: 'circle'
+        }
+      }]
+    };
+  };
+
   if (!transactionRow) {
     return <div>Loading...</div>;
   }
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
-      <Typography variant="h4" gutterBottom>
-        Accounting Summary for: {transactionRow.nature}
-      </Typography>
-      <Typography variant="h6" gutterBottom>
-        Initial Amount: {transactionRow.montantInitial}€
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Typography variant="h4" gutterBottom>
+          Accounting Summary for: {transactionRow.nature}
+        </Typography>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={viewCharts}
+              onChange={() => setViewCharts(!viewCharts)}
+              name="viewToggle"
+              color="primary"
+            />
+          }
+          label={viewCharts ? "Show Charts" : "Show Tables"}
+        />
+      </Box>
 
-      <Typography variant="h5" gutterBottom>
-        Detailed Breakdown
-      </Typography>
-      {detailedMontants.map((monthDetail, index) => (
-        <div key={index} style={{ marginBottom: '20px' }}>
-          <Typography variant="h6">Month {index + 1}</Typography>
-          <Typography variant="subtitle1">Total Amount: {monthDetail.totalAmount}€</Typography>
-
-          <Typography variant="subtitle2">Product Units</Typography>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#424242' }}>
-                  <TableCell sx={{ color: '#ffffff' }}>Product ID</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Description</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Unit Price</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Quantity</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Discount</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Total Before Discount</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Final Amount</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Notes</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {monthDetail.productUnits.map((unit, i) => (
-                  <TableRow key={i} hover>
-                    <TableCell>{unit.id}</TableCell>
-                    <TableCell>{unit.description}</TableCell>
-                    <TableCell>{unit.unitPrice}€</TableCell>
-                    <TableCell>{unit.quantity}</TableCell>
-                    <TableCell>{unit.discount}%</TableCell>
-                    <TableCell>{unit.totalBeforeDiscount}€</TableCell>
-                    <TableCell>{unit.finalAmount}€</TableCell>
-                    <TableCell>{unit.notes}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          <Typography variant="subtitle2" style={{ marginTop: '20px' }}>
-            Work Units
+      {!viewCharts && (
+        <>
+          <Typography variant="h6" gutterBottom>
+            Initial Amount: {transactionRow.montantInitial}€
           </Typography>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#424242' }}>
-                  <TableCell sx={{ color: '#ffffff' }}>Type</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Rate</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Hours Worked</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Total Earnings</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Notes</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {monthDetail.workUnits.map((unit, i) => (
-                  <TableRow key={i} hover>
-                    <TableCell>{unit.type}</TableCell>
-                    <TableCell>{unit.rate}€</TableCell>
-                    <TableCell>{unit.hoursWorked}</TableCell>
-                    <TableCell>{unit.totalEarnings}€</TableCell>
-                    <TableCell>{unit.notes}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </div>
-      ))}
 
-      <Typography variant="h5" gutterBottom>
-        Financial Overview
-      </Typography>
-      <HighchartsReact highcharts={Highcharts} options={renderGraphOptions(detailedMontants)} />
+          <Typography variant="h5" gutterBottom>
+            Detailed Breakdown
+          </Typography>
+          {detailedMontants.map((monthDetail, index) => (
+            <div key={index} style={{ marginBottom: '20px' }}>
+              <Typography variant="h6">Month {index + 1}</Typography>
+              <Typography variant="subtitle1">Total Amount: {monthDetail.totalAmount}€</Typography>
 
-      <Typography variant="h5" gutterBottom>
-        Most Profitable Products
-      </Typography>
-      <HighchartsReact highcharts={Highcharts} options={renderProfitableProductsChart(detailedMontants)} />
+              <Typography variant="subtitle2">Product Units</Typography>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: '#424242' }}>
+                      <TableCell sx={{ color: '#ffffff' }}>Product ID</TableCell>
+                      <TableCell sx={{ color: '#ffffff' }}>Description</TableCell>
+                      <TableCell sx={{ color: '#ffffff' }}>Unit Price</TableCell>
+                      <TableCell sx={{ color: '#ffffff' }}>Quantity</TableCell>
+                      <TableCell sx={{ color: '#ffffff' }}>Discount</TableCell>
+                      <TableCell sx={{ color: '#ffffff' }}>Total Before Discount</TableCell>
+                      <TableCell sx={{ color: '#ffffff' }}>Final Amount</TableCell>
+                      <TableCell sx={{ color: '#ffffff' }}>Purchase Date</TableCell>
+                      <TableCell sx={{ color: '#ffffff' }}>Notes</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {monthDetail.productUnits.map((unit, i) => (
+                      <TableRow key={i} hover>
+                        <TableCell>{unit.id}</TableCell>
+                        <TableCell>{unit.description}</TableCell>
+                        <TableCell>{unit.unitPrice}€</TableCell>
+                        <TableCell>{unit.quantity}</TableCell>
+                        <TableCell>{unit.discount}%</TableCell>
+                        <TableCell>{unit.totalBeforeDiscount}€</TableCell>
+                        <TableCell>{unit.finalAmount}€</TableCell>
+                        <TableCell>{unit.purchaseDate.toDateString()}</TableCell>
+                        <TableCell>{unit.notes}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
 
-      <Typography variant="h5" gutterBottom>
-        Product Sales Heatmap
-      </Typography>
-      <HighchartsReact highcharts={Highcharts} options={renderSalesHeatmapOptions(detailedMontants)} />
+              <Typography variant="subtitle2" style={{ marginTop: '20px' }}>
+                Work Units
+              </Typography>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: '#424242' }}>
+                      <TableCell sx={{ color: '#ffffff' }}>Type</TableCell>
+                      <TableCell sx={{ color: '#ffffff' }}>Rate</TableCell>
+                      <TableCell sx={{ color: '#ffffff' }}>Hours Worked</TableCell>
+                      <TableCell sx={{ color: '#ffffff' }}>Total Earnings</TableCell>
+                      <TableCell sx={{ color: '#ffffff' }}>Notes</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {monthDetail.workUnits.map((unit, i) => (
+                      <TableRow key={i} hover>
+                        <TableCell>{unit.type}</TableCell>
+                        <TableCell>{unit.rate}€</TableCell>
+                        <TableCell>{unit.hoursWorked}</TableCell>
+                        <TableCell>{unit.totalEarnings}€</TableCell>
+                        <TableCell>{unit.notes}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+          ))}
+        </>
+      )}
+
+      {viewCharts && (
+        <>
+          <Typography variant="h5" gutterBottom>
+            Financial Overview
+          </Typography>
+          <HighchartsReact highcharts={Highcharts} options={renderGraphOptions(detailedMontants)} />
+
+          <Typography variant="h5" gutterBottom>
+            Most Profitable Products
+          </Typography>
+          <HighchartsReact highcharts={Highcharts} options={renderProfitableProductsChart(detailedMontants)} />
+
+          <Typography variant="h5" gutterBottom>
+            Product Sales Heatmap
+          </Typography>
+          <HighchartsReact highcharts={Highcharts} options={renderSalesHeatmapOptions(detailedMontants)} />
+
+          <Typography variant="h5" gutterBottom>
+            Product Purchase Trends
+          </Typography>
+          <HighchartsReact highcharts={Highcharts} options={renderPurchaseTrendsChart(detailedMontants)} />
+        </>
+      )}
     </Container>
   );
 };
