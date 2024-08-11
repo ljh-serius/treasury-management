@@ -141,11 +141,10 @@ const TransactionTable = ({
                         padding="normal"
                         align="left"
                         sx={{
-                          backgroundColor: inputValues[type]?.some(t =>
-                            (type === 'encaissements' && highlightedRow.encaissements === t.nature) ||
-                            (type === 'decaissements' && highlightedRow.decaissements === t.nature)
-                          ) ? 'rgba(0, 0, 255, 0.1)' : 'inherit',
+                          backgroundColor: "#424242",
                           position: 'sticky',
+                          color:"white",
+                          border: '1px solid white',
                           left: 0,
                           zIndex: 1,
                         }}
@@ -185,7 +184,7 @@ const TransactionTable = ({
                             onClick={(event) => handleNatureMenuOpen(event, type, index, transaction)}
                             edge="end"
                             size="small"
-                            style={{ marginLeft: 'auto' }}
+                            style={{ marginLeft: 'auto', color: "white" }}
                           >
                             <MoreVertIcon />
                           </IconButton>
