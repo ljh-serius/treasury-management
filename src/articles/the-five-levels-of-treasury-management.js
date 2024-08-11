@@ -1,4 +1,4 @@
-const article = `# The Five Pillars of Treasury Management: Building a Strong Financial Foundation with Our Software
+const article = `# The Five Levels of Treasury Management: Building a Strong Financial Foundation with Our Software
 
 In today's complex financial landscape, effective treasury management is crucial for the success and stability of any organization. Our software is designed to provide comprehensive solutions that address the core aspects of treasury management. We have identified five key pillars that form the foundation of our software, each focusing on a critical area of treasury operations. These pillars are **Details**, **Summary**, **General**, **Forecast**, and **Interactions**.
 
