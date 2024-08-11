@@ -7,7 +7,6 @@ const AddTransactionModal = ({
   newTransactionType,
   newTransactionName,
   setNewTransactionName,
-  availableTransactions,
   newTransactionAmount,
   setNewTransactionAmount,
   selectedMonths,
@@ -15,9 +14,15 @@ const AddTransactionModal = ({
   handleModalSubmit,
   monthNames,
   transactions,
-  availableMonths// Pass the transactions prop here
+  availableMonths // Pass the transactions prop here
 }) => {
   
+  // Filter transaction natures based on the selected transaction type
+  const availableTransactionNatures = useMemo(() => {
+    if (!transactions || !newTransactionType) return [];
+    return transactions[newTransactionType]?.map(transaction => transaction.nature) || [];
+  }, [transactions, newTransactionType]);
+
   const handleInputChange = (event) => {
     setNewTransactionName(event.target.value);
   };
@@ -43,11 +48,14 @@ const AddTransactionModal = ({
             input={<OutlinedInput label="Transaction Name" />}
             renderValue={(selected) => selected || "Select or type a transaction name"}
           >
-            {availableTransactions.map((name, index) => (
+          {availableTransactionNatures
+            .filter(name => name !== 'Total Encaissements' && name !== 'Total Décaissements')
+            .map((name, index) => (
               <MenuItem key={index} value={name}>
                 {name}
               </MenuItem>
-            ))}
+            ))
+          }
           </Select>
           <TextField
             fullWidth

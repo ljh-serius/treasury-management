@@ -175,30 +175,48 @@ const handleModalClose = () => {
   setSelectedMonths([]);
 };
 
-// Handle modal submit
 const handleModalSubmit = () => {
   const updatedTransactions = { ...transactions };
-  const newTransaction = {
-    nature: newTransactionName,
-    montantInitial: newTransactionAmount,
-    montants: Array(12).fill(0),
-  };
-
-  selectedMonths.forEach((month) => {
-    newTransaction.montants[month] = newTransactionAmount;
-  });
-
-  // Get the array of transactions for the selected type
   const transactionArray = updatedTransactions[transactionName][newTransactionType];
 
-  // Insert the new transaction n-1 order from the bottom
-  transactionArray.splice(transactionArray.length - 1, 0, newTransaction);
+  // Find the existing transaction by its nature
+  const existingTransactionIndex = transactionArray.findIndex(
+    (transaction) => transaction.nature === newTransactionName
+  );
+
+  if (existingTransactionIndex !== -1) {
+    // If the transaction exists, update its values
+    const existingTransaction = transactionArray[existingTransactionIndex];
+    
+    // Update montantInitial and montants for the selected months
+    existingTransaction.montantInitial = newTransactionAmount;
+    selectedMonths.forEach((month) => {
+      existingTransaction.montants[month] = newTransactionAmount;
+    });
+
+    transactionArray[existingTransactionIndex] = existingTransaction;
+  } else {
+    // If the transaction doesn't exist, add it as a new transaction
+    const newTransaction = {
+      nature: newTransactionName,
+      montantInitial: newTransactionAmount,
+      montants: Array(12).fill(0),
+    };
+
+    selectedMonths.forEach((month) => {
+      newTransaction.montants[month] = newTransactionAmount;
+    });
+
+    // Insert the new transaction n-1 order from the bottom
+    transactionArray.splice(transactionArray.length - 1, 0, newTransaction);
+  }
 
   // Update the state and local storage
   setTransactions(updatedTransactions);
   localStorage.setItem('books', JSON.stringify(updatedTransactions));
   handleModalClose();
 };
+
 
   const drawer = (
     <div>

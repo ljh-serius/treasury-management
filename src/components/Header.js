@@ -66,7 +66,7 @@ const Header = ({
             >
               Generate Random Transactions
             </Randomize>
-            <IconButton color="inherit" onClick={handleAddClick}>
+        <IconButton color="inherit" onClick={handleAddClick}>
           <AddIcon />
         </IconButton>
         <Menu
