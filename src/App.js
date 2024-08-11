@@ -5,6 +5,8 @@ import TransactionBooks from './components/TransactionBooks';
 import Analytics from './components/Analytics';
 import TransactionDetails from './components/TransactionDetails';
 import HomePage from './components/HomePage';
+import Blog from './components/Blog';
+import Article from './components/Article';
 
 const App = () => (
   <Router>
@@ -38,6 +40,22 @@ const App = () => (
         element={
           <Dashboard>
             <TransactionDetails />
+          </Dashboard>
+        }
+      />
+      <Route
+        path="/blog"
+        element={
+          <Dashboard>
+            <Blog />
+          </Dashboard>
+        }
+      />
+      <Route
+        path="/article/:slug"
+        element={
+          <Dashboard>
+            <Article />
           </Dashboard>
         }
       />
