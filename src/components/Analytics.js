@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import heatmap from 'highcharts/modules/heatmap'; // Import heatmap module
+import heatmap from 'highcharts/modules/heatmap';
 import {
   calculateBudgetSummary,
   calculateTotals,
@@ -50,7 +50,6 @@ const Analytics = () => {
     setBooks(savedBooks);
     setBookOptions(Object.keys(savedBooks));
   
-    // If no books are selected, select all by default
     if (Object.keys(savedBooks).length > 0 && selectedBooks.length === 0) {
       setSelectedBooks(Object.keys(savedBooks));
     }
@@ -61,7 +60,6 @@ const Analytics = () => {
   };
 
   useEffect(() => {
-    // Use all books if none are selected
     const booksToAnalyze = selectedBooks.length > 0 ? selectedBooks : Object.keys(books);
   
     if (booksToAnalyze.length > 0) {
@@ -93,11 +91,9 @@ const Analytics = () => {
       
       initialBalances[bookName] = summary.initialBalance;
   
-      // Ensure totalEncaissements and totalDecaissements are arrays or handle them appropriately
       const encaissementsArray = Array.isArray(summary.totalEncaissements) ? summary.totalEncaissements : [summary.totalEncaissements];
       const decaissementsArray = Array.isArray(summary.totalDecaissements) ? summary.totalDecaissements : [summary.totalDecaissements];
   
-      // Filter by selected months if any are selected
       const filteredEncaissements = selectedMonths.length > 0
         ? encaissementsArray.filter((_, index) => selectedMonths.includes(index))
         : encaissementsArray;
@@ -163,7 +159,6 @@ const Analytics = () => {
       },
     };
   };
-  
 
   const generatePieChartOptions = (booksToAnalyze) => {
     const encaissementsData = {};
@@ -172,7 +167,6 @@ const Analytics = () => {
     booksToAnalyze.forEach((bookName) => {
       const book = books[bookName];
 
-      // Process encaissements
       book.encaissements.forEach((enc) => {
         enc.montants.forEach((amount, month) => {
           if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
@@ -181,7 +175,6 @@ const Analytics = () => {
         });
       });
 
-      // Process decaissements
       book.decaissements.forEach((dec) => {
         dec.montants.forEach((amount, month) => {
           if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
@@ -293,7 +286,6 @@ const Analytics = () => {
     booksToAnalyze.forEach((bookName) => {
       const book = books[bookName];
 
-      // Process encaissements
       book.encaissements.forEach((enc) => {
         enc.montants.forEach((amount, month) => {
           if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
@@ -306,7 +298,6 @@ const Analytics = () => {
         });
       });
 
-      // Process decaissements
       book.decaissements.forEach((dec) => {
         dec.montants.forEach((amount, month) => {
           if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
@@ -363,7 +354,7 @@ const Analytics = () => {
       book.decaissements.forEach((dec) => {
         dec.montants.forEach((amount, month) => {
           if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
-            heatmapData.push([bookIndex, month, -amount]); // Negative for decaissements
+            heatmapData.push([bookIndex, month, -amount]);
           }
         });
       });
@@ -449,12 +440,12 @@ const Analytics = () => {
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
-                <TableRow>
-                  <TableCell>Book</TableCell>
-                  <TableCell>Initial Balance</TableCell>
-                  <TableCell>Total Encaissements</TableCell>
-                  <TableCell>Total Decaissements</TableCell>
-                  <TableCell>Final Treasury</TableCell>
+                <TableRow sx={{ backgroundColor: '#424242' }}>
+                  <TableCell sx={{ color: '#ffffff' }}>Book</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Initial Balance</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Total Encaissements</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Total Decaissements</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Final Treasury</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -463,7 +454,7 @@ const Analytics = () => {
                     calculateTotals(books[bookName])
                   );
                   return (
-                    <TableRow key={bookName}>
+                    <TableRow key={bookName} hover>
                       <TableCell>{bookName}</TableCell>
                       <TableCell>{summary.initialBalance.toFixed(2)}</TableCell>
                       <TableCell>

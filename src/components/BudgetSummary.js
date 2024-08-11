@@ -12,7 +12,7 @@ const BudgetSummary = ({transactions}) => {
   const {initialBalance, totalEncaissements, totalDecaissements, finalTreasury} = calculateBudgetSummary(totals);
 
   return (
-    <Paper sx={{ padding: 2, backgroundColor: '#f5f5f5' }}>
+    <Paper sx={{ padding: 2}}>
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ backgroundColor: '#e3f2fd' }}>

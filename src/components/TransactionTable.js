@@ -50,11 +50,39 @@ const TransactionTable = ({
   return (
     <TableContainer component={Paper} sx={{ overflowX: 'auto', width: '100%' }}>
       <Table sx={{ minWidth: 650, width: '100vw' }} size="small" aria-label="a dense table">
-        <TableHead>
+        <TableHead sx={{ backgroundColor: '#424242' }}>
           <TableRow>
-            <TableCell padding="normal" align="left">Type</TableCell>
-            <TableCell padding="normal" align="left">Nature de la transaction</TableCell>
-            <TableCell padding="normal" align="left">
+            <TableCell
+              padding="normal"
+              align="left"
+              sx={{
+                color: '#ffffff',
+                position: 'sticky',
+                left: 0,
+                zIndex: 1,
+                backgroundColor: '#424242',
+              }}
+            >
+              Type
+            </TableCell>
+            <TableCell
+              padding="normal"
+              align="left"
+              sx={{
+                color: '#ffffff',
+                position: 'sticky',
+                left: '100px', // Adjust this value based on your table's structure
+                zIndex: 1,
+                backgroundColor: '#424242',
+              }}
+            >
+              Nature de la transaction
+            </TableCell>
+            <TableCell
+              padding="normal"
+              align="left"
+              sx={{ color: '#ffffff', backgroundColor: '#424242' }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography align="left" gutterBottom style={{ flexGrow: 1 }}>
                   Solde Initial
@@ -66,12 +94,17 @@ const TransactionTable = ({
                   size="small"
                   style={{ marginLeft: 'auto' }}
                 >
-                  <MoreVertIcon />
+                  <MoreVertIcon sx={{ color: '#ffffff' }} />
                 </IconButton>
               </div>
             </TableCell>
             {displayedMonths.map((month, i) => (
-              <TableCell key={month} align="left" padding="normal">
+              <TableCell
+                key={month}
+                align="left"
+                padding="normal"
+                sx={{ color: '#ffffff', backgroundColor: '#424242' }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography align="left" gutterBottom style={{ flexGrow: 1 }}>
                     {month}
@@ -83,12 +116,14 @@ const TransactionTable = ({
                     size="small"
                     style={{ marginLeft: 'auto' }}
                   >
-                    <MoreVertIcon />
+                    <MoreVertIcon sx={{ color: '#ffffff' }} />
                   </IconButton>
                 </div>
               </TableCell>
             ))}
-            <TableCell align="left" padding="normal">Total</TableCell>
+            <TableCell align="left" padding="normal" sx={{ color: '#ffffff', backgroundColor: '#424242' }}>
+              Total
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -109,13 +144,26 @@ const TransactionTable = ({
                           backgroundColor: inputValues[type]?.some(t =>
                             (type === 'encaissements' && highlightedRow.encaissements === t.nature) ||
                             (type === 'decaissements' && highlightedRow.decaissements === t.nature)
-                          ) ? 'rgba(0, 0, 255, 0.1)' : 'inherit'
+                          ) ? 'rgba(0, 0, 255, 0.1)' : 'inherit',
+                          position: 'sticky',
+                          left: 0,
+                          zIndex: 1,
                         }}
                       >
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                       </TableCell>
                     )}
-                    <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
+                    
+                    <TableCell
+                      padding="normal"
+                      align="left"
+                      sx={{
+                        color: "#ffffff",
+                        backgroundColor: '#424242',
+                        position: 'sticky',
+                        zIndex: 1,
+                      }}
+                    >
                       {editingCell?.type === type && editingCell?.index === index && editingCell?.key === 'nature' ? (
                         <TextField
                           value={transaction.nature}
@@ -129,7 +177,7 @@ const TransactionTable = ({
                         />
                       ) : (
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                             <div onClick={() => handleCellFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', maxWidth: '150px', whiteSpace: 'nowrap', flexGrow: 1 }}>
+                          <div onClick={() => handleCellFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', maxWidth: '150px', whiteSpace: 'nowrap', flexGrow: 1 }}>
                             {transaction.nature}
                           </div>
                           <IconButton
@@ -141,7 +189,7 @@ const TransactionTable = ({
                           >
                             <MoreVertIcon />
                           </IconButton>
-                      </div>
+                        </div>
                       )}
                     </TableCell>
                     <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>

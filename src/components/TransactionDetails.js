@@ -3,6 +3,17 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import HeatmapModule from 'highcharts/modules/heatmap';
 import ExportingModule from 'highcharts/modules/exporting';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  Container,
+} from '@mui/material';
 
 // Initialize Highcharts modules
 HeatmapModule(Highcharts);
@@ -276,81 +287,99 @@ const AccountingSummary = () => {
   }
 
   return (
-    <div>
-      <h2>Accounting Summary for: {transactionRow.nature}</h2>
-      <p>Initial Amount: {transactionRow.montantInitial}€</p>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Typography variant="h4" gutterBottom>
+        Accounting Summary for: {transactionRow.nature}
+      </Typography>
+      <Typography variant="h6" gutterBottom>
+        Initial Amount: {transactionRow.montantInitial}€
+      </Typography>
 
-      <h3>Detailed Breakdown</h3>
+      <Typography variant="h5" gutterBottom>
+        Detailed Breakdown
+      </Typography>
       {detailedMontants.map((monthDetail, index) => (
         <div key={index} style={{ marginBottom: '20px' }}>
-          <h4>Month {index + 1}</h4>
-          <p>Total Amount: {monthDetail.totalAmount}€</p>
+          <Typography variant="h6">Month {index + 1}</Typography>
+          <Typography variant="subtitle1">Total Amount: {monthDetail.totalAmount}€</Typography>
 
-          <h5>Product Units</h5>
-          <table border="1" cellPadding="5">
-            <thead>
-              <tr>
-                <th>Product ID</th>
-                <th>Description</th>
-                <th>Unit Price</th>
-                <th>Quantity</th>
-                <th>Discount</th>
-                <th>Total Before Discount</th>
-                <th>Final Amount</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {monthDetail.productUnits.map((unit, i) => (
-                <tr key={i}>
-                  <td>{unit.id}</td>
-                  <td>{unit.description}</td>
-                  <td>{unit.unitPrice}€</td>
-                  <td>{unit.quantity}</td>
-                  <td>{unit.discount}%</td>
-                  <td>{unit.totalBeforeDiscount}€</td>
-                  <td>{unit.finalAmount}€</td>
-                  <td>{unit.notes}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <Typography variant="subtitle2">Product Units</Typography>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#424242' }}>
+                  <TableCell sx={{ color: '#ffffff' }}>Product ID</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Description</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Unit Price</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Quantity</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Discount</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Total Before Discount</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Final Amount</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Notes</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {monthDetail.productUnits.map((unit, i) => (
+                  <TableRow key={i} hover>
+                    <TableCell>{unit.id}</TableCell>
+                    <TableCell>{unit.description}</TableCell>
+                    <TableCell>{unit.unitPrice}€</TableCell>
+                    <TableCell>{unit.quantity}</TableCell>
+                    <TableCell>{unit.discount}%</TableCell>
+                    <TableCell>{unit.totalBeforeDiscount}€</TableCell>
+                    <TableCell>{unit.finalAmount}€</TableCell>
+                    <TableCell>{unit.notes}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-          <h5>Work Units</h5>
-          <table border="1" cellPadding="5">
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Rate</th>
-                <th>Hours Worked</th>
-                <th>Total Earnings</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {monthDetail.workUnits.map((unit, i) => (
-                <tr key={i}>
-                  <td>{unit.type}</td>
-                  <td>{unit.rate}€</td>
-                  <td>{unit.hoursWorked}</td>
-                  <td>{unit.totalEarnings}€</td>
-                  <td>{unit.notes}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <Typography variant="subtitle2" style={{ marginTop: '20px' }}>
+            Work Units
+          </Typography>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#424242' }}>
+                  <TableCell sx={{ color: '#ffffff' }}>Type</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Rate</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Hours Worked</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Total Earnings</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>Notes</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {monthDetail.workUnits.map((unit, i) => (
+                  <TableRow key={i} hover>
+                    <TableCell>{unit.type}</TableCell>
+                    <TableCell>{unit.rate}€</TableCell>
+                    <TableCell>{unit.hoursWorked}</TableCell>
+                    <TableCell>{unit.totalEarnings}€</TableCell>
+                    <TableCell>{unit.notes}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </div>
       ))}
 
-      <h3>Financial Overview</h3>
+      <Typography variant="h5" gutterBottom>
+        Financial Overview
+      </Typography>
       <HighchartsReact highcharts={Highcharts} options={renderGraphOptions(detailedMontants)} />
 
-      <h3>Most Profitable Products</h3>
+      <Typography variant="h5" gutterBottom>
+        Most Profitable Products
+      </Typography>
       <HighchartsReact highcharts={Highcharts} options={renderProfitableProductsChart(detailedMontants)} />
 
-      <h3>Product Sales Heatmap</h3>
+      <Typography variant="h5" gutterBottom>
+        Product Sales Heatmap
+      </Typography>
       <HighchartsReact highcharts={Highcharts} options={renderSalesHeatmapOptions(detailedMontants)} />
-    </div>
+    </Container>
   );
 };
 

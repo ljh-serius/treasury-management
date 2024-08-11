@@ -224,7 +224,7 @@ const handleModalSubmit = () => {
       <Divider />
       <List>
         <ListItem key="books" disablePadding>
-          <ListItemButton component={Link} to="/">
+          <ListItemButton component={Link} to="/books">
             <ListItemIcon>
               <MailIcon />
             </ListItemIcon>
@@ -250,12 +250,20 @@ const handleModalSubmit = () => {
             <ListItemText primary="Add New Transaction Book" />
           </ListItemButton>
         </ListItem>
-        <ListItem key="analytics" disablePadding>
-          <ListItemButton component={Link} to="/analytics">
+        <ListItem key="comparatives" disablePadding>
+          <ListItemButton component={Link} to="/comparatives">
             <ListItemIcon>
               <MailIcon />
             </ListItemIcon>
-            <ListItemText primary="Analytics" />
+            <ListItemText primary="Comparatives" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key="details" disablePadding>
+          <ListItemButton component={Link} to="/details">
+            <ListItemIcon>
+              <MailIcon />
+            </ListItemIcon>
+            <ListItemText primary="Transaction Details" />
           </ListItemButton>
         </ListItem>
       </List>
@@ -287,7 +295,7 @@ const handleModalSubmit = () => {
           >
             <MenuIcon />
           </IconButton>
-          {currentLocation.pathname === '/' && (
+          {currentLocation.pathname === '/books' && (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <TransactionSelect
                 transactionName={transactionName}

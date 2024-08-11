@@ -1,18 +1,8 @@
 import React, { useState } from 'react';
 import { Container, Typography, Box, Button } from '@mui/material';
+import { Link, useLocation } from 'react-router-dom';
 
 const HomePage = () => {
-  const [transactionName, setTransactionName] = useState('');
-  const availableTransactions = ['Transaction 1', 'Transaction 2', 'Transaction 3'];
-
-  const handleTransactionChange = (newTransaction) => {
-    setTransactionName(newTransaction);
-  };
-
-  const handleNewTransaction = () => {
-    console.log('New transaction book created');
-  };
-
   return (
     <Container>
       <Box mt={12}>
@@ -33,7 +23,7 @@ const HomePage = () => {
         <Box mt={4}>
           <Button
             component={Link}
-            to="/"
+            to="/books"
             variant="contained"
             color="primary"
           >
@@ -41,7 +31,7 @@ const HomePage = () => {
           </Button>
           <Button
             component={Link}
-            to="/analytics"
+            to="/comparatives"
             variant="contained"
             color="secondary"
             sx={{ ml: 2 }}
