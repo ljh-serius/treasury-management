@@ -128,9 +128,20 @@ const TransactionTable = ({
                           }}
                         />
                       ) : (
-                        <div onClick={() => handleCellFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', minWidth: '120px', whiteSpace: 'nowrap', flexGrow: 1 }}>
-                          {transaction.nature}
-                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                             <div onClick={() => handleCellFocus(type, index, 'nature')} style={{ height: '36px', padding: '0 8px', maxWidth: '150px', whiteSpace: 'nowrap', flexGrow: 1 }}>
+                            {transaction.nature}
+                          </div>
+                          <IconButton
+                            aria-label="open nature menu"
+                            onClick={(event) => handleNatureMenuOpen(event, type, index)}
+                            edge="end"
+                            size="small"
+                            style={{ marginLeft: 'auto' }}
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                      </div>
                       )}
                     </TableCell>
                     <TableCell padding="normal" align="left" sx={{ backgroundColor: isHighlighted ? 'rgba(0, 0, 255, 0.1)' : 'inherit' }}>
