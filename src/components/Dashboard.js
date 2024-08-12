@@ -42,13 +42,27 @@ const Dashboard = ({ children }) => {
   useEffect(() => {
     const fetchTransactions = async () => {
       if (userId) {
-        const books = await getTransactionBooks(userId);
+        let books = await getTransactionBooks(userId);
+  
+        // Check if there are no transaction books
+        if (Object.keys(books).length === 0) {
+          // Create a default "Main transaction book"
+          books = { "Main transaction book": initialTransactions };
+  
+          // Save the default book to Firebase
+          await saveTransactionBook(userId, "Main transaction book", initialTransactions);
+        }
+  
+        // Update state with the fetched or newly created books
         setTransactions(books);
         setAvailableTransactions(Object.keys(books));
+        setTransactionName("Main transaction book");
       }
     };
+    
     fetchTransactions();
   }, [userId]);
+  
 
   const handleLogout = async () => {
     try {
