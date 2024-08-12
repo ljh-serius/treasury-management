@@ -325,6 +325,11 @@ const Dashboard = ({ children }) => {
   const handleRegisterOpen = () => setRegisterOpen(true);
   const handleRegisterClose = () => setRegisterOpen(false);
 
+  const currentSelection = Object.keys(transactions).filter((uuidKey) => {
+    return transactions[uuidKey].name === transactionName;
+  })[0];
+
+  console.log("Current book", currentSelection)
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -446,7 +451,7 @@ const Dashboard = ({ children }) => {
       >
         <Toolbar />
         {isTransactionBooks ? (
-          <TransactionBooks transactionName={transactionName} transactions={transactions[transactionName]} />
+          <TransactionBooks transactionName={transactionName} transactions={transactions[currentSelection]} />
         ) : (
           children
         )}

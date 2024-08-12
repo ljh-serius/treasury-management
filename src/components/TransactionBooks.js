@@ -19,6 +19,8 @@ const TransactionBooks = ({ transactions }) => {
     setSnackbarMessage('');
   };
 
+  console.log("transactions", transactions)
+
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Grid container spacing={2}>
