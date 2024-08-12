@@ -1,24 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
-import {
-  AppBar,
-  Toolbar,
-  useMediaQuery,
-  Box,
-  CssBaseline,
-  Divider,
-  Drawer,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Typography,
-  Button
-} from '@mui/material';
+import { AppBar, Toolbar, useMediaQuery, Box, CssBaseline, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Typography, Button } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
@@ -27,61 +9,77 @@ import { Link, useLocation } from 'react-router-dom';
 import TransactionSelect from './TransactionSelect';
 import TransactionBooks from './TransactionBooks';
 import AddTransactionModal from './AddTransactionModal';
-import { initialTransactions, monthNames } from './transactionHelpers';
-import LogoutIcon from '@mui/icons-material/Logout';
 import { signOut } from 'firebase/auth';
 import { auth } from '../utils/firebaseConfig';
+import { initialTransactions } from './transactionHelpers'; // adjust the path as needed
+import LogoutIcon from '@mui/icons-material/Logout';
+import LoginDialog from './LoginDialog'; // adjust the path as needed
+import RegisterDialog from './RegisterDialog'; // adjust the path as needed
 
-import LoginDialog from './LoginDialog';
-import RegisterDialog from './RegisterDialog';
-
-const drawerWidth = 240;
+import { saveTransactionBook, getTransactionBooks } from '../utils/firebaseHelpers';
 
 const Dashboard = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const currentLocation = useLocation();
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   const [transactions, setTransactions] = useState({});
   const [transactionName, setTransactionName] = useState('Main transaction book');
   const [availableTransactions, setAvailableTransactions] = useState([]);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [newTransactionType, setNewTransactionType] = useState('');
   const [newTransactionName, setNewTransactionName] = useState('');
   const [newTransactionAmount, setNewTransactionAmount] = useState('');
   const [selectedMonths, setSelectedMonths] = useState([]);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const userId = auth.currentUser?.uid;
+  const drawerWidth = 240; // or whatever width you need
 
   useEffect(() => {
-    const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
-    if (!savedBooks['Main transaction book']) {
-      savedBooks['Main transaction book'] = JSON.parse(JSON.stringify(initialTransactions));
-      localStorage.setItem('books', JSON.stringify(savedBooks));
-    }
-    setAvailableTransactions(Object.keys(savedBooks));
-    setTransactions(savedBooks);
-  }, []);
+    const fetchTransactions = async () => {
+      if (userId) {
+        const books = await getTransactionBooks(userId);
+        setTransactions(books);
+        setAvailableTransactions(Object.keys(books));
+      }
+    };
+    fetchTransactions();
+  }, [userId]);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // Optionally, you can redirect the user to the home page or login page after logout
-      window.location.href = '/'; // Redirects to home
+      window.location.href = '/';
     } catch (error) {
       console.error("Error signing out: ", error);
     }
   };
 
+  const handleTransactionChange = (name) => {
+    setTransactionName(name);
+  };
+
+  const handleNewTransaction = async () => {
+    const name = prompt('Enter name for new transaction set:');
+    if (name) {
+      const updatedTransactions = { ...transactions, [name]: initialTransactions };
+      setTransactions(updatedTransactions);
+      setAvailableTransactions([...availableTransactions, name]);
+
+      // Save to Firebase
+      await saveTransactionBook(userId, name, initialTransactions);
+    }
+  };
+
+
   const handleDrawerToggle = () => {
     if (!isClosing) {
       setMobileOpen(!mobileOpen);
     }
-  };
-
-  const handleTransactionChange = (name) => {
-    setTransactionName(name);
   };
 
   const handleDrawerClose = () => {
@@ -154,18 +152,6 @@ const Dashboard = ({ children }) => {
     // Update state to trigger re-render
     setTransactions(updatedBooks);
   }
-
-  const handleNewTransaction = () => {
-    const name = prompt('Enter name for new transaction set:');
-    if (name) {
-      const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
-      savedBooks[name] = JSON.parse(JSON.stringify(initialTransactions));
-      localStorage.setItem('books', JSON.stringify(savedBooks));
-      setAvailableTransactions([...availableTransactions, name]);
-      setTransactionName(name);
-      setTransactions(savedBooks);
-    }
-  };
 
   const handleAddClick = (event) => {
     setMenuAnchorEl(event.currentTarget);
