@@ -2,6 +2,7 @@ import React from 'react';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
+import { Button } from '@mui/material';
 
 const exportToExcel = async (detailedMontants) => {
   const workbook = new ExcelJS.Workbook();
@@ -91,7 +92,14 @@ const exportToExcel = async (detailedMontants) => {
 };
 
 const DownloadExcelButton = ({ detailedMontants }) => (
-  <button onClick={() => exportToExcel(detailedMontants)}>Download Excel with Charts</button>
+  <Button
+    variant="contained"
+    color="primary"
+    onClick={() => exportToExcel(detailedMontants)}
+    style={{ height: 36, float: 'right', marginTop: 15, marginBottom: 20 }}
+  >
+    Export as Spreadsheet
+  </Button>
 );
 
 export default DownloadExcelButton;

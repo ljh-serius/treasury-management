@@ -56,6 +56,7 @@ const AddTransactionModal = ({
               </MenuItem>
             ))
           }
+
           </Select>
           <TextField
             fullWidth
