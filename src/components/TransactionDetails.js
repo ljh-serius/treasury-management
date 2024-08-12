@@ -18,6 +18,8 @@ import {
   Box
 } from '@mui/material';
 import DownloadExcelButton from './DownloadExcelButton'; // Import the download button
+import { auth } from '../utils/firebaseConfig'; // Assuming you have auth setup for user ID
+import { saveTransactionDetails, getTransactionDetails } from '../utils/firebaseHelpers'; // Import Firebase functions
 
 // Initialize Highcharts modules
 HeatmapModule(Highcharts);
@@ -103,22 +105,42 @@ const AccountingSummary = () => {
   const [detailedMontants, setDetailedMontants] = useState([]);
   const [viewCharts, setViewCharts] = useState(false);  // State to control view
   const [transactionType, setTransactionType] = useState('');
+  const userId = auth.currentUser?.uid;
 
   useEffect(() => {
-    const savedTransaction = JSON.parse(localStorage.getItem('selectedTransaction'));
-    const selectedTransactionType = localStorage.getItem('selectedTransactionType') || '';
-    setTransactionType(selectedTransactionType);
+    const fetchOrGenerateDetails = async () => {
+      const savedTransaction = JSON.parse(localStorage.getItem('selectedTransaction'));
+      const selectedTransactionType = localStorage.getItem('selectedTransactionType') || '';
+      setTransactionType(selectedTransactionType);
 
-    setTransactionRow(savedTransaction);
+      setTransactionRow(savedTransaction);
 
-    if (savedTransaction) {
-      const detailed = savedTransaction.montants.map((totalAmount) => {
-        const detailedAnalysis = generateDetailedRandomSubElements(totalAmount);
-        return { totalAmount, ...detailedAnalysis };
-      });
-      setDetailedMontants(detailed);
-    }
-  }, []);
+      if (savedTransaction && userId) {
+        const transactionId = savedTransaction.id;
+
+        // Try to fetch existing transaction details from the database
+        const transactionDetails = await getTransactionDetails(userId, transactionId);
+
+        if (transactionDetails) {
+          // If details exist, use them
+          setDetailedMontants(transactionDetails.detailedMontants);
+        } else {
+          // If no details exist, generate new details
+          const detailed = savedTransaction.montants.map((totalAmount) => {
+            const detailedAnalysis = generateDetailedRandomSubElements(totalAmount);
+            return { totalAmount, ...detailedAnalysis };
+          });
+
+          setDetailedMontants(detailed);
+
+          // Save the newly generated details to the database
+          await saveTransactionDetails(userId, transactionId, { detailedMontants: detailed });
+        }
+      }
+    };
+
+    fetchOrGenerateDetails();
+  }, [userId]);
 
   const getTranslatedText = (key) => {
     const translations = {
@@ -427,7 +449,7 @@ const AccountingSummary = () => {
                         <TableCell>{unit.discount}%</TableCell>
                         <TableCell>{unit.totalBeforeDiscount}€</TableCell>
                         <TableCell>{unit.finalAmount}€</TableCell>
-                        <TableCell>{unit.purchaseDate.toDateString()}</TableCell>
+                        <TableCell>{new Date(unit.purchaseDate).toDateString()}</TableCell>
                         <TableCell>{unit.notes}</TableCell>
                       </TableRow>
                     ))}

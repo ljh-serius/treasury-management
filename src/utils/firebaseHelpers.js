@@ -26,28 +26,30 @@ export const getTransactionBooks = async (userId) => {
   }
 };
 
-// Function to save or update transaction book details
-export const saveTransactionDetails = async (userId, bookName, details) => {
+// Saving transaction details using transaction ID
+export const saveTransactionDetails = async (userId, transactionId, details) => {
   try {
-    const detailsRef = doc(collection(db, "users", userId, "transaction-books-details"), bookName);
+    const detailsRef = doc(db, "users", userId, "transaction-books-details", transactionId);
     await setDoc(detailsRef, details, { merge: true });
   } catch (error) {
-    console.error("Error saving transaction book details: ", error);
+    console.error("Error saving transaction details: ", error);
   }
 };
 
-// Function to retrieve all transaction books details
-export const getTransactionBooksDetails = async (userId) => {
+// Function to get transaction details using transaction ID
+export const getTransactionDetails = async (userId, transactionId) => {
   try {
-    const detailsCollection = collection(db, "users", userId, "transaction-books-details");
-    const detailsSnapshot = await getDocs(detailsCollection);
-    const details = {};
-    detailsSnapshot.forEach((doc) => {
-      details[doc.id] = doc.data();
-    });
-    return details;
+    const docRef = doc(db, "users", userId, "transaction-books-details", transactionId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return docSnap.data();
+    } else {
+      console.log("No such document!");
+      return null;
+    }
   } catch (error) {
-    console.error("Error getting transaction book details: ", error);
+    console.error("Error getting transaction details: ", error);
   }
 };
 
