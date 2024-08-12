@@ -38,6 +38,7 @@ const Dashboard = ({ children }) => {
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [isClosing, setIsClosing] = useState(false);
   
+  console.log("transaction dashboard ", transactions)
   const userId = auth.currentUser?.uid;
 
   useEffect(() => {

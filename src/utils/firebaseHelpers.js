@@ -4,7 +4,7 @@ import { db } from "./firebaseConfig";
 // Function to save or update a transaction book
 export const saveTransactionBook = async (userId, bookName, transactions) => {
   try {
-    const bookRef = doc(collection(db, "users", userId, "transactionBooks"), bookName);
+    const bookRef = doc(collection(db, "users", userId, "transaction-books"), bookName);
     await setDoc(bookRef, transactions, { merge: true });
   } catch (error) {
     console.error("Error saving transaction book: ", error);
@@ -14,7 +14,7 @@ export const saveTransactionBook = async (userId, bookName, transactions) => {
 // Function to retrieve all transaction books
 export const getTransactionBooks = async (userId) => {
   try {
-    const booksCollection = collection(db, "users", userId, "transactionBooks");
+    const booksCollection = collection(db, "users", userId, "transaction-books");
     const booksSnapshot = await getDocs(booksCollection);
     const books = {};
     booksSnapshot.forEach((doc) => {
