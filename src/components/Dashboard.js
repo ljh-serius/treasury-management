@@ -11,26 +11,25 @@ import TransactionBooks from './TransactionBooks';
 import AddTransactionModal from './AddTransactionModal';
 import { signOut } from 'firebase/auth';
 import { auth } from '../utils/firebaseConfig';
-
-import { initialTransactions } from './transactionHelpers'; // adjust the path as needed
 import LogoutIcon from '@mui/icons-material/Logout';
-import LoginDialog from './LoginDialog'; // Adjust the path as necessary
-import RegisterDialog from './RegisterDialog'; // Adjust the path as necessary
-import { v4 as uuidv4 } from 'uuid'; // Add this import for UUID
+import LoginDialog from './LoginDialog';
+import RegisterDialog from './RegisterDialog';
+import { v4 as uuidv4 } from 'uuid';
 
-// Firebase operations
-import { saveTransactionBook, getTransactionBooks } from '../utils/firebaseHelpers';
+// Import the summary helpers
+import { fetchUnitsSummary, saveSummaryToFirestore } from '../utils/firebaseHelpers'; 
+
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const Dashboard = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const currentLocation = useLocation();
-  const drawerWidth = 240; // or whatever width you need
+  const drawerWidth = 240;
 
-  const [transactions, setTransactions] = useState({});
-  const [transactionName, setTransactionName] = useState('Main transaction book');
-  const [availableTransactions, setAvailableTransactions] = useState([]);
+  const [summaries, setSummaries] = useState({});
+  const [summaryName, setSummaryName] = useState('Main transaction book');
+  const [availableSummaries, setAvailableSummaries] = useState([]);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -39,39 +38,37 @@ const Dashboard = ({ children }) => {
   const [newTransactionAmount, setNewTransactionAmount] = useState('');
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [isClosing, setIsClosing] = useState(false);
-  const [currentTransactonId, setCurrentTransactionId] = useState(false);
-  
+  const [currentSummaryId, setCurrentSummaryId] = useState('');
+
   const userId = auth.currentUser?.uid;
 
-  
   useEffect(() => {
-    const currentId = Object.keys(transactions).filter((uuidKey) => {
-      return transactions[uuidKey].name === transactionName;
+    const currentId = Object.keys(summaries).filter((uuidKey) => {
+      return summaries[uuidKey].name === summaryName;
     })[0];
 
-    setCurrentTransactionId(currentId)
-
-  }, [transactionName ]);
-  
-  console.log("transactions", transactions)
+    setCurrentSummaryId(currentId);
+  }, [summaryName, summaries]);
 
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchSummaries = async () => {
       if (userId) {
-        const books = await getTransactionBooks(userId);
-        console.log("Fetched books: ", books);
-  
-        setTransactions(books);
-        setTransactionName(books[Object.keys(books)[0]]?.name || ''); // Optionally, select the first available book
-        
-        const bookNames = Object.keys(books).map((key) => books[key].name);
-        setAvailableTransactions(bookNames);
+        try {
+          const summaryData = await fetchUnitsSummary(userId);
+          setSummaries(summaryData);
+          const firstSummary = Object.keys(summaryData)[0];
+          setSummaryName(summaryData[firstSummary]?.name || 'Main transaction book');
+          const summaryNames = Object.keys(summaryData).map((key) => summaryData[key].name);
+          setAvailableSummaries(summaryNames);
+        } catch (error) {
+          console.error("Error fetching summaries: ", error);
+        }
       }
     };
-  
-    fetchTransactions();
+
+    fetchSummaries();
   }, [userId]);
-  
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -81,24 +78,24 @@ const Dashboard = ({ children }) => {
     }
   };
 
-  const handleTransactionChange = (name) => {
-    setTransactionName(name);
+  const handleSummaryChange = (name) => {
+    setSummaryName(name);
   };
 
-  const handleNewTransaction = async () => {
-    const name = prompt('Enter name for new transaction set:');
+  const handleNewSummary = async () => {
+    const name = prompt('Enter name for new summary set:');
     if (name) {
-      const id = uuidv4();
-      const newBook = { name, ...initialTransactions };
-      const updatedTransactions = { ...transactions, [id]: newBook };
-      setTransactions(updatedTransactions);
-      setAvailableTransactions([...availableTransactions, name]);
-  
-      // Save to Firebase
-      await saveTransactionBook(userId, id, newBook);
+      const year = new Date().getFullYear();
+      const newSummary = { name, encaissements: [], decaissements: [] };
+      const updatedSummaries = { ...summaries, [year]: newSummary };
+      setSummaries(updatedSummaries);
+      setAvailableSummaries([...availableSummaries, name]);
+
+      // Save to Firestore
+      await saveSummaryToFirestore(userId, year, newSummary);
     }
   };
-  
+
   const handleDrawerToggle = () => {
     if (!isClosing) {
       setMobileOpen(!mobileOpen);
@@ -117,67 +114,36 @@ const Dashboard = ({ children }) => {
   };
 
   const generateRandomTransactions = async () => {
-    // Generate random transactions with UUIDs
     const encaissements = Array.from({ length: 5 }, (_, i) => ({
       id: uuidv4(),
       nature: `Encaissement ${i + 1}`,
       montantInitial: Math.floor(Math.random() * 1000),
       montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
     }));
-  
+
     const decaissements = Array.from({ length: 5 }, (_, i) => ({
       id: uuidv4(),
       nature: `Décaissement ${i + 1}`,
       montantInitial: Math.floor(Math.random() * 1000),
       montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
     }));
-  
-    // Calculate totals for encaissements and decaissements (UUID not needed here)
-    const totalEncaissement = encaissements.reduce((total, transaction) => {
-      return {
-        nature: 'Total Encaissements',
-        montantInitial: total.montantInitial + transaction.montantInitial,
-        montants: total.montants.map((monthTotal, index) => monthTotal + transaction.montants[index]),
-      };
-    }, {
-      nature: 'Total Encaissements',
-      montantInitial: 0,
-      montants: Array(12).fill(0),
-    });
-  
-    const totalDecaissement = decaissements.reduce((total, transaction) => {
-      return {
-        nature: 'Total Décaissements',
-        montantInitial: total.montantInitial + transaction.montantInitial,
-        montants: total.montants.map((monthTotal, index) => monthTotal + transaction.montants[index]),
-      };
-    }, {
-      nature: 'Total Décaissements',
-      montantInitial: 0,
-      montants: Array(12).fill(0),
-    });
-  
-    // Add totals to the arrays
-    encaissements.push(totalEncaissement);
-    decaissements.push(totalDecaissement);
-  
-    const randomTransactions = {
-      name: transactionName,
+
+    const randomSummary = {
+      name: summaryName,
       encaissements,
       decaissements,
     };
-  
-    const updatedBooks = {
-      ...transactions,
-      [currentTransactonId]: randomTransactions,
+
+    const updatedSummaries = {
+      ...summaries,
+      [currentSummaryId]: randomSummary,
     };
-  
-    // Update state to trigger re-render
-    setTransactions(updatedBooks);
-  
-    await saveTransactionBook(userId, currentTransactonId, randomTransactions);
+
+    setSummaries(updatedSummaries);
+
+    await saveSummaryToFirestore(userId, currentSummaryId, randomSummary);
   };
-  
+
   const handleAddClick = (event) => {
     setMenuAnchorEl(event.currentTarget);
   };
@@ -199,62 +165,62 @@ const Dashboard = ({ children }) => {
     setSelectedMonths([]);
   };
 
-  const handleModalSubmit = () => {
-    const updatedTransactions = { ...transactions[currentTransactonId] };
-  
+  const handleModalSubmit = async () => {
+    const updatedSummary = { ...summaries[currentSummaryId] };
+
     const initializeMonths = (transaction) => {
-        if (!transaction.montants) {
-            transaction.montants = Array(12).fill(0);
-        }
+      if (!transaction.montants) {
+        transaction.montants = Array(12).fill(0);
+      }
     };
-  
+
     const processTransaction = (type, name, amount, months) => {
-        if (!updatedTransactions[type]) {
-            updatedTransactions[type] = [];
-        }
-  
-        let existingTransaction = updatedTransactions[type].find(t => t.nature === name);
-  
-        if (existingTransaction) {
-            initializeMonths(existingTransaction);
-            months.forEach(monthIndex => {
-                existingTransaction.montants[monthIndex] += parseFloat(amount); // Ensure amount is treated as a number
-            });
-        } else {
-            const newTransaction = {
-                id: uuidv4(), // Add UUID here
-                nature: name,
-                montantInitial: 0,
-                montants: Array(12).fill(0),
-            };
-  
-            months.forEach(monthIndex => {
-                newTransaction.montants[monthIndex] = parseFloat(amount); // Ensure amount is treated as a number
-            });
-  
-            updatedTransactions[type] = [newTransaction, ...(updatedTransactions[type] || [])];
-        }
+      if (!updatedSummary[type]) {
+        updatedSummary[type] = [];
+      }
+
+      let existingTransaction = updatedSummary[type].find(t => t.nature === name);
+
+      if (existingTransaction) {
+        initializeMonths(existingTransaction);
+        months.forEach(monthIndex => {
+          existingTransaction.montants[monthIndex] += parseFloat(amount);
+        });
+      } else {
+        const newTransaction = {
+          id: uuidv4(),
+          nature: name,
+          montantInitial: 0,
+          montants: Array(12).fill(0),
+        };
+
+        months.forEach(monthIndex => {
+          newTransaction.montants[monthIndex] = parseFloat(amount);
+        });
+
+        updatedSummary[type] = [newTransaction, ...(updatedSummary[type] || [])];
+      }
     };
-  
-    // Ensure the amount is a valid number and name is not empty
+
     if (newTransactionAmount && newTransactionName) {
-        processTransaction(newTransactionType, newTransactionName, newTransactionAmount, selectedMonths);
+      processTransaction(newTransactionType, newTransactionName, newTransactionAmount, selectedMonths);
     } else {
-        console.warn('Transaction Name or Amount is invalid.');
-        return; // Exit if input is invalid
+      console.warn('Transaction Name or Amount is invalid.');
+      return;
     }
-  
-    const updatedBooks = {
-        ...transactions,
-        [currentTransactonId]: updatedTransactions, // Store only within the relevant book
+
+    const updatedSummaries = {
+      ...summaries,
+      [currentSummaryId]: updatedSummary,
     };
-  
-    setTransactions(updatedBooks);
-    localStorage.setItem('books', JSON.stringify(updatedBooks)); // Ensure correct storage
-  
-    handleModalClose(); // Reset the modal
+
+    setSummaries(updatedSummaries);
+
+    await saveSummaryToFirestore(userId, currentSummaryId, updatedSummary);
+
+    handleModalClose();
   };
-  
+
   const drawer = (
     <div>
       <Toolbar />
@@ -280,11 +246,11 @@ const Dashboard = ({ children }) => {
           </ListItemButton>
         </ListItem>
         <ListItem key="new" disablePadding>
-          <ListItemButton onClick={handleNewTransaction}>
+          <ListItemButton onClick={handleNewSummary}>
             <ListItemIcon>
               <MailIcon />
             </ListItemIcon>
-            <ListItemText primary="Add New Transaction Book" />
+            <ListItemText primary="Add New Summary" />
           </ListItemButton>
         </ListItem>
         <ListItem key="comparatives" disablePadding>
@@ -309,6 +275,14 @@ const Dashboard = ({ children }) => {
               <MailIcon />
             </ListItemIcon>
             <ListItemText primary="Generate Units" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key="summary" disablePadding>
+          <ListItemButton component={Link} to="/summary">
+            <ListItemIcon>
+              <MailIcon />
+            </ListItemIcon>
+            <ListItemText primary="Summary" />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
@@ -364,12 +338,12 @@ const Dashboard = ({ children }) => {
           >
             Blog
           </Typography>
-            {currentLocation.pathname === '/books' && (
+          {currentLocation.pathname === '/books' && (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <TransactionSelect
-                transactionName={transactionName}
-                availableTransactions={availableTransactions}
-                handleTransactionChange={handleTransactionChange}
+                transactionName={summaryName}
+                availableTransactions={availableSummaries}
+                handleTransactionChange={handleSummaryChange}
               />
               <IconButton
                 color="default"
@@ -391,30 +365,28 @@ const Dashboard = ({ children }) => {
                   Décaissements
                 </MenuItem>
               </Menu>
-                
             </div>
           )}
           {currentLocation.pathname === '/' && (
             <Box>
-            <Button
-              variant="contained"
-              color="info"
-              onClick={handleLoginOpen}
-              sx={{
-                marginRight: '5px'
-              }}
-            >
-              Login
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={handleRegisterOpen}
-            >
-              Register
-            </Button>
-          </Box>
-          
+              <Button
+                variant="contained"
+                color="info"
+                onClick={handleLoginOpen}
+                sx={{
+                  marginRight: '5px'
+                }}
+              >
+                Login
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleRegisterOpen}
+              >
+                Register
+              </Button>
+            </Box>
           )}
           <LoginDialog open={loginOpen} onClose={handleLoginClose} />
           <RegisterDialog open={registerOpen} onClose={handleRegisterClose} />
@@ -457,7 +429,7 @@ const Dashboard = ({ children }) => {
       >
         <Toolbar />
         {isTransactionBooks ? (
-          <TransactionBooks transactionName={transactionName} transactions={transactions[currentTransactonId]} />
+          <TransactionBooks transactionName={summaryName} transactions={summaries[currentSummaryId]} />
         ) : (
           children
         )}
@@ -467,7 +439,7 @@ const Dashboard = ({ children }) => {
           newTransactionType={newTransactionType}
           newTransactionName={newTransactionName}
           setNewTransactionName={setNewTransactionName}
-          availableTransactions={availableTransactions}
+          availableTransactions={availableSummaries}
           newTransactionAmount={newTransactionAmount}
           setNewTransactionAmount={setNewTransactionAmount}
           selectedMonths={selectedMonths}
@@ -475,7 +447,7 @@ const Dashboard = ({ children }) => {
           handleModalSubmit={handleModalSubmit}
           availableMonths={monthNames}
           monthNames={Array.from({ length: 12 }, (_, i) => `Month ${i + 1}`)}
-          transactions={transactions[currentTransactonId]}
+          transactions={summaries[currentSummaryId]}
         />
       </Box>
     </Box>

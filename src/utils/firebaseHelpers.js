@@ -1,5 +1,6 @@
 import { collection, getDocs, addDoc, getDoc, setDoc, updateDoc, doc, deleteDoc, query, where } from "firebase/firestore";
 import { db } from "./firebaseConfig";
+import { v4 as uuidv4 } from 'uuid';
 
 // Function to save or update a transaction book
 export const saveTransactionBook = async (userId, bookName, transactions) => {
@@ -131,5 +132,62 @@ export const saveUnitToFirestore = async (userId, unit) => {
     console.log(`Unit ${unit.id} saved to Firestore under user ${userId}.`);
   } catch (error) {
     console.error("Error saving unit to Firestore:", error);
+  }
+};
+
+export const fetchUnitsSummary = async (userId) => {
+  try {
+    const unitsSnapshot = await getDocs(collection(db, "users", userId, "transaction-units"));
+    const units = unitsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    const summary = units.reduce((acc, unit) => {
+      const date = new Date(unit.date.seconds * 1000); // Convert Firestore timestamp to JS date
+      const year = date.getFullYear();
+      const month = date.getMonth(); // 0-11 index for months
+      const totalAmount = parseFloat(unit.unitPrice) * parseInt(unit.quantity); // Calculate total amount
+
+      if (!acc[year]) {
+        acc[year] = { encaissements: [], decaissements: [], name: year };
+      }
+
+      const typeArray = unit.type === 'revenues' ? acc[year].encaissements : acc[year].decaissements;
+
+      let targetEntry = typeArray.find(entry => entry.nature === unit.category);
+      if (!targetEntry) {
+        targetEntry = {
+          id: uuidv4(), // Generate a unique ID for each category summary
+          nature: unit.category,
+          montantInitial: 0,
+          montants: Array(12).fill(0),
+        };
+        typeArray.push(targetEntry);
+      }
+
+      targetEntry.montantInitial += totalAmount;
+      targetEntry.montants[month] += totalAmount;
+
+      return acc;
+    }, {});
+
+    console.log("Summary generated successfully:", summary);
+    return summary;
+  } catch (error) {
+    console.error("Error fetching or saving units summary:", error);
+    throw error;
+  }
+};
+
+export const saveSummaryToFirestore = async (userId, year, summary) => {
+  try {
+    // Add the 'name' property to the summary object
+    summary.name = year;
+
+    // Save the summary to Firestore, using the year as the document ID
+    await setDoc(doc(db, "users", userId, "transactions-summary", year), summary);
+
+    console.log(`Summary for ${year} saved successfully.`);
+  } catch (error) {
+    console.error(`Error saving summary for ${year} to Firestore:`, error);
+    throw error;
   }
 };
