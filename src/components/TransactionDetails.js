@@ -95,7 +95,6 @@ const generateDetailedRandomSubElements = (totalAmount) => {
     }
   }
 
-  console.log({ productUnits, workUnits })
   return { productUnits, workUnits };
 };
 

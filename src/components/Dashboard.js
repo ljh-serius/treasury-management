@@ -128,20 +128,22 @@ const Dashboard = ({ children }) => {
   console.log("TTT", transactions)
 
   const generateRandomTransactions = async () => {
-    // Generate random transactions
+    // Generate random transactions with UUIDs
     const encaissements = Array.from({ length: 5 }, (_, i) => ({
+      id: uuidv4(),
       nature: `Encaissement ${i + 1}`,
       montantInitial: Math.floor(Math.random() * 1000),
       montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
     }));
   
     const decaissements = Array.from({ length: 5 }, (_, i) => ({
+      id: uuidv4(),
       nature: `Décaissement ${i + 1}`,
       montantInitial: Math.floor(Math.random() * 1000),
       montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
     }));
   
-    // Calculate totals for encaissements and decaissements
+    // Calculate totals for encaissements and decaissements (UUID not needed here)
     const totalEncaissement = encaissements.reduce((total, transaction) => {
       return {
         nature: 'Total Encaissements',
@@ -183,10 +185,10 @@ const Dashboard = ({ children }) => {
   
     // Update state to trigger re-render
     setTransactions(updatedBooks);
-    
+  
     await saveTransactionBook(userId, currentTransactonId, randomTransactions);
   };
-
+  
   const handleAddClick = (event) => {
     setMenuAnchorEl(event.currentTarget);
   };
@@ -231,6 +233,7 @@ const Dashboard = ({ children }) => {
             });
         } else {
             const newTransaction = {
+                id: uuidv4(), // Add UUID here
                 nature: name,
                 montantInitial: 0,
                 montants: Array(12).fill(0),
@@ -263,7 +266,6 @@ const Dashboard = ({ children }) => {
     handleModalClose(); // Reset the modal
   };
   
-
   const drawer = (
     <div>
       <Toolbar />
