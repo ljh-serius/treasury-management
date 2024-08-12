@@ -31,7 +31,7 @@ import { auth, db } from '../utils/firebaseConfig';
 import { v4 as uuidv4 } from 'uuid';
 import { collection, getDocs } from 'firebase/firestore';
 
-const categories = ['Category A', 'Category B', 'Category C'];
+const categories = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E', 'Category F', 'Category G', 'Category H', 'Category I', 'Category J'];
 const months = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
@@ -39,7 +39,7 @@ const months = [
 
 const generateRandomDate = () => {
   const end = new Date();
-  const start = new Date(end.getFullYear() - 2, end.getMonth(), end.getDate());
+  const start = new Date(end.getFullYear() - 15, end.getMonth(), end.getDate());
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 };
 
