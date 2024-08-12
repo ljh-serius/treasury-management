@@ -178,12 +178,12 @@ const Dashboard = ({ children }) => {
   
     const updatedBooks = {
       ...transactions,
-      [transactionName]: randomTransactions,
+      [currentTransactonId]: randomTransactions,
     };
   
     // Update state to trigger re-render
     setTransactions(updatedBooks);
-
+    
     await saveTransactionBook(userId, currentTransactonId, randomTransactions);
   };
 
