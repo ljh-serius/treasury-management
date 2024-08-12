@@ -13,16 +13,18 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../utils/firebaseConfig';
 import { initialTransactions } from './transactionHelpers'; // adjust the path as needed
 import LogoutIcon from '@mui/icons-material/Logout';
-import LoginDialog from './LoginDialog'; // adjust the path as needed
-import RegisterDialog from './RegisterDialog'; // adjust the path as needed
+import LoginDialog from './LoginDialog'; // Adjust the path as necessary
+import RegisterDialog from './RegisterDialog'; // Adjust the path as necessary
 
+// Firebase operations
 import { saveTransactionBook, getTransactionBooks } from '../utils/firebaseHelpers';
+const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const Dashboard = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const currentLocation = useLocation();
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const drawerWidth = 240; // or whatever width you need
 
   const [transactions, setTransactions] = useState({});
   const [transactionName, setTransactionName] = useState('Main transaction book');
@@ -35,34 +37,19 @@ const Dashboard = ({ children }) => {
   const [newTransactionAmount, setNewTransactionAmount] = useState('');
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [isClosing, setIsClosing] = useState(false);
-
+  
   const userId = auth.currentUser?.uid;
-  const drawerWidth = 240; // or whatever width you need
 
   useEffect(() => {
     const fetchTransactions = async () => {
       if (userId) {
-        let books = await getTransactionBooks(userId);
-  
-        // Check if there are no transaction books
-        if (Object.keys(books).length === 0) {
-          // Create a default "Main transaction book"
-          books = { "Main transaction book": initialTransactions };
-  
-          // Save the default book to Firebase
-          await saveTransactionBook(userId, "Main transaction book", initialTransactions);
-        }
-  
-        // Update state with the fetched or newly created books
+        const books = await getTransactionBooks(userId);
         setTransactions(books);
         setAvailableTransactions(Object.keys(books));
-        setTransactionName("Main transaction book");
       }
     };
-    
     fetchTransactions();
   }, [userId]);
-  
 
   const handleLogout = async () => {
     try {
@@ -107,7 +94,7 @@ const Dashboard = ({ children }) => {
     setIsClosing(false);
   };
 
-  const generateRandomTransactions = async () => {
+  const generateRandomTransactions = () => {
     // Generate random transactions
     const encaissements = Array.from({ length: 5 }, (_, i) => ({
       nature: `Encaissement ${i + 1}`,
@@ -124,7 +111,7 @@ const Dashboard = ({ children }) => {
     // Calculate totals for encaissements and decaissements
     const totalEncaissement = encaissements.reduce((total, transaction) => {
       return {
-        nature: 'Total Encaissements',
+      nature: 'Total Encaissements',
         montantInitial: total.montantInitial + transaction.montantInitial,
         montants: total.montants.map((monthTotal, index) => monthTotal + transaction.montants[index]),
       };
@@ -163,15 +150,10 @@ const Dashboard = ({ children }) => {
     // Save to local storage
     localStorage.setItem('books', JSON.stringify(updatedBooks));
   
-    // Save to Firebase
-    if (userId) {
-      await saveTransactionBook(userId, transactionName, randomTransactions);
-    }
-  
     // Update state to trigger re-render
     setTransactions(updatedBooks);
-  };
-  
+  }
+
   const handleAddClick = (event) => {
     setMenuAnchorEl(event.currentTarget);
   };
