@@ -11,6 +11,7 @@ import Article from './components/Article';
 import UnitDetails from './components/UnitDetails';
 import ProtectedRoute from './components/ProtectedRoute';
 import { auth } from './utils/firebaseConfig';
+import UnitGenerator from './components/UnitGenerator';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -60,6 +61,26 @@ const App = () => {
             <ProtectedRoute user={user}>
               <Dashboard>
                 <TransactionDetails />
+              </Dashboard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/units/:unitId"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard>
+                <UnitDetails />
+              </Dashboard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/generate-units"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard>
+                <UnitGenerator />
               </Dashboard>
             </ProtectedRoute>
           }

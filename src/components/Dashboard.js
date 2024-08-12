@@ -302,6 +302,14 @@ const Dashboard = ({ children }) => {
             <ListItemText primary="Transaction Details" />
           </ListItemButton>
         </ListItem>
+        <ListItem key="generate-units" disablePadding>
+          <ListItemButton component={Link} to="/generate-units">
+            <ListItemIcon>
+              <MailIcon />
+            </ListItemIcon>
+            <ListItemText primary="Generate Units" />
+          </ListItemButton>
+        </ListItem>
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout}>
             <ListItemIcon>
