@@ -31,28 +31,25 @@ const StyledButton = styled(Button)(({ theme }) => ({
 const TransactionSelect = ({
   transactionName,
   availableTransactions = [], // Default to empty array
-  handleTransactionChange,
-  handleNewTransaction,
+  handleTransactionChange
 }) => {
 
   return (
     <Box display="flex" alignItems="center">
       <StyledFormControl>
         <Select
-          value={transactionName}
-          onChange={(e) => handleTransactionChange(e.target.value)}
-          label="Transaction"
-        >
-          {availableTransactions.map((name) => (
-            <MenuItem key={name} value={name}>
-              {name}
-            </MenuItem>
-          ))}
-        </Select>
+        value={transactionName}
+        onChange={(e) => handleTransactionChange(e.target.value)}
+        displayEmpty
+      >
+        {availableTransactions.map((id) => (
+          <MenuItem key={id} value={id}>
+            {availableTransactions[id]?.name || 'Unnamed Book'}
+          </MenuItem>
+        ))}
+      </Select>
+
       </StyledFormControl>
-      {/* <StyledButton onClick={handleNewTransaction}>
-        New Book
-      </StyledButton> */}
     </Box>
   );
 };

@@ -299,7 +299,6 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
           Export as Spreadsheet
         </Button>
         <TransactionTable
-          transactions={transactions}
           inputValues={inputValues}
           setInputValues={setInputValues}
           handleInputChange={handleInputChange}

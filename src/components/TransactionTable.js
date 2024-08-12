@@ -8,32 +8,38 @@ import {
 } from './transactionHelpers';
 
 const TransactionTable = ({
-  transactions = {}, // Default to an empty object if transactions is undefined
   inputValues = {}, // Default to an empty object if inputValues is undefined
   handleInputChange,
   handleFocus, handleBlur, handleKeyDown, handleMenuOpen, handleColumnMenuOpen, handleNatureMenuOpen, editingCell,
   highlightedRow, highlightedMonth
 }) => {
+  console.log("TreasuryTable", inputValues)
   const presentedMonths = monthNames.slice(1);
+
+  console.log("inputValuesinputValues", inputValues)
+  console.log("inputValues", inputValues);
 
   // Filter displayed months based on input values
   const displayedMonths = presentedMonths.filter((_, monthIndex) =>
-    Object.keys(inputValues).some(type =>
-      inputValues[type]?.some(transaction => transaction.montants[monthIndex] !== 0)
+    ["encaissements", "decaissements"].some(type =>
+      inputValues[type] && Array.isArray(inputValues[type]) && 
+      inputValues[type].some(transaction => transaction.montants[monthIndex] !== 0)
     )
   );
-
+  
+  console.log("displayedMonths", displayedMonths);
+  
   const displayedMonthIndices = displayedMonths.map(month => presentedMonths.indexOf(month));
 
-  // Ensure transactions.encaissements and transactions.decaissements are arrays
-  const encaissements = transactions.encaissements || [];
-  const decaissements = transactions.decaissements || [];
+  // Ensure inputValues.encaissements and inputValues.decaissements are arrays
+  const encaissements = inputValues.encaissements || [];
+  const decaissements = inputValues.decaissements || [];
 
   // Calculate monthly and accumulated treasury, with checks for undefined properties
-  const monthlyTreasury = calculateMonthlyTreasury(transactions);
+  const monthlyTreasury = calculateMonthlyTreasury(inputValues);
   const initialEncaissement = encaissements[encaissements.length - 1]?.montantInitial || 0;
   const initialDecaissement = decaissements[decaissements.length - 1]?.montantInitial || 0;
-  const accumulatedTreasury = calculateAccumulatedTreasury(initialEncaissement - initialDecaissement, transactions);
+  const accumulatedTreasury = calculateAccumulatedTreasury(initialEncaissement - initialDecaissement, inputValues);
   const percentageVsEncaissements = calculatePercentageBalanceVsEncaissements(
     monthlyTreasury,
     encaissements[encaissements.length - 1]?.montants || []
@@ -127,11 +133,12 @@ const TransactionTable = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {Object.keys(inputValues).map((type) => (
-            <React.Fragment key={type}>
-              {inputValues[type]?.map((transaction, index) => {
-                const isHighlighted = (type === 'encaissements' && highlightedRow.encaissements === transaction.nature) ||
-                  (type === 'decaissements' && highlightedRow.decaissements === transaction.nature);
+        {["encaissements", "decaissements"].map((type) => (
+          <React.Fragment key={type}>
+            {inputValues[type]?.map((transaction, index) => {
+              const isHighlighted = 
+                (type === 'encaissements' && highlightedRow.encaissements === transaction.nature) ||
+                (type === 'decaissements' && highlightedRow.decaissements === transaction.nature);
 
                 return (
                   <TableRow key={index}>

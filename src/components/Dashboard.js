@@ -15,6 +15,7 @@ import { initialTransactions } from './transactionHelpers'; // adjust the path a
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginDialog from './LoginDialog'; // Adjust the path as necessary
 import RegisterDialog from './RegisterDialog'; // Adjust the path as necessary
+import { v4 as uuidv4 } from 'uuid'; // Add this import for UUID
 
 // Firebase operations
 import { saveTransactionBook, getTransactionBooks } from '../utils/firebaseHelpers';
@@ -48,12 +49,13 @@ const Dashboard = ({ children }) => {
   
         if (Object.keys(books).length === 0) {
           // No books found, create a default one
+          const id = uuidv4();
           const defaultBookName = 'Main Book';
-          const defaultTransactions = initialTransactions; // Assuming `initialTransactions` is your default structure
-          await saveTransactionBook(userId, defaultBookName, defaultTransactions);
-          setTransactions({ [defaultBookName]: defaultTransactions });
-          setAvailableTransactions([defaultBookName]);
-          setTransactionName(defaultBookName); // Automatically select the newly created book
+          const defaultTransactions = { name: defaultBookName, ...initialTransactions };
+          await saveTransactionBook(userId, id, defaultTransactions);
+          setTransactions({ [id]: defaultTransactions });
+          setAvailableTransactions([id]);
+          setTransactionName(id); // Automatically select the newly created book
         } else {
           setTransactions(books);
           setAvailableTransactions(Object.keys(books));
@@ -63,8 +65,6 @@ const Dashboard = ({ children }) => {
     };
     fetchTransactions();
   }, [userId]);
-  
-  
 
   const handleLogout = async () => {
     try {
@@ -82,16 +82,17 @@ const Dashboard = ({ children }) => {
   const handleNewTransaction = async () => {
     const name = prompt('Enter name for new transaction set:');
     if (name) {
-      const updatedTransactions = { ...transactions, [name]: initialTransactions };
+      const id = uuidv4();
+      const newBook = { name, ...initialTransactions };
+      const updatedTransactions = { ...transactions, [id]: newBook };
       setTransactions(updatedTransactions);
-      setAvailableTransactions([...availableTransactions, name]);
-
+      setAvailableTransactions([...availableTransactions, id]);
+  
       // Save to Firebase
-      await saveTransactionBook(userId, name, initialTransactions);
+      await saveTransactionBook(userId, id, newBook);
     }
   };
-
-
+  
   const handleDrawerToggle = () => {
     if (!isClosing) {
       setMobileOpen(!mobileOpen);
