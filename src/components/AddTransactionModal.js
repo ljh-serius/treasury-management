@@ -12,12 +12,10 @@ const AddTransactionModal = ({
   selectedMonths,
   setSelectedMonths,
   handleModalSubmit,
-  monthNames,
   transactions,
-  availableMonths // Pass the transactions prop here
+  availableMonths,
 }) => {
   
-  // Filter transaction natures based on the selected transaction type
   const availableTransactionNatures = useMemo(() => {
     if (!transactions || !newTransactionType) return [];
     return transactions[newTransactionType]?.map(transaction => transaction.nature) || [];
@@ -25,6 +23,13 @@ const AddTransactionModal = ({
 
   const handleInputChange = (event) => {
     setNewTransactionName(event.target.value);
+  };
+
+  const handleMonthChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedMonths(typeof value === 'string' ? value.split(',') : value);
   };
 
   return (
@@ -48,15 +53,14 @@ const AddTransactionModal = ({
             input={<OutlinedInput label="Transaction Name" />}
             renderValue={(selected) => selected || "Select or type a transaction name"}
           >
-          {availableTransactionNatures
-            .filter(name => name !== 'Total Encaissements' && name !== 'Total Décaissements')
-            .map((name, index) => (
-              <MenuItem key={index} value={name}>
-                {name}
-              </MenuItem>
-            ))
-          }
-
+            {availableTransactionNatures
+              .filter(name => name !== 'Total Encaissements' && name !== 'Total Décaissements')
+              .map((name, index) => (
+                <MenuItem key={index} value={name}>
+                  {name}
+                </MenuItem>
+              ))
+            }
           </Select>
           <TextField
             fullWidth
@@ -85,7 +89,7 @@ const AddTransactionModal = ({
             labelId="month-multi-select-label"
             multiple
             value={selectedMonths}
-            onChange={(e) => setSelectedMonths(e.target.value)}
+            onChange={handleMonthChange}
             input={<OutlinedInput label="Months" />}
             renderValue={(selected) => selected.map(index => availableMonths[index]).join(', ')}
           >

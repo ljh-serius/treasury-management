@@ -38,9 +38,21 @@ const Dashboard = ({ children }) => {
   const [newTransactionAmount, setNewTransactionAmount] = useState('');
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [isClosing, setIsClosing] = useState(false);
+  const [currentTransactonId, setCurrentTransactionId] = useState(false);
   
   const userId = auth.currentUser?.uid;
 
+  
+  useEffect(() => {
+    const currentId = Object.keys(transactions).filter((uuidKey) => {
+      return transactions[uuidKey].name === transactionName;
+    })[0];
+
+    setCurrentTransactionId(currentId)
+
+  }, [transactionName ]);
+  console.log("newTransactionAmount " , newTransactionAmount)
+  console.log("selectedMonths " , selectedMonths)
   useEffect(() => {
     const fetchTransactions = async () => {
       if (userId) {
@@ -172,13 +184,7 @@ const Dashboard = ({ children }) => {
     // Update state to trigger re-render
     setTransactions(updatedBooks);
 
-    const currentDashboard = Object.keys(transactions).filter((key) => {
-      return transactions[key].name === transactionName;
-    })[0]
-
-    console.log("currentDashboard", currentDashboard)
-    // Save to Firebase (or your preferred storage)
-    await saveTransactionBook(userId, currentDashboard, randomTransactions);
+    await saveTransactionBook(userId, currentTransactonId, randomTransactions);
   };
 
   const handleAddClick = (event) => {
@@ -203,55 +209,61 @@ const Dashboard = ({ children }) => {
   };
 
   const handleModalSubmit = () => {
-    const updatedTransactions = { ...transactions[transactionName] };
+    const updatedTransactions = { ...transactions[currentTransactonId] };
   
     const initializeMonths = (transaction) => {
-      if (!transaction.montants) {
-        transaction.montants = Array(12).fill(0);
-      }
+        if (!transaction.montants) {
+            transaction.montants = Array(12).fill(0);
+        }
     };
   
     const processTransaction = (type, name, amount, months) => {
-      if (!updatedTransactions[type]) {
-        updatedTransactions[type] = [];
-      }
+        if (!updatedTransactions[type]) {
+            updatedTransactions[type] = [];
+        }
   
-      let existingTransaction = updatedTransactions[type].find(t => t.nature === name);
+        let existingTransaction = updatedTransactions[type].find(t => t.nature === name);
   
-      if (existingTransaction) {
-        initializeMonths(existingTransaction);
-        months.forEach(monthIndex => {
-          existingTransaction.montants[monthIndex] += amount;
-        });
-      } else {
-        const newTransaction = {
-          nature: name,
-          montantInitial: 0,
-          montants: Array(12).fill(0),
-        };
+        if (existingTransaction) {
+            initializeMonths(existingTransaction);
+            months.forEach(monthIndex => {
+                existingTransaction.montants[monthIndex] += parseFloat(amount); // Ensure amount is treated as a number
+            });
+        } else {
+            const newTransaction = {
+                nature: name,
+                montantInitial: 0,
+                montants: Array(12).fill(0),
+            };
   
-        months.forEach(monthIndex => {
-          newTransaction.montants[monthIndex] = amount;
-        });
+            months.forEach(monthIndex => {
+                newTransaction.montants[monthIndex] = parseFloat(amount); // Ensure amount is treated as a number
+            });
   
-        // Insert the new transaction at the beginning of the array (n - 1 order)
-        updatedTransactions[type] = [newTransaction, ...(updatedTransactions[type] || [])];
-      }
+            updatedTransactions[type] = [newTransaction, ...(updatedTransactions[type] || [])];
+        }
     };
   
-    processTransaction(newTransactionType, newTransactionName, newTransactionAmount, selectedMonths);
+    // Ensure the amount is a valid number and name is not empty
+    if (newTransactionAmount && newTransactionName) {
+        processTransaction(newTransactionType, newTransactionName, newTransactionAmount, selectedMonths);
+    } else {
+        console.warn('Transaction Name or Amount is invalid.');
+        return; // Exit if input is invalid
+    }
   
     const updatedBooks = {
-      ...transactions,
-      [transactionName]: updatedTransactions, // Store only within the relevant book
+        ...transactions,
+        [currentTransactonId]: updatedTransactions, // Store only within the relevant book
     };
   
     setTransactions(updatedBooks);
-    localStorage.setItem('books', JSON.stringify(updatedBooks));
+    localStorage.setItem('books', JSON.stringify(updatedBooks)); // Ensure correct storage
   
-    handleModalClose();
+    handleModalClose(); // Reset the modal
   };
   
+
   const drawer = (
     <div>
       <Toolbar />
@@ -325,11 +337,10 @@ const Dashboard = ({ children }) => {
   const handleRegisterOpen = () => setRegisterOpen(true);
   const handleRegisterClose = () => setRegisterOpen(false);
 
-  const currentSelection = Object.keys(transactions).filter((uuidKey) => {
-    return transactions[uuidKey].name === transactionName;
-  })[0];
-
-  console.log("Current book", currentSelection)
+  console.log("transactionName",  transactionName)
+  console.log("currentTransactonId",  currentTransactonId)
+  console.log("selectedMonths",  selectedMonths)
+  console.log("newTransactionAmount",  newTransactionAmount)
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -451,7 +462,7 @@ const Dashboard = ({ children }) => {
       >
         <Toolbar />
         {isTransactionBooks ? (
-          <TransactionBooks transactionName={transactionName} transactions={transactions[currentSelection]} />
+          <TransactionBooks transactionName={transactionName} transactions={transactions[currentTransactonId]} />
         ) : (
           children
         )}
@@ -469,7 +480,7 @@ const Dashboard = ({ children }) => {
           handleModalSubmit={handleModalSubmit}
           availableMonths={monthNames.slice(1)}
           monthNames={Array.from({ length: 12 }, (_, i) => `Month ${i + 1}`)}
-          transactions={transactions[transactionName]}
+          transactions={transactions[currentTransactonId]}
         />
       </Box>
     </Box>
