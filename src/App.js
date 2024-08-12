@@ -54,7 +54,7 @@ const App = () => {
           }
         />
         <Route
-          path="/details"
+          path="/details/:transactionId"
           element={
             <ProtectedRoute user={user}>
               <Dashboard>

@@ -16,6 +16,7 @@ const TransactionActionsMenu = ({
   selectedTransaction, // Ensure this prop is passed in containing the transaction row data
 }) => {
 
+  const transactionId = localStorage.getItem('selectedTransactionId')
   return (
     <Menu
       anchorEl={anchorEl}
@@ -46,7 +47,7 @@ const TransactionActionsMenu = ({
           Paste Row
         </MenuItem>,
         <MenuItem key="seeDetailsTransactionNature">
-          <Link to="/details">
+          <Link to={"/details/" + transactionId}>
             See Details
           </Link>
         </MenuItem>

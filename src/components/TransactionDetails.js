@@ -99,7 +99,7 @@ const generateDetailedRandomSubElements = (totalAmount) => {
 };
 
 const AccountingSummary = () => {
-  const [transactionRow, setTransactionRow] = useState(null);
+  const [transactionRow, setTransactionRow] = useState();
   const [detailedMontants, setDetailedMontants] = useState([]);
   const [viewCharts, setViewCharts] = useState(false);  // State to control view
   const [transactionType, setTransactionType] = useState('');

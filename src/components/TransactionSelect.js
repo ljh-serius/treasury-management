@@ -34,7 +34,6 @@ const TransactionSelect = ({
   handleTransactionChange
 }) => {
 
-  console.log("availableTransactions", availableTransactions)
   return (
     <Box display="flex" alignItems="center">
       <StyledFormControl>

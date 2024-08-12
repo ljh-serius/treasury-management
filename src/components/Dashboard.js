@@ -51,37 +51,26 @@ const Dashboard = ({ children }) => {
     setCurrentTransactionId(currentId)
 
   }, [transactionName ]);
-  console.log("newTransactionAmount " , newTransactionAmount)
-  console.log("selectedMonths " , selectedMonths)
+  
+  console.log("transactions", transactions)
+
   useEffect(() => {
     const fetchTransactions = async () => {
       if (userId) {
         const books = await getTransactionBooks(userId);
+        console.log("Fetched books: ", books);
   
-        if (Object.keys(books).length === 0) {
-          // No books found, create a default one
-          const id = uuidv4();
-          const defaultBookName = 'Main Book';
-          const defaultTransactions = { name: defaultBookName, ...initialTransactions };
-          await saveTransactionBook(userId, id, defaultTransactions);
-          setTransactions({ [id]: defaultTransactions });
-          setTransactionName(id); // Automatically select the newly created book
-        } else {
-          setTransactions(books);
-          setTransactionName(books[Object.keys(books)[0]].name); // Optionally, select the first available book
-        }
-
-        const bookNames = Object.keys(books).map((key) => {
-          return books[key].name;
-        })
-
+        setTransactions(books);
+        setTransactionName(books[Object.keys(books)[0]]?.name || ''); // Optionally, select the first available book
+        
+        const bookNames = Object.keys(books).map((key) => books[key].name);
         setAvailableTransactions(bookNames);
-
       }
     };
+  
     fetchTransactions();
   }, [userId]);
-
+  
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -125,7 +114,6 @@ const Dashboard = ({ children }) => {
   const handleDrawerTransitionEnd = () => {
     setIsClosing(false);
   };
-  console.log("TTT", transactions)
 
   const generateRandomTransactions = async () => {
     // Generate random transactions with UUIDs
@@ -339,10 +327,6 @@ const Dashboard = ({ children }) => {
   const handleRegisterOpen = () => setRegisterOpen(true);
   const handleRegisterClose = () => setRegisterOpen(false);
 
-  console.log("transactionName",  transactionName)
-  console.log("currentTransactonId",  currentTransactonId)
-  console.log("selectedMonths",  selectedMonths)
-  console.log("newTransactionAmount",  newTransactionAmount)
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -480,7 +464,7 @@ const Dashboard = ({ children }) => {
           selectedMonths={selectedMonths}
           setSelectedMonths={setSelectedMonths}
           handleModalSubmit={handleModalSubmit}
-          availableMonths={monthNames.slice(1)}
+          availableMonths={monthNames}
           monthNames={Array.from({ length: 12 }, (_, i) => `Month ${i + 1}`)}
           transactions={transactions[currentTransactonId]}
         />
