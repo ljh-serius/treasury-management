@@ -20,6 +20,7 @@ import {
 import DownloadExcelButton from './DownloadExcelButton'; // Import the download button
 import { auth } from '../utils/firebaseConfig'; // Assuming you have auth setup for user ID
 import { saveTransactionDetails, getTransactionDetails } from '../utils/firebaseHelpers'; // Import Firebase functions
+import { useNavigate } from 'react-router-dom';
 
 // Initialize Highcharts modules
 HeatmapModule(Highcharts);
@@ -106,6 +107,7 @@ const AccountingSummary = () => {
   const [viewCharts, setViewCharts] = useState(false);  // State to control view
   const [transactionType, setTransactionType] = useState('');
   const userId = auth.currentUser?.uid;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrGenerateDetails = async () => {
@@ -441,17 +443,18 @@ const AccountingSummary = () => {
                   </TableHead>
                   <TableBody>
                     {monthDetail.productUnits.map((unit, i) => (
-                      <TableRow key={i} hover>
-                        <TableCell>{unit.id}</TableCell>
-                        <TableCell>{unit.description}</TableCell>
-                        <TableCell>{unit.unitPrice}€</TableCell>
-                        <TableCell>{unit.quantity}</TableCell>
-                        <TableCell>{unit.discount}%</TableCell>
-                        <TableCell>{unit.totalBeforeDiscount}€</TableCell>
-                        <TableCell>{unit.finalAmount}€</TableCell>
-                        <TableCell>{new Date(unit.purchaseDate).toDateString()}</TableCell>
-                        <TableCell>{unit.notes}</TableCell>
-                      </TableRow>
+                      <TableRow key={i} hover onClick={() => navigate(`/units/${unit.id}`, { state: { unit } })} style={{ cursor: 'pointer' }}>
+                      <TableCell>{unit.id}</TableCell>
+                      <TableCell>{unit.description}</TableCell>
+                      <TableCell>{unit.unitPrice}€</TableCell>
+                      <TableCell>{unit.quantity}</TableCell>
+                      <TableCell>{unit.discount}%</TableCell>
+                      <TableCell>{unit.totalBeforeDiscount}€</TableCell>
+                      <TableCell>{unit.finalAmount}€</TableCell>
+                      <TableCell>{new Date(unit.purchaseDate).toDateString()}</TableCell>
+                      <TableCell>{unit.notes}</TableCell>
+                    </TableRow>
+                    
                     ))}
                   </TableBody>
                 </Table>

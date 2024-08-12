@@ -8,6 +8,7 @@ import TransactionDetails from './components/TransactionDetails';
 import HomePage from './components/HomePage';
 import Blog from './components/Blog';
 import Article from './components/Article';
+import UnitDetails from './components/UnitDetails';
 import ProtectedRoute from './components/ProtectedRoute';
 import { auth } from './utils/firebaseConfig';
 
@@ -59,6 +60,16 @@ const App = () => {
             <ProtectedRoute user={user}>
               <Dashboard>
                 <TransactionDetails />
+              </Dashboard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/units/:unitId"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard>
+                <UnitDetails />
               </Dashboard>
             </ProtectedRoute>
           }
