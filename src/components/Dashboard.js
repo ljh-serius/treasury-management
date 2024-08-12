@@ -39,7 +39,6 @@ const Dashboard = ({ children }) => {
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [isClosing, setIsClosing] = useState(false);
   
-  console.log("transaction dashboard ", transactions)
   const userId = auth.currentUser?.uid;
 
   useEffect(() => {
@@ -54,13 +53,19 @@ const Dashboard = ({ children }) => {
           const defaultTransactions = { name: defaultBookName, ...initialTransactions };
           await saveTransactionBook(userId, id, defaultTransactions);
           setTransactions({ [id]: defaultTransactions });
-          setAvailableTransactions([id]);
           setTransactionName(id); // Automatically select the newly created book
         } else {
           setTransactions(books);
-          setAvailableTransactions(Object.keys(books));
           setTransactionName(Object.keys(books)[0]); // Optionally, select the first available book
         }
+
+        const bookNames = Object.keys(books).map((key) => {
+          return books[key].name;
+        })
+
+        console.log(bookNames)
+        setAvailableTransactions(bookNames);
+
       }
     };
     fetchTransactions();
@@ -86,7 +91,7 @@ const Dashboard = ({ children }) => {
       const newBook = { name, ...initialTransactions };
       const updatedTransactions = { ...transactions, [id]: newBook };
       setTransactions(updatedTransactions);
-      setAvailableTransactions([...availableTransactions, id]);
+      setAvailableTransactions([...availableTransactions, name]);
   
       // Save to Firebase
       await saveTransactionBook(userId, id, newBook);

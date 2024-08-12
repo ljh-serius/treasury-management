@@ -19,8 +19,6 @@ const TransactionBooks = ({ transactions }) => {
     setSnackbarMessage('');
   };
 
-  console.log("LOCAL", localTransactions)
-
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Grid container spacing={2}>

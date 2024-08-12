@@ -13,11 +13,8 @@ const TransactionTable = ({
   handleFocus, handleBlur, handleKeyDown, handleMenuOpen, handleColumnMenuOpen, handleNatureMenuOpen, editingCell,
   highlightedRow, highlightedMonth
 }) => {
-  console.log("TreasuryTable", inputValues)
   const presentedMonths = monthNames.slice(1);
 
-  console.log("inputValuesinputValues", inputValues)
-  console.log("inputValues", inputValues);
 
   // Filter displayed months based on input values
   const displayedMonths = presentedMonths.filter((_, monthIndex) =>
@@ -26,8 +23,6 @@ const TransactionTable = ({
       inputValues[type].some(transaction => transaction.montants[monthIndex] !== 0)
     )
   );
-  
-  console.log("displayedMonths", displayedMonths);
   
   const displayedMonthIndices = displayedMonths.map(month => presentedMonths.indexOf(month));
 

@@ -34,6 +34,7 @@ const TransactionSelect = ({
   handleTransactionChange
 }) => {
 
+  console.log("availableTransactions", availableTransactions)
   return (
     <Box display="flex" alignItems="center">
       <StyledFormControl>
@@ -42,9 +43,9 @@ const TransactionSelect = ({
         onChange={(e) => handleTransactionChange(e.target.value)}
         displayEmpty
       >
-        {availableTransactions.map((id) => (
-          <MenuItem key={id} value={id}>
-            {availableTransactions[id]?.name || 'Unnamed Book'}
+        {availableTransactions.map((name, index) => (
+          <MenuItem key={index} value={name}>
+            {name || 'Unnamed Book'}
           </MenuItem>
         ))}
       </Select>
