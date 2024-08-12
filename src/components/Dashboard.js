@@ -56,14 +56,13 @@ const Dashboard = ({ children }) => {
           setTransactionName(id); // Automatically select the newly created book
         } else {
           setTransactions(books);
-          setTransactionName(Object.keys(books)[0]); // Optionally, select the first available book
+          setTransactionName(books[Object.keys(books)[0]].name); // Optionally, select the first available book
         }
 
         const bookNames = Object.keys(books).map((key) => {
           return books[key].name;
         })
 
-        console.log(bookNames)
         setAvailableTransactions(bookNames);
 
       }
@@ -114,6 +113,7 @@ const Dashboard = ({ children }) => {
   const handleDrawerTransitionEnd = () => {
     setIsClosing(false);
   };
+  console.log("TTT", transactions)
 
   const generateRandomTransactions = async () => {
     // Generate random transactions
@@ -159,6 +159,7 @@ const Dashboard = ({ children }) => {
     decaissements.push(totalDecaissement);
   
     const randomTransactions = {
+      name: transactionName,
       encaissements,
       decaissements,
     };
@@ -170,9 +171,14 @@ const Dashboard = ({ children }) => {
   
     // Update state to trigger re-render
     setTransactions(updatedBooks);
-  
+
+    const currentDashboard = Object.keys(transactions).filter((key) => {
+      return transactions[key].name === transactionName;
+    })[0]
+
+    console.log("currentDashboard", currentDashboard)
     // Save to Firebase (or your preferred storage)
-    await saveTransactionBook(userId, transactionName, randomTransactions);
+    await saveTransactionBook(userId, currentDashboard, randomTransactions);
   };
 
   const handleAddClick = (event) => {
