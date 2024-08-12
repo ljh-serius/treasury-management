@@ -109,7 +109,7 @@ const Dashboard = ({ children }) => {
     setIsClosing(false);
   };
 
-  const generateRandomTransactions = () => {
+  const generateRandomTransactions = async () => {
     // Generate random transactions
     const encaissements = Array.from({ length: 5 }, (_, i) => ({
       nature: `Encaissement ${i + 1}`,
@@ -126,7 +126,7 @@ const Dashboard = ({ children }) => {
     // Calculate totals for encaissements and decaissements
     const totalEncaissement = encaissements.reduce((total, transaction) => {
       return {
-      nature: 'Total Encaissements',
+        nature: 'Total Encaissements',
         montantInitial: total.montantInitial + transaction.montantInitial,
         montants: total.montants.map((monthTotal, index) => monthTotal + transaction.montants[index]),
       };
@@ -162,12 +162,12 @@ const Dashboard = ({ children }) => {
       [transactionName]: randomTransactions,
     };
   
-    // Save to local storage
-    localStorage.setItem('books', JSON.stringify(updatedBooks));
-  
     // Update state to trigger re-render
     setTransactions(updatedBooks);
-  }
+  
+    // Save to Firebase (or your preferred storage)
+    await saveTransactionBook(userId, transactionName, randomTransactions);
+  };
 
   const handleAddClick = (event) => {
     setMenuAnchorEl(event.currentTarget);
