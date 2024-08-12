@@ -45,12 +45,26 @@ const Dashboard = ({ children }) => {
     const fetchTransactions = async () => {
       if (userId) {
         const books = await getTransactionBooks(userId);
-        setTransactions(books);
-        setAvailableTransactions(Object.keys(books));
+  
+        if (Object.keys(books).length === 0) {
+          // No books found, create a default one
+          const defaultBookName = 'Main Book';
+          const defaultTransactions = initialTransactions; // Assuming `initialTransactions` is your default structure
+          await saveTransactionBook(userId, defaultBookName, defaultTransactions);
+          setTransactions({ [defaultBookName]: defaultTransactions });
+          setAvailableTransactions([defaultBookName]);
+          setTransactionName(defaultBookName); // Automatically select the newly created book
+        } else {
+          setTransactions(books);
+          setAvailableTransactions(Object.keys(books));
+          setTransactionName(Object.keys(books)[0]); // Optionally, select the first available book
+        }
       }
     };
     fetchTransactions();
   }, [userId]);
+  
+  
 
   const handleLogout = async () => {
     try {
