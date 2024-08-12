@@ -17,6 +17,9 @@ import {
   MenuItem,
 } from '@mui/material';
 import { format } from 'date-fns';
+import { saveUnitToFirestore  } from '../utils/firebaseHelpers'; // Make sure your firebaseConfig is correctly set up
+import { auth } from '../utils/firebaseConfig';
+import { v4 as uuidv4 } from 'uuid';
 
 const categories = ['Category A', 'Category B', 'Category C'];
 
@@ -33,7 +36,7 @@ const generateRandomUnits = (count) => {
     const randomDate = generateRandomDate();
     const randomCategory = categories[Math.floor(Math.random() * categories.length)];
     const unit = {
-      id: i + 1,
+      id: uuidv4(),
       description: `Unit ${i + 1}`,
       quantity: Math.floor(Math.random() * 100) + 1,
       unitPrice: (Math.random() * 100).toFixed(2),
@@ -69,14 +72,21 @@ const UnitGenerator = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const rowsPerPage = 10;
 
-  const handleGenerateUnits = () => {
+  const userId = auth.currentUser?.uid;
+
+  const handleGenerateUnits = async () => {
     const { newWorkUnits, newProductUnits } = generateRandomUnits(100); // Adjust this number to ensure enough units are generated
-    console.log(newWorkUnits)
     setWorkUnits([...workUnits, ...newWorkUnits]);
     setProductUnits([...productUnits, ...newProductUnits]);
-    console.log("State Work Units:", workUnits.length); // Debugging
-    console.log("State Product Units:", productUnits.length); // Debugging
-  };
+
+    // Save generated units to Firestore
+    for (const unit of newWorkUnits) {
+      await saveUnitToFirestore(userId, unit);
+    }
+    for (const unit of newProductUnits) {
+      await saveUnitToFirestore(userId, unit);
+    }
+};
 
   const handlePageChange = (event, value) => {
     setPage(value);

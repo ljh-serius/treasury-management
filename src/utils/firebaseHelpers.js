@@ -116,3 +116,20 @@ export const deleteTransactionBook = async (bookId) => {
     throw new Error("Failed to delete transaction book.");
   }
 };
+
+export const saveUnitToFirestore = async (userId, unit) => {
+  try {
+    // Ensure the id is a string (if it's not already)
+    const unitId = String(unit.id);
+
+    // Create a reference to the specific document under the user's collection
+    const unitRef = doc(collection(db, "users", userId, "transaction-units"), unitId);
+
+    // Use setDoc with merge: true to update or create the document
+    await setDoc(unitRef, unit, { merge: true });
+
+    console.log(`Unit ${unit.id} saved to Firestore under user ${userId}.`);
+  } catch (error) {
+    console.error("Error saving unit to Firestore:", error);
+  }
+};

@@ -11,6 +11,7 @@ import TransactionBooks from './TransactionBooks';
 import AddTransactionModal from './AddTransactionModal';
 import { signOut } from 'firebase/auth';
 import { auth } from '../utils/firebaseConfig';
+
 import { initialTransactions } from './transactionHelpers'; // adjust the path as needed
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginDialog from './LoginDialog'; // Adjust the path as necessary
