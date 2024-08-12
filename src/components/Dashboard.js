@@ -17,6 +17,7 @@ import {
   Menu,
   MenuItem,
   Typography,
+  Button
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
@@ -27,6 +28,12 @@ import TransactionSelect from './TransactionSelect';
 import TransactionBooks from './TransactionBooks';
 import AddTransactionModal from './AddTransactionModal';
 import { initialTransactions, monthNames } from './transactionHelpers';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { signOut } from 'firebase/auth';
+import { auth } from '../utils/firebaseConfig';
+
+import LoginDialog from './LoginDialog';
+import RegisterDialog from './RegisterDialog';
 
 const drawerWidth = 240;
 
@@ -56,6 +63,16 @@ const Dashboard = ({ children }) => {
     setAvailableTransactions(Object.keys(savedBooks));
     setTransactions(savedBooks);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // Optionally, you can redirect the user to the home page or login page after logout
+      window.location.href = '/'; // Redirects to home
+    } catch (error) {
+      console.error("Error signing out: ", error);
+    }
+  };
 
   const handleDrawerToggle = () => {
     if (!isClosing) {
@@ -269,6 +286,14 @@ const Dashboard = ({ children }) => {
             <ListItemText primary="Transaction Details" />
           </ListItemButton>
         </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton onClick={handleLogout}>
+            <ListItemIcon>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText primary="Logout" />
+          </ListItemButton>
+        </ListItem>
       </List>
     </div>
   );
@@ -276,6 +301,15 @@ const Dashboard = ({ children }) => {
   const isTransactionBooks = React.Children.toArray(children).some(
     (child) => React.isValidElement(child) && child.type === TransactionBooks
   );
+
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [registerOpen, setRegisterOpen] = useState(false);
+
+  const handleLoginOpen = () => setLoginOpen(true);
+  const handleLoginClose = () => setLoginOpen(false);
+
+  const handleRegisterOpen = () => setRegisterOpen(true);
+  const handleRegisterClose = () => setRegisterOpen(false);
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -332,8 +366,33 @@ const Dashboard = ({ children }) => {
                   Décaissements
                 </MenuItem>
               </Menu>
+                
             </div>
           )}
+          {currentLocation.pathname === '/' && (
+            <Box>
+            <Button
+              variant="contained"
+              color="info"
+              onClick={handleLoginOpen}
+              sx={{
+                marginRight: '5px'
+              }}
+            >
+              Login
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleRegisterOpen}
+            >
+              Register
+            </Button>
+          </Box>
+          
+          )}
+          <LoginDialog open={loginOpen} onClose={handleLoginClose} />
+          <RegisterDialog open={registerOpen} onClose={handleRegisterClose} />
         </Toolbar>
       </AppBar>
       <Box
