@@ -31,8 +31,13 @@ import { format } from 'date-fns';
 import { fetchAllUnits, saveUnitToFirestore } from '../utils/firebaseHelpers';
 import { auth } from '../utils/firebaseConfig';
 import { v4 as uuidv4 } from 'uuid';
+import { translate } from '../utils/translate';
+import { useTranslation } from '../utils/TranslationProvider';
 
-const categories = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E', 'Category F', 'Category G', 'Category H', 'Category I', 'Category J'];
+const categories = [
+  'Category A', 'Category B', 'Category C', 'Category D', 'Category E',
+  'Category F', 'Category G', 'Category H', 'Category I', 'Category J'
+];
 const months = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
@@ -122,8 +127,8 @@ const generateSepaXML = (units) => {
         <CdtTrfTxInf>`;
 
   const xmlTransactions = units.map((unit) => {
-    const beneficiaryIBAN = randomIBAN(); // Correctly assign a generated IBAN
-    const beneficiaryBIC = randomBIC(); // Correctly assign a generated BIC
+    const beneficiaryIBAN = randomIBAN();
+    const beneficiaryBIC = randomBIC();
     const endToEndId = uuidv4();
 
     return `
@@ -158,15 +163,15 @@ const generateSepaXML = (units) => {
 
   const sepaXML = `${xmlHeader}${xmlTransactions}${xmlFooter}`;
 
-  // Create a Blob object to allow downloading the XML file
   const blob = new Blob([sepaXML], { type: 'application/xml' });
   const link = document.createElement('a');
   link.href = window.URL.createObjectURL(blob);
-  link.download = `SEPA_Decaissments_${new Date().toISOString().split('T')[0]}.xml`;
+  link.download = `SEPA_Expenses_${new Date().toISOString().split('T')[0]}.xml`;
   link.click();
 };
 
 const UnitGenerator = () => {
+  const { language } = useTranslation();
   const [allUnits, setAllUnits] = useState([]);
   const [filteredUnits, setFilteredUnits] = useState([]);
   const [page, setPage] = useState(1);
@@ -177,8 +182,8 @@ const UnitGenerator = () => {
   const [selectedYear, setSelectedYear] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
   const [unitType, setUnitType] = useState('revenues');
-  const [selectedMonths, setSelectedMonths] = useState([]); 
-  const [filtersLoaded, setFiltersLoaded] = useState(false); 
+  const [selectedMonths, setSelectedMonths] = useState([]);
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
   const rowsPerPage = 10;
 
   const userId = auth.currentUser?.uid;
@@ -192,7 +197,7 @@ const UnitGenerator = () => {
     }
     return null;
   };
-  
+
   useEffect(() => {
     if (userId) {
       console.log("loading filters")
@@ -201,14 +206,14 @@ const UnitGenerator = () => {
       console.log(localFilters)
       if (localFilters) {
         const filters = localFilters.data;
-  
+
         let type = '';
         if (filters.selectedType === 'encaissements') {
           type = 'revenues';
         } else if (filters.selectedType === 'decaissements') {
           type = 'expenses';
         }
-  
+
         setSelectedCategory(filters.selectedCategory || '');
         setSelectedType(type);
         setSelectedMonths(filters.selectedMonths || []);
@@ -217,7 +222,7 @@ const UnitGenerator = () => {
       setFiltersLoaded(true);
     }
   }, [userId]);
-  
+
   useEffect(() => {
     const fetchUnits = async () => {
       if (userId && filtersLoaded) {
@@ -260,7 +265,7 @@ const UnitGenerator = () => {
         const year = unitDate.getFullYear();
         const month = months[unitDate.getMonth()];
 
-        await saveUnitToFirestore(userId, unit, year.toString(), month);
+        await saveUnitToFirestore(userId, unit, year.toString(), translate(month, language));
       }
     }
   };
@@ -279,10 +284,10 @@ const UnitGenerator = () => {
 
   const handleGenerateSepaFile = () => {
     const expenseUnits = filteredUnits.filter(unit => unit.type === 'expenses');
-    console.log('Filtered expense units:', expenseUnits); // Log the filtered expense units
+    console.log('Filtered expense units:', expenseUnits);
 
     if (expenseUnits.length === 0) {
-      alert('No expenses found to generate SEPA XML.');
+      alert(translate('No expenses found to generate SEPA XML.', language));
       return;
     }
     generateSepaXML(expenseUnits);
@@ -293,26 +298,26 @@ const UnitGenerator = () => {
       <Box sx={{ padding: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Button variant="contained" color="primary" onClick={handleGenerateUnits}>
-            Generate Units
+            {translate('Generate Units', language)}
           </Button>
 
           <FormControlLabel
             control={<Switch checked={showWorkUnits} onChange={() => setShowWorkUnits(!showWorkUnits)} />}
-            label={showWorkUnits ? 'Show Work Units' : 'Show Product Units'}
+            label={showWorkUnits ? translate('Show Work Units', language) : translate('Show Product Units', language)}
             sx={{ marginTop: 2 }}
           />
         </Box>
 
         <TextField
           select
-          label="Filter by Category"
+          label={translate('Filter by Category', language)}
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
           fullWidth
           margin="normal"
           sx={{ marginTop: 2 }}
         >
-          <MenuItem value="">All Categories</MenuItem>
+          <MenuItem value="">{translate('All Categories', language)}</MenuItem>
           {categories.map((category) => (
             <MenuItem key={category} value={category}>
               {category}
@@ -322,20 +327,20 @@ const UnitGenerator = () => {
 
         <TextField
           select
-          label="Filter by Type"
+          label={translate('Filter by Type', language)}
           value={selectedType}
           onChange={(e) => setSelectedType(e.target.value)}
           fullWidth
           margin="normal"
           sx={{ marginTop: 2 }}
         >
-          <MenuItem value="">All Types</MenuItem>
-          <MenuItem value="revenues">Revenues</MenuItem>
-          <MenuItem value="expenses">Expenses</MenuItem>
+          <MenuItem value="">{translate('All Types', language)}</MenuItem>
+          <MenuItem value="revenues">{translate('Revenues', language)}</MenuItem>
+          <MenuItem value="expenses">{translate('Expenses', language)}</MenuItem>
         </TextField>
 
         <FormControl fullWidth margin="normal" sx={{ marginTop: 2 }}>
-          <InputLabel id="month-select-label">Filter by Month</InputLabel>
+          <InputLabel id="month-select-label">{translate('Filter by Month', language)}</InputLabel>
           <Select
             labelId="month-select-label"
             multiple
@@ -345,14 +350,14 @@ const UnitGenerator = () => {
           >
             {months.map((month) => (
               <MenuItem key={month} value={month}>
-                {month}
+                {translate(month, language)}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
 
         <TextField
-          label="Filter by Year"
+          label={translate('Filter by Year', language)}
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
           fullWidth
@@ -361,23 +366,23 @@ const UnitGenerator = () => {
         />
 
         <Typography variant="h6" sx={{ marginTop: 2 }}>
-          Total: {calculateTotal()}€
+          {translate('Total', language)}: {calculateTotal()}€
         </Typography>
 
         <TableContainer component={Paper} sx={{ marginTop: 3 }}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Quantity</TableCell>
-                <TableCell>Unit Price</TableCell>
-                {showWorkUnits && <TableCell>Hours Worked</TableCell>}
-                {showWorkUnits && <TableCell>Rate</TableCell>}
-                <TableCell>Total Amount</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Category</TableCell>
+                <TableCell>{translate('ID', language)}</TableCell>
+                <TableCell>{translate('Description', language)}</TableCell>
+                <TableCell>{translate('Type', language)}</TableCell>
+                <TableCell>{translate('Quantity', language)}</TableCell>
+                <TableCell>{translate('Unit Price', language)}</TableCell>
+                {showWorkUnits && <TableCell>{translate('Hours Worked', language)}</TableCell>}
+                {showWorkUnits && <TableCell>{translate('Rate', language)}</TableCell>}
+                <TableCell>{translate('Total Amount', language)}</TableCell>
+                <TableCell>{translate('Date', language)}</TableCell>
+                <TableCell>{translate('Category', language)}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -395,7 +400,7 @@ const UnitGenerator = () => {
                     {showWorkUnits && <TableCell>{unit.rate}€</TableCell>}
                     <TableCell>{unit.totalAmount}€</TableCell>
                     <TableCell>
-                      {unitDate ? format(unitDate, 'dd/MM/yyyy') : 'Invalid Date'}
+                      {unitDate ? format(unitDate, 'dd/MM/yyyy') : translate('Invalid Date', language)}
                     </TableCell>
                     <TableCell>{unit.category}</TableCell>
                   </TableRow>
@@ -413,29 +418,29 @@ const UnitGenerator = () => {
         />
 
         <Button variant="contained" color="secondary" onClick={handleGenerateSepaFile} sx={{ marginTop: 3 }}>
-          Generate SEPA XML for Expenses
+          {translate('Generate SEPA XML for Expenses', language)}
         </Button>
       </Box>
 
       <Dialog open={openDialog} onClose={() => handleDialogClose(false)}>
-        <DialogTitle>Select Unit Type</DialogTitle>
+        <DialogTitle>{translate('Select Unit Type', language)}</DialogTitle>
         <DialogContent>
           <FormControl component="fieldset">
-            <FormLabel component="legend">Type</FormLabel>
+            <FormLabel component="legend">{translate('Type', language)}</FormLabel>
             <RadioGroup
               aria-label="unit-type"
               name="unit-type"
               value={unitType}
               onChange={(e) => setUnitType(e.target.value)}
             >
-              <FormControlLabel value="revenues" control={<Radio />} label="Revenues" />
-              <FormControlLabel value="expenses" control={<Radio />} label="Expenses" />
+              <FormControlLabel value="revenues" control={<Radio />} label={translate('Revenues', language)} />
+              <FormControlLabel value="expenses" control={<Radio />} label={translate('Expenses', language)} />
             </RadioGroup>
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleDialogClose(false)}>Cancel</Button>
-          <Button onClick={() => handleDialogClose(true)} color="primary">Generate</Button>
+          <Button onClick={() => handleDialogClose(false)}>{translate('Cancel', language)}</Button>
+          <Button onClick={() => handleDialogClose(true)} color="primary">{translate('Generate', language)}</Button>
         </DialogActions>
       </Dialog>
     </Container>
