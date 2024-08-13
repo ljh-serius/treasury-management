@@ -31,9 +31,7 @@ const App = () => {
         <Route
           path="/"
           element={
-            <Dashboard>
-              <HomePage />
-            </Dashboard>
+            <HomePage />
           }
         />
         <Route

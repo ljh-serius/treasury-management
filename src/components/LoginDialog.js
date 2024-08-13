@@ -12,21 +12,23 @@ import {
 } from '@mui/material';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../utils/firebaseConfig';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const LoginDialog = ({ open, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       onClose(); // Close dialog on successful login
+      navigate('/books'); // Navigate to /books after login
     } catch (error) {
       setError(error.message);
     }
   };
-
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>Login</DialogTitle>
