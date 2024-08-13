@@ -9,7 +9,7 @@ const Blog = ({ language, switchLanguage }) => {
       <Button onClick={() => switchLanguage('en')}>English</Button>
       <Button onClick={() => switchLanguage('fr')}>Français</Button>
       <Typography variant="h4" gutterBottom>
-        {language === 'en' ? 'Blog Articles' : 'Articles du Blog'}
+        {language === 'en' ? 'Latest news, updates and frequent questions' : 'Dernières actualités, mises-à jour et questions fréquentes'}
       </Typography>
       <List>
         {articles.map((article, index) => (
