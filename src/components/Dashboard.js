@@ -23,6 +23,10 @@ import AddIcon from '@mui/icons-material/Add';
 // Import the summary helpers
 import { getAllTransactionSummaries, saveSummaryToFirestore } from '../utils/firebaseHelpers';
 
+// Import the translation utilities and context
+import { translate } from '../utils/translate';
+import { useTranslation } from '../utils/TranslationProvider';
+
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 // Utility to get the current time
@@ -58,8 +62,10 @@ const Dashboard = ({ children }) => {
   const currentLocation = useLocation();
   const drawerWidth = 240;
 
+  const { language, toggleLanguage } = useTranslation();
+  
   const [summaries, setSummaries] = useState({});
-  const [summaryName, setSummaryName] = useState('Main transaction book');
+  const [summaryName, setSummaryName] = useState(translate('Main transaction book', language));
   const [availableSummaries, setAvailableSummaries] = useState([]);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
@@ -89,7 +95,7 @@ const Dashboard = ({ children }) => {
       if (storedData && !shouldRefetchData(storedData.timestamp)) {
         setSummaries(storedData.data);
         const firstSummary = Object.keys(storedData.data)[0];
-        setSummaryName(storedData.data[firstSummary]?.name || 'Main transaction book');
+        setSummaryName(storedData.data[firstSummary]?.name || translate('Main transaction book', language));
         const summaryNames = Object.keys(storedData.data).map((key) => storedData.data[key].name);
         setAvailableSummaries(summaryNames);
         return;
@@ -101,7 +107,7 @@ const Dashboard = ({ children }) => {
           
           setSummaries(summaryData);
           const firstSummary = Object.keys(summaryData)[0];
-          setSummaryName(summaryData[firstSummary]?.name || 'Main transaction book');
+          setSummaryName(summaryData[firstSummary]?.name || translate('Main transaction book', language));
           const summaryNames = Object.keys(summaryData).map((key) => summaryData[key].name);
           setAvailableSummaries(summaryNames);
 
@@ -114,7 +120,7 @@ const Dashboard = ({ children }) => {
     };
 
     fetchSummaries();
-  }, [userId]);
+  }, [userId, language]);
 
   const handleLogout = async () => {
     try {
@@ -130,7 +136,7 @@ const Dashboard = ({ children }) => {
   };
 
   const handleNewSummary = async () => {
-    const name = prompt('Enter name for new summary set:');
+    const name = prompt(translate('Enter name for new summary set:', language));
     if (name) {
       const year = new Date().getFullYear();
       const newSummary = { name, encaissements: [], decaissements: [] };
@@ -288,6 +294,8 @@ const Dashboard = ({ children }) => {
     handleModalClose();
   };
 
+  console.log(translate("Transaction Books", language))
+
   const drawer = (
     <div>
       <Toolbar />
@@ -298,7 +306,7 @@ const Dashboard = ({ children }) => {
             <ListItemIcon>
               <BookIcon />
             </ListItemIcon>
-            <ListItemText primary="Transaction Books" />
+            <ListItemText primary={String(translate("Transaction Books", language))} />
           </ListItemButton>
         </ListItem>
       </List>
@@ -309,7 +317,7 @@ const Dashboard = ({ children }) => {
             <ListItemIcon>
               <ShuffleIcon />
             </ListItemIcon>
-            <ListItemText primary="Generate Random Summary" />
+            <ListItemText primary={translate("Generate Random Summary", language)} />
           </ListItemButton>
         </ListItem>
         <ListItem key="new" disablePadding>
@@ -317,7 +325,7 @@ const Dashboard = ({ children }) => {
             <ListItemIcon>
               <AddBoxIcon />
             </ListItemIcon>
-            <ListItemText primary="Add New Summary" />
+            <ListItemText primary={translate("Add New Summary", language)} />
           </ListItemButton>
         </ListItem>
         <ListItem key="analytics" disablePadding>
@@ -325,7 +333,7 @@ const Dashboard = ({ children }) => {
             <ListItemIcon>
               <InsertChartIcon />
             </ListItemIcon>
-            <ListItemText primary="Analytics" />
+            <ListItemText primary={translate("Analytics", language)} />
           </ListItemButton>
         </ListItem>
         <ListItem key="units" disablePadding>
@@ -333,7 +341,7 @@ const Dashboard = ({ children }) => {
             <ListItemIcon>
               <ListAltIcon />
             </ListItemIcon>
-            <ListItemText primary="Units" />
+            <ListItemText primary={translate("Units", language)} />
           </ListItemButton>
         </ListItem>
         <ListItem key="summary" disablePadding>
@@ -341,7 +349,7 @@ const Dashboard = ({ children }) => {
             <ListItemIcon>
               <AssessmentIcon />
             </ListItemIcon>
-            <ListItemText primary="Summary" />
+            <ListItemText primary={translate("Summary", language)} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
@@ -349,7 +357,7 @@ const Dashboard = ({ children }) => {
             <ListItemIcon>
               <LogoutIcon />
             </ListItemIcon>
-            <ListItemText primary="Logout" />
+            <ListItemText primary={translate("Logout", language)} />
           </ListItemButton>
         </ListItem>
       </List>
@@ -418,10 +426,10 @@ const Dashboard = ({ children }) => {
                 onClose={handleMenuClose}
               >
                 <MenuItem onClick={() => handleAddTransaction('encaissements')}>
-                  Encaissements
+                  {translate("Encaissements", language)}
                 </MenuItem>
                 <MenuItem onClick={() => handleAddTransaction('decaissements')}>
-                  Décaissements
+                  {translate("Décaissements", language)}
                 </MenuItem>
               </Menu>
             </div>
@@ -436,19 +444,27 @@ const Dashboard = ({ children }) => {
                   marginRight: '5px'
                 }}
               >
-                Login
+                {translate("Login", language)}
               </Button>
               <Button
                 variant="contained"
                 color="secondary"
                 onClick={handleRegisterOpen}
               >
-                Register
+                {translate("Register", language)}
               </Button>
             </Box>
           )}
           <LoginDialog open={loginOpen} onClose={handleLoginClose} />
           <RegisterDialog open={registerOpen} onClose={handleRegisterClose} />
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={toggleLanguage}
+            sx={{ ml: 'auto' }}
+          >
+            {translate("Switch Language", language)}
+          </Button>
         </Toolbar>
       </AppBar>
       <Box

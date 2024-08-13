@@ -13,6 +13,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { auth } from './utils/firebaseConfig';
 import UnitGenerator from './components/UnitGenerator';
 import SummaryComponent from './components/SummaryComponent';
+import { TranslationProvider } from './utils/TranslationProvider';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -37,72 +38,74 @@ const App = () => {
   };
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={user ? <Navigate to="/books" replace /> : <HomePage />}
-      />
-      <Route
-        path="/books"
-        element={
-          <ProtectedRoute user={user}>
-            <Dashboard>
-              <TransactionBooks />
-            </Dashboard>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/summary"
-        element={
-          <ProtectedRoute user={user}>
-            <Dashboard>
-              <SummaryComponent />
-            </Dashboard>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/analytics"
-        element={
-          <ProtectedRoute user={user}>
-            <Dashboard>
-              <Analytics />
-            </Dashboard>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/units"
-        element={
-          <ProtectedRoute user={user}>
-            <Dashboard>
-              <UnitGenerator />
-            </Dashboard>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/blog"
-        element={
-          <ProtectedRoute user={user}>
-            <Dashboard>
-              <Blog language={language} switchLanguage={switchLanguage} />
-            </Dashboard>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/article/:slug"
-        element={
-          <ProtectedRoute user={user}>
-            <Dashboard>
-              <Article language={language} switchLanguage={switchLanguage} />
-            </Dashboard>
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+    <TranslationProvider>
+      <Routes>
+        <Route
+          path="/"
+          element={user ? <Navigate to="/books" replace /> : <HomePage />}
+        />
+        <Route
+          path="/books"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard>
+                <TransactionBooks />
+              </Dashboard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/summary"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard>
+                <SummaryComponent />
+              </Dashboard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard>
+                <Analytics />
+              </Dashboard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/units"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard>
+                <UnitGenerator />
+              </Dashboard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/blog"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard>
+                <Blog language={language} switchLanguage={switchLanguage} />
+              </Dashboard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/article/:slug"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard>
+                <Article language={language} switchLanguage={switchLanguage} />
+              </Dashboard>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </TranslationProvider>
   );
 };
 
