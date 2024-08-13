@@ -335,7 +335,7 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
           handlePasteNatureRow={handlePasteNatureRow}
           type="nature"
         />
-        <Grid container style={{ mhandleNatureMenuOpenarginTop: 16 }}>
+        <Grid container style={{ handleNatureMenuOpenarginTop: 16 }}>
           <Grid item xs={12} md={6}>
             <ChartContainer
               title="Encaissements by Nature"

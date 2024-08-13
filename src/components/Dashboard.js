@@ -17,7 +17,7 @@ import RegisterDialog from './RegisterDialog';
 import { v4 as uuidv4 } from 'uuid';
 
 // Import the summary helpers
-import { fetchUnitsSummary, saveSummaryToFirestore } from '../utils/firebaseHelpers'; 
+import { getAllTransactionSummaries, saveSummaryToFirestore } from '../utils/firebaseHelpers'; 
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -54,7 +54,8 @@ const Dashboard = ({ children }) => {
     const fetchSummaries = async () => {
       if (userId) {
         try {
-          const summaryData = await fetchUnitsSummary(userId);
+          const summaryData = await getAllTransactionSummaries(userId);
+          
           setSummaries(summaryData);
           const firstSummary = Object.keys(summaryData)[0];
           setSummaryName(summaryData[firstSummary]?.name || 'Main transaction book');

@@ -88,16 +88,41 @@ const UnitGenerator = () => {
   const userId = auth.currentUser?.uid;
 
   const fetchAllUnits = async () => {
-    const unitsSnapshot = await getDocs(collection(db, "users", userId, "transaction-units"));
-    const units = unitsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    setAllUnits(units);
-    setFilteredUnits(units);
+    if (!userId) return;
+  
+    const allUnits = [];
+  
+    try {
+      // Loop through all years and months
+      for (let year = new Date().getFullYear(); year >= new Date().getFullYear() - 15; year--) {
+        for (let month of months) {
+          const monthIndex = months.indexOf(month) + 1; // Get the 1-based month index
+          const monthStr = monthIndex.toString().padStart(2, '0'); // Format month as "01", "02", etc.
+  
+          const unitsRef = collection(db, "users", userId, "transaction-units", year.toString(), month);
+          const unitsSnapshot = await getDocs(unitsRef);
+  
+          const units = unitsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            date: new Date(doc.data().date.seconds * 1000) // Convert Firestore timestamp to Date
+          }));
+  
+          allUnits.push(...units);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching units: ", error);
+    }
+  
+    setAllUnits(allUnits);
+    setFilteredUnits(allUnits);
   };
-
+  
   useEffect(() => {
     fetchAllUnits();
   }, [userId]);
-
+  
   const handleGenerateUnits = async () => {
     setOpenDialog(true);
   };
@@ -113,7 +138,13 @@ const UnitGenerator = () => {
 
       // Save generated units to Firestore
       for (const unit of combinedUnits) {
-        await saveUnitToFirestore(userId, unit);
+        const unitDate = unit.date;
+        const year = unitDate.getFullYear();
+        const month = months[unitDate.getMonth()];
+
+        const unitRef = collection(db, "users", userId, "transaction-units", year.toString(), month);
+        
+        await saveUnitToFirestore(userId, unit, unitRef);
       }
     }
   };
