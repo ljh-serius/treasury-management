@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState } from 'react';
 const TranslationContext = createContext();
 
 export const TranslationProvider = ({ children }) => {
-  const [language, setLanguage] = useState('en'); // default language
+  const [language, setLanguage] = useState('fr'); // default language
 
   const toggleLanguage = () => {
     setLanguage(language === 'fr' ? 'en' : 'fr');

@@ -29,13 +29,15 @@ import {
   getAllTransactionSummaries
 } from '../utils/firebaseHelpers';
 import { auth } from '../utils/firebaseConfig';
+import { translate } from '../utils/translate';
+import { useTranslation } from '../utils/TranslationProvider';
 
 // Initialize the heatmap module
 heatmap(Highcharts);
 
 const monthNames = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+  translate("January"), translate("February"), translate("March"), translate("April"), translate("May"), translate("June"),
+  translate("July"), translate("August"), translate("September"), translate("October"), translate("November"), translate("December")
 ];
 
 // Utility to get the current time
@@ -57,7 +59,6 @@ const saveToLocalStorage = (userId, key, data) => {
   localStorage.setItem(fullKey, JSON.stringify(dataToStore));
 };
 
-
 const loadFromLocalStorage = (userId, key) => {
   if (!userId) return null;
   const fullKey = `${userId}_${key}`;
@@ -69,6 +70,7 @@ const loadFromLocalStorage = (userId, key) => {
 };
 
 const Analytics = () => {
+  const { language } = useTranslation();
   const [books, setBooks] = useState({});
   const [selectedBooks, setSelectedBooks] = useState([]);
   const [selectedMonths, setSelectedMonths] = useState([]);
@@ -165,44 +167,44 @@ const Analytics = () => {
   
     return {
       title: {
-        text: 'Comparative Analysis of Budget Summaries',
+        text: translate('Comparative Analysis of Budget Summaries', language),
       },
       xAxis: {
         categories: booksToAnalyze,
         title: {
-          text: 'Books',
+          text: translate('Books', language),
         },
       },
       yAxis: {
         title: {
-          text: 'Amount',
+          text: translate('Amount', language),
         },
         min: 0,
       },
       series: [
         {
-          name: 'Initial Balance',
+          name: translate('Initial Balance', language),
           data: booksToAnalyze.map((bookName) => initialBalances[bookName]),
           type: 'column',
           color: '#007bff',
           dataLabels: { enabled: true },
         },
         {
-          name: 'Total Encaissements',
+          name: translate('Total Encaissements', language),
           data: booksToAnalyze.map((bookName) => totalEncaissements[bookName]),
           type: 'column',
           color: '#28a745',
           dataLabels: { enabled: true },
         },
         {
-          name: 'Total Decaissements',
+          name: translate('Total Decaissements', language),
           data: booksToAnalyze.map((bookName) => totalDecaissements[bookName]),
           type: 'column',
           color: '#dc3545',
           dataLabels: { enabled: true },
         },
         {
-          name: 'Final Treasury',
+          name: translate('Final Treasury', language),
           data: booksToAnalyze.map((bookName) => finalTreasuries[bookName]),
           type: 'column',
           color: '#ffc107',
@@ -245,11 +247,11 @@ const Analytics = () => {
           type: 'pie',
         },
         title: {
-          text: 'Encaissements Breakdown',
+          text: translate('Encaissements Breakdown', language),
         },
         series: [
           {
-            name: 'Encaissements',
+            name: translate('Encaissements', language),
             data: Object.entries(encaissementsData).map(([name, value]) => ({
               name,
               y: value,
@@ -264,11 +266,11 @@ const Analytics = () => {
           type: 'pie',
         },
         title: {
-          text: 'Decaissements Breakdown',
+          text: translate('Decaissements Breakdown', language),
         },
         series: [
           {
-            name: 'Decaissements',
+            name: translate('Decaissements', language),
             data: Object.entries(decaissementsData).map(([name, value]) => ({
               name,
               y: value,
@@ -311,21 +313,21 @@ const Analytics = () => {
 
     return {
       chart: { type: 'line' },
-      title: { text: 'Treasury Evolution Over Time' },
+      title: { text: translate('Treasury Evolution Over Time', language) },
       xAxis: {
         categories: months.map(month => monthNames[month]),
-        title: { text: 'Time' },
+        title: { text: translate('Time', language) },
       },
-      yAxis: { title: { text: 'Amount' }, min: 0 },
+      yAxis: { title: { text: translate('Amount', language) }, min: 0 },
       series: [
         {
-          name: 'Total Encaissements',
+          name: translate('Total Encaissements', language),
           data: encaissementsSeries,
           type: 'line',
           color: '#28a745',
         },
         {
-          name: 'Total Decaissements',
+          name: translate('Total Decaissements', language),
           data: decaissementsSeries,
           type: 'line',
           color: '#dc3545',
@@ -370,20 +372,20 @@ const Analytics = () => {
 
     return {
       chart: { type: 'column' },
-      title: { text: 'Monthly Totals' },
+      title: { text: translate('Monthly Totals', language) },
       xAxis: {
         categories: months.map(month => monthNames[month]),
-        title: { text: 'Month' },
+        title: { text: translate('Month', language) },
       },
-      yAxis: { title: { text: 'Amount' }, min: 0 },
+      yAxis: { title: { text: translate('Amount', language) }, min: 0 },
       series: [
         {
-          name: 'Total Encaissements',
+          name: translate('Total Encaissements', language),
           data: months.map((month) => monthlyTotals[month].encaissements),
           color: '#28a745',
         },
         {
-          name: 'Total Decaissements',
+          name: translate('Total Decaissements', language),
           data: months.map((month) => monthlyTotals[month].decaissements),
           color: '#dc3545',
         },
@@ -417,14 +419,14 @@ const Analytics = () => {
 
     return {
       chart: { type: 'heatmap' },
-      title: { text: 'Monthly Transaction Heatmap' },
+      title: { text: translate('Monthly Transaction Heatmap', language) },
       xAxis: {
         categories: booksToAnalyze,
-        title: { text: 'Books' },
+        title: { text: translate('Books', language) },
       },
       yAxis: {
         categories: monthNames,
-        title: { text: 'Month' },
+        title: { text: translate('Month', language) },
       },
       colorAxis: {
         min: -Math.max(...heatmapData.map(data => Math.abs(data[2]))),
@@ -433,7 +435,7 @@ const Analytics = () => {
       },
       series: [
         {
-          name: 'Transactions',
+          name: translate('Transactions', language),
           borderWidth: 1,
           data: heatmapData,
         },
@@ -445,13 +447,13 @@ const Analytics = () => {
   return (
     <Container maxWidth="xl" sx={{ mt: 12, mb: 12 }}>
       <Typography variant="h4" gutterBottom>
-        Comparative Analytics
+        {translate('Comparative Analytics', language)}
       </Typography>
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
           <FormControl fullWidth margin="normal">
-            <InputLabel>Select Books</InputLabel>
+            <InputLabel>{translate('Select Books', language)}</InputLabel>
             <Select
               multiple
               value={selectedBooks}
@@ -469,7 +471,7 @@ const Analytics = () => {
         </Grid>
         <Grid item xs={12} md={6}>
           <FormControl fullWidth margin="normal">
-            <InputLabel>Select Months</InputLabel>
+            <InputLabel>{translate('Select Months', language)}</InputLabel>
             <Select
               multiple
               value={selectedMonths}
@@ -490,17 +492,17 @@ const Analytics = () => {
       {selectedBooks.length > 0 && (
         <Box mt={4}>
           <Typography variant="h6" gutterBottom>
-            Global Annual :
+            {translate('Global Annual', language)}:
           </Typography>
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: '#424242' }}>
-                  <TableCell sx={{ color: '#ffffff' }}>Book</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Initial Balance</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Total Encaissements</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Total Decaissements</TableCell>
-                  <TableCell sx={{ color: '#ffffff' }}>Final Treasury</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>{translate('Book', language)}</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>{translate('Initial Balance', language)}</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>{translate('Total Encaissements', language)}</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>{translate('Total Decaissements', language)}</TableCell>
+                  <TableCell sx={{ color: '#ffffff' }}>{translate('Final Treasury', language)}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -535,7 +537,7 @@ const Analytics = () => {
 
       <Box mt={4}>
         <Typography variant="h6" gutterBottom>
-          Queryable Charts :
+          {translate('Queryable Charts', language)}:
         </Typography>
         {Object.keys(pieChartOptions).length > 0 && (
           <Grid container spacing={4}>

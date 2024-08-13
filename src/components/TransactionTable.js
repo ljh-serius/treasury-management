@@ -6,6 +6,8 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {
   calculateTotal, monthNames, calculateMonthlyTreasury, calculateAccumulatedTreasury, calculatePercentageBalanceVsEncaissements
 } from './transactionHelpers';
+import { translate } from '../utils/translate';
+import { useTranslation } from '../utils/TranslationProvider';
 
 const TransactionTable = ({
   inputValues = {}, // Default to an empty object if inputValues is undefined
@@ -13,6 +15,7 @@ const TransactionTable = ({
   handleFocus, handleBlur, handleKeyDown, handleMenuOpen, handleColumnMenuOpen, handleNatureMenuOpen, editingCell,
   highlightedRow, highlightedMonth
 }) => {
+  const { language } = useTranslation();
   const presentedMonths = monthNames.slice(1);
 
   // Filter displayed months based on input values
@@ -59,13 +62,13 @@ const TransactionTable = ({
                 color: '#ffffff',
                 position: 'sticky',
                 left: 0,
-                zIndex: 2,
+                zIndex: 3,  // Keep this high to ensure it's on top
                 backgroundColor: '#1976d2',
                 fontWeight: 'bold',
                 borderRight: '1px solid #ffffff',
               }}
             >
-              Type
+              {translate('Type', language)}
             </TableCell>
             <TableCell
               padding="normal"
@@ -73,14 +76,14 @@ const TransactionTable = ({
               sx={{
                 color: '#ffffff',
                 position: 'sticky',
-                left: '120px',
-                zIndex: 2,
+                left: 0, // Align it directly next to the first column
+                zIndex: 3,  // Keep this high to ensure it's on top
                 backgroundColor: '#1976d2',
                 fontWeight: 'bold',
                 borderRight: '1px solid #ffffff',
               }}
             >
-              Nature de la transaction
+              {translate('Nature of Transaction', language)}
             </TableCell>
             <TableCell
               padding="normal"
@@ -89,7 +92,7 @@ const TransactionTable = ({
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography align="left" gutterBottom style={{ flexGrow: 1 }}>
-                  Solde Initial
+                  {translate('Initial Balance', language)}
                 </Typography>
                 <IconButton
                   aria-label="open column menu"
@@ -111,7 +114,7 @@ const TransactionTable = ({
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography align="left" gutterBottom style={{ flexGrow: 1 }}>
-                    {month}
+                    {translate(month, language)}
                   </Typography>
                   <IconButton
                     aria-label="open column menu"
@@ -126,7 +129,7 @@ const TransactionTable = ({
               </TableCell>
             ))}
             <TableCell align="left" padding="normal" sx={{ color: '#ffffff', backgroundColor: '#1976d2', fontWeight: 'bold' }}>
-              Total
+              {translate('Total', language)}
             </TableCell>
           </TableRow>
         </TableHead>
@@ -149,12 +152,12 @@ const TransactionTable = ({
                         backgroundColor: "#e3f2fd",
                         position: 'sticky',
                         left: 0,
-                        zIndex: 1,
+                        zIndex: 2,  // Keep this high to ensure it's on top
                         fontWeight: 'bold',
                         borderRight: '1px solid #cccccc',
                       }}
                     >
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                      {translate(type.charAt(0).toUpperCase() + type.slice(1), language)}
                     </TableCell>
                   )}
                   <TableCell
@@ -163,8 +166,8 @@ const TransactionTable = ({
                     sx={{
                       backgroundColor: "#e3f2fd",
                       position: 'sticky',
-                      left: '120px',
-                      zIndex: 1,
+                      left: 0, // Align it directly next to the first column
+                      zIndex: 2,  // Keep this high to ensure it's on top
                       borderRight: '1px solid #cccccc',
                     }}
                   >
@@ -268,7 +271,7 @@ const TransactionTable = ({
           </React.Fragment>
         ))}
           <TableRow>
-            <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold', backgroundColor: '#e3f2fd', borderTop: '2px solid #1976d2' }} align="left">Solde de la Trésorerie</TableCell>
+            <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold', backgroundColor: '#e3f2fd', borderTop: '2px solid #1976d2' }} align="left">{translate('Treasury Balance', language)}</TableCell>
             {displayedMonthIndices.map((monthIndex) => (
               <TableCell
                 key={monthIndex}
@@ -289,7 +292,7 @@ const TransactionTable = ({
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold', backgroundColor: '#e3f2fd' }} align="left">Trésorerie Accumulée</TableCell>
+            <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold', backgroundColor: '#e3f2fd' }} align="left">{translate('Accumulated Treasury', language)}</TableCell>
             {displayedMonthIndices.map((monthIndex) => (
               <TableCell
                 key={monthIndex}
@@ -309,7 +312,7 @@ const TransactionTable = ({
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold', backgroundColor: '#e3f2fd' }} align="left">Percentage of Treasury vs Encaissements</TableCell>
+            <TableCell colSpan={3} padding="normal" sx={{ fontWeight: 'bold', backgroundColor: '#e3f2fd' }} align="left">{translate('Percentage of Treasury vs Encaissements', language)}</TableCell>
             {displayedMonthIndices.map((monthIndex) => (
               <TableCell
                 key={monthIndex}

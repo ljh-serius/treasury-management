@@ -107,11 +107,27 @@ export const translate =  (key, lanauge) => {
     "Filter by Type": "Filter by Type",
     "Filter by Month": "Filter by Month",
     "Filter by Year": "Filter by Year",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December",
+    "Encaissements": "Income",
+    "Decaissements": "Expenses"
   };
   
   const french = {
     // General$
     "Switch Language": "Changer de langue",
+    "Treasury Evolution Over Time" : "Évolution de la trésorerie à travers le temps",
+    "Monthly Transction Heatmap": "Heatmap des transactions mensuelles",
     "Comparative Analytics": "Analyse comparative",
     "Select Books": "Sélectionnez les livres",
     "Select Months": "Sélectionnez les mois",
@@ -130,7 +146,7 @@ export const translate =  (key, lanauge) => {
     "Accumulated Treasury": "Trésorerie Accumulée",
     "Treasury Balance": "Solde de Trésorerie",
     "Percentage of Treasury vs Receipts": "Percentage of Treasury vs Encaissements",
-    
+    "Percentage of Treasury vs Encaissements": "Pourcentage de (Trésororie vs Encaissements)",
     // Dashboard and Navigation
     "Transaction Books": "Livres de transactions",
     "Generate Random Summary": "Générer un résumé aléatoire",
@@ -217,6 +233,20 @@ export const translate =  (key, lanauge) => {
     "Filter by Type": "Filtrer par type",
     "Filter by Month": "Filtrer par mois",
     "Filter by Year": "Filtrer par année",
+    "January": "Janvier",
+    "February": "Février",
+    "March": "Mars",
+    "April": "Avril",
+    "May": "Mai",
+    "June": "Juin",
+    "July": "Juillet",
+    "August": "Août",
+    "September": "Septembre",
+    "October": "Octobre",
+    "November": "Novembre",
+    "December": "Décembre",
+    "Encaissements": "Encaissements",
+    "Decaissements": "Décaissements"
   };
 
   if(lanauge == 'fr') {
