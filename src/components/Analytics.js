@@ -25,6 +25,10 @@ import {
   calculateBudgetSummary,
   calculateTotals,
 } from './transactionHelpers';
+import {
+  getAllTransactionSummaries
+} from '../utils/firebaseHelpers';
+import { auth } from '../utils/firebaseConfig';
 
 // Initialize the heatmap module
 heatmap(Highcharts);
@@ -44,16 +48,25 @@ const Analytics = () => {
   const [lineChartOptions, setLineChartOptions] = useState({});
   const [barChartOptions, setBarChartOptions] = useState({});
   const [heatmapOptions, setHeatmapOptions] = useState({});
+  const userId = auth.currentUser?.uid;
 
   useEffect(() => {
-    const savedBooks = JSON.parse(localStorage.getItem('books')) || {};
-    setBooks(savedBooks);
-    setBookOptions(Object.keys(savedBooks));
-  
-    if (Object.keys(savedBooks).length > 0 && selectedBooks.length === 0) {
-      setSelectedBooks(Object.keys(savedBooks));
-    }
-  }, [selectedBooks]);
+    const fetchBooks = async () => {
+      try {
+        const fetchedBooks = await getAllTransactionSummaries(userId);
+        setBooks(fetchedBooks);
+        setBookOptions(Object.keys(fetchedBooks));
+
+        if (Object.keys(fetchedBooks).length > 0 && selectedBooks.length === 0) {
+          setSelectedBooks([Object.keys(fetchedBooks)[0]]);
+        }
+      } catch (error) {
+        console.error('Error fetching books:', error);
+      }
+    };
+
+    fetchBooks();
+  }, [userId, selectedBooks]);
 
   const handleBookChange = (event) => {
     setSelectedBooks(event.target.value);
