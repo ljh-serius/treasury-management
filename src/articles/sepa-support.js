@@ -1,4 +1,4 @@
-const article = `# Comprehensive Guide to Supporting SEPA Euro Payments for Streamlined Transactions
+const article3_en = `# Comprehensive Guide to Supporting SEPA Euro Payments for Streamlined Transactions
 
 As businesses increasingly expand their operations across borders within Europe, the efficiency and standardization of payment systems become vital. Our software now fully supports SEPA (Single Euro Payments Area) euro payments, providing a seamless and reliable solution that enhances the way businesses manage their financial transactions within the European Union and beyond.
 
@@ -46,4 +46,4 @@ Supporting SEPA euro payments is a critical step in modernizing your treasury ma
 
 Start leveraging SEPA with our software today and experience firsthand the benefits it can bring to your business. From improved cash flow management to enhanced business relationships, SEPA is a key component in your journey towards financial efficiency and success.`;
 
-export default article;
+export default article3_en;

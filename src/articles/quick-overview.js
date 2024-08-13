@@ -1,4 +1,4 @@
-const article = `# Quick overview of our software
+const article2_en = `# Quick overview of our software
 
 ### Home Page - '/'
 
@@ -102,4 +102,4 @@ The Transaction Details page allows users to dive deep into the specifics of ind
 - **Scenario 3: Viewing Trends and Patterns**
   - The user views charts that display trends and patterns in the transaction data, such as changes in costs over time or product profitability.`;
   
-export default article;
+export default article2_en;

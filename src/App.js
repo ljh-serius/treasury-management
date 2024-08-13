@@ -17,6 +17,7 @@ import SummaryComponent from './components/SummaryComponent';
 const App = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState('en'); // Default language
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -30,6 +31,10 @@ const App = () => {
   if (loading) {
     return <div>Loading...</div>; // Or a spinner component
   }
+
+  const switchLanguage = (lang) => {
+    setLanguage(lang);
+  };
 
   return (
     <Routes>
@@ -82,7 +87,7 @@ const App = () => {
         element={
           <ProtectedRoute user={user}>
             <Dashboard>
-              <Blog />
+              <Blog language={language} switchLanguage={switchLanguage} />
             </Dashboard>
           </ProtectedRoute>
         }
@@ -92,7 +97,7 @@ const App = () => {
         element={
           <ProtectedRoute user={user}>
             <Dashboard>
-              <Article />
+              <Article language={language} switchLanguage={switchLanguage} />
             </Dashboard>
           </ProtectedRoute>
         }
