@@ -62,7 +62,6 @@ export const getTransactionDetails = async (userId, transactionId) => {
  */
 export const getAllTransactionSummaries = async (userId) => {
   try {
-    console.log("fetching")
     const summariesCollection = collection(db, 'users', userId, 'transactions-summary');
     const summariesSnapshot = await getDocs(summariesCollection);
 
@@ -71,7 +70,6 @@ export const getAllTransactionSummaries = async (userId) => {
       summaries[doc.id] = doc.data();
     });
 
-    console.log("sumamries ", summaries)
     return summaries;
   } catch (error) {
     console.error('Error fetching transaction summaries: ', error);
@@ -176,17 +174,23 @@ export const fetchAllUnits = async (userId, filters) => {
 
 export const saveUnitToFirestore = async (userId, unit, year, month) => {
   try {
-    const unitRef = collection(db, "users", userId, "transaction-units", year, month);
+    // Get the reference to the collection where you want to add the document
+    const unitsCollectionRef = collection(db, "users", userId, "transaction-units", year, month);
 
-    await unitRef.add({
+    // Use addDoc to add the document to the collection
+    await addDoc(unitsCollectionRef, {
       ...unit,
       createdBy: userId,
       createdAt: new Date(),
     });
+
+    console.log('Unit saved successfully.');
   } catch (error) {
     console.error("Error saving unit: ", error);
+    throw error;
   }
 };
+
 // Define the months array
 const months = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -268,7 +272,6 @@ export const fetchUnitsSummary = async (userId) => {
       summary[year].decaissements.push(calculateTotal(summary[year].decaissements));
     }
 
-    console.log("Summary:", summary);
     return summary;
 
   } catch (error) {
