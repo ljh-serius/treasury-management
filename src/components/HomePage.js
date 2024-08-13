@@ -34,6 +34,7 @@ const HomePage = () => {
             Vault Insight
           </Typography>
           <Button color="inherit" onClick={handleLoginOpen}>Login</Button>
+          <Button component={Link} to="/registration" color="inherit">Register</Button> {/* Add Register button */}
         </Toolbar>
       </AppBar>
       <Toolbar />
@@ -49,9 +50,9 @@ const HomePage = () => {
               <Typography variant="h5" color="textSecondary" paragraph>
                 Transform the way you manage your financial transactions with Vault Insight - the ultimate solution for businesses of all sizes.
               </Typography>
-              <Button variant="contained" color="primary" size="large" onClick={handleRegisterOpen}>
+              <Button component={Link} to="/registration" variant="contained" color="primary" size="large">
                 Get Started
-              </Button>
+              </Button> {/* Update to navigate to the registration route */}
             </Grid>
             <Grid item xs={12} md={6}>
               <Card elevation={3}>

@@ -2,6 +2,49 @@ import { collectionGroup, collection, getDocs, addDoc, getDoc, setDoc, updateDoc
 import { db } from "./firebaseConfig";
 import { v4 as uuidv4 } from 'uuid';
 
+export const createOrganization = async (orgName, customDomain) => {
+  const tenantId = uuidv4();
+  const orgDocRef = doc(collection(db, "organizations"));
+
+  const organizationData = {
+    name: orgName,
+    domain: customDomain,
+    tenant_id: tenantId,
+  };
+
+  await setDoc(orgDocRef, organizationData);
+  return { tenantId, organizationId: orgDocRef.id };
+};
+
+export const fetchOrganizationData = async (organizationId) => {
+  const orgRef = doc(db, "organizations", organizationId);
+  const orgSnapshot = await getDoc(orgRef);
+
+  if (orgSnapshot.exists()) {
+    const orgData = orgSnapshot.data();
+    const usersSnapshot = await getDocs(collection(orgRef, "users"));
+    const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return { ...orgData, users };
+  } else {
+    throw new Error("Organization not found");
+  }
+};
+  
+export const fetchUsersOfOrganization = async (organizationId) => {
+  const usersCollection = collection(db, "organizations", organizationId, "users");
+  const usersSnapshot = await getDocs(usersCollection);
+  
+  const users = [];
+  usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
+  return users;
+};
+
+export const addUserToOrganization = async (organizationId, user) => {
+  const userRef = doc(collection(db, "organizations", organizationId, "users"));
+  await setDoc(userRef, user);
+};
+
 // Function to save or update a transaction book
 export const saveTransactionSummary = async (userId, bookName, transactions) => {
   try {

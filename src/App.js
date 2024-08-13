@@ -14,6 +14,7 @@ import { auth } from './utils/firebaseConfig';
 import UnitGenerator from './components/UnitGenerator';
 import SummaryComponent from './components/SummaryComponent';
 import { TranslationProvider } from './utils/TranslationProvider';
+import OrganizationRegistration from './components/OrganizationRegistration'; // Import the Registration component
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -104,6 +105,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/registration" element={<OrganizationRegistration />} /> {/* Add this line */}
       </Routes>
     </TranslationProvider>
   );
