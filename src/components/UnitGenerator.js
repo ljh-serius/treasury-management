@@ -74,7 +74,6 @@ const generateRandomUnits = (count, unitType) => {
 };
 
 const generateSepaXML = (units) => {
-  // Function to generate SEPA XML for "Décaissments" (Expenses)
   const randomIBAN = () => 'FR' + Math.floor(1000000000000000 + Math.random() * 9000000000000000).toString();
   const randomBIC = () => 'ABCDEF' + Math.floor(100 + Math.random() * 900).toString();
 
@@ -122,14 +121,9 @@ const generateSepaXML = (units) => {
         <ChrgBr>SLEV</ChrgBr>
         <CdtTrfTxInf>`;
 
-  const xmlFooter = `        </CdtTrfTxInf>
-      </PmtInf>
-    </CstmrCdtTrfInitn>
-  </Document>`;
-
   const xmlTransactions = units.map((unit) => {
-    const beneficiaryIBAN = randomIBAN();
-    const beneficiaryBIC = randomBIC();
+    const beneficiaryIBAN = randomIBAN(); // Correctly assign a generated IBAN
+    const beneficiaryBIC = randomBIC(); // Correctly assign a generated BIC
     const endToEndId = uuidv4();
 
     return `
@@ -157,6 +151,11 @@ const generateSepaXML = (units) => {
           </RmtInf>`;
   }).join('');
 
+  const xmlFooter = `        </CdtTrfTxInf>
+      </PmtInf>
+    </CstmrCdtTrfInitn>
+  </Document>`;
+
   const sepaXML = `${xmlHeader}${xmlTransactions}${xmlFooter}`;
 
   // Create a Blob object to allow downloading the XML file
@@ -178,8 +177,8 @@ const UnitGenerator = () => {
   const [selectedYear, setSelectedYear] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
   const [unitType, setUnitType] = useState('revenues');
-  const [selectedMonths, setSelectedMonths] = useState([]);  // Add this to your state declarations
-  const [filtersLoaded, setFiltersLoaded] = useState(false); // Track if filters are loaded from localStorage
+  const [selectedMonths, setSelectedMonths] = useState([]); 
+  const [filtersLoaded, setFiltersLoaded] = useState(false); 
   const rowsPerPage = 10;
 
   const userId = auth.currentUser?.uid;
@@ -267,6 +266,8 @@ const UnitGenerator = () => {
 
   const handleGenerateSepaFile = () => {
     const expenseUnits = filteredUnits.filter(unit => unit.type === 'expenses');
+    console.log('Filtered expense units:', expenseUnits); // Log the filtered expense units
+
     if (expenseUnits.length === 0) {
       alert('No expenses found to generate SEPA XML.');
       return;

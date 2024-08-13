@@ -38,6 +38,33 @@ const monthNames = [
   "July", "August", "September", "October", "November", "December"
 ];
 
+// Utility to get the current time
+const getCurrentTime = () => new Date().getTime();
+
+// Utility to check if data should be refetched
+const shouldRefetchData = (lastFetchTime, intervalInMs = 3600000) => {
+  const currentTime = getCurrentTime();
+  return !lastFetchTime || (currentTime - lastFetchTime) > intervalInMs;
+};
+
+// Utility to store data in localStorage
+const saveToLocalStorage = (key, data) => {
+  const dataToStore = {
+    timestamp: getCurrentTime(),
+    data
+  };
+  localStorage.setItem(key, JSON.stringify(dataToStore));
+};
+
+// Utility to load data from localStorage
+const loadFromLocalStorage = (key) => {
+  const storedData = localStorage.getItem(key);
+  if (storedData) {
+    return JSON.parse(storedData);
+  }
+  return null;
+};
+
 const Analytics = () => {
   const [books, setBooks] = useState({});
   const [selectedBooks, setSelectedBooks] = useState([]);
@@ -52,10 +79,22 @@ const Analytics = () => {
 
   useEffect(() => {
     const fetchBooks = async () => {
+      const localStorageKey = 'transactionSummaries';
+      const storedData = loadFromLocalStorage(localStorageKey);
+
+      if (storedData && !shouldRefetchData(storedData.timestamp)) {
+        setBooks(storedData.data);
+        setBookOptions(Object.keys(storedData.data));
+        return;
+      }
+
       try {
         const fetchedBooks = await getAllTransactionSummaries(userId);
         setBooks(fetchedBooks);
         setBookOptions(Object.keys(fetchedBooks));
+
+        // Store fetched data in localStorage
+        saveToLocalStorage(localStorageKey, fetchedBooks);
 
         if (Object.keys(fetchedBooks).length > 0 && selectedBooks.length === 0) {
           setSelectedBooks([Object.keys(fetchedBooks)[0]]);

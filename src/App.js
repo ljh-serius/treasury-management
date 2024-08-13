@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import Dashboard from './components/Dashboard';
 import TransactionBooks from './components/TransactionBooks';
@@ -16,87 +16,95 @@ import SummaryComponent from './components/SummaryComponent';
 
 const App = () => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
+      setLoading(false); // Stop loading once auth state is determined
     });
 
     return () => unsubscribe();
   }, []);
 
+  if (loading) {
+    return <div>Loading...</div>; // Or a spinner component
+  }
+
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <HomePage />
-          }
-        />
-        <Route
-          path="/books"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <TransactionBooks />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/summary"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <SummaryComponent />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/analytics"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <Analytics />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/units"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <UnitGenerator />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/blog"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <Blog />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/article/:slug"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <Article />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route
+        path="/"
+        element={user ? <Navigate to="/books" replace /> : <HomePage />}
+      />
+      <Route
+        path="/books"
+        element={
+          <ProtectedRoute user={user}>
+            <Dashboard>
+              <TransactionBooks />
+            </Dashboard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/summary"
+        element={
+          <ProtectedRoute user={user}>
+            <Dashboard>
+              <SummaryComponent />
+            </Dashboard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analytics"
+        element={
+          <ProtectedRoute user={user}>
+            <Dashboard>
+              <Analytics />
+            </Dashboard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/units"
+        element={
+          <ProtectedRoute user={user}>
+            <Dashboard>
+              <UnitGenerator />
+            </Dashboard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/blog"
+        element={
+          <ProtectedRoute user={user}>
+            <Dashboard>
+              <Blog />
+            </Dashboard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/article/:slug"
+        element={
+          <ProtectedRoute user={user}>
+            <Dashboard>
+              <Article />
+            </Dashboard>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 };
 
-export default App;
+const RootApp = () => (
+  <Router>
+    <App />
+  </Router>
+);
+
+export default RootApp;

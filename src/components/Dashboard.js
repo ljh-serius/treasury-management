@@ -20,11 +20,37 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ShuffleIcon from '@mui/icons-material/Shuffle';
 import AddIcon from '@mui/icons-material/Add';
 
-
 // Import the summary helpers
-import { getAllTransactionSummaries, saveSummaryToFirestore } from '../utils/firebaseHelpers'; 
+import { getAllTransactionSummaries, saveSummaryToFirestore } from '../utils/firebaseHelpers';
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+// Utility to get the current time
+const getCurrentTime = () => new Date().getTime();
+
+// Utility to check if data should be refetched
+const shouldRefetchData = (lastFetchTime, intervalInMs = 3600000) => {
+  const currentTime = getCurrentTime();
+  return !lastFetchTime || (currentTime - lastFetchTime) > intervalInMs;
+};
+
+// Utility to store data in localStorage
+const saveToLocalStorage = (key, data) => {
+  const dataToStore = {
+    timestamp: getCurrentTime(),
+    data
+  };
+  localStorage.setItem(key, JSON.stringify(dataToStore));
+};
+
+// Utility to load data from localStorage
+const loadFromLocalStorage = (key) => {
+  const storedData = localStorage.getItem(key);
+  if (storedData) {
+    return JSON.parse(storedData);
+  }
+  return null;
+};
 
 const Dashboard = ({ children }) => {
   const theme = useTheme();
@@ -57,6 +83,18 @@ const Dashboard = ({ children }) => {
 
   useEffect(() => {
     const fetchSummaries = async () => {
+      const localStorageKey = 'transactionSummaries';
+      const storedData = loadFromLocalStorage(localStorageKey);
+
+      if (storedData && !shouldRefetchData(storedData.timestamp)) {
+        setSummaries(storedData.data);
+        const firstSummary = Object.keys(storedData.data)[0];
+        setSummaryName(storedData.data[firstSummary]?.name || 'Main transaction book');
+        const summaryNames = Object.keys(storedData.data).map((key) => storedData.data[key].name);
+        setAvailableSummaries(summaryNames);
+        return;
+      }
+
       if (userId) {
         try {
           const summaryData = await getAllTransactionSummaries(userId);
@@ -66,6 +104,9 @@ const Dashboard = ({ children }) => {
           setSummaryName(summaryData[firstSummary]?.name || 'Main transaction book');
           const summaryNames = Object.keys(summaryData).map((key) => summaryData[key].name);
           setAvailableSummaries(summaryNames);
+
+          // Store fetched data in localStorage
+          saveToLocalStorage(localStorageKey, summaryData);
         } catch (error) {
           console.error("Error fetching summaries: ", error);
         }
@@ -314,7 +355,6 @@ const Dashboard = ({ children }) => {
       </List>
     </div>
   );
-  
 
   const isTransactionBooks = React.Children.toArray(children).some(
     (child) => React.isValidElement(child) && child.type === TransactionBooks
