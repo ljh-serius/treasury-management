@@ -26,10 +26,9 @@ import {
   Typography,
 } from '@mui/material';
 import { format } from 'date-fns';
-import { saveUnitToFirestore } from '../utils/firebaseHelpers';
-import { auth, db } from '../utils/firebaseConfig';
+import { fetchAllUnits, saveUnitToFirestore } from '../utils/firebaseHelpers';
+import { auth } from '../utils/firebaseConfig';
 import { v4 as uuidv4 } from 'uuid';
-import { collection, getDocs } from 'firebase/firestore';
 
 const categories = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E', 'Category F', 'Category G', 'Category H', 'Category I', 'Category J'];
 const months = [
@@ -87,42 +86,25 @@ const UnitGenerator = () => {
 
   const userId = auth.currentUser?.uid;
 
-  const fetchAllUnits = async () => {
-    if (!userId) return;
-  
-    const allUnits = [];
-  
-    try {
-      // Loop through all years and months
-      for (let year = new Date().getFullYear(); year >= new Date().getFullYear() - 15; year--) {
-        for (let month of months) {
-          const monthIndex = months.indexOf(month) + 1; // Get the 1-based month index
-          const monthStr = monthIndex.toString().padStart(2, '0'); // Format month as "01", "02", etc.
-  
-          const unitsRef = collection(db, "users", userId, "transaction-units", year.toString(), month);
-          const unitsSnapshot = await getDocs(unitsRef);
-  
-          const units = unitsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            date: new Date(doc.data().date.seconds * 1000) // Convert Firestore timestamp to Date
-          }));
-  
-          allUnits.push(...units);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching units: ", error);
-    }
-  
-    setAllUnits(allUnits);
-    setFilteredUnits(allUnits);
-  };
-  
   useEffect(() => {
-    fetchAllUnits();
-  }, [userId]);
-  
+    const fetchUnits = async () => {
+      if (userId) {
+        const filters = {
+          selectedCategory,
+          selectedType,
+          selectedMonth,
+          selectedYear,
+          months
+        };
+        const fetchedUnits = await fetchAllUnits(userId, filters);
+        setAllUnits(fetchedUnits);
+        setFilteredUnits(fetchedUnits);
+      }
+    };
+
+    fetchUnits();
+  }, [userId, selectedCategory, selectedType, selectedMonth, selectedYear]);
+
   const handleGenerateUnits = async () => {
     setOpenDialog(true);
   };
@@ -142,9 +124,7 @@ const UnitGenerator = () => {
         const year = unitDate.getFullYear();
         const month = months[unitDate.getMonth()];
 
-        const unitRef = collection(db, "users", userId, "transaction-units", year.toString(), month);
-        
-        await saveUnitToFirestore(userId, unit, unitRef);
+        await saveUnitToFirestore(userId, unit, year.toString(), month);
       }
     }
   };
@@ -153,47 +133,14 @@ const UnitGenerator = () => {
     setPage(value);
   };
 
-  const handleFilterChange = () => {
-    let units = allUnits;
-
-    if (selectedCategory) {
-      units = units.filter((unit) => unit.category === selectedCategory);
-    }
-
-    if (selectedType) {
-      units = units.filter((unit) => unit.type === selectedType);
-    }
-
-    if (selectedMonth) {
-      units = units.filter((unit) => {
-        const unitDate = new Date(unit.date.seconds * 1000);
-        return unitDate.getMonth() === months.indexOf(selectedMonth);
-      });
-    }
-
-    if (selectedYear) {
-      units = units.filter((unit) => {
-        const unitDate = new Date(unit.date.seconds * 1000);
-        return unitDate.getFullYear() === parseInt(selectedYear);
-      });
-    }
-
-    setFilteredUnits(units);
-    setPage(1); // Reset to first page when filtering
-  };
-
-  useEffect(() => {
-    handleFilterChange();
-  }, [selectedCategory, selectedType, selectedMonth, selectedYear]);
-
   const paginatedUnits = filteredUnits.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   const totalPages = Math.ceil(filteredUnits.length / rowsPerPage);
 
   const calculateTotal = () => {
-    return filteredUnits.reduce((sum, unit) => sum + (parseFloat(unit.unitPrice * unit.quantity)  || 0), 0).toFixed(2);
+    return filteredUnits.reduce((sum, unit) => sum + (parseFloat(unit.unitPrice * unit.quantity) || 0), 0).toFixed(2);
   };
-  
+
   return (
     <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Box sx={{ padding: 3 }}>
@@ -269,50 +216,47 @@ const UnitGenerator = () => {
         <Typography variant="h6" sx={{ marginTop: 2 }}>
           Total: {calculateTotal()}€
         </Typography>
-        const paginatedUnits = filteredUnits.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
-      <TableContainer component={Paper} sx={{ marginTop: 3 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Quantity</TableCell>
-              <TableCell>Unit Price</TableCell>
-              {showWorkUnits && <TableCell>Hours Worked</TableCell>}
-              {showWorkUnits && <TableCell>Rate</TableCell>}
-              <TableCell>Total Amount</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Category</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedUnits.map((unit) => {
-              // Safeguard: Ensure `unit.date` exists and is valid
-              const unitDate = unit.date && unit.date.seconds ? new Date(unit.date.seconds * 1000) : null;
+        <TableContainer component={Paper} sx={{ marginTop: 3 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell>Quantity</TableCell>
+                <TableCell>Unit Price</TableCell>
+                {showWorkUnits && <TableCell>Hours Worked</TableCell>}
+                {showWorkUnits && <TableCell>Rate</TableCell>}
+                <TableCell>Total Amount</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Category</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedUnits.map((unit) => {
+                const unitDate = unit.date ? new Date(unit.date) : null;
 
-              return (
-                <TableRow key={unit.id}>
-                  <TableCell>{unit.id}</TableCell>
-                  <TableCell>{unit.description}</TableCell>
-                  <TableCell>{unit.type}</TableCell>
-                  <TableCell>{unit.quantity}</TableCell>
-                  <TableCell>{unit.unitPrice}€</TableCell>
-                  {showWorkUnits && <TableCell>{unit.hoursWorked}</TableCell>}
-                  {showWorkUnits && <TableCell>{unit.rate}€</TableCell>}
-                  <TableCell>{unit.totalAmount}€</TableCell>
-                  <TableCell>
-                    {unitDate ? format(unitDate, 'dd/MM/yyyy') : 'Invalid Date'}
-                  </TableCell>
-                  <TableCell>{unit.category}</TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
+                return (
+                  <TableRow key={unit.id}>
+                    <TableCell>{unit.id}</TableCell>
+                    <TableCell>{unit.description}</TableCell>
+                    <TableCell>{unit.type}</TableCell>
+                    <TableCell>{unit.quantity}</TableCell>
+                    <TableCell>{unit.unitPrice}€</TableCell>
+                    {showWorkUnits && <TableCell>{unit.hoursWorked}</TableCell>}
+                    {showWorkUnits && <TableCell>{unit.rate}€</TableCell>}
+                    <TableCell>{unit.totalAmount}€</TableCell>
+                    <TableCell>
+                      {unitDate ? format(unitDate, 'dd/MM/yyyy') : 'Invalid Date'}
+                    </TableCell>
+                    <TableCell>{unit.category}</TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
         <Pagination
           count={totalPages}

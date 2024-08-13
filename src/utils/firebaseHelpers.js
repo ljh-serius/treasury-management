@@ -128,13 +128,63 @@ export const deleteTransactionBook = async (bookId) => {
   }
 };
 
-export const saveUnitToFirestore = async (userId, unit, unitRef) => {
+
+export const fetchAllUnits = async (userId, filters) => {
+  if (!userId) return [];
+
+  const allUnits = [];
+  const { selectedCategory, selectedType, selectedMonth, selectedYear, months } = filters;
+
   try {
-    await addDoc(unitRef, unit); // Add document to the provided reference
-    console.log("Unit saved successfully.");
+    // Only process the specific year if selected
+    const year = selectedYear ? parseInt(selectedYear) : new Date().getFullYear();
+    
+    // Iterate only through the selected month or all months
+    const selectedMonths = selectedMonth ? [selectedMonth] : months;
+
+    for (let month of selectedMonths) {
+      const monthIndex = months.indexOf(month) + 1; // 1-based index for the month
+
+      const unitsRef = collection(db, "users", userId, "transaction-units", year.toString(), month);
+      let unitsQuery = unitsRef;
+
+      // Apply the category filter if provided
+      if (selectedCategory) {
+        unitsQuery = query(unitsRef, where('category', '==', selectedCategory));
+      }
+
+      // Apply the type filter if provided
+      if (selectedType) {
+        unitsQuery = query(unitsQuery, where('type', '==', selectedType));
+      }
+
+      const unitsSnapshot = await getDocs(unitsQuery);
+      const units = unitsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        date: new Date(doc.data().date.seconds * 1000), // Convert Firestore timestamp to Date
+      }));
+
+      allUnits.push(...units);
+    }
   } catch (error) {
-    console.error("Error saving unit:", error);
-    throw error;
+    console.error("Error fetching units: ", error);
+  }
+
+  return allUnits;
+};
+
+export const saveUnitToFirestore = async (userId, unit, year, month) => {
+  try {
+    const unitRef = collection(db, "users", userId, "transaction-units", year, month);
+
+    await unitRef.add({
+      ...unit,
+      createdBy: userId,
+      createdAt: new Date(),
+    });
+  } catch (error) {
+    console.error("Error saving unit: ", error);
   }
 };
 // Define the months array
