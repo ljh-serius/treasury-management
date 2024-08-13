@@ -126,29 +126,27 @@ export const deleteTransactionBook = async (bookId) => {
   }
 };
 
-
 export const fetchAllUnits = async (userId, filters) => {
   if (!userId) return [];
 
   const allUnits = [];
-  const { selectedCategory, selectedType, selectedMonth, selectedYear, months } = filters;
+  const { selectedCategory, selectedType, selectedMonths = [], selectedYear, months } = filters;
 
   try {
+    console.log("Fetching all units for filters ", filters);
     // Only process the specific year if selected
     const year = selectedYear ? parseInt(selectedYear) : new Date().getFullYear();
-    
-    // Iterate only through the selected month or all months
-    const selectedMonths = selectedMonth ? [selectedMonth] : months;
 
-    for (let month of selectedMonths) {
-      const monthIndex = months.indexOf(month) + 1; // 1-based index for the month
+    // Use selectedMonths if defined, otherwise default to all months
+    const monthsToFetch = selectedMonths.length > 0 ? selectedMonths : months;
 
+    for (let month of monthsToFetch) {
       const unitsRef = collection(db, "users", userId, "transaction-units", year.toString(), month);
       let unitsQuery = unitsRef;
 
       // Apply the category filter if provided
       if (selectedCategory) {
-        unitsQuery = query(unitsRef, where('category', '==', selectedCategory));
+        unitsQuery = query(unitsQuery, where('category', '==', selectedCategory));
       }
 
       // Apply the type filter if provided

@@ -13,7 +13,7 @@ const TransactionActionsMenu = ({
   handleCopyNatureRow,
   handlePasteNatureRow,
   type,
-  selectedTransaction, // Ensure this prop is passed in containing the transaction row data
+  transactionBookName, // Ensure this prop is passed in containing the transaction row data
 }) => {
 
   const transactionId = localStorage.getItem('selectedTransactionId')
@@ -47,7 +47,7 @@ const TransactionActionsMenu = ({
           Paste Row
         </MenuItem>,
         <MenuItem key="seeDetailsTransactionNature">
-          <Link to={"/details/" + transactionId}>
+          <Link to={"/units"}>
             See Details
           </Link>
         </MenuItem>

@@ -24,6 +24,8 @@ import {
   FormLabel,
   Radio,
   Typography,
+  InputLabel,
+  Select,
 } from '@mui/material';
 import { format } from 'date-fns';
 import { fetchAllUnits, saveUnitToFirestore } from '../utils/firebaseHelpers';
@@ -35,6 +37,8 @@ const months = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
+
+
 
 const generateRandomDate = () => {
   const end = new Date();
@@ -82,28 +86,59 @@ const UnitGenerator = () => {
   const [selectedYear, setSelectedYear] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
   const [unitType, setUnitType] = useState('revenues');
+  const [selectedMonths, setSelectedMonths] = useState([]);  // Add this to your state declarations
+  const [filtersLoaded, setFiltersLoaded] = useState(false); // Track if filters are loaded from localStorage
   const rowsPerPage = 10;
 
   const userId = auth.currentUser?.uid;
 
+  // Load filters from localStorage on component mount
+  useEffect(() => {
+    if (userId) {
+      const localFilters = localStorage.getItem('selectedDetailsFilters');
+      if (localFilters) {
+        const filters = JSON.parse(localFilters);
+
+        let type = '';
+        if (filters.selectedType === 'encaissements') {
+          type = 'revenues';
+        } else if (filters.selectedType === 'decaissements') {
+          type = 'expenses';
+        }
+
+        setSelectedCategory(filters.selectedCategory || '');
+        setSelectedType(type);
+        setSelectedMonths(filters.selectedMonths || []);  // Set selectedMonths with the months from localStorage
+        setSelectedYear(filters.selectedYear || '');
+      }
+      setFiltersLoaded(true);  // Mark filters as loaded
+    }
+  }, [userId]);
+
+  // Fetch units once filters are loaded and valid
   useEffect(() => {
     const fetchUnits = async () => {
-      if (userId) {
-        const filters = {
-          selectedCategory,
-          selectedType,
-          selectedMonth,
-          selectedYear,
-          months
-        };
-        const fetchedUnits = await fetchAllUnits(userId, filters);
-        setAllUnits(fetchedUnits);
-        setFilteredUnits(fetchedUnits);
+      if (userId && filtersLoaded) {
+        const hasValidFilters = selectedCategory || selectedType || (selectedMonths.length > 0 && selectedYear);
+
+        if (hasValidFilters) {
+          const filters = {
+            selectedCategory,
+            selectedType,
+            selectedMonths,
+            selectedYear,
+            months
+          };
+
+          const fetchedUnits = await fetchAllUnits(userId, filters);
+          setAllUnits(fetchedUnits);
+          setFilteredUnits(fetchedUnits);
+        }
       }
     };
 
     fetchUnits();
-  }, [userId, selectedCategory, selectedType, selectedMonth, selectedYear]);
+  }, [userId, filtersLoaded, selectedCategory, selectedType, selectedMonths, selectedYear]);
 
   const handleGenerateUnits = async () => {
     setOpenDialog(true);
@@ -187,22 +222,23 @@ const UnitGenerator = () => {
           <MenuItem value="expenses">Expenses</MenuItem>
         </TextField>
 
-        <TextField
-          select
-          label="Filter by Month"
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(e.target.value)}
-          fullWidth
-          margin="normal"
-          sx={{ marginTop: 2 }}
-        >
-          <MenuItem value="">All Months</MenuItem>
-          {months.map((month) => (
-            <MenuItem key={month} value={month}>
-              {month}
-            </MenuItem>
-          ))}
-        </TextField>
+
+        <FormControl fullWidth margin="normal" sx={{ marginTop: 2 }}>
+          <InputLabel id="month-select-label">Filter by Month</InputLabel>
+          <Select
+            labelId="month-select-label"
+            multiple
+            value={selectedMonths} // use selectedMonths instead of selectedMonth
+            onChange={(e) => setSelectedMonths(e.target.value)}
+            renderValue={(selected) => selected.join(', ')} // Show selected months as a comma-separated list
+          >
+            {months.map((month) => (
+              <MenuItem key={month} value={month}>
+                {month}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         <TextField
           label="Filter by Year"

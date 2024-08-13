@@ -32,6 +32,7 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState({ type: '', index: -1, month: -1 });
 
+  console.log("inputValues", inputValues)
   useEffect(() => {
     setInputValues(transactions); // Synchronize inputValues with transactions prop
   }, [transactions]);
@@ -186,10 +187,8 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
     setColumnMenuAnchorEl(event.currentTarget);
   };
 
-  const handleNatureMenuOpen = (event, type, index, transaction) => {
-    localStorage.setItem("selectedTransaction", JSON.stringify(transaction));
-    localStorage.setItem("selectedTransactionType", type);
-    localStorage.setItem("selectedTransactionId", transaction.id);
+  const handleNatureMenuOpen = (event, type, index, filters) => {
+    localStorage.setItem("selectedDetailsFilters", JSON.stringify(filters));
     setSelectedTransaction({ type, index, month: -1 });
     setNatureMenuAnchorEl(event.currentTarget);
   };
@@ -333,7 +332,9 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
           handleMenuClose={handleNatureMenuClose}
           handleCopyNatureRow={handleCopyNatureRow}
           handlePasteNatureRow={handlePasteNatureRow}
+          transactionBookName={inputValues?.name}
           type="nature"
+
         />
         <Grid container style={{ handleNatureMenuOpenarginTop: 16 }}>
           <Grid item xs={12} md={6}>

@@ -15,7 +15,6 @@ const TransactionTable = ({
 }) => {
   const presentedMonths = monthNames.slice(1);
 
-
   // Filter displayed months based on input values
   const displayedMonths = presentedMonths.filter((_, monthIndex) =>
     ["encaissements", "decaissements"].some(type =>
@@ -182,14 +181,21 @@ const TransactionTable = ({
                             {transaction.nature}
                           </div>
                           <IconButton
-                            aria-label="open nature menu"
-                            onClick={(event) => handleNatureMenuOpen(event, type, index, transaction)}
-                            edge="end"
-                            size="small"
-                            style={{ marginLeft: 'auto', color: "white" }}
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
+                              aria-label="open nature menu"
+                              onClick={(event) => handleNatureMenuOpen(event, type, index, {
+                                selectedCategory: transaction.nature, // assuming nature is the category
+                                selectedType: type,
+                                selectedMonth: null, // This might be derived from `displayedMonths`
+                                selectedYear: inputValues.name, // or another source if available
+                                months: displayedMonths, // or another relevant list
+                              })}
+                              edge="end"
+                              size="small"
+                              style={{ marginLeft: 'auto', color: "white" }}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+
                         </div>
                       )}
                     </TableCell>

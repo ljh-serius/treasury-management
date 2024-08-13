@@ -57,7 +57,7 @@ const App = () => {
           }
         />
         <Route
-          path="/comparatives"
+          path="/analytics"
           element={
             <ProtectedRoute user={user}>
               <Dashboard>
@@ -67,41 +67,11 @@ const App = () => {
           }
         />
         <Route
-          path="/details/:transactionId"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <TransactionDetails />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/units/:unitId"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <UnitDetails />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/generate-units"
+          path="/units"
           element={
             <ProtectedRoute user={user}>
               <Dashboard>
                 <UnitGenerator />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/units/:unitId"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <UnitDetails />
               </Dashboard>
             </ProtectedRoute>
           }

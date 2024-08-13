@@ -2,19 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { AppBar, Toolbar, useMediaQuery, Box, CssBaseline, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Typography, Button } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
-import AddIcon from '@mui/icons-material/Add';
 import { Link, useLocation } from 'react-router-dom';
 import TransactionSelect from './TransactionSelect';
 import TransactionBooks from './TransactionBooks';
 import AddTransactionModal from './AddTransactionModal';
 import { signOut } from 'firebase/auth';
 import { auth } from '../utils/firebaseConfig';
-import LogoutIcon from '@mui/icons-material/Logout';
 import LoginDialog from './LoginDialog';
 import RegisterDialog from './RegisterDialog';
 import { v4 as uuidv4 } from 'uuid';
+import BookIcon from '@mui/icons-material/Book';
+import InsertChartIcon from '@mui/icons-material/InsertChart';
+import ListAltIcon from '@mui/icons-material/ListAlt';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import LogoutIcon from '@mui/icons-material/Logout';
+import ShuffleIcon from '@mui/icons-material/Shuffle';
+import AddIcon from '@mui/icons-material/Add';
 
 // Import the summary helpers
 import { getAllTransactionSummaries, saveSummaryToFirestore } from '../utils/firebaseHelpers'; 
@@ -230,7 +234,7 @@ const Dashboard = ({ children }) => {
         <ListItem key="books" disablePadding>
           <ListItemButton component={Link} to="/books">
             <ListItemIcon>
-              <MailIcon />
+              <BookIcon />
             </ListItemIcon>
             <ListItemText primary="Transaction Books" />
           </ListItemButton>
@@ -241,47 +245,39 @@ const Dashboard = ({ children }) => {
         <ListItem key="generate" disablePadding>
           <ListItemButton onClick={generateRandomTransactions}>
             <ListItemIcon>
-              <InboxIcon />
+              <ShuffleIcon />
             </ListItemIcon>
-            <ListItemText primary="Generate Random Transactions" />
+            <ListItemText primary="Generate Random Summary" />
           </ListItemButton>
         </ListItem>
         <ListItem key="new" disablePadding>
           <ListItemButton onClick={handleNewSummary}>
             <ListItemIcon>
-              <MailIcon />
+              <AddBoxIcon />
             </ListItemIcon>
             <ListItemText primary="Add New Summary" />
           </ListItemButton>
         </ListItem>
-        <ListItem key="comparatives" disablePadding>
-          <ListItemButton component={Link} to="/comparatives">
+        <ListItem key="analytics" disablePadding>
+          <ListItemButton component={Link} to="/analytics">
             <ListItemIcon>
-              <MailIcon />
+              <InsertChartIcon />
             </ListItemIcon>
-            <ListItemText primary="Comparatives" />
+            <ListItemText primary="Analytics" />
           </ListItemButton>
         </ListItem>
-        <ListItem key="details" disablePadding>
-          <ListItemButton component={Link} to="/details">
+        <ListItem key="units" disablePadding>
+          <ListItemButton component={Link} to="/units">
             <ListItemIcon>
-              <MailIcon />
+              <ListAltIcon />
             </ListItemIcon>
-            <ListItemText primary="Transaction Details" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="generate-units" disablePadding>
-          <ListItemButton component={Link} to="/generate-units">
-            <ListItemIcon>
-              <MailIcon />
-            </ListItemIcon>
-            <ListItemText primary="Generate Units" />
+            <ListItemText primary="Units" />
           </ListItemButton>
         </ListItem>
         <ListItem key="summary" disablePadding>
           <ListItemButton component={Link} to="/summary">
             <ListItemIcon>
-              <MailIcon />
+              <AssessmentIcon />
             </ListItemIcon>
             <ListItemText primary="Summary" />
           </ListItemButton>
@@ -297,6 +293,7 @@ const Dashboard = ({ children }) => {
       </List>
     </div>
   );
+  
 
   const isTransactionBooks = React.Children.toArray(children).some(
     (child) => React.isValidElement(child) && child.type === TransactionBooks
