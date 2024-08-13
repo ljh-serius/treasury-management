@@ -1,14 +1,19 @@
-import { collectionGroup, collection, getDocs, addDoc, getDoc, setDoc, updateDoc, doc, deleteDoc, query, where } from "firebase/firestore";
+import { collection, getDocs, addDoc, getDoc, setDoc, updateDoc, doc, deleteDoc, query, where } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 import { v4 as uuidv4 } from 'uuid';
 
-export const createOrganization = async (orgName, customDomain) => {
+// Function to create an organization in Firebase
+export const createOrganization = async (orgName, customDomain, email, numUsers, numStores, price) => {
   const tenantId = uuidv4();
   const orgDocRef = doc(collection(db, "organizations"));
 
   const organizationData = {
     name: orgName,
     domain: customDomain,
+    email: email,
+    numUsers: numUsers,
+    numStores: numStores,
+    price: price,
     tenant_id: tenantId,
   };
 
@@ -16,6 +21,7 @@ export const createOrganization = async (orgName, customDomain) => {
   return { tenantId, organizationId: orgDocRef.id };
 };
 
+// Function to fetch organization data along with users
 export const fetchOrganizationData = async (organizationId) => {
   const orgRef = doc(db, "organizations", organizationId);
   const orgSnapshot = await getDoc(orgRef);
@@ -30,7 +36,8 @@ export const fetchOrganizationData = async (organizationId) => {
     throw new Error("Organization not found");
   }
 };
-  
+
+// Function to fetch users of an organization
 export const fetchUsersOfOrganization = async (organizationId) => {
   const usersCollection = collection(db, "organizations", organizationId, "users");
   const usersSnapshot = await getDocs(usersCollection);
@@ -40,50 +47,26 @@ export const fetchUsersOfOrganization = async (organizationId) => {
   return users;
 };
 
+// Function to add a user to an organization
 export const addUserToOrganization = async (organizationId, user) => {
   const userRef = doc(collection(db, "organizations", organizationId, "users"));
   await setDoc(userRef, user);
 };
 
-// Function to save or update a transaction book
-export const saveTransactionSummary = async (userId, bookName, transactions) => {
+// Function to save transaction details within an organization
+export const saveTransactionDetails = async (organizationId, transactionId, details) => {
   try {
-    const bookRef = doc(collection(db, "users", userId, "transactions-summary"), bookName);
-    await setDoc(bookRef, transactions, { merge: true });
-  } catch (error) {
-    console.error("Error saving transaction book: ", error);
-  }
-};
-
-// Function to retrieve all transaction books
-export const getTransactionSummary = async (userId) => {
-  try {
-    const booksCollection = collection(db, "users", userId, "transactions-summary");
-    const booksSnapshot = await getDocs(booksCollection);
-    const books = {};
-    booksSnapshot.forEach((doc) => {
-      books[doc.id] = doc.data();
-    });
-    return books;
-  } catch (error) {
-    console.error("Error getting transaction books: ", error);
-  }
-};
-
-// Saving transaction details using transaction ID
-export const saveTransactionDetails = async (userId, transactionId, details) => {
-  try {
-    const detailsRef = doc(db, "users", userId, "transaction-books-details", transactionId);
+    const detailsRef = doc(db, "organizations", organizationId, "transaction-details", transactionId);
     await setDoc(detailsRef, details, { merge: true });
   } catch (error) {
     console.error("Error saving transaction details: ", error);
   }
 };
 
-// Function to get transaction details using transaction ID
-export const getTransactionDetails = async (userId, transactionId) => {
+// Function to get transaction details within an organization
+export const getTransactionDetails = async (organizationId, transactionId) => {
   try {
-    const docRef = doc(db, "users", userId, "transaction-books-details", transactionId);
+    const docRef = doc(db, "organizations", organizationId, "transaction-details", transactionId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
@@ -97,80 +80,9 @@ export const getTransactionDetails = async (userId, transactionId) => {
   }
 };
 
-
-/**
- * Fetches all transaction summary books for a user.
- * @param {string} userId - The ID of the user.
- * @returns {Promise<Object>} - An object containing all transaction summaries keyed by their document ID.
- */
-export const getAllTransactionSummaries = async (userId) => {
-  try {
-    const summariesCollection = collection(db, 'users', userId, 'transactions-summary');
-    const summariesSnapshot = await getDocs(summariesCollection);
-
-    const summaries = {};
-    summariesSnapshot.forEach((doc) => {
-      summaries[doc.id] = doc.data();
-    });
-
-    return summaries;
-  } catch (error) {
-    console.error('Error fetching transaction summaries: ', error);
-    throw error;
-  }
-};
-
-// Function to get details of a specific transaction book
-export const getTransactionBookDetails = async (bookId) => {
-  try {
-    const bookRef = doc(db, "transaction-books-details", bookId);
-    const bookSnap = await getDoc(bookRef);
-    if (bookSnap.exists()) {
-      return { id: bookSnap.id, ...bookSnap.data() };
-    } else {
-      throw new Error("Transaction book details not found.");
-    }
-  } catch (error) {
-    console.error("Error fetching transaction book details: ", error);
-    throw new Error("Failed to fetch transaction book details.");
-  }
-};
-
-// Function to add a new transaction book
-export const addTransactionBook = async (newBook) => {
-  try {
-    const docRef = await addDoc(collection(db, "transaction-books"), newBook);
-    return docRef.id;
-  } catch (error) {
-    console.error("Error adding transaction book: ", error);
-    throw new Error("Failed to add transaction book.");
-  }
-};
-
-// Function to update a transaction book
-export const updateTransactionBook = async (bookId, updatedData) => {
-  try {
-    const bookRef = doc(db, "transaction-books", bookId);
-    await updateDoc(bookRef, updatedData);
-  } catch (error) {
-    console.error("Error updating transaction book: ", error);
-    throw new Error("Failed to update transaction book.");
-  }
-};
-
-// Function to delete a transaction book
-export const deleteTransactionBook = async (bookId) => {
-  try {
-    const bookRef = doc(db, "transaction-books", bookId);
-    await deleteDoc(bookRef);
-  } catch (error) {
-    console.error("Error deleting transaction book: ", error);
-    throw new Error("Failed to delete transaction book.");
-  }
-};
-
-export const fetchAllUnits = async (userId, filters) => {
-  if (!userId) return [];
+// Function to fetch all transaction units within an organization
+export const fetchAllUnits = async (organizationId, filters) => {
+  if (!organizationId) return [];
 
   const allUnits = [];
   const { selectedCategory, selectedType, selectedMonths = [], selectedYear, months } = filters;
@@ -184,7 +96,7 @@ export const fetchAllUnits = async (userId, filters) => {
     const monthsToFetch = selectedMonths.length > 0 ? selectedMonths : months;
 
     for (let month of monthsToFetch) {
-      const unitsRef = collection(db, "users", userId, "transaction-units", year.toString(), month);
+      const unitsRef = collection(db, "organizations", organizationId, "transaction-units", year.toString(), month);
       let unitsQuery = unitsRef;
 
       // Apply the category filter if provided
@@ -213,15 +125,16 @@ export const fetchAllUnits = async (userId, filters) => {
   return allUnits;
 };
 
-export const saveUnitToFirestore = async (userId, unit, year, month) => {
+// Function to save a unit to Firestore within an organization
+export const saveUnitToFirestore = async (organizationId, unit, year, month) => {
   try {
     // Get the reference to the collection where you want to add the document
-    const unitsCollectionRef = collection(db, "users", userId, "transaction-units", year, month);
+    const unitsCollectionRef = collection(db, "organizations", organizationId, "transaction-units", year, month);
 
     // Use addDoc to add the document to the collection
     await addDoc(unitsCollectionRef, {
       ...unit,
-      createdBy: userId,
+      createdBy: organizationId,
       createdAt: new Date(),
     });
 
@@ -238,15 +151,32 @@ const months = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-export const fetchUnitsSummary = async (userId) => {
-  if (!userId) return;
+export const getAllTransactionSummaries = async (organizationId) => {
+  try {
+    const summariesCollection = collection(db, 'organizations', organizationId, 'transactions-summary');
+    const summariesSnapshot = await getDocs(summariesCollection);
+
+    const summaries = {};
+    summariesSnapshot.forEach((doc) => {
+      summaries[doc.id] = doc.data();
+    });
+
+    return summaries;
+  } catch (error) {
+    console.error('Error fetching transaction summaries: ', error);
+    throw error;
+  }
+};
+
+export const fetchUnitsSummary = async (organizationId) => {
+  if (!organizationId) return;
 
   const summary = {};
+  const currentYear = new Date().getFullYear();
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   try {
-    // Loop through all years and months
-    for (let year = new Date().getFullYear(); year >= new Date().getFullYear() - 15; year--) {
-      // Initialize the year object in the summary
+    for (let year = currentYear; year >= currentYear - 15; year--) {
       summary[year] = {
         encaissements: [],
         decaissements: [],
@@ -254,9 +184,14 @@ export const fetchUnitsSummary = async (userId) => {
 
       for (let month of months) {
         const monthIndex = months.indexOf(month); // 0-based index for the month
+        const unitsRef = collection(db, "organizations", organizationId, "transaction-units", year.toString(), month);
 
-        const unitsRef = collection(db, "users", userId, "transaction-units", year.toString(), month);
         const unitsSnapshot = await getDocs(unitsRef);
+
+        if (unitsSnapshot.empty) {
+          console.log(`No units found for ${year} ${month}`);
+          continue; // Skip to the next month if no units found
+        }
 
         const units = unitsSnapshot.docs.map(doc => ({
           id: doc.id,
@@ -266,16 +201,13 @@ export const fetchUnitsSummary = async (userId) => {
 
         units.forEach(unit => {
           const { type, category, quantity, unitPrice } = unit;
-          const totalAmount = parseFloat(unitPrice) * parseInt(quantity);
+          const totalAmount = parseFloat(unitPrice) * parseInt(quantity, 10);
 
-          // Determine if the unit is an encaissement or decaissement
           const summaryType = type === 'revenues' ? 'encaissements' : 'decaissements';
 
-          // Find the existing category (nature) object within the year
           let natureEntry = summary[year][summaryType].find(entry => entry.nature === category);
 
           if (!natureEntry) {
-            // If it doesn't exist, create a new one
             natureEntry = {
               nature: category,
               montantInitial: 0,
@@ -284,17 +216,15 @@ export const fetchUnitsSummary = async (userId) => {
             summary[year][summaryType].push(natureEntry);
           }
 
-          // Add the total amount to the correct month in the montants array
           natureEntry.montants[monthIndex] += totalAmount;
         });
       }
 
-      // Calculate the total for each type within the year
       const calculateTotal = (entries) => {
         const totalEntry = {
-          nature: `Total ${entries.length > 0 ? entries[0].nature.split(" ")[0] : ""}`, // Total Encaissements or Total Decaissements
+          nature: `Total ${entries.length > 0 ? entries[0].nature.split(" ")[0] : ""}`,
           montantInitial: 0,
-          montants: Array(12).fill(0), // Initialize an array for 12 months
+          montants: Array(12).fill(0),
         };
 
         entries.forEach(entry => {
@@ -308,10 +238,11 @@ export const fetchUnitsSummary = async (userId) => {
         return totalEntry;
       };
 
-      // Push the calculated totals to the summary
       summary[year].encaissements.push(calculateTotal(summary[year].encaissements));
       summary[year].decaissements.push(calculateTotal(summary[year].decaissements));
     }
+
+    console.log('Final Summary:', summary); // Debugging output
 
     return summary;
 
@@ -320,14 +251,15 @@ export const fetchUnitsSummary = async (userId) => {
     throw error;
   }
 };
+  
 
-
-export const saveSummaryToFirestore = async (userId, year, summary) => {
+// Function to save a summary to Firestore within an organization
+export const saveSummaryToFirestore = async (organizationId, year, summary) => {
   try {
     summary.name = year;
 
     // Save the summary to Firestore, using the year as the document ID
-    await setDoc(doc(db, "users", userId, "transactions-summary", year.toString()), summary);
+    await setDoc(doc(db, "organizations", organizationId, "transactions-summary", year.toString()), summary);
 
     console.log(`Summary for ${year} saved successfully.`);
   } catch (error) {

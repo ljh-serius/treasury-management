@@ -120,7 +120,10 @@ export const translate =  (key, lanauge) => {
     "November": "November",
     "December": "December",
     "Encaissements": "Income",
-    "Decaissements": "Expenses"
+    "Decaissements": "Expenses",
+
+    // Users page
+    "Manage Users": "Manage Users"
   };
   
   const french = {
@@ -246,7 +249,9 @@ export const translate =  (key, lanauge) => {
     "November": "Novembre",
     "December": "Décembre",
     "Encaissements": "Encaissements",
-    "Decaissements": "Décaissements"
+    "Decaissements": "Décaissements",
+
+    "Manage Users": "Gestion utilisateurs"
   };
 
   if(lanauge == 'fr') {

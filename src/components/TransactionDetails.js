@@ -120,7 +120,7 @@ const AccountingSummary = () => {
 
       setTransactionRow(savedTransaction);
 
-      if (savedTransaction && userId) {
+      if (savedTransaction) {
         const transactionId = savedTransaction.id;
 
         // Try to fetch existing transaction details from the database
@@ -138,8 +138,9 @@ const AccountingSummary = () => {
 
           setDetailedMontants(detailed);
 
+          const organizationId = localStorage.getItem('organizationId');
           // Save the newly generated details to the database
-          await saveTransactionDetails(userId, transactionId, { detailedMontants: detailed });
+          await saveTransactionDetails(organizationId, transactionId, { detailedMontants: detailed });
         }
       }
     };

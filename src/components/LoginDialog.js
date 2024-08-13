@@ -11,21 +11,42 @@ import {
   Typography,
 } from '@mui/material';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../utils/firebaseConfig';
+import { doc, getDoc, query, collection, where, getDocs } from 'firebase/firestore'; // Import Firestore functions
+import { auth, db } from '../utils/firebaseConfig'; // Import Firestore instance
 
-const LoginDialog = ({ open, onClose }) => {
+const LoginDialog = ({ open, onClose }) => { // Add onLoginSuccess prop
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      // Sign in the user
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      // Retrieve organization associated with the logged-in email
+      const q = query(collection(db, 'organizations'), where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const docSnapshot = querySnapshot.docs[0]; // Get the first matching organization document
+        const organization = docSnapshot.data(); // Get the data of the organization
+        const organizationId = docSnapshot.id; // Get the document ID (key)
+
+        // Save both the organization data and its ID in localStorage
+        localStorage.setItem('organization', JSON.stringify(organization));
+        localStorage.setItem('organizationId', organizationId);
+        
+        console.log('Organization ID:', organizationId); // For debugging purposes
+      } else {
+        console.error('No organization found for this user');
+      }
+
       onClose(); // Close dialog on successful login
     } catch (error) {
       setError(error.message);
     }
-  };
+  };  
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>Login</DialogTitle>

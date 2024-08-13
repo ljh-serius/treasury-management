@@ -225,7 +225,7 @@ const UnitGenerator = () => {
 
   useEffect(() => {
     const fetchUnits = async () => {
-      if (userId && filtersLoaded) {
+      if (filtersLoaded) {
         const hasValidFilters = selectedCategory || selectedType || (selectedMonths.length > 0 && selectedYear);
 
         if (hasValidFilters) {
@@ -237,7 +237,9 @@ const UnitGenerator = () => {
             months
           };
 
-          const fetchedUnits = await fetchAllUnits(userId, filters);
+          const organizationId = localStorage.getItem('organizationId')
+
+          const fetchedUnits = await fetchAllUnits(organizationId, filters);
           setAllUnits(fetchedUnits);
           setFilteredUnits(fetchedUnits);
         }
@@ -265,7 +267,9 @@ const UnitGenerator = () => {
         const year = unitDate.getFullYear();
         const month = months[unitDate.getMonth()];
 
-        await saveUnitToFirestore(userId, unit, year.toString(), translate(month, language));
+        const organizationId = localStorage.getItem('organizationId');
+        
+        await saveUnitToFirestore(organizationId, unit, year.toString(), month);
       }
     }
   };

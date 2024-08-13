@@ -13,20 +13,22 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { auth } from './utils/firebaseConfig';
 import UnitGenerator from './components/UnitGenerator';
 import SummaryComponent from './components/SummaryComponent';
+import OrganizationRegistration from './components/OrganizationRegistration';
+import ManageUsers from './pages/ManageUsers';
 import { TranslationProvider } from './utils/TranslationProvider';
-import OrganizationRegistration from './components/OrganizationRegistration'; // Import the Registration component
+import { getOrganizationIdForUser } from './utils/firebaseHelpers'; // Import the helper function
 
 const App = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [organizationId, setOrganizationId] = useState(null); // State to store organizationId
   const [language, setLanguage] = useState('en'); // Default language
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       setLoading(false); // Stop loading once auth state is determined
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -86,6 +88,16 @@ const App = () => {
           }
         />
         <Route
+          path="/manage-users"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard>
+                <ManageUsers />
+              </Dashboard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/blog"
           element={
             <ProtectedRoute user={user}>
@@ -105,7 +117,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/registration" element={<OrganizationRegistration />} /> {/* Add this line */}
+        <Route path="/registration" element={<OrganizationRegistration />} />
       </Routes>
     </TranslationProvider>
   );

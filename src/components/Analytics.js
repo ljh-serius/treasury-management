@@ -28,7 +28,6 @@ import {
 import {
   getAllTransactionSummaries
 } from '../utils/firebaseHelpers';
-import { auth } from '../utils/firebaseConfig';
 import { translate } from '../utils/translate';
 import { useTranslation } from '../utils/TranslationProvider';
 
@@ -49,9 +48,9 @@ const shouldRefetchData = (lastFetchTime, intervalInMs = 3600000) => {
   return !lastFetchTime || (currentTime - lastFetchTime) > intervalInMs;
 };
 
-const saveToLocalStorage = (userId, key, data) => {
-  if (!userId) return;
-  const fullKey = `${userId}_${key}`;
+const saveToLocalStorage = (organizationId, key, data) => {
+  if (!organizationId) return;
+  const fullKey = `${organizationId}_${key}`;
   const dataToStore = {
     timestamp: getCurrentTime(),
     data
@@ -59,9 +58,9 @@ const saveToLocalStorage = (userId, key, data) => {
   localStorage.setItem(fullKey, JSON.stringify(dataToStore));
 };
 
-const loadFromLocalStorage = (userId, key) => {
-  if (!userId) return null;
-  const fullKey = `${userId}_${key}`;
+const loadFromLocalStorage = (organizationId, key) => {
+  if (!organizationId) return null;
+  const fullKey = `${organizationId}_${key}`;
   const storedData = localStorage.getItem(fullKey);
   if (storedData) {
     return JSON.parse(storedData);
@@ -80,12 +79,11 @@ const Analytics = () => {
   const [lineChartOptions, setLineChartOptions] = useState({});
   const [barChartOptions, setBarChartOptions] = useState({});
   const [heatmapOptions, setHeatmapOptions] = useState({});
-  const userId = auth.currentUser?.uid;
 
   useEffect(() => {
     const fetchBooks = async () => {
       const localStorageKey = 'transactionSummaries';
-      const storedData = loadFromLocalStorage(userId, localStorageKey);
+      const storedData = loadFromLocalStorage('organizationId', localStorageKey);
   
       if (storedData && !shouldRefetchData(storedData.timestamp)) {
         setBooks(storedData.data);
@@ -94,12 +92,14 @@ const Analytics = () => {
       }
   
       try {
-        const fetchedBooks = await getAllTransactionSummaries(userId);
+        const fetchedBooks = await getAllTransactionSummaries(organizationId);
         setBooks(fetchedBooks);
         setBookOptions(Object.keys(fetchedBooks));
-  
+        
+        const organizationId = localStorage.getItem('organizationId');
+
         // Store fetched data in localStorage
-        saveToLocalStorage(userId, localStorageKey, fetchedBooks);
+        saveToLocalStorage(organizationId, localStorageKey, fetchedBooks);
   
         if (Object.keys(fetchedBooks).length > 0 && selectedBooks.length === 0) {
           setSelectedBooks([Object.keys(fetchedBooks)[0]]);
@@ -110,7 +110,7 @@ const Analytics = () => {
     };
   
     fetchBooks();
-  }, [userId, selectedBooks]);
+  }, [selectedBooks]);
   
   const handleBookChange = (event) => {
     setSelectedBooks(event.target.value);

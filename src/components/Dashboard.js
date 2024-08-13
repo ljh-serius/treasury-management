@@ -89,22 +89,27 @@ const Dashboard = ({ children }) => {
 
   useEffect(() => {
     const fetchSummaries = async () => {
-      const localStorageKey = 'transactionSummaries';
-      const storedData = loadFromLocalStorage(localStorageKey);
+      // const localStorageKey = 'transactionSummaries';
+      // const storedData = loadFromLocalStorage(localStorageKey);
 
-      if (storedData && !shouldRefetchData(storedData.timestamp)) {
-        setSummaries(storedData.data);
-        const firstSummary = Object.keys(storedData.data)[0];
-        setSummaryName(storedData.data[firstSummary]?.name || translate('Main transaction book', language));
-        const summaryNames = Object.keys(storedData.data).map((key) => storedData.data[key].name);
-        setAvailableSummaries(summaryNames);
-        return;
-      }
+      // if (storedData && !shouldRefetchData(storedData.timestamp)) {
+      //   setSummaries(storedData.data);
+      //   const firstSummary = Object.keys(storedData.data)[0];
+      //   setSummaryName(storedData.data[firstSummary]?.name || translate('Main transaction book', language));
+      //   const summaryNames = Object.keys(storedData.data).map((key) => storedData.data[key].name);
+      //   setAvailableSummaries(summaryNames);
+      //   return;
+      // }
 
-      if (userId) {
+      const organizationId = localStorage.getItem('organizationId');
+
+      console.log("fetching all")
+      if (organizationId) {
         try {
-          const summaryData = await getAllTransactionSummaries(userId);
+          const summaryData = await getAllTransactionSummaries(organizationId);
+        
           
+          console.log(summaryData)
           setSummaries(summaryData);
           const firstSummary = Object.keys(summaryData)[0];
           setSummaryName(summaryData[firstSummary]?.name || translate('Main transaction book', language));
@@ -112,7 +117,7 @@ const Dashboard = ({ children }) => {
           setAvailableSummaries(summaryNames);
 
           // Store fetched data in localStorage
-          saveToLocalStorage(localStorageKey, summaryData);
+          // saveToLocalStorage(localStorageKey, summaryData);
         } catch (error) {
           console.error("Error fetching summaries: ", error);
         }
@@ -145,8 +150,9 @@ const Dashboard = ({ children }) => {
       setAvailableSummaries([...availableSummaries, name]);
 
       setSummaryName(name)
+      const organizationId = localStorage.getItem("organizationId");
       // Save to Firestore
-      await saveSummaryToFirestore(userId, year, newSummary);
+      await saveSummaryToFirestore(organizationId, year, newSummary);
     }
   };
 
@@ -210,8 +216,9 @@ const Dashboard = ({ children }) => {
         summaryName,
         randomSummary,
       });
-  
-      await saveSummaryToFirestore(userId, summaryName, randomSummary);
+      const organizationId = localStorage.getItem("organizationId");
+      // Save to Firestore
+      await saveSummaryToFirestore(organizationId, summaryName, randomSummary);
     } catch (error) {
       console.error('Error in generateRandomTransactions:', error);
     }
@@ -288,8 +295,9 @@ const Dashboard = ({ children }) => {
     };
 
     setSummaries(updatedSummaries);
+    const organizationId = localStorage.getItem("organizationId");
 
-    await saveSummaryToFirestore(userId, currentSummaryId, updatedSummary);
+    await saveSummaryToFirestore(organizationId, currentSummaryId, updatedSummary);
 
     handleModalClose();
   };
@@ -350,6 +358,14 @@ const Dashboard = ({ children }) => {
               <AssessmentIcon />
             </ListItemIcon>
             <ListItemText primary={translate("Summary", language)} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key="manage-users" disablePadding>
+          <ListItemButton component={Link} to="/manage-users">
+            <ListItemIcon>
+              <AssessmentIcon />
+            </ListItemIcon>
+            <ListItemText primary={translate("Manage Users", language)} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
