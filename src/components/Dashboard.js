@@ -96,6 +96,7 @@ const Dashboard = ({ children }) => {
       setSummaries(updatedSummaries);
       setAvailableSummaries([...availableSummaries, name]);
 
+      setSummaryName(name)
       // Save to Firestore
       await saveSummaryToFirestore(userId, year, newSummary);
     }
@@ -119,36 +120,55 @@ const Dashboard = ({ children }) => {
   };
 
   const generateRandomTransactions = async () => {
-    const encaissements = Array.from({ length: 5 }, (_, i) => ({
-      id: uuidv4(),
-      nature: `Encaissement ${i + 1}`,
-      montantInitial: Math.floor(Math.random() * 1000),
-      montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
-    }));
-
-    const decaissements = Array.from({ length: 5 }, (_, i) => ({
-      id: uuidv4(),
-      nature: `Décaissement ${i + 1}`,
-      montantInitial: Math.floor(Math.random() * 1000),
-      montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
-    }));
-
-    const randomSummary = {
-      name: summaryName,
-      encaissements,
-      decaissements,
-    };
-
-    const updatedSummaries = {
-      ...summaries,
-      [currentSummaryId]: randomSummary,
-    };
-
-    setSummaries(updatedSummaries);
-
-    await saveSummaryToFirestore(userId, currentSummaryId, randomSummary);
+    try {
+      const encaissements = Array.from({ length: 5 }, (_, i) => ({
+        id: uuidv4(),
+        nature: `Encaissement ${i + 1}`,
+        montantInitial: Math.floor(Math.random() * 1000),
+        montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
+      }));
+  
+      const decaissements = Array.from({ length: 5 }, (_, i) => ({
+        id: uuidv4(),
+        nature: `Décaissement ${i + 1}`,
+        montantInitial: Math.floor(Math.random() * 1000),
+        montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
+      }));
+  
+      // Ensure these variables are defined
+      if (!summaryName) {
+        throw new Error('summaryName is undefined');
+      }
+      if (!userId) {
+        throw new Error('userId is undefined');
+      }
+  
+      const randomSummary = {
+        name: summaryName,
+        encaissements,
+        decaissements,
+      };
+  
+      const updatedSummaries = {
+        ...summaries,
+        [summaryName]: randomSummary,
+      };
+  
+      setSummaries(updatedSummaries);
+  
+      // Logging the variables before passing them to the function
+      console.log('Saving summary:', {
+        userId,
+        summaryName,
+        randomSummary,
+      });
+  
+      await saveSummaryToFirestore(userId, summaryName, randomSummary);
+    } catch (error) {
+      console.error('Error in generateRandomTransactions:', error);
+    }
   };
-
+  
   const handleAddClick = (event) => {
     setMenuAnchorEl(event.currentTarget);
   };
