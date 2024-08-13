@@ -47,18 +47,21 @@ const shouldRefetchData = (lastFetchTime, intervalInMs = 3600000) => {
   return !lastFetchTime || (currentTime - lastFetchTime) > intervalInMs;
 };
 
-// Utility to store data in localStorage
-const saveToLocalStorage = (key, data) => {
+const saveToLocalStorage = (userId, key, data) => {
+  if (!userId) return;
+  const fullKey = `${userId}_${key}`;
   const dataToStore = {
     timestamp: getCurrentTime(),
     data
   };
-  localStorage.setItem(key, JSON.stringify(dataToStore));
+  localStorage.setItem(fullKey, JSON.stringify(dataToStore));
 };
 
-// Utility to load data from localStorage
-const loadFromLocalStorage = (key) => {
-  const storedData = localStorage.getItem(key);
+
+const loadFromLocalStorage = (userId, key) => {
+  if (!userId) return null;
+  const fullKey = `${userId}_${key}`;
+  const storedData = localStorage.getItem(fullKey);
   if (storedData) {
     return JSON.parse(storedData);
   }
@@ -80,22 +83,22 @@ const Analytics = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       const localStorageKey = 'transactionSummaries';
-      const storedData = loadFromLocalStorage(localStorageKey);
-
+      const storedData = loadFromLocalStorage(userId, localStorageKey);
+  
       if (storedData && !shouldRefetchData(storedData.timestamp)) {
         setBooks(storedData.data);
         setBookOptions(Object.keys(storedData.data));
         return;
       }
-
+  
       try {
         const fetchedBooks = await getAllTransactionSummaries(userId);
         setBooks(fetchedBooks);
         setBookOptions(Object.keys(fetchedBooks));
-
+  
         // Store fetched data in localStorage
-        saveToLocalStorage(localStorageKey, fetchedBooks);
-
+        saveToLocalStorage(userId, localStorageKey, fetchedBooks);
+  
         if (Object.keys(fetchedBooks).length > 0 && selectedBooks.length === 0) {
           setSelectedBooks([Object.keys(fetchedBooks)[0]]);
         }
@@ -103,10 +106,10 @@ const Analytics = () => {
         console.error('Error fetching books:', error);
       }
     };
-
+  
     fetchBooks();
   }, [userId, selectedBooks]);
-
+  
   const handleBookChange = (event) => {
     setSelectedBooks(event.target.value);
   };

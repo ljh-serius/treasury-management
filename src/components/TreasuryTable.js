@@ -13,6 +13,37 @@ import {
   calculateAccumulatedTreasury, prepareChartData, prepareCumulativeTreasuryData,
   prepareMonthlyTreasuryData, calculateTotal
 } from './transactionHelpers';
+import { auth } from '../utils/firebaseConfig';
+
+// Utility to get the current time
+const getCurrentTime = () => new Date().getTime();
+
+// Utility to check if data should be refetched
+const shouldRefetchData = (lastFetchTime, intervalInMs = 3600000) => {
+  const currentTime = getCurrentTime();
+  return !lastFetchTime || (currentTime - lastFetchTime) > intervalInMs;
+};
+
+const saveToLocalStorage = (userId, key, data) => {
+  if (!userId) return;
+  const fullKey = `${userId}_${key}`;
+  const dataToStore = {
+    timestamp: getCurrentTime(),
+    data
+  };
+  localStorage.setItem(fullKey, JSON.stringify(dataToStore));
+};
+
+
+const loadFromLocalStorage = (userId, key) => {
+  if (!userId) return null;
+  const fullKey = `${userId}_${key}`;
+  const storedData = localStorage.getItem(fullKey);
+  if (storedData) {
+    return JSON.parse(storedData);
+  }
+  return null;
+};
 
 const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnackbarMessage, setSnackbarOpen }) => {
   const [inputValues, setInputValues] = useState(transactions);
@@ -31,7 +62,7 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
   const [action, setAction] = useState('');
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState({ type: '', index: -1, month: -1 });
-
+  const userId = auth.currentUser?.uid;
   useEffect(() => {
     setInputValues(transactions); // Synchronize inputValues with transactions prop
   }, [transactions]);
@@ -187,7 +218,7 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
   };
 
   const handleNatureMenuOpen = (event, type, index, filters) => {
-    localStorage.setItem("selectedDetailsFilters", JSON.stringify(filters));
+    saveToLocalStorage(userId, "selectedDetailsFilters", filters)
     setSelectedTransaction({ type, index, month: -1 });
     setNatureMenuAnchorEl(event.currentTarget);
   };

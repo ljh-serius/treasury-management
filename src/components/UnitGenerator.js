@@ -182,20 +182,33 @@ const UnitGenerator = () => {
   const rowsPerPage = 10;
 
   const userId = auth.currentUser?.uid;
-
+  
+  const loadFromLocalStorage = (userId, key) => {
+    if (!userId) return null;
+    const fullKey = `${userId}_${key}`;
+    const storedData = localStorage.getItem(fullKey);
+    if (storedData) {
+      return JSON.parse(storedData);
+    }
+    return null;
+  };
+  
   useEffect(() => {
     if (userId) {
-      const localFilters = localStorage.getItem('selectedDetailsFilters');
-      if (localFilters) {
-        const filters = JSON.parse(localFilters);
+      console.log("loading filters")
+      const localFilters = loadFromLocalStorage(userId, 'selectedDetailsFilters');
 
+      console.log(localFilters)
+      if (localFilters) {
+        const filters = localFilters.data;
+  
         let type = '';
         if (filters.selectedType === 'encaissements') {
           type = 'revenues';
         } else if (filters.selectedType === 'decaissements') {
           type = 'expenses';
         }
-
+  
         setSelectedCategory(filters.selectedCategory || '');
         setSelectedType(type);
         setSelectedMonths(filters.selectedMonths || []);
@@ -204,7 +217,7 @@ const UnitGenerator = () => {
       setFiltersLoaded(true);
     }
   }, [userId]);
-
+  
   useEffect(() => {
     const fetchUnits = async () => {
       if (userId && filtersLoaded) {
