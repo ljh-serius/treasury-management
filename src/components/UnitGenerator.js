@@ -38,8 +38,6 @@ const months = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-
-
 const generateRandomDate = () => {
   const end = new Date();
   const start = new Date(end.getFullYear() - 15, end.getMonth(), end.getDate());
@@ -59,9 +57,9 @@ const generateRandomUnits = (count, unitType) => {
       unitPrice: (Math.random() * 100).toFixed(2),
       date: randomDate,
       category: randomCategory,
-      type: unitType, // Set the unit type based on the user's choice
+      type: unitType,
     };
-    unit.totalAmount = parseFloat(unit.unitPrice) * parseInt(unit.quantity); // Calculate total amount
+    unit.totalAmount = parseFloat(unit.unitPrice) * parseInt(unit.quantity);
     if (i % 2 === 0) {
       newWorkUnits.push({
         ...unit,
@@ -73,6 +71,100 @@ const generateRandomUnits = (count, unitType) => {
     }
   }
   return { newWorkUnits, newProductUnits };
+};
+
+const generateSepaXML = (units) => {
+  // Function to generate SEPA XML for "Décaissments" (Expenses)
+  const randomIBAN = () => 'FR' + Math.floor(1000000000000000 + Math.random() * 9000000000000000).toString();
+  const randomBIC = () => 'ABCDEF' + Math.floor(100 + Math.random() * 900).toString();
+
+  const xmlHeader = `<?xml version="1.0" encoding="UTF-8"?>
+  <Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
+    <CstmrCdtTrfInitn>
+      <GrpHdr>
+        <MsgId>${uuidv4()}</MsgId>
+        <CreDtTm>${new Date().toISOString()}</CreDtTm>
+        <NbOfTxs>${units.length}</NbOfTxs>
+        <CtrlSum>${units.reduce((sum, unit) => sum + unit.totalAmount, 0).toFixed(2)}</CtrlSum>
+        <InitgPty>
+          <Nm>Your Company Name</Nm>
+        </InitgPty>
+      </GrpHdr>
+      <PmtInf>
+        <PmtInfId>${uuidv4()}</PmtInfId>
+        <PmtMtd>TRF</PmtMtd>
+        <BtchBookg>false</BtchBookg>
+        <NbOfTxs>${units.length}</NbOfTxs>
+        <CtrlSum>${units.reduce((sum, unit) => sum + unit.totalAmount, 0).toFixed(2)}</CtrlSum>
+        <PmtTpInf>
+          <SvcLvl>
+            <Cd>SEPA</Cd>
+          </SvcLvl>
+        </PmtTpInf>
+        <ReqdExctnDt>${new Date().toISOString().split('T')[0]}</ReqdExctnDt>
+        <Dbtr>
+          <Nm>Your Company Name</Nm>
+          <PstlAdr>
+            <Ctry>FR</Ctry>
+            <AdrLine>Your Company Address</AdrLine>
+          </PstlAdr>
+        </Dbtr>
+        <DbtrAcct>
+          <Id>
+            <IBAN>${randomIBAN()}</IBAN>
+          </Id>
+        </DbtrAcct>
+        <DbtrAgt>
+          <FinInstnId>
+            <BIC>${randomBIC()}</BIC>
+          </FinInstnId>
+        </DbtrAgt>
+        <ChrgBr>SLEV</ChrgBr>
+        <CdtTrfTxInf>`;
+
+  const xmlFooter = `        </CdtTrfTxInf>
+      </PmtInf>
+    </CstmrCdtTrfInitn>
+  </Document>`;
+
+  const xmlTransactions = units.map((unit) => {
+    const beneficiaryIBAN = randomIBAN();
+    const beneficiaryBIC = randomBIC();
+    const endToEndId = uuidv4();
+
+    return `
+          <PmtId>
+            <EndToEndId>${endToEndId}</EndToEndId>
+          </PmtId>
+          <Amt>
+            <InstdAmt Ccy="EUR">${unit.totalAmount.toFixed(2)}</InstdAmt>
+          </Amt>
+          <CdtrAgt>
+            <FinInstnId>
+              <BIC>${beneficiaryBIC}</BIC>
+            </FinInstnId>
+          </CdtrAgt>
+          <Cdtr>
+            <Nm>${unit.description}</Nm>
+          </Cdtr>
+          <CdtrAcct>
+            <Id>
+              <IBAN>${beneficiaryIBAN}</IBAN>
+            </Id>
+          </CdtrAcct>
+          <RmtInf>
+            <Ustrd>${unit.category}</Ustrd>
+          </RmtInf>`;
+  }).join('');
+
+  const sepaXML = `${xmlHeader}${xmlTransactions}${xmlFooter}`;
+
+  // Create a Blob object to allow downloading the XML file
+  const blob = new Blob([sepaXML], { type: 'application/xml' });
+  const link = document.createElement('a');
+  link.href = window.URL.createObjectURL(blob);
+  link.download = `SEPA_Decaissments_${new Date().toISOString().split('T')[0]}.xml`;
+  link.click();
 };
 
 const UnitGenerator = () => {
@@ -92,7 +184,6 @@ const UnitGenerator = () => {
 
   const userId = auth.currentUser?.uid;
 
-  // Load filters from localStorage on component mount
   useEffect(() => {
     if (userId) {
       const localFilters = localStorage.getItem('selectedDetailsFilters');
@@ -108,14 +199,13 @@ const UnitGenerator = () => {
 
         setSelectedCategory(filters.selectedCategory || '');
         setSelectedType(type);
-        setSelectedMonths(filters.selectedMonths || []);  // Set selectedMonths with the months from localStorage
+        setSelectedMonths(filters.selectedMonths || []);
         setSelectedYear(filters.selectedYear || '');
       }
-      setFiltersLoaded(true);  // Mark filters as loaded
+      setFiltersLoaded(true);
     }
   }, [userId]);
 
-  // Fetch units once filters are loaded and valid
   useEffect(() => {
     const fetchUnits = async () => {
       if (userId && filtersLoaded) {
@@ -153,7 +243,6 @@ const UnitGenerator = () => {
       setAllUnits([...allUnits, ...combinedUnits]);
       setFilteredUnits([...filteredUnits, ...combinedUnits]);
 
-      // Save generated units to Firestore
       for (const unit of combinedUnits) {
         const unitDate = unit.date;
         const year = unitDate.getFullYear();
@@ -174,6 +263,15 @@ const UnitGenerator = () => {
 
   const calculateTotal = () => {
     return filteredUnits.reduce((sum, unit) => sum + (parseFloat(unit.unitPrice * unit.quantity) || 0), 0).toFixed(2);
+  };
+
+  const handleGenerateSepaFile = () => {
+    const expenseUnits = filteredUnits.filter(unit => unit.type === 'expenses');
+    if (expenseUnits.length === 0) {
+      alert('No expenses found to generate SEPA XML.');
+      return;
+    }
+    generateSepaXML(expenseUnits);
   };
 
   return (
@@ -222,15 +320,14 @@ const UnitGenerator = () => {
           <MenuItem value="expenses">Expenses</MenuItem>
         </TextField>
 
-
         <FormControl fullWidth margin="normal" sx={{ marginTop: 2 }}>
           <InputLabel id="month-select-label">Filter by Month</InputLabel>
           <Select
             labelId="month-select-label"
             multiple
-            value={selectedMonths} // use selectedMonths instead of selectedMonth
+            value={selectedMonths}
             onChange={(e) => setSelectedMonths(e.target.value)}
-            renderValue={(selected) => selected.join(', ')} // Show selected months as a comma-separated list
+            renderValue={(selected) => selected.join(', ')}
           >
             {months.map((month) => (
               <MenuItem key={month} value={month}>
@@ -300,6 +397,10 @@ const UnitGenerator = () => {
           onChange={handlePageChange}
           sx={{ marginTop: 2 }}
         />
+
+        <Button variant="contained" color="secondary" onClick={handleGenerateSepaFile} sx={{ marginTop: 3 }}>
+          Generate SEPA XML for Expenses
+        </Button>
       </Box>
 
       <Dialog open={openDialog} onClose={() => handleDialogClose(false)}>

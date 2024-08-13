@@ -32,7 +32,6 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState({ type: '', index: -1, month: -1 });
 
-  console.log("inputValues", inputValues)
   useEffect(() => {
     setInputValues(transactions); // Synchronize inputValues with transactions prop
   }, [transactions]);

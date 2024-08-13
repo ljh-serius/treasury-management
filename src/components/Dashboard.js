@@ -20,6 +20,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ShuffleIcon from '@mui/icons-material/Shuffle';
 import AddIcon from '@mui/icons-material/Add';
 
+
 // Import the summary helpers
 import { getAllTransactionSummaries, saveSummaryToFirestore } from '../utils/firebaseHelpers'; 
 
@@ -114,7 +115,7 @@ const Dashboard = ({ children }) => {
       setMobileOpen(false);
     }, 300);
   };
-
+  
   const handleDrawerTransitionEnd = () => {
     setIsClosing(false);
   };
