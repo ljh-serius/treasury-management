@@ -78,22 +78,25 @@ const Dashboard = ({ children }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       const user = auth.currentUser;
+      
       if (!user) return;
+      
       const organizationId = JSON.parse(localStorage.getItem("userData")).organizationId;
   
       const userDoc = await getDoc(doc(db, 'users', user.uid));
+      
       if (userDoc.exists()) {
         const userData = userDoc.data();
+        
         setUserRole(userData.role);
 
-
         const data = await getAllStoreTransactionSummaries(organizationId);
+        
         setSummaries(data)
-
-        console.log("data ", data)
   
         if (['admin', 'headquarter'].includes(userData.role)) {
           const fetchedEntities = await fetchEntities(organizationId);
+          
           setEntities(fetchedEntities)
           setSelectedEntity(fetchedEntities[0].id)
           setAvailableSummaries(Object.keys(data[fetchedEntities[0].id]))
@@ -133,6 +136,7 @@ const Dashboard = ({ children }) => {
     setSelectedEntity(entityId)
   };
   
+
 
   const handleLogout = async () => {
     try {
@@ -261,7 +265,7 @@ const Dashboard = ({ children }) => {
   
       setSummaries(updatedSummaries);
   
-      const organizationId = localStorage.getItem("organizationId");
+      const organizationId = JSON.parse(localStorage.getItem("userData")).organizationId;
       await saveSummaryToFirestore(organizationId, selectedEntity, summaryName, randomSummary);
     } catch (error) {
       console.error('Error in generateRandomTransactions:', error);
@@ -364,7 +368,6 @@ const Dashboard = ({ children }) => {
   );
 
 
-  console.log("summaries ", summaries)
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
