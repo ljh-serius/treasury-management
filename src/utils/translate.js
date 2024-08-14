@@ -127,7 +127,10 @@ export const translate =  (key, lanauge) => {
     "Manage Users": "Gestion des utilisateurs",
 
     "Manage Organization": "Gestion de l'organization",
-    "Manage Parameters": "Gérer les paramètres"
+    "Manage Parameters": "Gérer les paramètres",
+
+    "Show Work Units": "Afficher les unités de travail",
+    "Show Product Units": "Afficher les unités des produits"
   };
 
   if(lanauge == 'fr') {
