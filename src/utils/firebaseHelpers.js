@@ -88,7 +88,7 @@ export const fetchUsersOfOrganization = async (organizationId) => {
 };
 
 // Function to add a user to the root `users` collection in Firestore
-export const addUser = async (userId, firstName, lastName, email, role = 'admin', organizationId) => {
+export const addUser = async (userId, firstName, lastName, email, role = 'admin', organizationId, entityId) => {
   const userRef = doc(db, 'users', userId);
   
   const userData = {
@@ -98,6 +98,7 @@ export const addUser = async (userId, firstName, lastName, email, role = 'admin'
     role,
     organizationId,
     createdAt: new Date(),
+    entityId: entityId
   };
 
   await setDoc(userRef, userData);
@@ -301,14 +302,21 @@ export const fetchUnitsSummaryForStore = async (organizationId, entityId) => {
     throw error;
   }
 };
-  
 
-// Function to save a summary to Firestore within an entity of an organization
 export const saveSummaryToFirestore = async (organizationId, entityId, year, summary) => {
   try {
-    summary.name = year;
+    if (!summary) {
+      throw new Error("Summary data is undefined or null");
+    }
 
-    await setDoc(doc(db, "organizations", organizationId, "entities", entityId, "transactions-summary", year.toString()), summary);
+    if (!organizationId || !entityId || !year) {
+      throw new Error("Invalid organizationId, entityId, or year");
+    }
+
+    summary.name = year.toString();
+
+    const docRef = doc(db, "organizations", organizationId, "entities", entityId, "transactions-summary", year.toString());
+    await setDoc(docRef, summary);
 
     console.log(`Summary for ${year} saved successfully.`);
   } catch (error) {
@@ -316,6 +324,7 @@ export const saveSummaryToFirestore = async (organizationId, entityId, year, sum
     throw error;
   }
 };
+
 
 export const fetchEntities = async (organizationId) => {
   try {

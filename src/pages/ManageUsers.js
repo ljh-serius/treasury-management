@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '../utils/firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs, deleteDoc, query, where } from 'firebase/firestore';
 import {
   Container, Typography, TextField, Button, Box, Grid, Alert, Paper, MenuItem, Select, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, CircularProgress, Divider, InputAdornment, useTheme
 } from '@mui/material';
@@ -33,8 +33,18 @@ const ManageUsers = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      const organizationId = userData.organizationId;
+
+      if (!organizationId) {
+        setError('Invalid organization ID. Please ensure you are passing a valid organization ID.');
+        setLoading(false);
+        return;
+      }
+
       const usersCollectionRef = collection(db, 'users');
-      const usersSnapshot = await getDocs(usersCollectionRef);
+      const usersQuery = query(usersCollectionRef, where('organizationId', '==', organizationId));
+      const usersSnapshot = await getDocs(usersQuery);
       const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setUsers(usersList);
     } catch (error) {
@@ -85,6 +95,7 @@ const ManageUsers = () => {
           entityId: role === 'store' ? entityId : null,
           uid: editingUser.uid,
           createdAt: editingUser.createdAt,
+          organizationId,  // Ensure the organizationId is updated
         });
         setSuccess(`User ${firstName} ${lastName} updated successfully as ${role}`);
         setEditingUser(null);

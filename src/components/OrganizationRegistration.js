@@ -93,7 +93,7 @@ const OrganizationRegistration = () => {
       // Create the organization in Firestore
       const { tenantId, organizationId } = await createOrganization(orgName, domain, email, numUsers, numStores, totalPrice, organization.uid);
 
-      addUser(organization.uid, firstName, lastName, email, 'admin', organizationId)
+      addUser(organization.uid, firstName, lastName, email, 'admin', organizationId, null)
 
       } catch (error) {
       console.error('Error registering organization:', error);
