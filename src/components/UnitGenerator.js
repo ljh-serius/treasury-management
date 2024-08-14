@@ -199,9 +199,11 @@ const UnitGenerator = () => {
   };
 
   useEffect(() => {
-    if (userId) {
+    const organizationId = localStorage.getItem('organizationId')
+    
+    if (organizationId) {
       console.log("loading filters")
-      const localFilters = loadFromLocalStorage(userId, 'selectedDetailsFilters');
+      const localFilters = loadFromLocalStorage(organizationId, 'selectedDetailsFilters');
 
       console.log(localFilters)
       if (localFilters) {
@@ -221,7 +223,7 @@ const UnitGenerator = () => {
       }
       setFiltersLoaded(true);
     }
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     const fetchUnits = async () => {
