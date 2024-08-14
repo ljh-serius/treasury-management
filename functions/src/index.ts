@@ -1,19 +1,13 @@
-import { onRequest } from "firebase-functions/v2/https";
-import { config } from "firebase-functions";
-
-
+import * as functions from "firebase-functions";
 import Stripe from "stripe";
 
 // Initialize Stripe with your secret key from Firebase config
-const stripe = new Stripe(config().stripe.secret_key, {
+const stripe = new Stripe(functions.config().stripe.secret_key, {
     apiVersion: "2024-06-20"
 });
 
-
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
-
-export const createPaymentIntent = onRequest(async (req, res) => {
+// Create the payment intent function
+export const createPaymentIntent = functions.https.onRequest(async (req, res) => {
     try {
         const { amount, currency = 'usd' } = req.body;
 
@@ -33,7 +27,6 @@ export const createPaymentIntent = onRequest(async (req, res) => {
             clientSecret: paymentIntent.client_secret,
         });
     } catch (error) {
-        // Type assertion to ensure 'error' is an instance of Error
         if (error instanceof Error) {
             console.error('Error creating payment intent:', error.message);
             res.status(500).send({
