@@ -82,24 +82,23 @@ const Analytics = () => {
 
   useEffect(() => {
     const fetchBooks = async () => {
-      const localStorageKey = 'transactionSummaries';
-      const storedData = loadFromLocalStorage('organizationId', localStorageKey);
+      // const localStorageKey = 'transactionSummaries';
+      // const storedData = loadFromLocalStorage('organizationId', localStorageKey);
   
-      if (storedData && !shouldRefetchData(storedData.timestamp)) {
-        setBooks(storedData.data);
-        setBookOptions(Object.keys(storedData.data));
-        return;
-      }
+      // if (storedData && !shouldRefetchData(storedData.timestamp)) {
+      //   setBooks(storedData.data);
+      //   setBookOptions(Object.keys(storedData.data));
+      //   return;
+      // }
   
       try {
+        const organizationId = localStorage.getItem('organizationId')
         const fetchedBooks = await getAllTransactionSummaries(organizationId);
         setBooks(fetchedBooks);
         setBookOptions(Object.keys(fetchedBooks));
         
-        const organizationId = localStorage.getItem('organizationId');
-
-        // Store fetched data in localStorage
-        saveToLocalStorage(organizationId, localStorageKey, fetchedBooks);
+        // // Store fetched data in localStorage
+        // saveToLocalStorage(organizationId, localStorageKey, fetchedBooks);
   
         if (Object.keys(fetchedBooks).length > 0 && selectedBooks.length === 0) {
           setSelectedBooks([Object.keys(fetchedBooks)[0]]);
