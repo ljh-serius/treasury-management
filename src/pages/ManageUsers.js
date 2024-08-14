@@ -3,20 +3,24 @@ import { auth, db } from '../utils/firebaseConfig';
 import { createUserWithEmailAndPassword, deleteUser } from 'firebase/auth';
 import { doc, setDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
 import {
-  Container, Typography, TextField, Button, Box, Grid, Alert, Paper, MenuItem, Select, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, CircularProgress, Divider, InputAdornment
+  Container, Typography, TextField, Button, Box, Grid, Alert, Paper, MenuItem, Select, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, CircularProgress, Divider, InputAdornment, useTheme
 } from '@mui/material';
 import { Delete, Edit, Search } from '@mui/icons-material';
 
 const ManageUsers = () => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState(''); // Optionally generate or require a password
-  const [role, setRole] = useState('store'); // Default role
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('store');
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const theme = useTheme();
 
   useEffect(() => {
     fetchUsers();
@@ -59,12 +63,14 @@ const ManageUsers = () => {
         // Editing existing user
         const userDocRef = doc(db, 'organizations', organizationId, 'users', editingUser.id);
         await setDoc(userDocRef, {
-          email: email,
-          role: role,
+          firstName,
+          lastName,
+          email,
+          role,
           uid: editingUser.uid,
           createdAt: editingUser.createdAt,
         });
-        setSuccess(`User ${email} updated successfully as ${role}`);
+        setSuccess(`User ${firstName} ${lastName} updated successfully as ${role}`);
         setEditingUser(null);
       } else {
         // Register the user in Firebase Auth
@@ -74,18 +80,23 @@ const ManageUsers = () => {
         // Store user details under the organization's collection
         const userDocRef = doc(collection(db, 'organizations', organizationId, 'users'), user.uid);
         await setDoc(userDocRef, {
-          email: email,
-          role: role, // 'store' or 'headquarter'
+          firstName,
+          lastName,
+          email,
+          role,
           uid: user.uid,
           createdAt: new Date(),
         });
 
-        setSuccess(`User ${email} added successfully as ${role}`);
+        setSuccess(`User ${firstName} ${lastName} added successfully as ${role}`);
       }
 
+      // Reset fields
+      setFirstName('');
+      setLastName('');
       setEmail('');
-      setPassword(''); // Clear password if you are using it manually
-      setRole('store'); // Reset role to default
+      setPassword('');
+      setRole('store');
       fetchUsers(); // Refresh the users list
     } catch (error) {
       console.error('Error adding/updating user:', error);
@@ -111,6 +122,8 @@ const ManageUsers = () => {
   };
 
   const handleEditUser = (user) => {
+    setFirstName(user.firstName);
+    setLastName(user.lastName);
     setEmail(user.email);
     setRole(user.role);
     setEditingUser(user);
@@ -119,18 +132,42 @@ const ManageUsers = () => {
   const filteredUsers = users.filter(
     (user) =>
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchQuery.toLowerCase())
+      user.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7 }}>
-      <Typography variant="h4" gutterBottom color="primary">
+      <Typography variant="h4" gutterBottom color="primary" sx={{ fontWeight: 'bold' }}>
         Manage Users
       </Typography>
       <Divider sx={{ mb: 3 }} />
       <form onSubmit={handleAddUser}>
         <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
+            <TextField
+              fullWidth
+              label="First Name"
+              variant="outlined"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+              sx={{ backgroundColor: theme.palette.background.paper, borderRadius: '4px' }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <TextField
+              fullWidth
+              label="Last Name"
+              variant="outlined"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              sx={{ backgroundColor: theme.palette.background.paper, borderRadius: '4px' }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
             <TextField
               fullWidth
               label="User Email"
@@ -139,10 +176,10 @@ const ManageUsers = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              sx={{ backgroundColor: '#fff', borderRadius: '4px' }}
+              sx={{ backgroundColor: theme.palette.background.paper, borderRadius: '4px' }}
             />
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             {!editingUser && (
               <TextField
                 fullWidth
@@ -152,12 +189,12 @@ const ManageUsers = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                sx={{ backgroundColor: '#fff', borderRadius: '4px' }}
+                sx={{ backgroundColor: theme.palette.background.paper, borderRadius: '4px' }}
               />
             )}
           </Grid>
-          <Grid item xs={12} sm={4}>
-            <FormControl fullWidth sx={{ backgroundColor: '#fff', borderRadius: '4px' }}>
+          <Grid item xs={12} sm={3}>
+            <FormControl fullWidth sx={{ backgroundColor: theme.palette.background.paper, borderRadius: '4px' }}>
               <InputLabel id="role-label">Role</InputLabel>
               <Select
                 labelId="role-label"
@@ -193,58 +230,62 @@ const ManageUsers = () => {
         </Button>
       </form>
 
-        <Typography variant="h5" sx={{ marginTop: 5 }} gutterBottom color="primary">
-          Users List
-        </Typography>
-        <Divider sx={{ mb: 3 }} />
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Search users..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ mb: 3, backgroundColor: '#fff', borderRadius: '4px' }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-        />
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <TableContainer component={Paper} sx={{ marginTop: 3 }}>
-            <Table sx={{ minWidth: 650 }} size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell><Typography fontWeight="bold">Email</Typography></TableCell>
-                  <TableCell><Typography fontWeight="bold">Role</Typography></TableCell>
-                  <TableCell><Typography fontWeight="bold">Actions</Typography></TableCell>
+      <Typography variant="h5" sx={{ marginTop: 5, fontWeight: 'bold' }} gutterBottom color="primary">
+        Users List
+      </Typography>
+      <Divider sx={{ mb: 3 }} />
+      <TextField
+        fullWidth
+        variant="outlined"
+        placeholder="Search users..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        sx={{ mb: 3, backgroundColor: theme.palette.background.paper, borderRadius: '4px' }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Search />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TableContainer component={Paper} sx={{ marginTop: 3, borderRadius: '12px', boxShadow: theme.shadows[3] }}>
+          <Table sx={{ minWidth: 650 }} size="medium">
+            <TableHead sx={{ backgroundColor: theme.palette.primary.light }}>
+              <TableRow>
+                <TableCell><Typography fontWeight="bold" color={theme.palette.primary.contrastText}>First Name</Typography></TableCell>
+                <TableCell><Typography fontWeight="bold" color={theme.palette.primary.contrastText}>Last Name</Typography></TableCell>
+                <TableCell><Typography fontWeight="bold" color={theme.palette.primary.contrastText}>Email</Typography></TableCell>
+                <TableCell><Typography fontWeight="bold" color={theme.palette.primary.contrastText}>Role</Typography></TableCell>
+                <TableCell><Typography fontWeight="bold" color={theme.palette.primary.contrastText}>Actions</Typography></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredUsers.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.firstName}</TableCell>
+                  <TableCell>{user.lastName}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.role}</TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => handleEditUser(user)} color="primary">
+                      <Edit />
+                    </IconButton>
+                    <IconButton onClick={() => handleDeleteUser(user.id)} color="secondary">
+                      <Delete />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.role}</TableCell>
-                    <TableCell>
-                      <IconButton onClick={() => handleEditUser(user)} color="primary">
-                        <Edit />
-                      </IconButton>
-                      <IconButton onClick={() => handleDeleteUser(user.id)} color="secondary">
-                        <Delete />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </Container>
   );
 };

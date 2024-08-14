@@ -373,20 +373,20 @@ const UnitGenerator = () => {
           {translate('Total', language)}: {calculateTotal()}€
         </Typography>
 
-        <TableContainer component={Paper} sx={{ marginTop: 3 }}>
+        <TableContainer component={Paper} sx={{ marginTop: 3, borderRadius: '12px', boxShadow: 3 }}>
           <Table>
-            <TableHead>
+            <TableHead sx={{ backgroundColor: '#1976d2' }}>
               <TableRow>
-                <TableCell>{translate('ID', language)}</TableCell>
-                <TableCell>{translate('Description', language)}</TableCell>
-                <TableCell>{translate('Type', language)}</TableCell>
-                <TableCell>{translate('Quantity', language)}</TableCell>
-                <TableCell>{translate('Unit Price', language)}</TableCell>
-                {showWorkUnits && <TableCell>{translate('Hours Worked', language)}</TableCell>}
-                {showWorkUnits && <TableCell>{translate('Rate', language)}</TableCell>}
-                <TableCell>{translate('Total Amount', language)}</TableCell>
-                <TableCell>{translate('Date', language)}</TableCell>
-                <TableCell>{translate('Category', language)}</TableCell>
+                <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>{translate('ID', language)}</TableCell>
+                <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>{translate('Description', language)}</TableCell>
+                <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>{translate('Type', language)}</TableCell>
+                <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>{translate('Quantity', language)}</TableCell>
+                <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>{translate('Unit Price', language)}</TableCell>
+                {showWorkUnits && <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>{translate('Hours Worked', language)}</TableCell>}
+                {showWorkUnits && <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>{translate('Rate', language)}</TableCell>}
+                <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>{translate('Total Amount', language)}</TableCell>
+                <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>{translate('Date', language)}</TableCell>
+                <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>{translate('Category', language)}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
