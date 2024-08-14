@@ -63,6 +63,7 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState({ type: '', index: -1, month: -1 });
   const userId = auth.currentUser?.uid;
+  
   useEffect(() => {
     setInputValues(transactions); // Synchronize inputValues with transactions prop
   }, [transactions]);
@@ -164,27 +165,31 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
 
     // Adding the transaction data
     const wsData = [
-      ["Type", "Nature de la transaction", "Solde Initial", ...monthNames.slice(1), "Total"]
+        ["Type", "Nature de la transaction", "Solde Initial", ...monthNames.slice(1), "Total"]
     ];
 
     Object.keys(transactions).forEach((type) => {
-      transactions[type].forEach((transaction, index) => {
-        const rowData = [
-          type.charAt(0).toUpperCase() + type.slice(1),
-          transaction.nature,
-          transaction.montantInitial,
-          ...transaction.montants,
-          calculateTotal(type, index, transactions)
-        ];
-        wsData.push(rowData);
-      });
+        if (Array.isArray(transactions[type])) {
+            transactions[type].forEach((transaction, index) => {
+                const rowData = [
+                    type.charAt(0).toUpperCase() + type.slice(1),
+                    transaction.nature,
+                    transaction.montantInitial,
+                    ...transaction.montants,
+                    calculateTotal(type, index, transactions)
+                ];
+                wsData.push(rowData);
+            });
+        } else {
+            console.warn(`Expected transactions[${type}] to be an array, but got:`, transactions[type]);
+        }
     });
 
     const monthlyTreasury = calculateMonthlyTreasury(transactions);
     const accumulatedTreasury = calculateAccumulatedTreasury(
-      (transactions.encaissements[transactions.encaissements.length - 1]?.montantInitial || 0) -
-      (transactions.decaissements[transactions.decaissements.length - 1]?.montantInitial || 0),
-      transactions
+        (transactions.encaissements?.[transactions.encaissements.length - 1]?.montantInitial || 0) -
+        (transactions.decaissements?.[transactions.decaissements.length - 1]?.montantInitial || 0),
+        transactions
     );
 
     wsData.push(["", "Solde de la Trésorerie", "", ...monthlyTreasury, monthlyTreasury.reduce((acc, curr) => acc + curr, 0)]);
@@ -196,21 +201,22 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
     const chartContainers = document.querySelectorAll('.chart-container'); // Ensure your chart containers have this class
 
     for (let i = 0; i < chartContainers.length; i++) {
-      const canvas = await html2canvas(chartContainers[i]);
-      const imgData = canvas.toDataURL('image/png');
+        const canvas = await html2canvas(chartContainers[i]);
+        const imgData = canvas.toDataURL('image/png');
 
-      const imageId = wb.addImage({
-        base64: imgData,
-        extension: 'png',
-      });
+        const imageId = wb.addImage({
+            base64: imgData,
+            extension: 'png',
+        });
 
-      ws.addImage(imageId, `A${wsData.length + (i * 20) + 3}:P${wsData.length + (i * 20) + 20}`);
+        ws.addImage(imageId, `A${wsData.length + (i * 20) + 3}:P${wsData.length + (i * 20) + 20}`);
     }
 
     // Saving the workbook
     const buffer = await wb.xlsx.writeBuffer();
     saveAs(new Blob([buffer]), 'treasury_data_with_charts.xlsx');
-  };
+};
+
 
   const handleColumnMenuOpen = (event, monthIndex) => {
     setSelectedTransaction({ type: '', index: -1, month: monthIndex });
