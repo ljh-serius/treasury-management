@@ -19,6 +19,8 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ShuffleIcon from '@mui/icons-material/Shuffle';
 import AddIcon from '@mui/icons-material/Add';
+import PeopleIcon from '@mui/icons-material/People';
+import BusinessIcon from '@mui/icons-material/Business';
 
 // Import the summary helpers
 import { getAllTransactionSummaries, saveSummaryToFirestore } from '../utils/firebaseHelpers';
@@ -304,6 +306,7 @@ const Dashboard = ({ children }) => {
 
   console.log(translate("Transaction Books", language))
 
+
   const drawer = (
     <div>
       <Toolbar />
@@ -363,15 +366,15 @@ const Dashboard = ({ children }) => {
         <ListItem key="manage-users" disablePadding>
           <ListItemButton component={Link} to="/manage-users">
             <ListItemIcon>
-              <AssessmentIcon />
+              <PeopleIcon />
             </ListItemIcon>
             <ListItemText primary={translate("Manage Users", language)} />
           </ListItemButton>
         </ListItem>
-        <ListItem key="manage-otganization" disablePadding>
+        <ListItem key="manage-organization" disablePadding>
           <ListItemButton component={Link} to="/manage-organization">
             <ListItemIcon>
-              <AssessmentIcon />
+              <BusinessIcon />
             </ListItemIcon>
             <ListItemText primary={translate("Manage Organization", language)} />
           </ListItemButton>

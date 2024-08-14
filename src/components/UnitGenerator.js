@@ -205,7 +205,6 @@ const UnitGenerator = () => {
       console.log("loading filters")
       const localFilters = loadFromLocalStorage(organizationId, 'selectedDetailsFilters');
 
-      console.log(localFilters)
       if (localFilters) {
         const filters = localFilters.data;
 
