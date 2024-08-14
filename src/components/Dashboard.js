@@ -368,6 +368,14 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={translate("Manage Users", language)} />
           </ListItemButton>
         </ListItem>
+        <ListItem key="manage-otganization" disablePadding>
+          <ListItemButton component={Link} to="/manage-organization">
+            <ListItemIcon>
+              <AssessmentIcon />
+            </ListItemIcon>
+            <ListItemText primary={translate("Manage Organization", language)} />
+          </ListItemButton>
+        </ListItem>
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout}>
             <ListItemIcon>

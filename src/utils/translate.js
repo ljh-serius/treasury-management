@@ -1,131 +1,4 @@
 export const translate =  (key, lanauge) => {
-  const english = {
-    // General
-    "Switch Language": "Switch Language",
-    "Comparative Analytics": "Comparative Analytics",
-    "Select Books": "Select Books",
-    "Select Months": "Select Months",
-    "Global Annual": "Global Annual",
-    "Book": "Book",
-    "Initial Balance": "Initial Balance",
-    "Total Receipts": "Total Receipts",
-    "Total Disbursements": "Total Disbursements",
-    "Final Treasury": "Final Treasury",
-    "Financial Overview": "Financial Overview",
-    "Receipts Breakdown": "Receipts Breakdown",
-    "Disbursements Breakdown": "Disbursements Breakdown",
-    "Monthly Totals": "Monthly Totals",
-    "Monthly Transaction Heatmap": "Monthly Transaction Heatmap",
-    "Treasury Evolution Over Time": "Treasury Evolution Over Time",
-    "Accumulated Treasury": "Accumulated Treasury",
-    "Treasury Balance": "Treasury Balance",
-    "Percentage of Treasury vs Receipts": "Percentage of Treasury vs Receipts",
-    
-    // Dashboard and Navigation
-    "Transaction Books": "Transaction Books",
-    "Generate Random Summary": "Generate Random Summary",
-    "Add New Summary": "Add New Summary",
-    "Analytics": "Analytics",
-    "Units": "Units",
-    "Summary": "Summary",
-    "Logout": "Logout",
-    "Login": "Login",
-    "Register": "Register",
-    "Help Center": "Help Center",
-    "Privacy Policy": "Privacy Policy",
-    "Follow Us": "Follow Us",
-    
-    // Forms and Buttons
-    "Submit": "Submit",
-    "Cancel": "Cancel",
-    "Select Location": "Select Location",
-    "Select Store": "Select Store",
-    "Select Duration": "Select Duration",
-    "Justification": "Justification",
-    "Provision Product": "Provision Product",
-    "Request Another Intervention": "Request Another Intervention",
-    "Stop Scheduling Interventions": "Stop Scheduling Interventions",
-    "Stop Selling Product": "Stop Selling Product",
-    "Export as Spreadsheet": "Export as Spreadsheet",
-    "Generate Units": "Generate Units",
-    "Generate SEPA XML for Expenses": "Generate SEPA XML for Expenses",
-    
-    // Financial Terms
-    "Initial Outflow Amount": "Initial Outflow Amount",
-    "Product Purchases": "Product Purchases",
-    "Work Payments": "Work Payments",
-    "Expenditure Overview": "Expenditure Overview",
-    "Most Expensive Products": "Most Expensive Products",
-    "Purchase Frequency Heatmap": "Purchase Frequency Heatmap",
-    "Product Purchase Trends": "Product Purchase Trends",
-    "Initial Inflow Amount": "Initial Inflow Amount",
-    "Product Sales": "Product Sales",
-    "Work Earnings": "Work Earnings",
-    "Revenue Overview": "Revenue Overview",
-    "Most Profitable Products": "Most Profitable Products",
-    "Sales Heatmap": "Sales Heatmap",
-    "Product Sales Trends": "Product Sales Trends",
-
-    // Table Headers
-    "Type": "Type",
-    "Nature of transaction": "Nature of transaction",
-    "Initial Balance": "Initial Balance",
-    "Total": "Total",
-    "Accumulated Treasury": "Accumulated Treasury",
-    "Percentage of Treasury vs Receipts": "Percentage of Treasury vs Receipts",
-
-    // Specific for Units
-    "Intervention Location": "Intervention Location",
-    "Hours Requested": "Hours Requested",
-    "Status": "Status",
-    "Actions": "Actions",
-    "Duration": "Duration",
-    "Units": "Units",
-    "Store": "Store",
-    "Requested": "Requested",
-    "Stop Duration": "Stop Duration",
-    "Call": "Call",
-    "Email": "Email",
-    "Final Amount": "Final Amount",
-    "Purchase Date": "Purchase Date",
-    "Notes": "Notes",
-    "Hourly Rate": "Hourly Rate",
-    "Hours Worked": "Hours Worked",
-    "Total Earnings": "Total Earnings",
-    "Description": "Description",
-    "Rate": "Rate",
-    "Unit Price": "Unit Price",
-    "Total Amount": "Total Amount",
-    "Category": "Category",
-    "Select Unit Type": "Select Unit Type",
-    "Revenues": "Revenues",
-    "Expenses": "Expenses",
-    "Generate": "Generate",
-    "All Categories": "All Categories",
-    "All Types": "All Types",
-    "Filter by Category": "Filter by Category",
-    "Filter by Type": "Filter by Type",
-    "Filter by Month": "Filter by Month",
-    "Filter by Year": "Filter by Year",
-    "January": "January",
-    "February": "February",
-    "March": "March",
-    "April": "April",
-    "May": "May",
-    "June": "June",
-    "July": "July",
-    "August": "August",
-    "September": "September",
-    "October": "October",
-    "November": "November",
-    "December": "December",
-    "Encaissements": "Income",
-    "Decaissements": "Expenses",
-
-    // Users page
-    "Manage Users": "Manage Users"
-  };
-  
   const french = {
     // General$
     "Switch Language": "Changer de langue",
@@ -251,12 +124,14 @@ export const translate =  (key, lanauge) => {
     "Encaissements": "Encaissements",
     "Decaissements": "Décaissements",
 
-    "Manage Users": "Gestion utilisateurs"
+    "Manage Users": "Gestion des utilisateurs",
+
+    "Manage Organization": "Gestion de l'organization"
   };
 
   if(lanauge == 'fr') {
     return french[key];
   }
   
-  return english[key]; 
+  return key; 
 };

@@ -15,8 +15,8 @@ import UnitGenerator from './components/UnitGenerator';
 import SummaryComponent from './components/SummaryComponent';
 import OrganizationRegistration from './components/OrganizationRegistration';
 import ManageUsers from './pages/ManageUsers';
+import ManageOrganization from './pages/ManageOrganization';
 import { TranslationProvider } from './utils/TranslationProvider';
-import { getOrganizationIdForUser } from './utils/firebaseHelpers'; // Import the helper function
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -93,6 +93,16 @@ const App = () => {
             <ProtectedRoute user={user}>
               <Dashboard>
                 <ManageUsers />
+              </Dashboard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/manage-organization"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard>
+                <ManageOrganization />
               </Dashboard>
             </ProtectedRoute>
           }
