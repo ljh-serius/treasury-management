@@ -121,9 +121,9 @@ export const translate =  (key, lanauge) => {
     "October": "Octobre",
     "November": "Novembre",
     "December": "Décembre",
-    "Encaissements": "Encaissements",
-    "Decaissements": "Décaissements",
-
+    "Revenues": "Encaissements",
+    "Expenses": "Décaissements",
+    "Expenses Breakdown": "Détails des décaissements",
     "Manage Users": "Gestion des utilisateurs",
 
     "Manage Organization": "Gestion de l'organization",

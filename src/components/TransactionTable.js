@@ -157,7 +157,7 @@ const TransactionTable = ({
                         borderRight: '1px solid #cccccc',
                       }}
                     >
-                      {translate(type.charAt(0).toUpperCase() + type.slice(1), language)}
+                      {translate(type == "decaissements" ? 'Expenses' : 'Revenues', language)}
                     </TableCell>
                   )}
                   <TableCell

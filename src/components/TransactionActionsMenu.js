@@ -47,7 +47,7 @@ const TransactionActionsMenu = ({
           Paste Row
         </MenuItem>,
         <MenuItem key="seeDetailsTransactionNature">
-          <Link to={"/units"}>
+          <Link to="/units">
             See Details
           </Link>
         </MenuItem>

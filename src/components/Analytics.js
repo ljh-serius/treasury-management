@@ -267,11 +267,11 @@ const Analytics = () => {
           type: 'pie',
         },
         title: {
-          text: translate('Decaissements Breakdown', language),
+          text: translate('Expenses Breakdown', language),
         },
         series: [
           {
-            name: translate('Decaissements', language),
+            name: translate('Expenses', language),
             data: Object.entries(decaissementsData).map(([name, value]) => ({
               name,
               y: value,
