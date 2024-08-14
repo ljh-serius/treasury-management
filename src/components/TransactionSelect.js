@@ -29,26 +29,24 @@ const StyledButton = styled(Button)(({ theme }) => ({
 }));
 
 const TransactionSelect = ({
-  transactionName,
+  transactionName = '', // Initialize with an empty string
   availableTransactions = [], // Default to empty array
   handleTransactionChange
 }) => {
-
   return (
     <Box display="flex" alignItems="center">
       <StyledFormControl>
         <Select
-        value={transactionName}
-        onChange={(e) => handleTransactionChange(e.target.value)}
-        displayEmpty
-      >
-        {availableTransactions.map((name, index) => (
-          <MenuItem key={index} value={name}>
-            {name || 'Unnamed Book'}
-          </MenuItem>
-        ))}
-      </Select>
-
+          value={transactionName || ''} // Ensure value is always a string
+          onChange={(e) => handleTransactionChange(e.target.value)}
+          displayEmpty
+        >
+          {availableTransactions.map((name, index) => (
+            <MenuItem key={index} value={name}>
+              {name || 'Unnamed Book'}
+            </MenuItem>
+          ))}
+        </Select>
       </StyledFormControl>
     </Box>
   );

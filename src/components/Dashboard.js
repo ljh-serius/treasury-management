@@ -75,72 +75,41 @@ const Dashboard = ({ children }) => {
 
   const userId = auth.currentUser?.uid;
 
-// This part of the Dashboard code should correctly set available transactions.
-useEffect(() => {
-  const fetchUserData = async () => {
-    const user = auth.currentUser;
-    if (user) {
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      const organizationId = JSON.parse(localStorage.getItem("userData")).organizationId;
+  
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
         setUserRole(userData.role);
-        const organizationId = userData.organizationId;
 
-        if (userData.role === 'admin' || userData.role === 'headquarter') {
+
+        const data = await getAllStoreTransactionSummaries(organizationId);
+        setSummaries(data)
+
+        console.log("data ", data)
+  
+        if (['admin', 'headquarter'].includes(userData.role)) {
           const fetchedEntities = await fetchEntities(organizationId);
-          setEntities(fetchedEntities);
+          setEntities(fetchedEntities)
+          setSelectedEntity(fetchedEntities[0].id)
+          setAvailableSummaries(Object.keys(data[fetchedEntities[0].id]))
 
-          // Set the default selected entity and fetch the summaries
-          const firstEntityId = fetchedEntities[0]?.id || '';
-          setSelectedEntity(firstEntityId);
-
-          const fetchedSummaries = await getAllStoreTransactionSummaries(organizationId);
-          setSummaries(fetchedSummaries);
-
-          // Prepare available transactions per entity
-          const availableTransactionsForEntity = fetchedSummaries[firstEntityId] 
-            ? Object.keys(fetchedSummaries[firstEntityId])
-            : [];
-
-
-            console.log("fetchedSummaries", fetchedSummaries)
-            console.log("firstEntityId", firstEntityId)
-          setAvailableSummaries(availableTransactionsForEntity);
-          setSummaryName(availableTransactionsForEntity[0] || translate('Main transaction book', language));
-          setCurrentSummaryId(availableTransactionsForEntity[0] || '');
         } else if (userData.role === 'store') {
-          const fetchedSummaries = await getStoreTransactionSummaries(organizationId, userData.entityId);
-          setSummaries(fetchedSummaries);
+          const entityId = JSON.parse(localStorage.getItem("userData")).entityId;
 
-          // Prepare available transactions per entity
-          const availableTransactionsForEntity = fetchedSummaries[userData.entityId] 
-            ? Object.keys(fetchedSummaries[userData.entityId])
-            : [];
-
-          setAvailableSummaries(availableTransactionsForEntity);
-          setSummaryName(availableTransactionsForEntity[0] || translate('Main transaction book', language));
-          setCurrentSummaryId(availableTransactionsForEntity[0] || '');
+          const data = await getStoreTransactionSummaries(organizationId, entityId);
+          setSummaries(data)
         }
       }
-    }
-  };
-
-  fetchUserData();
-}, [userId, language]);
-
-
-  const handleEntityChange = async (entityId) => {
-    setSelectedEntity(entityId);
-    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-    const fetchedSummaries = await getStoreTransactionSummaries(organizationId, entityId);
-    setSummaries(fetchedSummaries);
-
-    const firstSummaryId = Object.keys(fetchedSummaries)[0];
-    setCurrentSummaryId(firstSummaryId);
-    setSummaryName(fetchedSummaries[firstSummaryId]?.name || translate('Main transaction book', language));
-    const summaryNames = Object.keys(fetchedSummaries).map((key) => fetchedSummaries[key].name);
-    setAvailableSummaries(summaryNames);
-  };
+    };
+  
+    fetchUserData();
+  }, [userId, language]);
+  
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -154,8 +123,16 @@ useEffect(() => {
   };
 
   const handleSummaryChange = (name) => {
+    if (!name) return;
+  
     setSummaryName(name);
+    setCurrentSummaryId(name);
   };
+
+  const handleEntityChange = async (entityId) => {
+    setSelectedEntity(entityId)
+  };
+  
 
   const handleLogout = async () => {
     try {
@@ -386,6 +363,8 @@ useEffect(() => {
     (child) => React.isValidElement(child) && child.type === TransactionBooks
   );
 
+
+  console.log("summaries ", summaries)
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -486,12 +465,16 @@ useEffect(() => {
         component="main"
         sx={{ flexGrow: 1, p: 2.4, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
       >
-        <Toolbar />
-        {isTransactionBooks ? (
-          <TransactionBooks transactionName={summaryName} transactions={summaries[selectedEntity][summaryName]} />
-        ) : (
-          children
-        )}
+          <Toolbar />
+        {isTransactionBooks && summaries[selectedEntity] && summaries[selectedEntity][summaryName] ? (
+            <TransactionBooks 
+              transactionName={summaryName} 
+              transactions={summaries[selectedEntity][summaryName]} 
+            />
+          ) : (
+            children
+          )}
+        
         <AddTransactionModal
           modalOpen={modalOpen}
           handleModalClose={handleModalClose}

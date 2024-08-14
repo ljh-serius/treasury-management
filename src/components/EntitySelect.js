@@ -20,7 +20,7 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
 }));
 
 const EntitySelect = ({
-  selectedEntity,
+  selectedEntity = '', // Initialize with an empty string
   availableEntities = [], // Default to empty array
   handleEntityChange
 }) => {
@@ -28,7 +28,7 @@ const EntitySelect = ({
     <Box display="flex" alignItems="center">
       <StyledFormControl>
         <Select
-          value={selectedEntity}
+          value={selectedEntity || ''} // Ensure value is always a string
           onChange={(e) => handleEntityChange(e.target.value)}
           displayEmpty
         >
