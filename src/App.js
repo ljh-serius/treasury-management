@@ -14,8 +14,7 @@ import { auth } from './utils/firebaseConfig';
 import UnitGenerator from './components/UnitGenerator';
 import SummaryComponent from './components/SummaryComponent';
 import OrganizationRegistration from './components/OrganizationRegistration';
-import ManageUsers from './pages/ManageUsers';
-import ManageOrganization from './pages/ManageOrganization';
+import ManageParameters from './pages/ManageParameters';
 import { TranslationProvider } from './utils/TranslationProvider';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
@@ -98,25 +97,15 @@ const App = () => {
             }
           />
           <Route
-            path="/manage-users"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <ManageUsers />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/manage-organization"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <ManageOrganization />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
+              path="/manage-parameters"
+              element={
+                <ProtectedRoute user={user}>
+                  <Dashboard>
+                    <ManageParameters />
+                  </Dashboard>
+                </ProtectedRoute>
+              }
+            />
           <Route
             path="/blog"
             element={

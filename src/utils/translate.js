@@ -126,7 +126,8 @@ export const translate =  (key, lanauge) => {
 
     "Manage Users": "Gestion des utilisateurs",
 
-    "Manage Organization": "Gestion de l'organization"
+    "Manage Organization": "Gestion de l'organization",
+    "Manage Parameters": "Gérer les paramètres"
   };
 
   if(lanauge == 'fr') {

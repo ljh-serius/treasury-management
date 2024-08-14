@@ -74,9 +74,6 @@ const ManageOrganization = () => {
 
   return (
     <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7 }}>
-        <Typography variant="h4" gutterBottom color="primary">
-          Manage Organization
-        </Typography>
         <Box component="form" noValidate autoComplete="off">
           <Grid container spacing={2}>
             <Grid item xs={12}>

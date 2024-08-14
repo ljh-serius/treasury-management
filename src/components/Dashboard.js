@@ -363,20 +363,12 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={translate("Summary", language)} />
           </ListItemButton>
         </ListItem>
-        <ListItem key="manage-users" disablePadding>
-          <ListItemButton component={Link} to="/manage-users">
+        <ListItem key="manage-parameters" disablePadding>
+          <ListItemButton component={Link} to="/manage-parameters">
             <ListItemIcon>
               <PeopleIcon />
             </ListItemIcon>
-            <ListItemText primary={translate("Manage Users", language)} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="manage-organization" disablePadding>
-          <ListItemButton component={Link} to="/manage-organization">
-            <ListItemIcon>
-              <BusinessIcon />
-            </ListItemIcon>
-            <ListItemText primary={translate("Manage Organization", language)} />
+            <ListItemText primary={translate("Manage Parameters", language)} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>

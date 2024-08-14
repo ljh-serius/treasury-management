@@ -26,80 +26,81 @@ const OrganizationRegistration = () => {
   
     const handlePayment = async () => {
       try {
-        // Fetch the client secret from the Firebase function
-        const response = await fetch('https://us-central1-your-project-id.cloudfunctions.net/createPaymentIntent', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ amount: totalPrice, currency: 'usd' }), // Amount in USD cents
-        });
+          // Fetch the client secret from the Firebase function
+          const response = await fetch('https://us-central1-vault-insight.cloudfunctions.net/createPaymentIntent', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ amount: totalPrice, currency: 'usd' }), // Amount in USD cents
+          });
   
-        const { clientSecret } = await response.json();
+          const { clientSecret } = await response.json();
   
-        // Confirm the payment with Stripe using the client secret
-        const result = await stripe.confirmCardPayment(clientSecret, {
-          payment_method: {
-            card: elements.getElement(CardElement),
-            billing_details: {
-              email: email,
-            },
-          },
-        });
+          // Confirm the payment with Stripe using the client secret
+          const result = await stripe.confirmCardPayment(clientSecret, {
+              payment_method: {
+                  card: elements.getElement(CardElement),
+                  billing_details: {
+                      email: email,
+                  },
+              },
+          });
   
-        if (result.error) {
-          console.error(result.error.message);
-          setError(`Payment failed: ${result.error.message}`);
-          return false; // Payment failed
-        } else {
-          if (result.paymentIntent.status === 'succeeded') {
-            console.log('Payment succeeded!');
-            return true; // Payment succeeded
+          if (result.error) {
+              console.error(result.error.message);
+              setError(`Payment failed: ${result.error.message}`);
+              return false; // Payment failed
+          } else {
+              if (result.paymentIntent.status === 'succeeded') {
+                  console.log('Payment succeeded!');
+                  return true; // Payment succeeded
+              }
           }
-        }
       } catch (error) {
-        console.error('Error handling payment:', error);
-        setError('An error occurred during payment. Please try again.');
-        return false;
+          console.error('Error handling payment:', error);
+          setError('An error occurred during payment. Please try again.');
+          return false;
       }
-    };
+  };
   
-    const handleRegister = async (e) => {
-      e.preventDefault();
-      setError(null);
-  
-      try {
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    try {
         // Check if the organization name already exists in Firestore
         const q = query(collection(db, 'organizations'), where('name', '==', orgName));
         const querySnapshot = await getDocs(q);
-  
+
         if (!querySnapshot.empty) {
-          setError('Organization with this name already exists.');
-          return;
+            setError('Organization with this name already exists.');
+            return;
         }
-  
+
         // Handle payment before creating user
         const paymentSuccess = await handlePayment();
         if (!paymentSuccess) {
-          return; // Stop registration if payment fails
+            return; // Stop registration if payment fails
         }
-  
+
         // Register the organization as a user in Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-  
+
         // Create the organization in Firestore
         const { tenantId, organizationId } = await createOrganization(orgName, domain, email, numUsers, numStores, totalPrice, user.uid);
-  
+
         // Store organization ID and navigate to dashboard
         localStorage.setItem('organizationId', organizationId);
         navigate('/');
-  
-      } catch (error) {
+
+    } catch (error) {
         console.error('Error registering organization:', error);
         setError('An error occurred during registration. Please try again.');
-      }
-    };
+    }
+};
+
   
     return (
       <Container maxWidth="sm">

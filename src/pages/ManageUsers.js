@@ -139,9 +139,6 @@ const ManageUsers = () => {
 
   return (
     <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7 }}>
-      <Typography variant="h4" gutterBottom color="primary" sx={{ fontWeight: 'bold' }}>
-        Manage Users
-      </Typography>
       <Divider sx={{ mb: 3 }} />
       <form onSubmit={handleAddUser}>
         <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -230,7 +227,7 @@ const ManageUsers = () => {
         </Button>
       </form>
 
-      <Typography variant="h5" sx={{ marginTop: 5, fontWeight: 'bold' }} gutterBottom color="primary">
+      <Typography variant="h5" sx={{ marginTop: 5 }} gutterBottom >
         Users List
       </Typography>
       <Divider sx={{ mb: 3 }} />
@@ -256,13 +253,13 @@ const ManageUsers = () => {
       ) : (
         <TableContainer component={Paper} sx={{ marginTop: 3, borderRadius: '12px', boxShadow: theme.shadows[3] }}>
           <Table sx={{ minWidth: 650 }} size="medium">
-            <TableHead sx={{ backgroundColor: theme.palette.primary.light }}>
+            <TableHead sx={{ backgroundColor: theme.palette.primary.dark }}>
               <TableRow>
-                <TableCell><Typography fontWeight="bold" color={theme.palette.primary.contrastText}>First Name</Typography></TableCell>
-                <TableCell><Typography fontWeight="bold" color={theme.palette.primary.contrastText}>Last Name</Typography></TableCell>
-                <TableCell><Typography fontWeight="bold" color={theme.palette.primary.contrastText}>Email</Typography></TableCell>
-                <TableCell><Typography fontWeight="bold" color={theme.palette.primary.contrastText}>Role</Typography></TableCell>
-                <TableCell><Typography fontWeight="bold" color={theme.palette.primary.contrastText}>Actions</Typography></TableCell>
+                <TableCell><Typography  color={theme.palette.primary.contrastText}>First Name</Typography></TableCell>
+                <TableCell><Typography  color={theme.palette.primary.contrastText}>Last Name</Typography></TableCell>
+                <TableCell><Typography  color={theme.palette.primary.contrastText}>Email</Typography></TableCell>
+                <TableCell><Typography  color={theme.palette.primary.contrastText}>Role</Typography></TableCell>
+                <TableCell><Typography  color={theme.palette.primary.contrastText}>Actions</Typography></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
