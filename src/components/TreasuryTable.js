@@ -218,7 +218,8 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
   };
 
   const handleNatureMenuOpen = (event, type, index, filters) => {
-    saveToLocalStorage(userId, "selectedDetailsFilters", filters)
+    const organizationId = localStorage.getItem('organizationId');
+    saveToLocalStorage(organizationId, "selectedDetailsFilters", filters)
     setSelectedTransaction({ type, index, month: -1 });
     setNatureMenuAnchorEl(event.currentTarget);
   };
