@@ -131,7 +131,7 @@ useEffect(() => {
 
   const handleEntityChange = async (entityId) => {
     setSelectedEntity(entityId);
-    const organizationId = JSON.parse(localStorage.getItem('loggedInUser')).organizationId;
+    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
     const fetchedSummaries = await getStoreTransactionSummaries(organizationId, entityId);
     setSummaries(fetchedSummaries);
 
@@ -412,7 +412,7 @@ useEffect(() => {
               <EntitySelect
                 selectedEntity={selectedEntity}
                 availableEntities={entities}
-                handleEntityChange={setSelectedEntity}
+                handleEntityChange={handleEntityChange}
               />
               <TransactionSelect
                 transactionName={summaryName}
@@ -488,7 +488,7 @@ useEffect(() => {
       >
         <Toolbar />
         {isTransactionBooks ? (
-          <TransactionBooks transactionName={summaryName} transactions={summaries[currentSummaryId]} />
+          <TransactionBooks transactionName={summaryName} transactions={summaries[selectedEntity][summaryName]} />
         ) : (
           children
         )}
