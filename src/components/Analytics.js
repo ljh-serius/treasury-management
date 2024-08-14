@@ -92,8 +92,8 @@ const Analytics = () => {
       // }
   
       try {
-        const organizationId = localStorage.getItem('organizationId')
-        const fetchedBooks = await getAllTransactionSummaries(organizationId);
+        const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+        const fetchedBooks = await getAllTransactionSummaries(organizationId,);
         setBooks(fetchedBooks);
         setBookOptions(Object.keys(fetchedBooks));
         

@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { fetchUnitsSummary, saveSummaryToFirestore } from '../utils/firebaseHelpers';
+import { fetchUnitsSummaryForStore, saveSummaryToFirestore } from '../utils/firebaseHelpers';
 
 const SummaryComponent = () => {
   const [summary, setSummary] = useState(null);
 
   useEffect(() => {
-    const organizationId = localStorage.getItem('organizationId');
-    if (organizationId) {
-      fetchUnitsSummary(organizationId)
+    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+    const entityId = JSON.parse(localStorage.getItem('userData')).entityId;
+
+    if (organizationId && entityId) {
+      fetchUnitsSummaryForStore(organizationId, entityId)
         .then(setSummary)
         .catch(error => console.error("Failed to fetch summary:", error));
     }
   }, []); // Ensure useEffect runs when userId is defined
 
   const handleSaveSummary = () => {
-    const organizationId = localStorage.getItem('organizationId');
+    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
     
     if (organizationId && summary) {
       Object.keys(summary).forEach((year) => {

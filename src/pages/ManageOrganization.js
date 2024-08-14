@@ -13,7 +13,7 @@ const ManageOrganization = () => {
     const fetchOrganization = async () => {
       console.log("Fetching organization data...");
       try {
-        const organizationId = localStorage.getItem("organizationId");
+        const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
         if (!organizationId) {
           console.error("organizationId is null or undefined");
           setLoading(false);
@@ -50,7 +50,7 @@ const ManageOrganization = () => {
     setError(null);
     setSuccess(null);
     try {
-      const organizationId = localStorage.getItem("organizationId");
+      const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
       if (!organizationId) {
         setError('Invalid organization ID.');
         return;

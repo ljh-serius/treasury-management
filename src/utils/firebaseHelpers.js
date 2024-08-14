@@ -21,17 +21,57 @@ export const createOrganization = async (orgName, customDomain, email, numUsers,
   return { tenantId, organizationId: orgDocRef.id };
 };
 
-// Function to fetch organization data along with users
+export const getAllStoreTransactionSummaries = async (organizationId) => {
+  try {
+    const summariesCollection = collection(db, 'organizations', organizationId, 'transactions-summary');
+    const summariesSnapshot = await getDocs(summariesCollection);
+
+    const summaries = {};
+    summariesSnapshot.forEach((doc) => {
+      summaries[doc.id] = doc.data();
+    });
+
+    return summaries;
+  } catch (error) {
+    console.error('Error fetching all store transaction summaries: ', error);
+    throw error;
+  }
+};
+
+export const getStoreTransactionSummaries = async (organizationId, storeId) => {
+  try {
+    const storeSummariesCollection = collection(db, 'organizations', organizationId, 'entities', storeId, 'transactions-summary');
+    const summariesSnapshot = await getDocs(storeSummariesCollection);
+
+    const summaries = {};
+    summariesSnapshot.forEach((doc) => {
+      summaries[doc.id] = doc.data();
+    });
+
+    return summaries;
+  } catch (error) {
+    console.error('Error fetching transaction summaries for store: ', error);
+    throw error;
+  }
+};
+
+// Function to fetch organization data along with users and entities
 export const fetchOrganizationData = async (organizationId) => {
   const orgRef = doc(db, "organizations", organizationId);
   const orgSnapshot = await getDoc(orgRef);
 
   if (orgSnapshot.exists()) {
     const orgData = orgSnapshot.data();
+    
+    // Fetch users
     const usersSnapshot = await getDocs(collection(orgRef, "users"));
     const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    return { ...orgData, users };
+    // Fetch entities
+    const entitiesSnapshot = await getDocs(collection(orgRef, "entities"));
+    const entities = entitiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return { ...orgData, users, entities };
   } else {
     throw new Error("Organization not found");
   }
@@ -47,26 +87,44 @@ export const fetchUsersOfOrganization = async (organizationId) => {
   return users;
 };
 
-// Function to add a user to an organization
-export const addUserToOrganization = async (organizationId, user) => {
-  const userRef = doc(collection(db, "organizations", organizationId, "users"));
-  await setDoc(userRef, user);
+// Function to add a user to the root `users` collection in Firestore
+export const addUser = async (userId, firstName, lastName, email, role = 'admin', organizationId) => {
+  const userRef = doc(db, 'users', userId);
+  
+  const userData = {
+    firstName,
+    lastName,
+    email,
+    role,
+    organizationId,
+    createdAt: new Date(),
+  };
+
+  await setDoc(userRef, userData);
 };
 
-// Function to save transaction details within an organization
-export const saveTransactionDetails = async (organizationId, transactionId, details) => {
+
+// Function to add an entity to an organization
+export const addEntityToOrganization = async (organizationId, entityData) => {
+  const entityRef = doc(collection(db, "organizations", organizationId, "entities"));
+  await setDoc(entityRef, entityData);
+  return entityRef.id;
+};
+
+// Function to save transaction details within an entity of an organization
+export const saveTransactionDetails = async (organizationId, entityId, transactionId, details) => {
   try {
-    const detailsRef = doc(db, "organizations", organizationId, "transaction-details", transactionId);
+    const detailsRef = doc(db, "organizations", organizationId, "entities", entityId, "transaction-details", transactionId);
     await setDoc(detailsRef, details, { merge: true });
   } catch (error) {
     console.error("Error saving transaction details: ", error);
   }
 };
 
-// Function to get transaction details within an organization
-export const getTransactionDetails = async (organizationId, transactionId) => {
+// Function to get transaction details within an entity of an organization
+export const getTransactionDetails = async (organizationId, entityId, transactionId) => {
   try {
-    const docRef = doc(db, "organizations", organizationId, "transaction-details", transactionId);
+    const docRef = doc(db, "organizations", organizationId, "entities", entityId, "transaction-details", transactionId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
@@ -80,31 +138,25 @@ export const getTransactionDetails = async (organizationId, transactionId) => {
   }
 };
 
-// Function to fetch all transaction units within an organization
-export const fetchAllUnits = async (organizationId, filters) => {
-  if (!organizationId) return [];
+// Function to fetch all transaction units within an entity of an organization
+export const fetchAllUnits = async (organizationId, entityId, filters) => {
+  if (!organizationId || !entityId) return [];
 
   const allUnits = [];
   const { selectedCategory, selectedType, selectedMonths = [], selectedYear, months } = filters;
 
   try {
-    console.log("Fetching all units for filters ", filters);
-    // Only process the specific year if selected
     const year = selectedYear ? parseInt(selectedYear) : new Date().getFullYear();
-
-    // Use selectedMonths if defined, otherwise default to all months
     const monthsToFetch = selectedMonths.length > 0 ? selectedMonths : months;
 
     for (let month of monthsToFetch) {
-      const unitsRef = collection(db, "organizations", organizationId, "transaction-units", year.toString(), month);
+      const unitsRef = collection(db, "organizations", organizationId, "entities", entityId, "transaction-units", year.toString(), month);
       let unitsQuery = unitsRef;
 
-      // Apply the category filter if provided
       if (selectedCategory) {
         unitsQuery = query(unitsQuery, where('category', '==', selectedCategory));
       }
 
-      // Apply the type filter if provided
       if (selectedType) {
         unitsQuery = query(unitsQuery, where('type', '==', selectedType));
       }
@@ -113,7 +165,7 @@ export const fetchAllUnits = async (organizationId, filters) => {
       const units = unitsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        date: new Date(doc.data().date.seconds * 1000), // Convert Firestore timestamp to Date
+        date: new Date(doc.data().date.seconds * 1000),
       }));
 
       allUnits.push(...units);
@@ -125,13 +177,11 @@ export const fetchAllUnits = async (organizationId, filters) => {
   return allUnits;
 };
 
-// Function to save a unit to Firestore within an organization
-export const saveUnitToFirestore = async (organizationId, unit, year, month) => {
+// Function to save a unit to Firestore within an entity of an organization
+export const saveUnitToFirestore = async (organizationId, entityId, unit, year, month) => {
   try {
-    // Get the reference to the collection where you want to add the document
-    const unitsCollectionRef = collection(db, "organizations", organizationId, "transaction-units", year, month);
+    const unitsCollectionRef = collection(db, "organizations", organizationId, "entities", entityId, "transaction-units", year, month);
 
-    // Use addDoc to add the document to the collection
     await addDoc(unitsCollectionRef, {
       ...unit,
       createdBy: organizationId,
@@ -151,9 +201,9 @@ const months = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-export const getAllTransactionSummaries = async (organizationId) => {
+export const getAllTransactionSummaries = async (organizationId, entityId) => {
   try {
-    const summariesCollection = collection(db, 'organizations', organizationId, 'transactions-summary');
+    const summariesCollection = collection(db, 'organizations', organizationId, 'entities', entityId, 'transactions-summary');
     const summariesSnapshot = await getDocs(summariesCollection);
 
     const summaries = {};
@@ -168,8 +218,8 @@ export const getAllTransactionSummaries = async (organizationId) => {
   }
 };
 
-export const fetchUnitsSummary = async (organizationId) => {
-  if (!organizationId) return;
+export const fetchUnitsSummaryForStore = async (organizationId, entityId) => {
+  if (!organizationId || !entityId) return;
 
   const summary = {};
   const currentYear = new Date().getFullYear();
@@ -183,20 +233,20 @@ export const fetchUnitsSummary = async (organizationId) => {
       };
 
       for (let month of months) {
-        const monthIndex = months.indexOf(month); // 0-based index for the month
-        const unitsRef = collection(db, "organizations", organizationId, "transaction-units", year.toString(), month);
+        const monthIndex = months.indexOf(month);
+        const unitsRef = collection(db, "organizations", organizationId, "entities", entityId, "transaction-units", year.toString(), month);
 
         const unitsSnapshot = await getDocs(unitsRef);
 
         if (unitsSnapshot.empty) {
           console.log(`No units found for ${year} ${month}`);
-          continue; // Skip to the next month if no units found
+          continue;
         }
 
         const units = unitsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          date: new Date(doc.data().date.seconds * 1000), // Convert Firestore timestamp to Date
+          date: new Date(doc.data().date.seconds * 1000),
         }));
 
         units.forEach(unit => {
@@ -211,7 +261,7 @@ export const fetchUnitsSummary = async (organizationId) => {
             natureEntry = {
               nature: category,
               montantInitial: 0,
-              montants: Array(12).fill(0), // Initialize an array for 12 months
+              montants: Array(12).fill(0),
             };
             summary[year][summaryType].push(natureEntry);
           }
@@ -242,7 +292,7 @@ export const fetchUnitsSummary = async (organizationId) => {
       summary[year].decaissements.push(calculateTotal(summary[year].decaissements));
     }
 
-    console.log('Final Summary:', summary); // Debugging output
+    console.log('Final Summary:', summary);
 
     return summary;
 
@@ -253,17 +303,73 @@ export const fetchUnitsSummary = async (organizationId) => {
 };
   
 
-// Function to save a summary to Firestore within an organization
-export const saveSummaryToFirestore = async (organizationId, year, summary) => {
+// Function to save a summary to Firestore within an entity of an organization
+export const saveSummaryToFirestore = async (organizationId, entityId, year, summary) => {
   try {
     summary.name = year;
 
-    // Save the summary to Firestore, using the year as the document ID
-    await setDoc(doc(db, "organizations", organizationId, "transactions-summary", year.toString()), summary);
+    await setDoc(doc(db, "organizations", organizationId, "entities", entityId, "transactions-summary", year.toString()), summary);
 
     console.log(`Summary for ${year} saved successfully.`);
   } catch (error) {
     console.error(`Error saving summary for ${year} to Firestore:`, error);
     throw error;
+  }
+};
+
+export const fetchEntities = async (organizationId) => {
+  try {
+    const entitiesRef = collection(db, "organizations", organizationId, "entities");
+    const entitiesSnapshot = await getDocs(entitiesRef);
+
+    const entities = entitiesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return entities;
+  } catch (error) {
+    console.error("Error fetching entities: ", error);
+    throw error;
+  }
+};
+
+export const fetchEntityById = async (organizationId, entityId) => {
+  try {
+    const entityRef = doc(db, "organizations", organizationId, "entities", entityId);
+    const entityDoc = await getDoc(entityRef);
+
+    if (entityDoc.exists()) {
+      return { id: entityId, ...entityDoc.data() };
+    } else {
+      throw new Error("Entity not found");
+    }
+  } catch (error) {
+    console.error("Error fetching entity: ", error);
+    throw error;
+  }
+};
+
+export const updateEntity = async (organizationId, entityId, updatedData) => {
+  try {
+    const entityRef = doc(db, "organizations", organizationId, "entities", entityId);
+    await updateDoc(entityRef, updatedData);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating entity: ", error);
+    return { success: false, error };
+  }
+};
+
+export const deleteEntity = async (organizationId, entityId) => {
+  try {
+    const entityRef = doc(db, "organizations", organizationId, "entities", entityId);
+    await deleteDoc(entityRef);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting entity: ", error);
+    return { success: false, error };
   }
 };

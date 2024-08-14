@@ -29,10 +29,11 @@ import {
 } from '@mui/material';
 import { format } from 'date-fns';
 import { fetchAllUnits, saveUnitToFirestore } from '../utils/firebaseHelpers';
-import { auth } from '../utils/firebaseConfig';
+import { auth, db } from '../utils/firebaseConfig';
 import { v4 as uuidv4 } from 'uuid';
 import { translate } from '../utils/translate';
 import { useTranslation } from '../utils/TranslationProvider';
+import { collection, getDocs } from 'firebase/firestore';
 
 const categories = [
   'Category A', 'Category B', 'Category C', 'Category D', 'Category E',
@@ -184,10 +185,12 @@ const UnitGenerator = () => {
   const [unitType, setUnitType] = useState('revenues');
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [filtersLoaded, setFiltersLoaded] = useState(false);
+  const [entities, setEntities] = useState([]);  // State to store the list of entities
+  const [selectedEntity, setSelectedEntity] = useState('');  // State to store the selected entity ID
   const rowsPerPage = 10;
 
   const userId = auth.currentUser?.uid;
-  
+
   const loadFromLocalStorage = (userId, key) => {
     if (!userId) return null;
     const fullKey = `${userId}_${key}`;
@@ -199,10 +202,24 @@ const UnitGenerator = () => {
   };
 
   useEffect(() => {
-    const organizationId = localStorage.getItem('organizationId')
+    const fetchEntities = async () => {
+      const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+      if (organizationId) {
+        const entitiesCollectionRef = collection(db, 'organizations', organizationId, 'entities');
+        const entitiesSnapshot = await getDocs(entitiesCollectionRef);
+        const entitiesList = entitiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setEntities(entitiesList);
+      }
+    };
+
+    fetchEntities();
+  }, []);
+
+  useEffect(() => {
+    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
     
     if (organizationId) {
-      console.log("loading filters")
+      console.log("loading filters");
       const localFilters = loadFromLocalStorage(organizationId, 'selectedDetailsFilters');
 
       if (localFilters) {
@@ -235,11 +252,10 @@ const UnitGenerator = () => {
             selectedType,
             selectedMonths,
             selectedYear,
-            months
+            months,
           };
 
-          const organizationId = localStorage.getItem('organizationId')
-
+          const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
           const fetchedUnits = await fetchAllUnits(organizationId, filters);
           setAllUnits(fetchedUnits);
           setFilteredUnits(fetchedUnits);
@@ -268,9 +284,10 @@ const UnitGenerator = () => {
         const year = unitDate.getFullYear();
         const month = months[unitDate.getMonth()];
 
-        const organizationId = localStorage.getItem('organizationId');
+        const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
         
-        await saveUnitToFirestore(organizationId, unit, year.toString(), month);
+        await saveUnitToFirestore(organizationId, selectedEntity, unit, year.toString(), month); // Save with entity ID
+
       }
     }
   };
@@ -312,6 +329,22 @@ const UnitGenerator = () => {
             sx={{ marginTop: 2 }}
           />
         </Box>
+
+        <FormControl fullWidth margin="normal" sx={{ marginTop: 2 }}>
+          <InputLabel id="entity-select-label">{translate('Filter by Entity', language)}</InputLabel>
+          <Select
+            labelId="entity-select-label"
+            value={selectedEntity}
+            onChange={(e) => setSelectedEntity(e.target.value)}
+          >
+            <MenuItem value="">{translate('All Entities', language)}</MenuItem>
+            {entities.map((entity) => (
+              <MenuItem key={entity.id} value={entity.id}>
+                {entity.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         <TextField
           select
@@ -441,6 +474,21 @@ const UnitGenerator = () => {
               <FormControlLabel value="revenues" control={<Radio />} label={translate('Revenues', language)} />
               <FormControlLabel value="expenses" control={<Radio />} label={translate('Expenses', language)} />
             </RadioGroup>
+          </FormControl>
+
+          <FormControl fullWidth margin="normal" sx={{ marginTop: 2 }}>
+            <InputLabel id="entity-dialog-select-label">{translate('Select Entity', language)}</InputLabel>
+            <Select
+              labelId="entity-dialog-select-label"
+              value={selectedEntity}
+              onChange={(e) => setSelectedEntity(e.target.value)}
+            >
+              {entities.map((entity) => (
+                <MenuItem key={entity.id} value={entity.id}>
+                  {entity.name}
+                </MenuItem>
+              ))}
+            </Select>
           </FormControl>
         </DialogContent>
         <DialogActions>

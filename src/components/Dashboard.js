@@ -1,15 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { AppBar, Toolbar, useMediaQuery, Box, CssBaseline, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Typography, Button } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  useMediaQuery,
+  Box,
+  CssBaseline,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Typography,
+  Button,
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useLocation } from 'react-router-dom';
 import TransactionSelect from './TransactionSelect';
 import TransactionBooks from './TransactionBooks';
 import AddTransactionModal from './AddTransactionModal';
 import { signOut } from 'firebase/auth';
-import { auth } from '../utils/firebaseConfig';
-import LoginDialog from './LoginDialog';
-import RegisterDialog from './RegisterDialog';
+import { auth, db } from '../utils/firebaseConfig';
 import { v4 as uuidv4 } from 'uuid';
 import BookIcon from '@mui/icons-material/Book';
 import InsertChartIcon from '@mui/icons-material/InsertChart';
@@ -20,49 +36,18 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ShuffleIcon from '@mui/icons-material/Shuffle';
 import AddIcon from '@mui/icons-material/Add';
 import PeopleIcon from '@mui/icons-material/People';
-import BusinessIcon from '@mui/icons-material/Business';
-
-// Import the summary helpers
-import { getAllTransactionSummaries, saveSummaryToFirestore } from '../utils/firebaseHelpers';
-
-// Import the translation utilities and context
+import { getDoc, doc } from "firebase/firestore";
+import { getAllStoreTransactionSummaries, getStoreTransactionSummaries, saveSummaryToFirestore } from '../utils/firebaseHelpers';
 import { translate } from '../utils/translate';
 import { useTranslation } from '../utils/TranslationProvider';
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-// Utility to get the current time
-const getCurrentTime = () => new Date().getTime();
-
-// Utility to check if data should be refetched
-const shouldRefetchData = (lastFetchTime, intervalInMs = 3600000) => {
-  const currentTime = getCurrentTime();
-  return !lastFetchTime || (currentTime - lastFetchTime) > intervalInMs;
-};
-
-// Utility to store data in localStorage
-const saveToLocalStorage = (key, data) => {
-  const dataToStore = {
-    timestamp: getCurrentTime(),
-    data
-  };
-  localStorage.setItem(key, JSON.stringify(dataToStore));
-};
-
-// Utility to load data from localStorage
-const loadFromLocalStorage = (key) => {
-  const storedData = localStorage.getItem(key);
-  if (storedData) {
-    return JSON.parse(storedData);
-  }
-  return null;
-};
-
 const Dashboard = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const currentLocation = useLocation();
-  const drawerWidth = 240;
+  const drawerWidth = 250;
 
   const { language, toggleLanguage } = useTranslation();
   
@@ -76,58 +61,33 @@ const Dashboard = ({ children }) => {
   const [newTransactionName, setNewTransactionName] = useState('');
   const [newTransactionAmount, setNewTransactionAmount] = useState('');
   const [selectedMonths, setSelectedMonths] = useState([]);
-  const [isClosing, setIsClosing] = useState(false);
   const [currentSummaryId, setCurrentSummaryId] = useState('');
-
-  const userId = auth.currentUser?.uid;
-
-  useEffect(() => {
-    const currentId = Object.keys(summaries).filter((uuidKey) => {
-      return summaries[uuidKey].name === summaryName;
-    })[0];
-
-    setCurrentSummaryId(currentId);
-  }, [summaryName, summaries]);
+  const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
-    const fetchSummaries = async () => {
-      // const localStorageKey = 'transactionSummaries';
-      // const storedData = loadFromLocalStorage(localStorageKey);
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setUserRole(userData.role);
 
-      // if (storedData && !shouldRefetchData(storedData.timestamp)) {
-      //   setSummaries(storedData.data);
-      //   const firstSummary = Object.keys(storedData.data)[0];
-      //   setSummaryName(storedData.data[firstSummary]?.name || translate('Main transaction book', language));
-      //   const summaryNames = Object.keys(storedData.data).map((key) => storedData.data[key].name);
-      //   setAvailableSummaries(summaryNames);
-      //   return;
-      // }
-
-      const organizationId = localStorage.getItem('organizationId');
-
-      console.log("fetching all")
-      if (organizationId) {
-        try {
-          const summaryData = await getAllTransactionSummaries(organizationId);
-        
-          
-          console.log(summaryData)
-          setSummaries(summaryData);
-          const firstSummary = Object.keys(summaryData)[0];
-          setSummaryName(summaryData[firstSummary]?.name || translate('Main transaction book', language));
-          const summaryNames = Object.keys(summaryData).map((key) => summaryData[key].name);
-          setAvailableSummaries(summaryNames);
-
-          // Store fetched data in localStorage
-          // saveToLocalStorage(localStorageKey, summaryData);
-        } catch (error) {
-          console.error("Error fetching summaries: ", error);
+          if (userData.role === 'admin' || userData.role === 'headquarter') {
+            const organizationId = userData.organizationId;
+            const fetchedEntities = await getAllStoreTransactionSummaries(organizationId);
+            setSummaries(fetchedEntities);
+            const firstSummary = Object.keys(fetchedEntities)[0];
+            setSummaryName(fetchedEntities[firstSummary]?.name || translate('Main transaction book', language));
+            const summaryNames = Object.keys(fetchedEntities).map((key) => fetchedEntities[key].name);
+            setAvailableSummaries(summaryNames);
+          }
         }
       }
     };
 
-    fetchSummaries();
-  }, [userId, language]);
+    fetchUserData();
+  }, [language]);
 
   const handleLogout = async () => {
     try {
@@ -151,81 +111,16 @@ const Dashboard = ({ children }) => {
       setSummaries(updatedSummaries);
       setAvailableSummaries([...availableSummaries, name]);
 
-      setSummaryName(name)
-      const organizationId = localStorage.getItem("organizationId");
-      // Save to Firestore
+      setSummaryName(name);
+      const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
       await saveSummaryToFirestore(organizationId, year, newSummary);
     }
   };
 
   const handleDrawerToggle = () => {
-    if (!isClosing) {
-      setMobileOpen(!mobileOpen);
-    }
+    setMobileOpen(!mobileOpen);
   };
 
-  const handleDrawerClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setMobileOpen(false);
-    }, 300);
-  };
-  
-  const handleDrawerTransitionEnd = () => {
-    setIsClosing(false);
-  };
-
-  const generateRandomTransactions = async () => {
-    try {
-      const encaissements = Array.from({ length: 5 }, (_, i) => ({
-        id: uuidv4(),
-        nature: `Encaissement ${i + 1}`,
-        montantInitial: Math.floor(Math.random() * 1000),
-        montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
-      }));
-  
-      const decaissements = Array.from({ length: 5 }, (_, i) => ({
-        id: uuidv4(),
-        nature: `Décaissement ${i + 1}`,
-        montantInitial: Math.floor(Math.random() * 1000),
-        montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
-      }));
-  
-      // Ensure these variables are defined
-      if (!summaryName) {
-        throw new Error('summaryName is undefined');
-      }
-      if (!userId) {
-        throw new Error('userId is undefined');
-      }
-  
-      const randomSummary = {
-        name: summaryName,
-        encaissements,
-        decaissements,
-      };
-  
-      const updatedSummaries = {
-        ...summaries,
-        [summaryName]: randomSummary,
-      };
-  
-      setSummaries(updatedSummaries);
-  
-      // Logging the variables before passing them to the function
-      console.log('Saving summary:', {
-        userId,
-        summaryName,
-        randomSummary,
-      });
-      const organizationId = localStorage.getItem("organizationId");
-      // Save to Firestore
-      await saveSummaryToFirestore(organizationId, summaryName, randomSummary);
-    } catch (error) {
-      console.error('Error in generateRandomTransactions:', error);
-    }
-  };
-  
   const handleAddClick = (event) => {
     setMenuAnchorEl(event.currentTarget);
   };
@@ -297,15 +192,12 @@ const Dashboard = ({ children }) => {
     };
 
     setSummaries(updatedSummaries);
-    const organizationId = localStorage.getItem("organizationId");
+    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
     await saveSummaryToFirestore(organizationId, currentSummaryId, updatedSummary);
 
     handleModalClose();
   };
-
-  console.log(translate("Transaction Books", language))
-
 
   const drawer = (
     <div>
@@ -315,86 +207,65 @@ const Dashboard = ({ children }) => {
         <ListItem key="books" disablePadding>
           <ListItemButton component={Link} to="/books">
             <ListItemIcon>
-              <BookIcon />
+              <BookIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={String(translate("Transaction Books", language))} />
+            <ListItemText primary={<Typography variant="body1">{translate("Transaction Books", language)}</Typography>} /> 
           </ListItemButton>
         </ListItem>
       </List>
       <Divider />
       <List>
         <ListItem key="generate" disablePadding>
-          <ListItemButton onClick={generateRandomTransactions}>
-            <ListItemIcon>
-              <ShuffleIcon />
-            </ListItemIcon>
-            <ListItemText primary={translate("Generate Random Summary", language)} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="new" disablePadding>
           <ListItemButton onClick={handleNewSummary}>
             <ListItemIcon>
-              <AddBoxIcon />
+              <AddBoxIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={translate("Add New Summary", language)} />
+            <ListItemText primary={<Typography variant="body1">{translate("Add New Summary", language)}</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem key="analytics" disablePadding>
           <ListItemButton component={Link} to="/analytics">
             <ListItemIcon>
-              <InsertChartIcon />
+              <InsertChartIcon style={{ fontSize: '1.6rem' }} /> 
             </ListItemIcon>
-            <ListItemText primary={translate("Analytics", language)} />
+            <ListItemText primary={<Typography variant="body1">{translate("Analytics", language)}</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem key="units" disablePadding>
           <ListItemButton component={Link} to="/units">
             <ListItemIcon>
-              <ListAltIcon />
+              <ListAltIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={translate("Units", language)} />
+            <ListItemText primary={<Typography variant="body1">{translate("Units", language)}</Typography>} /> 
           </ListItemButton>
         </ListItem>
         <ListItem key="summary" disablePadding>
           <ListItemButton component={Link} to="/summary">
             <ListItemIcon>
-              <AssessmentIcon />
+              <AssessmentIcon style={{ fontSize: '1.6rem' }} /> 
             </ListItemIcon>
-            <ListItemText primary={translate("Summary", language)} />
+            <ListItemText primary={<Typography variant="body1">{translate("Summary", language)}</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem key="manage-parameters" disablePadding>
           <ListItemButton component={Link} to="/manage-parameters">
             <ListItemIcon>
-              <PeopleIcon />
+              <PeopleIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={translate("Manage Parameters", language)} />
+            <ListItemText primary={<Typography variant="body1">{translate("Manage Parameters", language)}</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout}>
             <ListItemIcon>
-              <LogoutIcon />
+              <LogoutIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={translate("Logout", language)} />
+            <ListItemText primary={<Typography variant="body1">{translate("Logout", language)}</Typography>} />
           </ListItemButton>
         </ListItem>
       </List>
     </div>
   );
-
-  const isTransactionBooks = React.Children.toArray(children).some(
-    (child) => React.isValidElement(child) && child.type === TransactionBooks
-  );
-
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [registerOpen, setRegisterOpen] = useState(false);
-
-  const handleLoginOpen = () => setLoginOpen(true);
-  const handleLoginClose = () => setLoginOpen(false);
-
-  const handleRegisterOpen = () => setRegisterOpen(true);
-  const handleRegisterClose = () => setRegisterOpen(false);
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -412,15 +283,15 @@ const Dashboard = ({ children }) => {
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            sx={{ mr: 1.6, display: { sm: 'none' } }} 
           >
-            <MenuIcon />
+            <MenuIcon style={{ fontSize: '1.6rem' }} />
           </IconButton>
           <Typography
             variant="h6"
             component={Link}
             to="/blog"
-            sx={{ textDecoration: 'none', color: 'inherit', mr: 2 }}
+            sx={{ textDecoration: 'none', color: 'inherit', mr: 1.6 }}  
           >
             Blog
           </Typography>
@@ -435,9 +306,9 @@ const Dashboard = ({ children }) => {
                 color="default"
                 variant="round"
                 onClick={handleAddClick}
-                style={{ backgroundColor: 'purple', marginLeft: '10px' }}
+                style={{ backgroundColor: 'purple', marginLeft: '8px' }}
               >
-                <AddIcon style={{ fontSize: '1.5rem' }} />
+                <AddIcon style={{ fontSize: '1.2rem' }} /> 
               </IconButton>
               <Menu
                 anchorEl={menuAnchorEl}
@@ -453,34 +324,11 @@ const Dashboard = ({ children }) => {
               </Menu>
             </div>
           )}
-          {currentLocation.pathname === '/' && (
-            <Box>
-              <Button
-                variant="contained"
-                color="info"
-                onClick={handleLoginOpen}
-                sx={{
-                  marginRight: '5px'
-                }}
-              >
-                {translate("Login", language)}
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleRegisterOpen}
-              >
-                {translate("Register", language)}
-              </Button>
-            </Box>
-          )}
-          <LoginDialog open={loginOpen} onClose={handleLoginClose} />
-          <RegisterDialog open={registerOpen} onClose={handleRegisterClose} />
           <Button
             variant="outlined"
             color="inherit"
             onClick={toggleLanguage}
-            sx={{ ml: 'auto' }}
+            sx={{ ml: 'auto', fontSize: '0.8rem' }} 
           >
             {translate("Switch Language", language)}
           </Button>
@@ -494,8 +342,7 @@ const Dashboard = ({ children }) => {
         <Drawer
           variant="temporary"
           open={mobileOpen}
-          onClose={handleDrawerClose}
-          onTransitionEnd={handleDrawerTransitionEnd}
+          onClose={handleDrawerToggle}
           ModalProps={{
             keepMounted: true,
           }}
@@ -519,14 +366,10 @@ const Dashboard = ({ children }) => {
       </Box>
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
+        sx={{ flexGrow: 1, p: 2.4, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
       >
         <Toolbar />
-        {isTransactionBooks ? (
-          <TransactionBooks transactionName={summaryName} transactions={summaries[currentSummaryId]} />
-        ) : (
-          children
-        )}
+        {children}
         <AddTransactionModal
           modalOpen={modalOpen}
           handleModalClose={handleModalClose}
@@ -540,8 +383,6 @@ const Dashboard = ({ children }) => {
           setSelectedMonths={setSelectedMonths}
           handleModalSubmit={handleModalSubmit}
           availableMonths={monthNames}
-          monthNames={Array.from({ length: 12 }, (_, i) => `Month ${i + 1}`)}
-          transactions={summaries[currentSummaryId]}
         />
       </Box>
     </Box>

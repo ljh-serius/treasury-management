@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '../utils/firebaseConfig';
-import { createUserWithEmailAndPassword, deleteUser } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
 import {
   Container, Typography, TextField, Button, Box, Grid, Alert, Paper, MenuItem, Select, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, CircularProgress, Divider, InputAdornment, useTheme
 } from '@mui/material';
 import { Delete, Edit, Search } from '@mui/icons-material';
+import { addUser } from '../utils/firebaseHelpers';
 
 const ManageUsers = () => {
   const [firstName, setFirstName] = useState('');
@@ -13,6 +14,8 @@ const ManageUsers = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('store');
+  const [entityId, setEntityId] = useState('');
+  const [entities, setEntities] = useState([]);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [users, setUsers] = useState([]);
@@ -24,18 +27,13 @@ const ManageUsers = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchEntities();
   }, []);
 
   const fetchUsers = async () => {
-    const organizationId = localStorage.getItem('organizationId');
-    if (!organizationId) {
-      setError('Invalid organization ID. Please ensure you are passing a valid organization ID.');
-      return;
-    }
-
     setLoading(true);
     try {
-      const usersCollectionRef = collection(db, 'organizations', organizationId, 'users');
+      const usersCollectionRef = collection(db, 'users');
       const usersSnapshot = await getDocs(usersCollectionRef);
       const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setUsers(usersList);
@@ -46,12 +44,30 @@ const ManageUsers = () => {
     setLoading(false);
   };
 
+  const fetchEntities = async () => {
+    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+    if (!organizationId) {
+      setError('Invalid organization ID. Please ensure you are passing a valid organization ID.');
+      return;
+    }
+
+    try {
+      const entitiesCollectionRef = collection(db, 'organizations', organizationId, 'entities');
+      const entitiesSnapshot = await getDocs(entitiesCollectionRef);
+      const entitiesList = entitiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setEntities(entitiesList);
+    } catch (error) {
+      console.error('Error fetching entities:', error);
+      setError('An error occurred while fetching entities.');
+    }
+  };
+
   const handleAddUser = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
 
-    const organizationId = localStorage.getItem('organizationId');
+    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
     if (!organizationId) {
       setError('Invalid organization ID. Please ensure you are passing a valid organization ID.');
@@ -60,44 +76,34 @@ const ManageUsers = () => {
 
     try {
       if (editingUser) {
-        // Editing existing user
-        const userDocRef = doc(db, 'organizations', organizationId, 'users', editingUser.id);
+        const userDocRef = doc(db, 'users', editingUser.id);
         await setDoc(userDocRef, {
           firstName,
           lastName,
           email,
           role,
+          entityId: role === 'store' ? entityId : null,
           uid: editingUser.uid,
           createdAt: editingUser.createdAt,
         });
         setSuccess(`User ${firstName} ${lastName} updated successfully as ${role}`);
         setEditingUser(null);
       } else {
-        // Register the user in Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Store user details under the organization's collection
-        const userDocRef = doc(collection(db, 'organizations', organizationId, 'users'), user.uid);
-        await setDoc(userDocRef, {
-          firstName,
-          lastName,
-          email,
-          role,
-          uid: user.uid,
-          createdAt: new Date(),
-        });
+        addUser(user.uid, firstName, lastName, email, role, organizationId, entityId);
 
         setSuccess(`User ${firstName} ${lastName} added successfully as ${role}`);
       }
 
-      // Reset fields
       setFirstName('');
       setLastName('');
       setEmail('');
       setPassword('');
       setRole('store');
-      fetchUsers(); // Refresh the users list
+      setEntityId('');
+      fetchUsers();
     } catch (error) {
       console.error('Error adding/updating user:', error);
       setError('An error occurred while adding/updating the user. Please try again.');
@@ -105,16 +111,10 @@ const ManageUsers = () => {
   };
 
   const handleDeleteUser = async (userId) => {
-    const organizationId = localStorage.getItem('organizationId');
-    if (!organizationId) {
-      setError('Invalid organization ID. Please ensure you are passing a valid organization ID.');
-      return;
-    }
-
     try {
-      await deleteDoc(doc(db, 'organizations', organizationId, 'users', userId));
+      await deleteDoc(doc(db, 'users', userId));
       setSuccess('User deleted successfully.');
-      fetchUsers(); // Refresh the users list
+      fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
       setError('An error occurred while deleting the user. Please try again.');
@@ -126,6 +126,7 @@ const ManageUsers = () => {
     setLastName(user.lastName);
     setEmail(user.email);
     setRole(user.role);
+    setEntityId(user.entityId || '');
     setEditingUser(user);
   };
 
@@ -205,6 +206,27 @@ const ManageUsers = () => {
               </Select>
             </FormControl>
           </Grid>
+
+          {role === 'store' && (
+            <Grid item xs={12} sm={3}>
+              <FormControl fullWidth sx={{ backgroundColor: theme.palette.background.paper, borderRadius: '4px' }}>
+                <InputLabel id="entity-label">Entity</InputLabel>
+                <Select
+                  labelId="entity-label"
+                  value={entityId}
+                  label="Entity"
+                  onChange={(e) => setEntityId(e.target.value)}
+                  required
+                >
+                  {entities.map((entity) => (
+                    <MenuItem key={entity.id} value={entity.id}>
+                      {entity.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          )}
         </Grid>
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
@@ -255,11 +277,12 @@ const ManageUsers = () => {
           <Table sx={{ minWidth: 650 }} size="medium">
             <TableHead sx={{ backgroundColor: theme.palette.primary.dark }}>
               <TableRow>
-                <TableCell><Typography  color={theme.palette.primary.contrastText}>First Name</Typography></TableCell>
-                <TableCell><Typography  color={theme.palette.primary.contrastText}>Last Name</Typography></TableCell>
-                <TableCell><Typography  color={theme.palette.primary.contrastText}>Email</Typography></TableCell>
-                <TableCell><Typography  color={theme.palette.primary.contrastText}>Role</Typography></TableCell>
-                <TableCell><Typography  color={theme.palette.primary.contrastText}>Actions</Typography></TableCell>
+                <TableCell><Typography color={theme.palette.primary.contrastText}>First Name</Typography></TableCell>
+                <TableCell><Typography color={theme.palette.primary.contrastText}>Last Name</Typography></TableCell>
+                <TableCell><Typography color={theme.palette.primary.contrastText}>Email</Typography></TableCell>
+                <TableCell><Typography color={theme.palette.primary.contrastText}>Role</Typography></TableCell>
+                <TableCell><Typography color={theme.palette.primary.contrastText}>Entity</Typography></TableCell>
+                <TableCell><Typography color={theme.palette.primary.contrastText}>Actions</Typography></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -269,6 +292,7 @@ const ManageUsers = () => {
                   <TableCell>{user.lastName}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.role}</TableCell>
+                  <TableCell>{entities.find(entity => entity.id === user.entityId)?.name || 'N/A'}</TableCell>
                   <TableCell>
                     <IconButton onClick={() => handleEditUser(user)} color="primary">
                       <Edit />
