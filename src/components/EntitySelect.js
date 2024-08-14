@@ -1,53 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { fetchEntities, fetchEntityById } from '../utils/firebaseHelpers';
+import React from 'react';
+import { FormControl, Select, MenuItem, Box } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
-const EntitySelect = ({ userId, userRole, onEntityChange }) => {
-  const [entities, setEntities] = useState([]);
-  const [selectedEntity, setSelectedEntity] = useState('');
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  backgroundColor: 'white',
+  minWidth: 200,
+  marginRight: '10px',
+  borderRadius: 4,
+  height: 36,
+  '& .MuiInputBase-root': {
+    height: 36,
+    alignItems: 'center',
+  },
+  '& .MuiSelect-select': {
+    display: 'flex',
+    alignItems: 'center',
+    height: '100%',
+  },
+}));
 
-  useEffect(() => {
-    const fetchUserEntities = async () => {
-      const organizationId = localStorage.getItem('organizationId');
-      if (organizationId && userRole) {
-        try {
-          const entitiesData = userRole === 'headquarter' || userRole === 'organization' 
-            ? await fetchEntities(organizationId) 
-            : await fetchEntityById(organizationId, userId);
-          
-          setEntities(entitiesData);
-          const firstEntityId = entitiesData[0]?.id || '';
-          setSelectedEntity(firstEntityId);
-          onEntityChange(firstEntityId);
-        } catch (error) {
-          console.error('Error fetching entities: ', error);
-        }
-      }
-    };
-
-    fetchUserEntities();
-  }, [userId, userRole, onEntityChange]);
-
-  const handleEntityChange = (event) => {
-    setSelectedEntity(event.target.value);
-    onEntityChange(event.target.value);
-  };
-
+const EntitySelect = ({
+  selectedEntity,
+  availableEntities = [], // Default to empty array
+  handleEntityChange
+}) => {
   return (
-    <FormControl fullWidth>
-      <InputLabel id="entity-select-label">Select Entity</InputLabel>
-      <Select
-        labelId="entity-select-label"
-        value={selectedEntity}
-        onChange={handleEntityChange}
-      >
-        {entities.map((entity) => (
-          <MenuItem key={entity.id} value={entity.id}>
-            {entity.name}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <Box display="flex" alignItems="center">
+      <StyledFormControl>
+        <Select
+          value={selectedEntity}
+          onChange={(e) => handleEntityChange(e.target.value)}
+          displayEmpty
+        >
+          {availableEntities.map((entity) => (
+            <MenuItem key={entity.id} value={entity.id}>
+              {entity.name || 'Unnamed Entity'}
+            </MenuItem>
+          ))}
+        </Select>
+      </StyledFormControl>
+    </Box>
   );
 };
 

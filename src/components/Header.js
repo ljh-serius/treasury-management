@@ -58,6 +58,9 @@ const Header = ({
               handleTransactionChange={handleTransactionChange}
               handleNewTransaction={handleNewTransaction}
             />
+            <EntitySelect>
+              
+            </EntitySelect>
             <Randomize
               color="inherit"
               startIcon={<RefreshIcon />}

@@ -22,11 +22,19 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useLocation } from 'react-router-dom';
 import TransactionSelect from './TransactionSelect';
-import TransactionBooks from './TransactionBooks';
+import EntitySelect from './EntitySelect';
 import AddTransactionModal from './AddTransactionModal';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../utils/firebaseConfig';
-import { v4 as uuidv4 } from 'uuid';
+import { getDoc, doc } from "firebase/firestore";
+import {
+  getAllStoreTransactionSummaries,
+  getStoreTransactionSummaries,
+  saveSummaryToFirestore,
+  fetchEntities,
+} from '../utils/firebaseHelpers';
+import { translate } from '../utils/translate';
+import { useTranslation } from '../utils/TranslationProvider';
 import BookIcon from '@mui/icons-material/Book';
 import InsertChartIcon from '@mui/icons-material/InsertChart';
 import ListAltIcon from '@mui/icons-material/ListAlt';
@@ -36,10 +44,8 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ShuffleIcon from '@mui/icons-material/Shuffle';
 import AddIcon from '@mui/icons-material/Add';
 import PeopleIcon from '@mui/icons-material/People';
-import { getDoc, doc } from "firebase/firestore";
-import { getAllStoreTransactionSummaries, getStoreTransactionSummaries, saveSummaryToFirestore } from '../utils/firebaseHelpers';
-import { translate } from '../utils/translate';
-import { useTranslation } from '../utils/TranslationProvider';
+import { v4 as uuidv4 } from 'uuid';
+import TransactionBooks from './TransactionBooks'; // Adjust the path as necessary
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -63,31 +69,93 @@ const Dashboard = ({ children }) => {
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [currentSummaryId, setCurrentSummaryId] = useState('');
   const [userRole, setUserRole] = useState('');
+  const [selectedEntity, setSelectedEntity] = useState('');
+  const [entities, setEntities] = useState([]);  // Make sure this is defined here
+  const [isClosing, setIsClosing] = useState(false);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setUserRole(userData.role);
+  const userId = auth.currentUser?.uid;
 
-          if (userData.role === 'admin' || userData.role === 'headquarter') {
-            const organizationId = userData.organizationId;
-            const fetchedEntities = await getAllStoreTransactionSummaries(organizationId);
-            setSummaries(fetchedEntities);
-            const firstSummary = Object.keys(fetchedEntities)[0];
-            setSummaryName(fetchedEntities[firstSummary]?.name || translate('Main transaction book', language));
-            const summaryNames = Object.keys(fetchedEntities).map((key) => fetchedEntities[key].name);
-            setAvailableSummaries(summaryNames);
-          }
+// This part of the Dashboard code should correctly set available transactions.
+useEffect(() => {
+  const fetchUserData = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setUserRole(userData.role);
+        const organizationId = userData.organizationId;
+
+        if (userData.role === 'admin' || userData.role === 'headquarter') {
+          const fetchedEntities = await fetchEntities(organizationId);
+          setEntities(fetchedEntities);
+
+          // Set the default selected entity and fetch the summaries
+          const firstEntityId = fetchedEntities[0]?.id || '';
+          setSelectedEntity(firstEntityId);
+
+          const fetchedSummaries = await getAllStoreTransactionSummaries(organizationId);
+          setSummaries(fetchedSummaries);
+
+          // Prepare available transactions per entity
+          const availableTransactionsForEntity = fetchedSummaries[firstEntityId] 
+            ? Object.keys(fetchedSummaries[firstEntityId])
+            : [];
+
+
+            console.log("fetchedSummaries", fetchedSummaries)
+            console.log("firstEntityId", firstEntityId)
+          setAvailableSummaries(availableTransactionsForEntity);
+          setSummaryName(availableTransactionsForEntity[0] || translate('Main transaction book', language));
+          setCurrentSummaryId(availableTransactionsForEntity[0] || '');
+        } else if (userData.role === 'store') {
+          const fetchedSummaries = await getStoreTransactionSummaries(organizationId, userData.entityId);
+          setSummaries(fetchedSummaries);
+
+          // Prepare available transactions per entity
+          const availableTransactionsForEntity = fetchedSummaries[userData.entityId] 
+            ? Object.keys(fetchedSummaries[userData.entityId])
+            : [];
+
+          setAvailableSummaries(availableTransactionsForEntity);
+          setSummaryName(availableTransactionsForEntity[0] || translate('Main transaction book', language));
+          setCurrentSummaryId(availableTransactionsForEntity[0] || '');
         }
       }
-    };
+    }
+  };
 
-    fetchUserData();
-  }, [language]);
+  fetchUserData();
+}, [userId, language]);
+
+
+  const handleEntityChange = async (entityId) => {
+    setSelectedEntity(entityId);
+    const organizationId = JSON.parse(localStorage.getItem('loggedInUser')).organizationId;
+    const fetchedSummaries = await getStoreTransactionSummaries(organizationId, entityId);
+    setSummaries(fetchedSummaries);
+
+    const firstSummaryId = Object.keys(fetchedSummaries)[0];
+    setCurrentSummaryId(firstSummaryId);
+    setSummaryName(fetchedSummaries[firstSummaryId]?.name || translate('Main transaction book', language));
+    const summaryNames = Object.keys(fetchedSummaries).map((key) => fetchedSummaries[key].name);
+    setAvailableSummaries(summaryNames);
+  };
+
+  const handleDrawerClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setMobileOpen(false);
+    }, 300);
+  };
+  
+  const handleDrawerTransitionEnd = () => {
+    setIsClosing(false);
+  };
+
+  const handleSummaryChange = (name) => {
+    setSummaryName(name);
+  };
 
   const handleLogout = async () => {
     try {
@@ -95,25 +163,6 @@ const Dashboard = ({ children }) => {
       window.location.href = '/';
     } catch (error) {
       console.error("Error signing out: ", error);
-    }
-  };
-
-  const handleSummaryChange = (name) => {
-    setSummaryName(name);
-  };
-
-  const handleNewSummary = async () => {
-    const name = prompt(translate('Enter name for new summary set:', language));
-    if (name) {
-      const year = new Date().getFullYear();
-      const newSummary = { name, encaissements: [], decaissements: [] };
-      const updatedSummaries = { ...summaries, [year]: newSummary };
-      setSummaries(updatedSummaries);
-      setAvailableSummaries([...availableSummaries, name]);
-
-      setSummaryName(name);
-      const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-      await saveSummaryToFirestore(organizationId, year, newSummary);
     }
   };
 
@@ -192,13 +241,71 @@ const Dashboard = ({ children }) => {
     };
 
     setSummaries(updatedSummaries);
-    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+    const organizationId = JSON.parse(localStorage.getItem("userData")).organizationId;
 
-    await saveSummaryToFirestore(organizationId, currentSummaryId, updatedSummary);
+    await saveSummaryToFirestore(organizationId, selectedEntity, currentSummaryId, updatedSummary);
 
     handleModalClose();
   };
 
+  const generateRandomTransactions = async () => {
+    try {
+      const encaissements = Array.from({ length: 5 }, (_, i) => ({
+        id: uuidv4(),
+        nature: `Encaissement ${i + 1}`,
+        montantInitial: Math.floor(Math.random() * 1000),
+        montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
+      }));
+  
+      const decaissements = Array.from({ length: 5 }, (_, i) => ({
+        id: uuidv4(),
+        nature: `Décaissement ${i + 1}`,
+        montantInitial: Math.floor(Math.random() * 1000),
+        montants: Array.from({ length: 12 }, () => Math.floor(Math.random() * 500)),
+      }));
+  
+      if (!summaryName) {
+        throw new Error('summaryName is undefined');
+      }
+      if (!userId) {
+        throw new Error('userId is undefined');
+      }
+  
+      const randomSummary = {
+        name: summaryName,
+        encaissements,
+        decaissements,
+      };
+  
+      const updatedSummaries = {
+        ...summaries,
+        [summaryName]: randomSummary,
+      };
+  
+      setSummaries(updatedSummaries);
+  
+      const organizationId = localStorage.getItem("organizationId");
+      await saveSummaryToFirestore(organizationId, selectedEntity, summaryName, randomSummary);
+    } catch (error) {
+      console.error('Error in generateRandomTransactions:', error);
+    }
+  };
+
+  const handleNewSummary = async () => {
+    const name = prompt(translate('Enter name for new summary set:', language));
+    if (name) {
+      const year = new Date().getFullYear();
+      const newSummary = { name, encaissements: [], decaissements: [] };
+      const updatedSummaries = { ...summaries, [year]: newSummary };
+      setSummaries(updatedSummaries);
+      setAvailableSummaries([...availableSummaries, name]);
+  
+      setSummaryName(name);
+      const organizationId = localStorage.getItem("organizationId");
+      await saveSummaryToFirestore(organizationId, selectedEntity, year, newSummary);
+    }
+  };
+  
   const drawer = (
     <div>
       <Toolbar />
@@ -216,6 +323,14 @@ const Dashboard = ({ children }) => {
       <Divider />
       <List>
         <ListItem key="generate" disablePadding>
+          <ListItemButton onClick={generateRandomTransactions}>
+            <ListItemIcon>
+              <ShuffleIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">{translate("Generate Random Summary", language)}</Typography>} /> 
+          </ListItemButton>
+        </ListItem>
+        <ListItem key="new" disablePadding>
           <ListItemButton onClick={handleNewSummary}>
             <ListItemIcon>
               <AddBoxIcon style={{ fontSize: '1.6rem' }} />
@@ -267,6 +382,10 @@ const Dashboard = ({ children }) => {
     </div>
   );
 
+  const isTransactionBooks = React.Children.toArray(children).some(
+    (child) => React.isValidElement(child) && child.type === TransactionBooks
+  );
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -287,16 +406,14 @@ const Dashboard = ({ children }) => {
           >
             <MenuIcon style={{ fontSize: '1.6rem' }} />
           </IconButton>
-          <Typography
-            variant="h6"
-            component={Link}
-            to="/blog"
-            sx={{ textDecoration: 'none', color: 'inherit', mr: 1.6 }}  
-          >
-            Blog
-          </Typography>
+          
           {currentLocation.pathname === '/books' && (
             <div style={{ display: 'flex', alignItems: 'center' }}>
+              <EntitySelect
+                selectedEntity={selectedEntity}
+                availableEntities={entities}
+                handleEntityChange={setSelectedEntity}
+              />
               <TransactionSelect
                 transactionName={summaryName}
                 availableTransactions={availableSummaries}
@@ -342,7 +459,8 @@ const Dashboard = ({ children }) => {
         <Drawer
           variant="temporary"
           open={mobileOpen}
-          onClose={handleDrawerToggle}
+          onClose={handleDrawerClose}
+          onTransitionEnd={handleDrawerTransitionEnd}
           ModalProps={{
             keepMounted: true,
           }}
@@ -369,7 +487,11 @@ const Dashboard = ({ children }) => {
         sx={{ flexGrow: 1, p: 2.4, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
       >
         <Toolbar />
-        {children}
+        {isTransactionBooks ? (
+          <TransactionBooks transactionName={summaryName} transactions={summaries[currentSummaryId]} />
+        ) : (
+          children
+        )}
         <AddTransactionModal
           modalOpen={modalOpen}
           handleModalClose={handleModalClose}

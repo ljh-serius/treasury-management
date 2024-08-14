@@ -21,9 +21,38 @@ export const createOrganization = async (orgName, customDomain, email, numUsers,
   return { tenantId, organizationId: orgDocRef.id };
 };
 
+
 export const getAllStoreTransactionSummaries = async (organizationId) => {
   try {
-    const summariesCollection = collection(db, 'organizations', organizationId, 'transactions-summary');
+    const summaries = {};
+
+    // Fetch all entities within the organization
+    const entitiesSnapshot = await getDocs(collection(db, 'organizations', organizationId, 'entities'));
+    for (const entityDoc of entitiesSnapshot.docs) {
+      const entityId = entityDoc.id;
+
+      // Fetch transaction summaries for each entity
+      const summariesCollection = collection(db, 'organizations', organizationId, 'entities', entityId, 'transactions-summary');
+      const summariesSnapshot = await getDocs(summariesCollection);
+
+      const entitySummaries = {};
+      summariesSnapshot.forEach((doc) => {
+        entitySummaries[doc.id] = doc.data();
+      });
+
+      summaries[entityId] = entitySummaries;
+    }
+
+    return summaries;
+  } catch (error) {
+    console.error('Error fetching all store transaction summaries: ', error);
+    throw error;
+  }
+};
+
+export const getStoreTransactionSummaries = async (organizationId, entityId) => {
+  try {
+    const summariesCollection = collection(db, 'organizations', organizationId, 'entities', entityId, 'transactions-summary');
     const summariesSnapshot = await getDocs(summariesCollection);
 
     const summaries = {};
@@ -33,50 +62,10 @@ export const getAllStoreTransactionSummaries = async (organizationId) => {
 
     return summaries;
   } catch (error) {
-    console.error('Error fetching all store transaction summaries: ', error);
+    console.error('Error fetching store transaction summaries: ', error);
     throw error;
   }
 };
-
-export const getStoreTransactionSummaries = async (organizationId, storeId) => {
-  try {
-    const storeSummariesCollection = collection(db, 'organizations', organizationId, 'entities', storeId, 'transactions-summary');
-    const summariesSnapshot = await getDocs(storeSummariesCollection);
-
-    const summaries = {};
-    summariesSnapshot.forEach((doc) => {
-      summaries[doc.id] = doc.data();
-    });
-
-    return summaries;
-  } catch (error) {
-    console.error('Error fetching transaction summaries for store: ', error);
-    throw error;
-  }
-};
-
-// Function to fetch organization data along with users and entities
-export const fetchOrganizationData = async (organizationId) => {
-  const orgRef = doc(db, "organizations", organizationId);
-  const orgSnapshot = await getDoc(orgRef);
-
-  if (orgSnapshot.exists()) {
-    const orgData = orgSnapshot.data();
-    
-    // Fetch users
-    const usersSnapshot = await getDocs(collection(orgRef, "users"));
-    const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // Fetch entities
-    const entitiesSnapshot = await getDocs(collection(orgRef, "entities"));
-    const entities = entitiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    return { ...orgData, users, entities };
-  } else {
-    throw new Error("Organization not found");
-  }
-};
-
 // Function to fetch users of an organization
 export const fetchUsersOfOrganization = async (organizationId) => {
   const usersCollection = collection(db, "organizations", organizationId, "users");
@@ -218,6 +207,7 @@ export const getAllTransactionSummaries = async (organizationId, entityId) => {
     throw error;
   }
 };
+
 
 export const fetchUnitsSummaryForStore = async (organizationId, entityId) => {
   if (!organizationId || !entityId) return;
