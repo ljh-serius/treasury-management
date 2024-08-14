@@ -52,15 +52,15 @@ const Analytics = () => {
   const [barChartOptions, setBarChartOptions] = useState({});
   const [heatmapOptions, setHeatmapOptions] = useState({});
 
-  const [selectedBooks, setSelectedBooks] = useState([]); // Renamed from selectedIds to selectedBooks
-  const [selectedEntities, setSelectedEntities] = useState([]); // Renamed from selectedBooks to selectedYears
-
+  const [selectedBooks, setSelectedBooks] = useState([]); // Selected entities (book IDs)
+  const [selectedEntities, setSelectedEntities] = useState([]); // Selected years/books
+  
   const handleBooksSelectChange = (event) => {
-    setSelectedBooks(event.target.value);
+    setSelectedBooks(event.target.value); 
   };
 
   const handleEntitiesSelectChange = (event) => {
-    setSelectedEntities(event.target.value);
+    setSelectedEntities(event.target.value); // No reset or pre-selection logic here
   };
 
   // Generate available books with prefixes if necessary
@@ -69,7 +69,7 @@ const Analytics = () => {
     return Object.keys(books[bookId] || {}).map(bookName => {
       return {
         originalBook: bookName,
-        displayBook: prefix ? `${prefix} ${bookName}` : bookName
+        displayBook: prefix ? `${prefix} - ${bookName}` : bookName
       };
     });
   });
@@ -80,7 +80,6 @@ const Analytics = () => {
     const fetchEntitiesData = async () => {
       try {
         const fetchedEntities = await fetchEntities(organizationId);
-        console.log("fetched entities", fetchedEntities);
         setEntities(fetchedEntities || []);
       } catch (error) {
         console.error('Error fetching entities:', error);
@@ -90,7 +89,6 @@ const Analytics = () => {
     const fetchBooksData = async () => {
       try {
         const fetchedBooks = await getAllStoreTransactionSummaries(organizationId);
-        console.log("fetched books", fetchedBooks);
         setBooks(fetchedBooks);
       } catch (error) {
         console.error('Error fetching books:', error);
@@ -103,7 +101,6 @@ const Analytics = () => {
 
   useEffect(() => {
     if (selectedBooks.length > 0 && selectedEntities.length > 0) {
-      console.log("selected books", selectedBooks)
       const options = generateChartOptions(selectedBooks);
       setChartOptions(options);
 
@@ -132,6 +129,8 @@ const Analytics = () => {
       if (!booksUnderEntity) return; // Skip if no books found under this entityId
   
       Object.keys(booksUnderEntity).forEach((bookName) => {
+        if (!selectedEntities.includes(bookName)) return; // Only include selected years/books
+  
         const book = booksUnderEntity[bookName];
         if (!book) return;
   
@@ -162,7 +161,7 @@ const Analytics = () => {
         text: translate('Comparative Analysis of Budget Summaries', language),
       },
       xAxis: {
-        categories: Object.keys(initialBalances), // Display the book names (years)
+        categories: Object.keys(initialBalances), // Display the selected book names (years)
         title: {
           text: translate('Books', language),
         },
@@ -477,7 +476,6 @@ const Analytics = () => {
     };
   };
   
-
   return (
     <Container maxWidth="xl" sx={{ mt: 12, mb: 12 }}>
       <Typography variant="h4" gutterBottom>
@@ -492,7 +490,7 @@ const Analytics = () => {
               labelId="books-select-label"
               multiple
               value={selectedBooks}
-              onChange={handleBooksSelectChange} // Corrected this line
+              onChange={handleBooksSelectChange} 
               renderValue={(selected) => selected.map(id => entities.find(item => item.id === id)?.name).join(', ')}
             >
               {entities.map(item => (
@@ -511,13 +509,13 @@ const Analytics = () => {
             <Select
               labelId="years-select-label"
               multiple
-              value={selectedEntities} // Corrected this line
-              onChange={handleEntitiesSelectChange} // Corrected this line
+              value={selectedEntities} 
+              onChange={handleEntitiesSelectChange}
               renderValue={(selected) => selected.join(', ')}
             >
               {availableBooks.map(({ originalBook, displayBook }) => (
-                <MenuItem key={originalBook} value={displayBook}>
-                  <Checkbox checked={selectedEntities.indexOf(displayBook) > -1} />
+                <MenuItem key={originalBook} value={originalBook}>
+                  <Checkbox checked={selectedEntities.indexOf(originalBook) > -1} />
                   <ListItemText primary={displayBook} />
                 </MenuItem>
               ))}
@@ -545,7 +543,7 @@ const Analytics = () => {
         </Grid>
       </Grid>
 
-      {selectedBooks.length > 0 && (
+      {selectedBooks.length > 0 && selectedEntities.length > 0 && (
         <Box mt={4}>
           <Typography variant="h6" gutterBottom>
             {translate('Global Annual', language)}:
@@ -562,7 +560,7 @@ const Analytics = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {selectedBooks.map((year) => {
+                {selectedEntities.map((year) => {
                   const summary = calculateBudgetSummary(
                     calculateTotals(books[selectedBooks[0]][year])
                   );
