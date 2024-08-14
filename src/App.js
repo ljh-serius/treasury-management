@@ -17,6 +17,14 @@ import OrganizationRegistration from './components/OrganizationRegistration';
 import ManageUsers from './pages/ManageUsers';
 import ManageOrganization from './pages/ManageOrganization';
 import { TranslationProvider } from './utils/TranslationProvider';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
+
+if (!process.env.REACT_APP_STRIPE_PUBLIC_KEY) {
+  console.error("Stripe public key is missing. Make sure to set REACT_APP_STRIPE_PUBLIC_KEY in your .env file.");
+}
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -41,95 +49,98 @@ const App = () => {
   };
 
   return (
-    <TranslationProvider>
-      <Routes>
-        <Route
-          path="/"
-          element={user ? <Navigate to="/books" replace /> : <HomePage />}
-        />
-        <Route
-          path="/books"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <TransactionBooks />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/summary"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <SummaryComponent />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/analytics"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <Analytics />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/units"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <UnitGenerator />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/manage-users"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <ManageUsers />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/manage-organization"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <ManageOrganization />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/blog"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <Blog language={language} switchLanguage={switchLanguage} />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/article/:slug"
-          element={
-            <ProtectedRoute user={user}>
-              <Dashboard>
-                <Article language={language} switchLanguage={switchLanguage} />
-              </Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/registration" element={<OrganizationRegistration />} />
-      </Routes>
-    </TranslationProvider>
+    <Elements stripe={stripePromise}>
+      <TranslationProvider>
+
+        <Routes>
+          <Route
+            path="/"
+            element={user ? <Navigate to="/books" replace /> : <HomePage />}
+          />
+          <Route
+            path="/books"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <TransactionBooks />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/summary"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <SummaryComponent />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Analytics />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/units"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <UnitGenerator />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manage-users"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <ManageUsers />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manage-organization"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <ManageOrganization />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/blog"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Blog language={language} switchLanguage={switchLanguage} />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/article/:slug"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Article language={language} switchLanguage={switchLanguage} />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/registration" element={<OrganizationRegistration />} />
+        </Routes>
+      </TranslationProvider>
+    </Elements>
   );
 };
 
