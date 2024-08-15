@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Button } from '@mui/material';
-import { saveAs } from 'file-saver';
-import html2canvas from 'html2canvas';
-import ExcelJS from 'exceljs';
+import { Container } from '@mui/material';
 import {
   DataGrid,
   GridToolbar,
@@ -11,7 +8,6 @@ import {
   calculateTotal, monthNames, calculateMonthlyTreasury, calculateAccumulatedTreasury, prepareChartData, prepareCumulativeTreasuryData,
   prepareMonthlyTreasuryData, calculateTotals
 } from './transactionHelpers';
-import TreasuryChart from './TreasuryChart';
 
 const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }, headerHeight = 64, drawerWidth = 240, showAnalytics = false }) => {
   const [encaissementsData, setEncaissementsData] = useState([]);
@@ -115,53 +111,24 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
   ];
 
   return (
-    <>
-      <div style={{
-        height: showAnalytics ? 'auto' : `calc(100vh - ${headerHeight}px)`, 
-        width: `calc(100vw - ${drawerWidth}px)`,
-        marginTop: `${headerHeight}px`,  // This pushes the grid down below the header
-        marginLeft: `${drawerWidth}px`,  // This pushes the grid to the right, avoiding the drawer
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
-      }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          components={{ Toolbar: GridToolbar }}
-          disableSelectionOnClick
-          autoHeight={showAnalytics} // If showAnalytics is true, the grid will adjust its height
+    <Container maxWidth="xl" sx={{ mt: 12, mb: 12, width: '100%' }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        components={{ Toolbar: GridToolbar }}
+        disableSelectionOnClick
+        disableAutosize
+        disableColumnResize
+        hideFooter
+        pagination
+        sx={{
+          marginLeft: `${drawerWidth}px`,
+          '& .MuiDataGrid-main': {
+            minWidth: '100%',
+          },
+        }}
         />
-      </div>
-      {showAnalytics && (
-        <Grid container style={{ marginTop: 16, marginLeft: `${drawerWidth}px` }}>
-          <Grid item xs={12} md={6}>
-            <TreasuryChart
-              title="Encaissements by Nature"
-              data={encaissementsData}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TreasuryChart
-              title="Décaissements by Nature"
-              data={decaissementsData}
-            />
-          </Grid>
-          <Grid item xs={12} md={12}>
-            <TreasuryChart
-              title="Solde de Trésorie"
-              data={monthlyTreasuryData}
-            />
-          </Grid>
-          <Grid item xs={12} md={12}>
-            <TreasuryChart
-              title="Trésorerie Cummulée"
-              data={cumulativeTreasuryData}
-            />
-          </Grid>
-        </Grid>
-      )}
-    </>
+    </Container>
   );
 };
 
