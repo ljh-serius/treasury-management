@@ -231,13 +231,10 @@ export default function UnitGenerator() {
   const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
   const userId = auth.currentUser?.uid;
 
-  const calculateTotal = (type, index, transactions) => {
-    const transaction = transactions[type][index];
-    if (!transaction || !transaction.montants) return 0;
-  
-    return transaction.montants.reduce((sum, amount) => sum + (amount || 0), 0);
+  const calculateTotal = () => {
+    return filteredUnits.reduce((sum, unit) => { return sum + (parseFloat(unit.unitPrice) * parseFloat(unit.quantity) || 0) }, 0).toFixed(2);
   };
-  
+
   useEffect(() => {
     const fillEntities = async () => {
       if (organizationId) {
@@ -275,7 +272,6 @@ export default function UnitGenerator() {
         months,
       };
 
-      console.log("FITLERS AAAA ", filters)
       const units = await fetchAllUnits(organizationId, filters);
       setAllUnits(units);
       setFilteredUnits(units);

@@ -8,12 +8,10 @@ import {
 import TreasuryChart from './TreasuryChart'; // Import your chart component
 
 const calculateTotal = (type, index, transactions) => {
-  console.log(`Calculating total for ${type} at index ${index}`);
   const transaction = transactions[type][index];
   if (!transaction || !transaction.montants) return 0;
 
   const total = transaction.montants.reduce((sum, amount) => sum + (amount || 0), 0);
-  console.log(`Total calculated: ${total}`);
   return total;
 };
 

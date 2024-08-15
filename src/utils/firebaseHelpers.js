@@ -325,6 +325,33 @@ export const fetchUnitsSummaryForStore = async (organizationId, entityId) => {
   }
 };
 
+
+/**
+ * Fetch the historical summary for the given organization from Firestore.
+ *
+ * @param {string} organizationId - The ID of the organization.
+ * @param {string} summaryType - The type of summary to fetch (e.g., 'Bilan Historique').
+ * @returns {Promise<Object|null>} - A promise that resolves to the historical summary if it exists, or null if it doesn't.
+ */
+export const fetchHistoricalSummaryFromFirestore = async (organizationId, summaryType) => {
+  try {
+
+    
+    const docRef = doc(db, "organizations", organizationId, "transactions-historical-summary", "Bilan Historique");
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return docSnap.data();
+    } else {
+      console.log(`No ${summaryType} found for organization ${organizationId}.`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error fetching ${summaryType} for organization ${organizationId}:`, error);
+    throw error; // rethrow the error after logging it
+  }
+};
+
 export const saveSummaryToFirestore = async (organizationId, entityId, year, summary) => {
   try {
     if (!summary) {

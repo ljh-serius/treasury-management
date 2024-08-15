@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchUnitsSummaryForStore, saveSummaryToFirestore, saveHistoricalSummaryToFirestore } from '../utils/firebaseHelpers';
+import { fetchUnitsSummaryForStore, saveSummaryToFirestore, saveHistoricalSummaryToFirestore, fetchHistoricalSummaryFromFirestore } from '../utils/firebaseHelpers';
 import { collection, getDocs } from "firebase/firestore";
 import { db } from '../utils/firebaseConfig';
 import TreasuryTable from './TreasuryTable'; // Import the TreasuryTable component
@@ -7,6 +7,7 @@ import TreasuryTable from './TreasuryTable'; // Import the TreasuryTable compone
 const SummaryComponent = () => {
   const [summary, setSummary] = useState(null);
   const [userRole, setUserRole] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('userData'));
@@ -16,20 +17,38 @@ const SummaryComponent = () => {
 
     setUserRole(role);
 
-    if (role === 'admin' || role === 'headquarter') {
-      fetchSummaryForAllEntities(organizationId)
-        .then(groupedData => {
-          setSummary(groupedData);
-        })
-        .catch(error => console.error("Failed to fetch summary for all entities:", error));
-    } else if (role === 'store') {
-      fetchUnitsSummaryForStore(organizationId, entityId)
-        .then(data => {
-          const groupedData = { [entityId]: data };
-          setSummary(groupedData);
-        })
-        .catch(error => console.error("Failed to fetch summary:", error));
-    }
+    const checkAndLoadBilanHistorique = async () => {
+      try {
+        const historicalSummary = await fetchHistoricalSummaryFromFirestore(organizationId, 'Bilan Historique');
+
+        if (historicalSummary) {
+          // If Bilan Historique exists, set it to the state
+          setSummary({ "Bilan Historique": historicalSummary });
+          console.log('Bilan Historique found and loaded from database.');
+        } else {
+          console.log('Bilan Historique not found, generating and saving it...');
+          // If Bilan Historique does not exist, generate it
+          if (role === 'admin' || role === 'headquarter') {
+            const groupedData = await fetchSummaryForAllEntities(organizationId);
+            setSummary(groupedData);
+            await saveHistoricalSummaryToFirestore(organizationId, 'Bilan Historique', groupedData["Bilan Historique"]);
+            console.log('Bilan Historique generated and saved.');
+          } else if (role === 'store') {
+            const storeSummary = await fetchUnitsSummaryForStore(organizationId, entityId);
+            const groupedData = { [entityId]: storeSummary };
+            setSummary(groupedData);
+            await saveSummaryToFirestore(organizationId, entityId, 'Bilan Historique', groupedData[entityId]["Bilan Historique"]);
+            console.log('Bilan Historique generated and saved for the store.');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load or generate Bilan Historique:', error);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    checkAndLoadBilanHistorique();
   }, []);
 
   const fetchSummaryForAllEntities = async (organizationId) => {
@@ -53,27 +72,26 @@ const SummaryComponent = () => {
       }
     };
 
-  
     const accumulateData = (targetArray, sourceArray) => {
-        sourceArray.forEach(source => {
-            const existingCategory = targetArray.find(item => item.nature === source.nature);
+      sourceArray.forEach(source => {
+        const existingCategory = targetArray.find(item => item.nature === source.nature);
 
-            if (existingCategory) {
-            // Add the montants of the current source to the existing category's montants
-            existingCategory.montants = existingCategory.montants.map(
-                (monthTotal, index) => monthTotal + (source.montants[index] || 0)
-            );
-            } else {
-            // If this category doesn't exist, add it with its montants
-            targetArray.push({
-                nature: source.nature,
-                montantInitial: source.montantInitial,
-                montants: [...source.montants] // Copy montants array
-            });
-            }
-        });
+        if (existingCategory) {
+          // Add the montants of the current source to the existing category's montants
+          existingCategory.montants = existingCategory.montants.map(
+            (monthTotal, index) => monthTotal + (source.montants[index] || 0)
+          );
+        } else {
+          // If this category doesn't exist, add it with its montants
+          targetArray.push({
+            nature: source.nature,
+            montantInitial: source.montantInitial,
+            montants: [...source.montants] // Copy montants array
+          });
+        }
+      });
     };
-  
+
     Object.values(summary).forEach(storeData => {
       Object.entries(storeData).forEach(([year, data]) => {
         // Accumulate data across all years for encaissements and decaissements
@@ -81,48 +99,17 @@ const SummaryComponent = () => {
         accumulateData(groupedSummary["Bilan Historique"].decaissements, data.decaissements);
       });
     });
-  
+
     return groupedSummary;
   };
-  
-  const handleSaveSummary = () => {
-    const userData = JSON.parse(localStorage.getItem('userData'));
-    const organizationId = userData.organizationId;
-  
-    if (!summary || !organizationId) {
-      console.error("Organization ID or summary is missing.");
-      return;
-    }
-  
-    if (userRole === 'admin' || userRole === 'headquarter') {
-      // Log the summary before saving
-      console.log("Saving summary for organization:", JSON.stringify(summary, null, 2));
-      
-      saveHistoricalSummaryToFirestore(organizationId, 'Bilan Historique', summary["Bilan Historique"])
-        .then(() => console.log(`Summary for organization in 'Bilan Historique' saved successfully.`))
-        .catch(error => console.error(`Failed to save summary for 'ALL' in 'Bilan Historique':`, error));
-    } else if (userRole === 'store') {
-      const entityId = userData.entityId;
-  
-      if (!summary[entityId]) {
-        console.error(`Summary for entity ID ${entityId} is missing.`);
-        return;
-      }
-  
-      // Log the entity-specific summary before saving
-      console.log(`Saving summary for entity ${entityId}:`, JSON.stringify(summary[entityId], null, 2));
-  
-      saveSummaryToFirestore(organizationId, entityId, 'Bilan Historique', summary[entityId]["Bilan Historique"])
-        .then(() => console.log(`Summary for ${entityId} saved successfully.`))
-        .catch(error => console.error(`Failed to save summary for ${entityId}:`, error));
-    }
-  };
-  
 
   return (
     <div>
-      <button onClick={handleSaveSummary}>Save</button>
-      {summary && <TreasuryTable transactions={summary["Bilan Historique"]} />}
+      {isLoaded ? (
+        summary && <TreasuryTable transactions={summary["Bilan Historique"]} />
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 };

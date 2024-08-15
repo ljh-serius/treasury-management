@@ -277,7 +277,7 @@ const Dashboard = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <CssBaseline />entities
+      <CssBaseline />
       <AppBar
         position="fixed"
         sx={{
