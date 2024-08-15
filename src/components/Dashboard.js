@@ -559,7 +559,7 @@ const Dashboard = ({ children }) => {
       </Box>
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 2.4, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
+        sx={{ flexGrow: 1, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
       >
           <Toolbar />
         {isTransactionBooks && summaries[selectedEntity] && summaries[selectedEntity][summaryName] ? (
