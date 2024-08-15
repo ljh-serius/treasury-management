@@ -19,7 +19,6 @@ export const translate =  (key, lanauge) => {
     "Monthly Totals": "Totaux mensuels",
     "Monthly Transaction Heatmap": "Heatmap des transactions mensuelles",
     "Treasury Evolution Over Time": "Évolution de la trésorerie au fil du temps",
-    "Accumulated Treasury": "Trésorerie Accumulée",
     "Treasury Balance": "Solde de Trésorerie",
     "Percentage of Treasury vs Receipts": "Percentage of Treasury vs Encaissements",
     "Percentage of Treasury vs Encaissements": "Pourcentage de (Trésororie vs Encaissements)",
@@ -138,6 +137,6 @@ export const translate =  (key, lanauge) => {
   if(lanauge == 'fr') {
     return french[key];
   }
-  
+
   return key; 
 };

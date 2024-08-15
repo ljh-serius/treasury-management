@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import Dashboard from './components/Dashboard';
-import TransactionBooks from './components/TransactionBooks';
 import Analytics from './components/Analytics';
-import TransactionDetails from './components/TransactionDetails';
 import HomePage from './components/HomePage';
 import Blog from './components/Blog';
 import Article from './components/Article';
@@ -29,6 +27,7 @@ import SearchPartners from './components/SearchPartners';
 import ProjectPrioritization from './components/ProjectPrioritization';
 import RiskManagement from './components/RiskManagement';
 import Employees from './components/Employees';
+import TreasuryTable from './components/TreasuryTable';
 
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
 
@@ -72,7 +71,7 @@ const App = () => {
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                  <TransactionBooks />
+                  <TreasuryTable />
                 </Dashboard>
               </ProtectedRoute>
             }

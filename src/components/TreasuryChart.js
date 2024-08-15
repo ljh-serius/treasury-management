@@ -2,49 +2,45 @@ import React from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-const TreasuryChart = ({ title, data, onHover, highlightedCumulativeMonth }) => {
+const TreasuryChart = ({ title, data }) => {
   const options = {
     title: {
-      text: title
+      text: title,
     },
     xAxis: {
-      categories: ["Initial", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+      categories: [
+        "Initial", "January", "February", "March", "April", "May", "June", 
+        "July", "August", "September", "October", "November", "December"
+      ],
     },
     yAxis: {
       title: {
-        text: 'Amount'
-      }
+        text: 'Amount',
+      },
     },
     series: data.map(series => ({
       ...series,
-      data: series.data.map((point, index) => ({
-        y: point,
-        color: highlightedCumulativeMonth !== null && index <= highlightedCumulativeMonth + 1 ? 'rgba(255, 0, 0, 0.5)' : null // Highlight up to the selected month
-      }))
+      data: series.data, // No conditional coloring
     })),
     credits: {
-      enabled: false
+      enabled: false,
     },
     tooltip: {
       formatter: function () {
         return `Month: <b>${this.x}</b><br/>Value: <b>${this.y}</b>`;
-      }
+      },
     },
     plotOptions: {
       series: {
         point: {
           events: {
             mouseOver: function () {
-              const monthIndex = this.index;
-              onHover(this.series.name, monthIndex);
+              const monthIndex = this.index; // Kept this if you need it for other purposes
             },
-            mouseOut: function () {
-              onHover(null, null);
-            }
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   };
 
   return (

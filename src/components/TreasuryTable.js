@@ -1,373 +1,168 @@
-// TreasuryTable.js
-
 import React, { useState, useEffect } from 'react';
-import { Button, Grid } from '@mui/material';
+import { Grid, Button } from '@mui/material';
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
 import ExcelJS from 'exceljs';
-import TransactionTable from './TransactionTable';
-import TransactionActionsMenu from './TransactionActionsMenu';
-import ChartContainer from './ChartContainer';
 import {
-  monthNames, calculateTotals, calculateMonthlyTreasury,
-  calculateAccumulatedTreasury, prepareChartData, prepareCumulativeTreasuryData,
-  prepareMonthlyTreasuryData, calculateTotal
+  DataGrid,
+  GridToolbar,
+} from '@mui/x-data-grid';
+import {
+  calculateTotal, monthNames, calculateMonthlyTreasury, calculateAccumulatedTreasury, prepareChartData, prepareCumulativeTreasuryData,
+  prepareMonthlyTreasuryData, calculateTotals
 } from './transactionHelpers';
-import { auth } from '../utils/firebaseConfig';
+import TreasuryChart from './TreasuryChart';
 
-// Utility to get the current time
-const getCurrentTime = () => new Date().getTime();
-
-const saveToLocalStorage = (userId, key, data) => {
-  if (!userId) return;
-  const fullKey = `${userId}_${key}`;
-  const dataToStore = {
-    timestamp: getCurrentTime(),
-    data
-  };
-  localStorage.setItem(fullKey, JSON.stringify(dataToStore));
-};
-
-const TreasuryTable = ({ transactions, setTransactions, setSnackbarMessage, setSnackbarOpen }) => {
-  const [inputValues, setInputValues] = useState(transactions);
-  const [editingCell, setEditingCell] = useState(null);
+const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }, headerHeight = 64, drawerWidth = 240, showAnalytics = false }) => {
   const [encaissementsData, setEncaissementsData] = useState([]);
   const [decaissementsData, setDecaissementsData] = useState([]);
   const [cumulativeTreasuryData, setCumulativeTreasuryData] = useState([]);
   const [monthlyTreasuryData, setMonthlyTreasuryData] = useState([]);
-  const [highlightedRow, setHighlightedRow] = useState({ encaissements: null, decaissements: null });
-  const [highlightedMonth, setHighlightedMonth] = useState(null);
-  const [highlightedCumulativeMonth, setHighlightedCumulativeMonth] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
-  const [columnMenuAnchorEl, setColumnMenuAnchorEl] = useState(null);
-  const [natureMenuAnchorEl, setNatureMenuAnchorEl] = useState(null);
-  const [action, setAction] = useState('');
-  const [selectedMonths, setSelectedMonths] = useState([]);
-  const [selectedTransaction, setSelectedTransaction] = useState({ type: '', index: -1, month: -1 });
-  const userId = auth.currentUser?.uid;
-  
-  useEffect(() => {
-    setInputValues(transactions); // Synchronize inputValues with transactions prop
-  }, [transactions]);
 
   useEffect(() => {
-    const updatedTransactions = calculateTotals(transactions);
-    setEncaissementsData(prepareChartData('encaissements', updatedTransactions));
-    setDecaissementsData(prepareChartData('decaissements', updatedTransactions));
-    setCumulativeTreasuryData(prepareCumulativeTreasuryData(updatedTransactions));
-    setMonthlyTreasuryData(prepareMonthlyTreasuryData(updatedTransactions));
-  }, [transactions]);
+    // Only calculate and set state if transactions change
+    const updatedInputValues = calculateTotals(transactions);
 
-  const handleInputChange = (type, index, key, value) => {
-    const updatedInputValues = { ...inputValues };
-    if (key === 'montantInitial') {
-      updatedInputValues[type][index][key] = parseFloat(value) || 0;
-    } else if (key === 'nature') {
-      updatedInputValues[type][index][key] = value;
-    } else {
-      updatedInputValues[type][index].montants[key] = parseFloat(value) || 0;
-    }
-    setInputValues(updatedInputValues); // Update the input values state
-  };
+    // Prevent unnecessary updates by checking if the data is actually different
+    const newEncaissementsData = prepareChartData('encaissements', updatedInputValues);
+    const newDecaissementsData = prepareChartData('decaissements', updatedInputValues);
+    const newCumulativeTreasuryData = prepareCumulativeTreasuryData(updatedInputValues);
+    const newMonthlyTreasuryData = prepareMonthlyTreasuryData(updatedInputValues);
 
-  const handleBlur = () => {
-    const updatedTransactions = calculateTotals(inputValues); // Recalculate totals
-    setTransactions(updatedTransactions); // Update the transactions state with recalculated totals
-    setEditingCell(null);
-  };
-  
-  const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      handleBlur();
-    }
-  };
+    setEncaissementsData(newEncaissementsData);
+    setDecaissementsData(newDecaissementsData);
+    setCumulativeTreasuryData(newCumulativeTreasuryData);
+    setMonthlyTreasuryData(newMonthlyTreasuryData);
+  }, []);
 
-  const handleFocus = (type, index, key) => {
-    setEditingCell({ type, index, key });
-  };
+  const generateRows = () => {
+    const rows = [];
+    const encaissements = transactions.encaissements || [];
+    const decaissements = transactions.decaissements || [];
+    const monthlyTreasury = calculateMonthlyTreasury(transactions || {});
+    const initialEncaissement = encaissements[encaissements.length - 1]?.montantInitial || 0;
+    const initialDecaissement = decaissements[decaissements.length - 1]?.montantInitial || 0;
+    const accumulatedTreasury = calculateAccumulatedTreasury(initialEncaissement - initialDecaissement, transactions || {});
+    const displayedMonths = monthNames.slice(1);
 
-  const handleMenuOpen = (event, type, index, month) => {
-    setSelectedTransaction({ type, index, month });
-    setMenuAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchorEl(null);
-  };
-
-  const handleActionClick = (actionType) => {
-    if (actionType === 'setMonths') {
-      // Open modal for setting transaction details across months
-      setModalOpen(true);
-    } else {
-      setAction(actionType);
-      setSelectedMonths([]);
-      setModalOpen(true);
-    }
-  };
-
-  const handleChartHover = (type, seriesName) => {
-    setHighlightedRow((prev) => ({
-      ...prev,
-      [type]: seriesName
-    }));
-  };
-
-  const handleMonthHighlight = (index) => {
-    setHighlightedMonth(index);
-  };
-
-  const handleCumulativeMonthHighlight = (index) => {
-    setHighlightedCumulativeMonth(index);
-  };
-
-  const exportToSpreadsheet = async () => {
-    const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet('Transactions');
-
-    // Adding the transaction data
-    const wsData = [
-        ["Type", "Nature de la transaction", "Solde Initial", ...monthNames.slice(1), "Total"]
-    ];
-
-    Object.keys(transactions).forEach((type) => {
-        if (Array.isArray(transactions[type])) {
-            transactions[type].forEach((transaction, index) => {
-                const rowData = [
-                    type.charAt(0).toUpperCase() + type.slice(1),
-                    transaction.nature,
-                    transaction.montantInitial,
-                    ...transaction.montants,
-                    calculateTotal(type, index, transactions)
-                ];
-                wsData.push(rowData);
-            });
-        } else {
-            console.warn(`Expected transactions[${type}] to be an array, but got:`, transactions[type]);
-        }
-    });
-
-    const monthlyTreasury = calculateMonthlyTreasury(transactions);
-    const accumulatedTreasury = calculateAccumulatedTreasury(
-        (transactions.encaissements?.[transactions.encaissements.length - 1]?.montantInitial || 0) -
-        (transactions.decaissements?.[transactions.decaissements.length - 1]?.montantInitial || 0),
-        transactions
-    );
-
-    wsData.push(["", "Solde de la Trésorerie", "", ...monthlyTreasury, monthlyTreasury.reduce((acc, curr) => acc + curr, 0)]);
-    wsData.push(["", "Trésorerie Accumulée", "", ...accumulatedTreasury, accumulatedTreasury[accumulatedTreasury.length - 1]]);
-
-    ws.addRows(wsData);
-
-    // Capturing and adding charts to the Excel file
-    const chartContainers = document.querySelectorAll('.chart-container'); // Ensure your chart containers have this class
-
-    for (let i = 0; i < chartContainers.length; i++) {
-        const canvas = await html2canvas(chartContainers[i]);
-        const imgData = canvas.toDataURL('image/png');
-
-        const imageId = wb.addImage({
-            base64: imgData,
-            extension: 'png',
-        });
-
-        ws.addImage(imageId, `A${wsData.length + (i * 20) + 3}:P${wsData.length + (i * 20) + 20}`);
-    }
-
-    // Saving the workbook
-    const buffer = await wb.xlsx.writeBuffer();
-    saveAs(new Blob([buffer]), 'treasury_data_with_charts.xlsx');
-};
-
-
-  const handleColumnMenuOpen = (event, monthIndex) => {
-    setSelectedTransaction({ type: '', index: -1, month: monthIndex });
-    setColumnMenuAnchorEl(event.currentTarget);
-  };
-
-  const handleNatureMenuOpen = (event, type, index, filters) => {
-    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-    saveToLocalStorage(organizationId, "selectedDetailsFilters", filters)
-    setSelectedTransaction({ type, index, month: -1 });
-    setNatureMenuAnchorEl(event.currentTarget);
-  };
-
-  const handleColumnMenuClose = () => {
-    setColumnMenuAnchorEl(null);
-  };
-
-  const handleNatureMenuClose = () => {
-    setNatureMenuAnchorEl(null);
-  };
-
-  const handleCopyColumn = () => {
-    const { month } = selectedTransaction;
-    const columnData = [];
-
-    Object.keys(transactions).forEach((type) => {
-      transactions[type].forEach((transaction) => {
-        if (month === -1) {
-          columnData.push(transaction.montantInitial); // Handle "Solde Initial" column
-        } else {
-          columnData.push(transaction.montants[month]);
-        }
-      });
-    });
-
-    navigator.clipboard.writeText(JSON.stringify(columnData));
-    handleColumnMenuClose();
-    setSnackbarMessage(`Copied data of ${month === -1 ? 'Solde Initial' : 'month ' + monthNames[month + 1]}`);
-    setSnackbarOpen(true);
-  };
-
-  const handlePasteColumn = () => {
-    const { month } = selectedTransaction;
-
-    navigator.clipboard.readText().then((text) => {
-      const columnData = JSON.parse(text);
-      const updatedTransactions = { ...transactions };
-
-      let rowIndex = 0;
-      Object.keys(transactions).forEach((type) => {
-        transactions[type].forEach((transaction, index) => {
-          if (rowIndex < columnData.length) {
-            if (month === -1) {
-              updatedTransactions[type][index].montantInitial = columnData[rowIndex]; // Handle "Solde Initial" column
-            } else {
-              updatedTransactions[type][index].montants[month] = columnData[rowIndex];
-            }
-            rowIndex++;
-          }
+    ["encaissements", "decaissements"].forEach((type) => {
+      transactions[type]?.forEach((transaction, index) => {
+        rows.push({
+          id: `${type}-${index}`,
+          type: type.charAt(0).toUpperCase() + type.slice(1),
+          nature: transaction.nature || 'Unknown',
+          initialBalance: transaction.montantInitial || 0,
+          ...displayedMonths.reduce((acc, month, i) => {
+            acc[`month_${i}`] = transaction.montants[i] || '';
+            return acc;
+          }, {}),
+          total: calculateTotal(type, index, transactions),
         });
       });
-
-      setTransactions(updatedTransactions);
     });
-    handleColumnMenuClose();
-    setSnackbarMessage(`Pasted data to ${month === -1 ? 'Solde Initial' : 'month ' + monthNames[month + 1]}`);
-    setSnackbarOpen(true);
+
+    if (monthlyTreasury.length) {
+      rows.push({
+        id: 'treasury-balance',
+        type: 'Treasury Balance',
+        ...displayedMonths.reduce((acc, _, i) => {
+          acc[`month_${i}`] = monthlyTreasury[i];
+          return acc;
+        }, {}),
+        total: monthlyTreasury.reduce((acc, curr) => acc + curr, 0),
+      });
+    }
+
+    if (accumulatedTreasury.length) {
+      rows.push({
+        id: 'accumulated-treasury',
+        type: 'Accumulated Treasury',
+        ...displayedMonths.reduce((acc, _, i) => {
+          acc[`month_${i}`] = accumulatedTreasury[i];
+          return acc;
+        }, {}),
+        total: accumulatedTreasury.slice(-1)[0],
+      });
+    }
+
+    return rows;
   };
 
-  const handleCopyNatureRow = () => {
-    const { type, index } = selectedTransaction;
-    const rowData = transactions[type][index];
+  const rows = generateRows();
 
-    navigator.clipboard.writeText(JSON.stringify(rowData));
-    handleNatureMenuClose();
-    setSnackbarMessage(`Copied row ${rowData.nature}`);
-    setSnackbarOpen(true);
-  };
+  const columns = [
+    { field: 'type', headerName: 'Type', width: 150 },
+    { field: 'nature', headerName: 'Nature of Transaction', width: 200, editable: true },
+    { field: 'initialBalance', headerName: 'Initial Balance', width: 150, editable: true },
+    ...monthNames.slice(1).map((month, index) => ({
+      field: `month_${index}`,
+      headerName: month,
+      width: 150,
+      editable: true,
+    })),
+    {
+      field: 'total',
+      headerName: 'Total',
+      width: 150,
+      valueGetter: (params) => {
+        const { row } = params;
+        if (row && row.type && typeof row.id !== 'undefined') {
+          return calculateTotal(row.type.toLowerCase(), row.id.split('-')[1], transactions);
+        }
+        return null;
+      },
+    },
+  ];
 
-  const handlePasteNatureRow = () => {
-    const { type, index } = selectedTransaction;
-
-    navigator.clipboard.readText().then((text) => {
-      const rowData = JSON.parse(text);
-      const updatedTransactions = { ...transactions };
-
-      updatedTransactions[type][index] = { ...rowData }; // Create a copy of the row data to avoid modifying the source
-
-      setTransactions(updatedTransactions);
-    });
-    handleNatureMenuClose();
-    setSnackbarMessage(`Pasted row to ${type.charAt(0).toUpperCase() + type.slice(1)}`);
-    setSnackbarOpen(true);
-  };
-
-    useEffect(() => {
-      setInputValues(transactions); 
-    }, [transactions]);
-  
-    useEffect(() => {
-      const updatedTransactions = calculateTotals(transactions);
-      setEncaissementsData(prepareChartData('encaissements', updatedTransactions));
-      setDecaissementsData(prepareChartData('decaissements', updatedTransactions));
-      setCumulativeTreasuryData(prepareCumulativeTreasuryData(updatedTransactions));
-      setMonthlyTreasuryData(prepareMonthlyTreasuryData(updatedTransactions));
-    }, [transactions]);
-  
-    return (
-      <>
-       <Button
-          variant="contained"
-          color="primary"
-          onClick={exportToSpreadsheet}
-          style={{ height: 36, float: 'right', marginTop: 15, marginBottom: 20 }}
-        >
-          Export as Spreadsheet
-        </Button>
-        <TransactionTable
-          inputValues={inputValues}
-          setInputValues={setInputValues}
-          handleInputChange={handleInputChange}
-          setSelectedTransaction={setSelectedTransaction}
-          handleFocus={handleFocus}
-          handleBlur={handleBlur}
-          handleKeyDown={handleKeyDown}
-          handleMenuOpen={handleMenuOpen}
-          handleColumnMenuOpen={handleColumnMenuOpen}
-          handleNatureMenuOpen={handleNatureMenuOpen}
-          editingCell={editingCell}
-          highlightedRow={highlightedRow}
-          highlightedMonth={highlightedMonth}
-          highlightedCumulativeMonth={highlightedCumulativeMonth}
+  return (
+    <>
+      <div style={{
+        height: showAnalytics ? 'auto' : `calc(100vh - ${headerHeight}px)`, 
+        width: `calc(100vw - ${drawerWidth}px)`,
+        marginTop: `${headerHeight}px`,  // This pushes the grid down below the header
+        marginLeft: `${drawerWidth}px`,  // This pushes the grid to the right, avoiding the drawer
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          components={{ Toolbar: GridToolbar }}
+          disableSelectionOnClick
+          autoHeight={showAnalytics} // If showAnalytics is true, the grid will adjust its height
         />
-  
-        <TransactionActionsMenu
-          anchorEl={menuAnchorEl}
-          handleMenuClose={handleMenuClose}
-          handleActionClick={handleActionClick}
-          type="amount"
-        />
-        <TransactionActionsMenu
-          anchorEl={columnMenuAnchorEl}
-          handleMenuClose={handleColumnMenuClose}
-          handleCopyColumn={handleCopyColumn}
-          handlePasteColumn={handlePasteColumn}
-          type="column"
-        />
-        <TransactionActionsMenu
-          anchorEl={natureMenuAnchorEl}
-          handleMenuClose={handleNatureMenuClose}
-          handleCopyNatureRow={handleCopyNatureRow}
-          handlePasteNatureRow={handlePasteNatureRow}
-          transactionBookName={inputValues?.name}
-          type="nature"
-
-        />
-        <Grid container style={{ handleNatureMenuOpenarginTop: 16 }}>
+      </div>
+      {showAnalytics && (
+        <Grid container style={{ marginTop: 16, marginLeft: `${drawerWidth}px` }}>
           <Grid item xs={12} md={6}>
-            <ChartContainer
+            <TreasuryChart
               title="Encaissements by Nature"
               data={encaissementsData}
-              onHover={(seriesName) => handleChartHover('encaissements', seriesName)}
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            <ChartContainer
+            <TreasuryChart
               title="Décaissements by Nature"
               data={decaissementsData}
-              onHover={(seriesName) => handleChartHover('decaissements', seriesName)}
             />
           </Grid>
           <Grid item xs={12} md={12}>
-            <ChartContainer
+            <TreasuryChart
               title="Solde de Trésorie"
               data={monthlyTreasuryData}
-              onHover={(seriesName, index) => handleMonthHighlight(index - 1)}
             />
           </Grid>
           <Grid item xs={12} md={12}>
-            <ChartContainer
+            <TreasuryChart
               title="Trésorerie Cummulée"
               data={cumulativeTreasuryData}
-              onHover={(seriesName, index) => handleCumulativeMonthHighlight(index - 1)}
             />
           </Grid>
         </Grid>
-      </>
-    );
-  };
-  
-  export default TreasuryTable;
+      )}
+    </>
+  );
+};
+
+export default TreasuryTable;
