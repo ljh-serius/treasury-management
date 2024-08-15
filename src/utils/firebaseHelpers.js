@@ -276,6 +276,7 @@ export const fetchUnitsSummaryForStore = async (organizationId, entityId) => {
           const { type, category, quantity, unitPrice } = unit;
           const totalAmount = parseFloat(unitPrice) * parseInt(quantity, 10);
 
+          console.log("TYPE TYPE TYPE ", type)
           const summaryType = type === 'revenues' ? 'encaissements' : 'decaissements';
 
           let natureEntry = summary[year][summaryType].find(entry => entry.nature === category);
@@ -301,11 +302,11 @@ export const fetchUnitsSummaryForStore = async (organizationId, entityId) => {
         };
 
         entries.forEach(entry => {
-          entry.montantInitial = entry.montants.reduce((sum, montant) => sum + montant, 0);
+          entry.montantInitial = 0;
           entry.montants.forEach((montant, index) => {
-            totalEntry.montants[index] += montant;
+            totalEntry.montants[index] += parseFloat(montant);
           });
-          totalEntry.montantInitial += entry.montantInitial;
+          totalEntry.montantInitial = 0;
         });
 
         return totalEntry;

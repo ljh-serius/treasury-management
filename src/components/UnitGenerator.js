@@ -226,7 +226,6 @@ export default function UnitGenerator() {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [currentUnit, setCurrentUnit] = useState({});
-  const [selectedTypes, setSelectedTypes] = useState({});
   const [selectedGenerationEntity, setSelectedGenerationEntity] = useState({});
 
   const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
@@ -266,20 +265,21 @@ export default function UnitGenerator() {
     const fetchUnits = async () => {
       const filters = {
         selectedCategories,
-        selectedTypes,
+        selectedTypes: [unitType],
         selectedMonths,
         selectedYears,
         selectedEntity,
         months,
       };
 
+      console.log("FITLERS AAAA ", filters)
       const units = await fetchAllUnits(organizationId, filters);
       setAllUnits(units);
       setFilteredUnits(units);
     };
 
     fetchUnits();
-  }, [selectedCategories, selectedTypes, selectedMonths, selectedYears, selectedEntity]);
+  }, [selectedCategories, unitType, selectedMonths, selectedYears, selectedEntity]);
 
   const handleDialogClose = async (confirm) => {
     setOpenDialog(false);
