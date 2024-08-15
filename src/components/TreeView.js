@@ -3,18 +3,21 @@ import Box from '@mui/material/Box';
 
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 
-export default function BasicRichTreeView({ summaries, entities }) {
+export default function BasicRichTreeView({ summaries, entities, onSelectSummary}) {
 
+    const [selectedItems, setSelectedItems] = React.useState([]);
+
+    const handleSelectedItemsChange = (event, ids) => {
+        setSelectedItems(ids);
+        onSelectSummary(ids);
+    };
+  
+    console.log("ALLAH ALLAH ", selectedItems)
     
     const getDataObject = () => {
-
-        console.log("summaries ", summaries)
-        console.log("entities ", entities)
         if(Object.keys(summaries).length > 0 && entities.length > 0){
             const data = Object.keys(summaries).map((key) => {
                 const relativeEntity = entities.filter((entity) => { return entity.id === key })[0];
-                console.log("relative " + key, relativeEntity )
-                console.log(relativeEntity)
                 return {
                     id: relativeEntity.id,
                     label: relativeEntity.name,
@@ -37,7 +40,11 @@ export default function BasicRichTreeView({ summaries, entities }) {
 
     return (
         <Box sx={{ minHeight: 100, minWidth: 250 }}>
-            <RichTreeView items={items} />
+            <RichTreeView
+                items={items}
+                selectedItems={selectedItems}
+                onSelectedItemsChange={handleSelectedItemsChange}
+            />
         </Box>
     );
 }

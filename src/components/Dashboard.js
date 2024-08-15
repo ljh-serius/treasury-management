@@ -315,6 +315,13 @@ const Dashboard = ({ children }) => {
       await saveSummaryToFirestore(organizationId, selectedEntity, year, newSummary);
     }
   };
+
+  const onSelectSummaryTreeView = (selectedSummary) => {
+    const [entityId, summaryName] = selectedSummary.split('-');
+    console.log("summaryNamesummaryNamesummaryNamesummaryName", summaryName)
+    setSelectedEntity(entityId);
+    setSummaryName(summaryName);
+  }
   
 
   const drawer = (
@@ -331,7 +338,7 @@ const Dashboard = ({ children }) => {
             </ListItemButton>
           </ListItem>
           <Divider />
-          <TreeView summaries={summaries || {}} entities={entities || []}></TreeView>
+          <TreeView summaries={summaries || {}} entities={entities || []} onSelectSummary={onSelectSummaryTreeView}></TreeView>
         </List>
         <Divider />
         <List>
