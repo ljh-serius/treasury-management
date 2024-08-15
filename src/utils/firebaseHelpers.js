@@ -131,18 +131,20 @@ export const getTransactionDetails = async (organizationId, entityId, transactio
 export const fetchAllUnits = async (organizationId, filters) => {
   if (!organizationId) return [];
 
+  console.log("FILTERS FILTERS ", filters);
+
   const allUnits = [];
   const {
     selectedCategories = [],
     selectedTypes = [],
     selectedMonths = [],
-    selectedYear = null,
+    selectedYears = null,
     months = [],
     selectedEntity = '',  // Ajout de l'entity sélectionnée dans les filtres
   } = filters;
 
   try {
-    const year = selectedYear ? parseInt(selectedYear) : new Date().getFullYear();
+    const year = selectedYears ? parseInt(selectedYears) : new Date().getFullYear();
     
     // Filtrer les valeurs null des mois sélectionnés
     const monthsToFetch = selectedMonths.filter(month => month !== null).length > 0 
