@@ -113,9 +113,11 @@ const Dashboard = ({ children }) => {
           const fetchedEntities = await fetchEntities(organizationId);
           
           setEntities(fetchedEntities)
-          setSelectedEntity(fetchedEntities[0].id)
-          setAvailableSummaries(Object.keys(data[fetchedEntities[0].id]))
-
+          
+          if(fetchedEntities.length > 0){
+            setSelectedEntity(fetchedEntities[0].id)
+            setAvailableSummaries(Object.keys(data[fetchedEntities[0].id]))
+          }
         } else if (userData.role === 'store') {
           const entityId = JSON.parse(localStorage.getItem("userData")).entityId;
 
@@ -149,6 +151,7 @@ const Dashboard = ({ children }) => {
     };
     localStorage.setItem(fullKey, JSON.stringify(dataToStore));
   };
+  
 
   const handleSummaryChange = (name) => {
     const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
-  Toolbar, Typography, Paper, Checkbox, IconButton, Tooltip, FormControlLabel, Switch, Modal, TextField, Button
+  Toolbar, Typography, Paper, Checkbox, IconButton, Tooltip, FormControlLabel, Switch, Modal, TextField, Button, Container
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -187,7 +187,7 @@ function ProviderModal({ open, onClose, onSubmit, initialData, organizationId })
   );
 }
 
-export default function EnhancedTable() {
+export default function Providers() {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('name');
   const [selected, setSelected] = useState([]);
@@ -309,87 +309,89 @@ export default function EnhancedTable() {
   );
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Paper sx={{ width: '100%', mb: 2 }}>
-        <EnhancedTableToolbar
-          numSelected={selected.length}
-          onAdd={handleAddProvider}
-          onDelete={handleDeleteProviders}
-          onEdit={handleEditProvider}
-        />
-        <TableContainer>
-          <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={dense ? 'small' : 'medium'}>
-            <EnhancedTableHead
-              numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
-              onRequestSort={handleRequestSort}
-              rowCount={providers.length}
+    <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+        <Box sx={{ width: '100%' }}>
+        <Paper sx={{ width: '100%', mb: 2 }}>
+            <EnhancedTableToolbar
+            numSelected={selected.length}
+            onAdd={handleAddProvider}
+            onDelete={handleDeleteProviders}
+            onEdit={handleEditProvider}
             />
-            <TableBody>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.id);
-                const labelId = `enhanced-table-checkbox-${index}`;
+            <TableContainer>
+            <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={dense ? 'small' : 'medium'}>
+                <EnhancedTableHead
+                numSelected={selected.length}
+                order={order}
+                orderBy={orderBy}
+                onSelectAllClick={handleSelectAllClick}
+                onRequestSort={handleRequestSort}
+                rowCount={providers.length}
+                />
+                <TableBody>
+                {visibleRows.map((row, index) => {
+                    const isItemSelected = isSelected(row.id);
+                    const labelId = `enhanced-table-checkbox-${index}`;
 
-                return (
-                  <TableRow
-                    hover
-                    onClick={(event) => handleClick(event, row.id)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.id}
-                    selected={isItemSelected}
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        color="primary"
-                        checked={isItemSelected}
-                        inputProps={{ 'aria-labelledby': labelId }}
-                      />
-                    </TableCell>
-                    <TableCell component="th" id={labelId} scope="row" padding="none">
-                      {row.name}
-                    </TableCell>
-                    <TableCell align="right">{row.taxId}</TableCell>
-                    <TableCell align="right">{row.address}</TableCell>
-                    <TableCell align="right">{row.contactEmail}</TableCell>
-                    <TableCell align="right">{row.contactPhone}</TableCell>
-                  </TableRow>
-                );
-              })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: (dense ? 33 : 53) * emptyRows,
-                  }}
-                >
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={providers.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
+                    return (
+                    <TableRow
+                        hover
+                        onClick={(event) => handleClick(event, row.id)}
+                        role="checkbox"
+                        aria-checked={isItemSelected}
+                        tabIndex={-1}
+                        key={row.id}
+                        selected={isItemSelected}
+                        sx={{ cursor: 'pointer' }}
+                    >
+                        <TableCell padding="checkbox">
+                        <Checkbox
+                            color="primary"
+                            checked={isItemSelected}
+                            inputProps={{ 'aria-labelledby': labelId }}
+                        />
+                        </TableCell>
+                        <TableCell component="th" id={labelId} scope="row" padding="none">
+                        {row.name}
+                        </TableCell>
+                        <TableCell align="right">{row.taxId}</TableCell>
+                        <TableCell align="right">{row.address}</TableCell>
+                        <TableCell align="right">{row.contactEmail}</TableCell>
+                        <TableCell align="right">{row.contactPhone}</TableCell>
+                    </TableRow>
+                    );
+                })}
+                {emptyRows > 0 && (
+                    <TableRow
+                    style={{
+                        height: (dense ? 33 : 53) * emptyRows,
+                    }}
+                    >
+                    <TableCell colSpan={6} />
+                    </TableRow>
+                )}
+                </TableBody>
+            </Table>
+            </TableContainer>
+            <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={providers.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+        </Paper>
+        <FormControlLabel control={<Switch checked={dense} onChange={handleChangeDense} />} label="Dense padding" />
+        <ProviderModal
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+            onSubmit={handleModalSubmit}
+            initialData={currentProvider}
+            organizationId={organizationId}
         />
-      </Paper>
-      <FormControlLabel control={<Switch checked={dense} onChange={handleChangeDense} />} label="Dense padding" />
-      <ProviderModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={handleModalSubmit}
-        initialData={currentProvider}
-        organizationId={organizationId}
-      />
-    </Box>
+        </Box>
+    </Container>
   );
 }

@@ -205,6 +205,7 @@ export const saveUnitToFirestore = async (organizationId, entityId, unit, year, 
 
     await addDoc(unitsCollectionRef, {
       ...unit,
+      entityId,
       createdBy: organizationId,
       createdAt: new Date(),
     });

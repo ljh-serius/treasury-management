@@ -28,7 +28,7 @@ const saveToLocalStorage = (userId, key, data) => {
   localStorage.setItem(fullKey, JSON.stringify(dataToStore));
 };
 
-const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnackbarMessage, setSnackbarOpen }) => {
+const TreasuryTable = ({ transactions, setTransactions, setSnackbarMessage, setSnackbarOpen }) => {
   const [inputValues, setInputValues] = useState(transactions);
   const [editingCell, setEditingCell] = useState(null);
   const [encaissementsData, setEncaissementsData] = useState([]);
