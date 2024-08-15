@@ -231,10 +231,13 @@ export default function UnitGenerator() {
   const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
   const userId = auth.currentUser?.uid;
 
-  const calculateTotal = () => {
-    return filteredUnits.reduce((sum, unit) => sum + (parseFloat(unit.unitPrice) * parseFloat(unit.quantity) || 0), 0).toFixed(2);
+  const calculateTotal = (type, index, transactions) => {
+    const transaction = transactions[type][index];
+    if (!transaction || !transaction.montants) return 0;
+  
+    return transaction.montants.reduce((sum, amount) => sum + (amount || 0), 0);
   };
-
+  
   useEffect(() => {
     const fillEntities = async () => {
       if (organizationId) {
@@ -538,7 +541,7 @@ export default function UnitGenerator() {
             input={<OutlinedInput label="Year" />}
             renderValue={(selected) => selected.join(', ')}
           >
-            {Array.from(new Array(5), (_, index) => new Date().getFullYear() - index).map((year) => (
+            {Array.from(new Array(16), (_, index) => new Date().getFullYear() - index).map((year) => (
               <MenuItem key={year} value={year}>
                 <Checkbox checked={selectedYears.indexOf(year) > -1} />
                 <ListItemText primary={year} />

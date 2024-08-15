@@ -11,6 +11,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { auth } from './utils/firebaseConfig';
 import UnitGenerator from './components/UnitGenerator';
 import SummaryComponent from './components/SummaryComponent';
+import SaverComponent from './components/SaverComponent';
 import OrganizationRegistration from './components/OrganizationRegistration';
 import ManageParameters from './pages/ManageParameters';
 import { TranslationProvider } from './utils/TranslationProvider';
@@ -28,7 +29,6 @@ import ProjectPrioritization from './components/ProjectPrioritization';
 import RiskManagement from './components/RiskManagement';
 import Employees from './components/Employees';
 import TreasuryTable from './components/TreasuryTable';
-
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
 
 if (!process.env.REACT_APP_STRIPE_PUBLIC_KEY) {
@@ -82,6 +82,16 @@ const App = () => {
               <ProtectedRoute user={user}>
                 <Dashboard>
                   <SummaryComponent />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/saver-by-entity"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <SaverComponent />
                 </Dashboard>
               </ProtectedRoute>
             }

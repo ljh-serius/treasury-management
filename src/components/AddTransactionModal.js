@@ -16,8 +16,6 @@ const AddTransactionModal = ({
   availableMonths,
 }) => {
 
-  console.log('3333 ', transactions)
-  
   const availableTransactionNatures = useMemo(() => {
     if (!transactions || !newTransactionType) return [];
     return transactions[newTransactionType]?.map(transaction => transaction.nature) || [];

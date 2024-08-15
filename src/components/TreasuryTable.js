@@ -2,10 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Container, Grid, Box } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import {
-  calculateTotal, monthNames, calculateMonthlyTreasury, calculateAccumulatedTreasury,
+  monthNames, calculateMonthlyTreasury, calculateAccumulatedTreasury,
   prepareChartData, prepareCumulativeTreasuryData, prepareMonthlyTreasuryData, calculateTotals
 } from './transactionHelpers';
 import TreasuryChart from './TreasuryChart'; // Import your chart component
+
+const calculateTotal = (type, index, transactions) => {
+  console.log(`Calculating total for ${type} at index ${index}`);
+  const transaction = transactions[type][index];
+  if (!transaction || !transaction.montants) return 0;
+
+  const total = transaction.montants.reduce((sum, amount) => sum + (amount || 0), 0);
+  console.log(`Total calculated: ${total}`);
+  return total;
+};
 
 const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }, headerHeight = 64, drawerWidth = 240, showAnalytics = false }) => {
   const [encaissementsData, setEncaissementsData] = useState([]);
@@ -36,7 +46,7 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
     const initialDecaissement = decaissements[decaissements.length - 1]?.montantInitial || 0;
     const accumulatedTreasury = calculateAccumulatedTreasury(initialEncaissement - initialDecaissement, transactions || {});
     const displayedMonths = monthNames.slice(1);
-
+  
     ["encaissements", "decaissements"].forEach((type) => {
       transactions[type]?.forEach((transaction, index) => {
         rows.push({
@@ -52,7 +62,7 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
         });
       });
     });
-
+  
     if (monthlyTreasury.length) {
       rows.push({
         id: 'treasury-balance',
@@ -64,7 +74,7 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
         total: monthlyTreasury.reduce((acc, curr) => acc + curr, 0),
       });
     }
-
+  
     if (accumulatedTreasury.length) {
       rows.push({
         id: 'accumulated-treasury',
@@ -76,10 +86,10 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
         total: accumulatedTreasury.slice(-1)[0],
       });
     }
-
+  
     return rows;
   };
-
+  
   const rows = generateRows();
 
   const columns = [
@@ -97,13 +107,11 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
       headerName: 'Total',
       width: 150,
       valueGetter: (params) => {
-        const { row } = params;
-        if (row && row.type && typeof row.id !== 'undefined') {
-          return calculateTotal(row.type.toLowerCase(), row.id.split('-')[1], transactions);
-        }
-        return null;
+        console.log("PARAMS PARAMS  PARAMS  PARAMS  ", params)
+          // return calculateTotal(row.type.toLowerCase(), row.id.split('-')[1], transactions);
+          return params
       },
-    },
+    }
   ];
 
   return (

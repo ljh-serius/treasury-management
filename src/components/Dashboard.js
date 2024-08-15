@@ -243,6 +243,14 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Summary</Typography>} />
           </ListItemButton>
         </ListItem>
+        <ListItem key="saver-by-entity" disablePadding>
+          <ListItemButton component={Link} to="/saver-by-entity">
+            <ListItemIcon>
+              <GanttChartIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Saver By Entity</Typography>} />
+          </ListItemButton>
+        </ListItem>
         <ListItem key="manage-parameters" disablePadding>
           <ListItemButton component={Link} to="/manage-parameters">
             <ListItemIcon>

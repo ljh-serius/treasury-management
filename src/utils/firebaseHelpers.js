@@ -131,8 +131,6 @@ export const getTransactionDetails = async (organizationId, entityId, transactio
 export const fetchAllUnits = async (organizationId, filters) => {
   if (!organizationId) return [];
 
-  console.log("FILTERS FILTERS ", filters);
-
   const allUnits = [];
   const {
     selectedCategories = [],
@@ -144,43 +142,44 @@ export const fetchAllUnits = async (organizationId, filters) => {
   } = filters;
 
   try {
-    const year = selectedYears ? parseInt(selectedYears) : new Date().getFullYear();
+    const years = selectedYears ? selectedYears : [new Date().getFullYear()];
     
     // Filtrer les valeurs null des mois sélectionnés
     const monthsToFetch = selectedMonths.filter(month => month !== null).length > 0 
       ? selectedMonths.filter(month => month !== null) 
       : months;
-
     // Définir l'ensemble des entités à récupérer, soit toutes soit l'entité spécifique sélectionnée
     const entityIds = selectedEntity 
       ? [selectedEntity] 
       : (await getDocs(collection(db, "organizations", organizationId, "entities"))).docs.map(doc => doc.id);
 
-    for (let entityId of entityIds) {
-      for (let month of monthsToFetch) {
-        const unitsRef = collection(db, "organizations", organizationId, "entities", entityId, "transaction-units", year.toString(), month);
-        let unitsQuery = unitsRef;
+      for (let entityId of entityIds) {
+        for (let year of years) {
+          for (let month of monthsToFetch) {
+          const unitsRef = collection(db, "organizations", organizationId, "entities", entityId, "transaction-units", year.toString(), month);
+          let unitsQuery = unitsRef;
 
-        // Appliquer les filtres de catégories si spécifiés
-        if (selectedCategories.length > 0) {
-          unitsQuery = query(unitsQuery, where('category', 'in', selectedCategories));
+          // Appliquer les filtres de catégories si spécifiés
+          if (selectedCategories.length > 0) {
+            unitsQuery = query(unitsQuery, where('category', 'in', selectedCategories));
+          }
+
+          // Appliquer les filtres de types si spécifiés
+          if (selectedTypes.length > 0) {
+            unitsQuery = query(unitsQuery, where('type', 'in', selectedTypes));
+          }
+
+          const unitsSnapshot = await getDocs(unitsQuery);
+          console.log(`Fetched ${unitsSnapshot.size} units for entity ${entityId} in ${month} ${year}`);
+
+          const units = unitsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            date: new Date(doc.data().date.seconds * 1000),
+          }));
+
+          allUnits.push(...units);
         }
-
-        // Appliquer les filtres de types si spécifiés
-        if (selectedTypes.length > 0) {
-          unitsQuery = query(unitsQuery, where('type', 'in', selectedTypes));
-        }
-
-        const unitsSnapshot = await getDocs(unitsQuery);
-        console.log(`Fetched ${unitsSnapshot.size} units for entity ${entityId} in ${month} ${year}`);
-
-        const units = unitsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          date: new Date(doc.data().date.seconds * 1000),
-        }));
-
-        allUnits.push(...units);
       }
     }
 
@@ -276,7 +275,6 @@ export const fetchUnitsSummaryForStore = async (organizationId, entityId) => {
           const { type, category, quantity, unitPrice } = unit;
           const totalAmount = parseFloat(unitPrice) * parseInt(quantity, 10);
 
-          console.log("TYPE TYPE TYPE ", type)
           const summaryType = type === 'revenues' ? 'encaissements' : 'decaissements';
 
           let natureEntry = summary[year][summaryType].find(entry => entry.nature === category);
@@ -295,6 +293,7 @@ export const fetchUnitsSummaryForStore = async (organizationId, entityId) => {
       }
 
       const calculateTotal = (entries) => {
+
         const totalEntry = {
           nature: `Total ${entries.length > 0 ? entries[0].nature.split(" ")[0] : ""}`,
           montantInitial: 0,
@@ -344,6 +343,29 @@ export const saveSummaryToFirestore = async (organizationId, entityId, year, sum
     console.log(`Summary for ${year} saved successfully.`);
   } catch (error) {
     console.error(`Error saving summary for ${year} to Firestore:`, error);
+    throw error;
+  }
+};
+
+
+export const saveHistoricalSummaryToFirestore = async (organizationId, name, summary) => {
+  try {
+    if (!summary) {
+      throw new Error("Summary data is undefined or null");
+    }
+
+    if (!organizationId) {
+      throw new Error("Invalid organizationId, entityId, or year");
+    }
+
+    summary.name = name;
+
+    const docRef = doc(db, "organizations", organizationId, "transactions-historical-summary", name);
+    await setDoc(docRef, summary);
+
+    console.log(`Summary for 'Bilan Historique' saved successfully.`);
+  } catch (error) {
+    console.error(`Error saving summary for 'Bilan Historique' to Firestore:`, error);
     throw error;
   }
 };

@@ -1,16 +1,3 @@
-export const initialTransactions = {
-  encaissements: [
-    { nature: 'Vente', montantInitial: 0, montants: Array(12).fill(0) },
-    { nature: 'Service', montantInitial: 0, montants: Array(12).fill(0) },
-    { nature: 'Total Encaissements', montantInitial: 0, montants: Array(12).fill(0) }
-  ],
-  decaissements: [
-    { nature: 'Achat', montantInitial: 0, montants: Array(12).fill(0) },
-    { nature: 'Salaires', montantInitial: 0, montants: Array(12).fill(0) },
-    { nature: 'Total Décaissements', montantInitial: 0, montants: Array(12).fill(0) }
-  ]
-};
-
 export const monthNames = ["Initial", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 export const modalStyle = {
