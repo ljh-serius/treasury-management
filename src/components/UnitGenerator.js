@@ -408,7 +408,8 @@ export default function UnitGenerator() {
         ...currentUnit,
         id: filteredUnits.length + 1,
       };
-      await saveUnitToFirestore(organizationId, selectedEntity, newUnit, new Date(newUnit.date).getFullYear(), new Date(newUnit.date).toLocaleString('default', { month: 'long' }));
+      alert("quoi ??")
+      await saveUnitToFirestore(organizationId, selectedGenerationEntity, newUnit, (new Date()).getFullYear(), (new Date()).toLocaleString('en-US', { month: 'long' }));
       setFilteredUnits([...filteredUnits, newUnit]);
       setAllUnits([...allUnits, newUnit]);
     }
@@ -707,6 +708,41 @@ export default function UnitGenerator() {
               value={currentUnit.unitPrice || ''}
               onChange={handleInputChange}
             />
+            <FormControl fullWidth margin="normal" sx={{ marginBottom: 2 }}>
+              <InputLabel id="entity-select-label">{language === 'en' ? 'Filter by Entity' : 'Filtrer par entité'}</InputLabel>
+              <Select
+                labelId="entity-select-label"
+                value={selectedGenerationEntity}
+                onChange={(e) => setSelectedGenerationEntity(e.target.value)}
+              >
+                <MenuItem value="">{language === 'en' ? 'All Entities' : 'Toutes les entités'}</MenuItem>
+                {entities.map((entity) => (
+                  <MenuItem key={entity.id} value={entity.id}>
+                    {entity.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {unitType === 'expenses' && (
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="provider-dialog-select-label">{language === 'en' ? 'Select Providers' : 'Sélectionner des fournisseurs'}</InputLabel>
+                <Select
+                  labelId="provider-dialog-select-label"
+                  multiple
+                  value={selectedProviders}
+                  onChange={handleSelectProviderChange}
+                  input={<OutlinedInput label="Providers" />}
+                  renderValue={(selected) => selected.join(', ')}
+                >
+                  {providers.map((provider) => (
+                    <MenuItem key={provider.id} value={provider.name}>
+                      <Checkbox checked={selectedProviders.indexOf(provider.name) > -1} />
+                      <ListItemText primary={provider.name} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
             <Button onClick={handleModalSave} variant="contained" sx={{ mt: 2 }}>
               {translate('Save', language)}
             </Button>

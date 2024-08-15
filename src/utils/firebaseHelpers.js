@@ -177,7 +177,6 @@ export const fetchAllUnits = async (organizationId, filters) => {
         const units = unitsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          date: new Date(doc.data().date.seconds * 1000),
         }));
 
         allUnits.push(...units);
@@ -270,7 +269,6 @@ export const fetchUnitsSummaryForStore = async (organizationId, entityId) => {
         const units = unitsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          date: new Date(doc.data().date.seconds * 1000),
         }));
 
         units.forEach(unit => {
