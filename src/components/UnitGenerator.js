@@ -684,6 +684,18 @@ export default function UnitGenerator() {
             <Typography id="transition-modal-title" variant="h6" component="h2">
               {editMode ? translate('Edit Unit', language) : translate('Add Unit', language)}
             </Typography>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="unit-type-dialog-select-label">{language === 'en' ? 'Select Type' : 'Sélectionner le type'}</InputLabel>
+              <Select
+                labelId="unit-type-dialog-select-label"
+                value={unitType}
+                onChange={(event) => { handleChangeUnitType(event); currentUnit.type = event.target.value }}
+              >
+                <MenuItem value="revenues">{language === 'en' ? 'Revenues' : 'Recettes'}</MenuItem>
+                <MenuItem value="expenses">{language === 'en' ? 'Expenses' : 'Décaissements'}</MenuItem>
+              </Select>
+            </FormControl>
+
             <TextField
               margin="normal"
               fullWidth
@@ -724,25 +736,25 @@ export default function UnitGenerator() {
               </Select>
             </FormControl>
             {unitType === 'expenses' && (
-              <FormControl fullWidth margin="normal">
-                <InputLabel id="provider-dialog-select-label">{language === 'en' ? 'Select Providers' : 'Sélectionner des fournisseurs'}</InputLabel>
-                <Select
-                  labelId="provider-dialog-select-label"
-                  multiple
-                  value={selectedProviders}
-                  onChange={handleSelectProviderChange}
-                  input={<OutlinedInput label="Providers" />}
-                  renderValue={(selected) => selected.join(', ')}
-                >
-                  {providers.map((provider) => (
-                    <MenuItem key={provider.id} value={provider.name}>
-                      <Checkbox checked={selectedProviders.indexOf(provider.name) > -1} />
-                      <ListItemText primary={provider.name} />
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="provider-dialog-select-label">{language === 'en' ? 'Select Providers' : 'Sélectionner des fournisseurs'}</InputLabel>
+              <Select
+                labelId="provider-dialog-select-label"
+                multiple
+                value={selectedProviders}
+                onChange={handleSelectProviderChange}
+                input={<OutlinedInput label="Providers" />}
+                renderValue={(selected) => selected.join(', ')}
+              >
+                {providers.map((provider) => (
+                  <MenuItem key={provider.id} value={provider.name}>
+                    <Checkbox checked={selectedProviders.indexOf(provider.name) > -1} />
+                    <ListItemText primary={provider.name} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
             <Button onClick={handleModalSave} variant="contained" sx={{ mt: 2 }}>
               {translate('Save', language)}
             </Button>

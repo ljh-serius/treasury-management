@@ -130,7 +130,9 @@ export const translate =  (key, lanauge) => {
     "Manage Parameters": "Gérer les paramètres",
 
     "Show Work Units": "Afficher les unités de travail",
-    "Show Product Units": "Afficher les unités des produits"
+    "Show Product Units": "Afficher les unités des produits",
+
+    "Quantity": "Quantité"
   };
 
   if(lanauge == 'fr') {
