@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';  // Import Gantt CSS
 import gantt from 'dhtmlx-gantt';        // Import Gantt JavaScript
-import { Container } from '@mui/material';
 
 // Function to generate random data
 const generateRandomTasks = (numTasks) => {
