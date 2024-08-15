@@ -420,6 +420,14 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Risk Management</Typography>} />
           </ListItemButton>
         </ListItem>
+        <ListItem key="employees" disablePadding>
+          <ListItemButton component={Link} to="/employees">
+            <ListItemIcon>
+              <RiskIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Employees</Typography>} />
+          </ListItemButton>
+        </ListItem>
         <ListItem key="analytics" disablePadding>
           <ListItemButton component={Link} to="/analytics">
             <ListItemIcon>

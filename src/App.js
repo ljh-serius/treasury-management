@@ -28,6 +28,7 @@ import Partners from './components/Partners';
 import SearchPartners from './components/SearchPartners';
 import ProjectPrioritization from './components/ProjectPrioritization';
 import RiskManagement from './components/RiskManagement';
+import Employees from './components/Employees';
 
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
 
@@ -147,16 +148,6 @@ const App = () => {
             }
           />
           <Route
-            path="/gantt-chart"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                <GanttChart />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/projects"
             element={
               <ProtectedRoute user={user}>
@@ -166,6 +157,27 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/employees"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Employees />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/gantt-chart"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                <GanttChart />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          
           <Route
             path="/providers"
             element={

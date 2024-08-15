@@ -7,19 +7,19 @@ import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
-import { fetchProjects, addProject, updateProject, deleteProject } from '../utils/projectsFirebaseHelpers';
-import { visuallyHidden } from '@mui/utils';
+import { fetchEmployees, addEmployee, updateEmployee, deleteEmployee } from '../utils/employeesFirebaseHelpers';
 
 const headCells = [
-  { id: 'name', numeric: false, disablePadding: true, label: 'Project Name' },
-  { id: 'description', numeric: false, disablePadding: false, label: 'Description' },
-  { id: 'startDate', numeric: false, disablePadding: false, label: 'Start Date' },
-  { id: 'endDate', numeric: false, disablePadding: false, label: 'End Date' },
+  { id: 'name', numeric: false, disablePadding: true, label: 'Name' },
+  { id: 'position', numeric: false, disablePadding: false, label: 'Position' },
+  { id: 'email', numeric: false, disablePadding: false, label: 'Email' },
+  { id: 'phone', numeric: false, disablePadding: false, label: 'Phone' },
+  { id: 'department', numeric: false, disablePadding: false, label: 'Department' },
+  { id: 'hireDate', numeric: false, disablePadding: false, label: 'Hire Date' },
+  { id: 'salary', numeric: true, disablePadding: false, label: 'Salary' },
   { id: 'status', numeric: false, disablePadding: false, label: 'Status' },
-  { id: 'managerName', numeric: false, disablePadding: false, label: 'Manager' },
-  { id: 'teamMembers', numeric: true, disablePadding: false, label: 'Team Members' },
-  { id: 'budget', numeric: true, disablePadding: false, label: 'Budget' },
-  { id: 'priority', numeric: false, disablePadding: false, label: 'Priority' },
+  { id: 'manager', numeric: false, disablePadding: false, label: 'Manager' },
+  { id: 'location', numeric: false, disablePadding: false, label: 'Location' },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -44,124 +44,117 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
+function EmployeeModal({ open, onClose, onSubmit, initialData, organizationId }) {
+    const [employeeData, setEmployeeData] = useState(
+      initialData || {
+        name: '',
+        position: '',
+        email: '',
+        phone: '',
+        department: '',
+        hireDate: '',
+        salary: '',
+        status: 'Active',
+        manager: '',
+        location: '',
+        organizationId: organizationId,
+      }
+    );
+  
+    useEffect(() => {
+      setEmployeeData(initialData || {
+        name: '',
+        position: '',
+        email: '',
+        phone: '',
+        department: '',
+        hireDate: '',
+        salary: '',
+        status: 'Active',
+        manager: '',
+        location: '',
+        organizationId: organizationId,
+      });
+    }, [initialData, organizationId]);
+  
+    const handleChange = (event) => {
+      const { name, value } = event.target;
+      setEmployeeData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    };
+  
+    const handleSubmit = () => {
+      onSubmit(employeeData);
+    };
+  
+    return (
+      <Modal open={open} onClose={onClose}>
+        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+          <Typography variant="h6" component="h2">
+            {initialData ? 'Edit Employee' : 'Add Employee'}
+          </Typography>
+          <TextField label="Name" name="name" fullWidth margin="normal" value={employeeData.name} onChange={handleChange} />
+          <TextField label="Position" name="position" fullWidth margin="normal" value={employeeData.position} onChange={handleChange} />
+          <TextField label="Email" name="email" fullWidth margin="normal" value={employeeData.email} onChange={handleChange} />
+          <TextField label="Phone" name="phone" fullWidth margin="normal" value={employeeData.phone} onChange={handleChange} />
+          <TextField label="Department" name="department" fullWidth margin="normal" value={employeeData.department} onChange={handleChange} />
+          <TextField label="Hire Date" name="hireDate" type="date" fullWidth margin="normal" value={employeeData.hireDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+          <TextField label="Salary" name="salary" type="number" fullWidth margin="normal" value={employeeData.salary} onChange={handleChange} />
+          <TextField label="Status" name="status" fullWidth margin="normal" value={employeeData.status} onChange={handleChange} />
+          <TextField label="Manager" name="manager" fullWidth margin="normal" value={employeeData.manager} onChange={handleChange} />
+          <TextField label="Location" name="location" fullWidth margin="normal" value={employeeData.location} onChange={handleChange} />
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
+            <Button variant="contained" onClick={handleSubmit}>
+              {initialData ? 'Update' : 'Add'}
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+    );
+  }
 
 function EnhancedTableHead(props) {
-  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-  const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
-  };
-
-  return (
-    <TableHead>
-      <TableRow>
+    const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, showWorkUnits } = props;
+    const createSortHandler = (property) => (event) => {
+      onRequestSort(event, property);
+    };
+    
+    return (
+      <TableHead>
+        <TableRow>
         <TableCell padding="checkbox">
           <MUICheckbox
             color="primary"
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
-            inputProps={{ 'aria-label': 'select all projects' }}
+            inputProps={{ 'aria-label': 'select all units' }}
           />
         </TableCell>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'normal'}
-            sortDirection={orderBy === headCell.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
-              onClick={createSortHandler(headCell.id)}
+          {headCells.map((headCell) => (
+            <TableCell
+              key={headCell.id}
+              align={headCell.numeric ? 'right' : 'left'}
+              padding={headCell.disablePadding ? 'none' : 'normal'}
+              sortDirection={orderBy === headCell.id ? order : false}
             >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                </Box>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-  );
+              <TableSortLabel
+                active={orderBy === headCell.id}
+                direction={orderBy === headCell.id ? order : 'asc'}
+                onClick={createSortHandler(headCell.id)}
+              >
+                {headCell.label}
+              </TableSortLabel>
+            </TableCell>
+          ))}
+        </TableRow>
+      </TableHead>
+    );
 }
-
-function ProjectModal({ open, onClose, onSubmit, initialData, organizationId }) {
-  const [projectData, setProjectData] = useState(
-    initialData || {
-      name: '',
-      description: '',
-      startDate: '',
-      endDate: '',
-      status: 'Active',
-      managerName: '',
-      managerEmail: '',
-      teamMembers: '',
-      budget: '',
-      priority: 'Medium',
-      organizationId: organizationId,
-    }
-  );
-
-  useEffect(() => {
-    setProjectData(initialData || {
-      name: '',
-      description: '',
-      startDate: '',
-      endDate: '',
-      status: 'Active',
-      managerName: '',
-      managerEmail: '',
-      teamMembers: '',
-      budget: '',
-      priority: 'Medium',
-      organizationId: organizationId,
-    });
-  }, [initialData, organizationId]);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setProjectData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = () => {
-    onSubmit(projectData);
-  };
-
-  return (
-    <Modal open={open} onClose={onClose}>
-      <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
-        <Typography variant="h6" component="h2">
-          {initialData ? 'Edit Project' : 'Add Project'}
-        </Typography>
-        <TextField label="Name" name="name" fullWidth margin="normal" value={projectData.name} onChange={handleChange} />
-        <TextField label="Description" name="description" fullWidth margin="normal" value={projectData.description} onChange={handleChange} />
-        <TextField label="Start Date" name="startDate" type="date" fullWidth margin="normal" value={projectData.startDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-        <TextField label="End Date" name="endDate" type="date" fullWidth margin="normal" value={projectData.endDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-        <TextField label="Status" name="status" fullWidth margin="normal" value={projectData.status} onChange={handleChange} />
-        <TextField label="Manager Name" name="managerName" fullWidth margin="normal" value={projectData.managerName} onChange={handleChange} />
-        <TextField label="Manager Email" name="managerEmail" fullWidth margin="normal" value={projectData.managerEmail} onChange={handleChange} />
-        <TextField label="Team Members" name="teamMembers" type="number" fullWidth margin="normal" value={projectData.teamMembers} onChange={handleChange} />
-        <TextField label="Budget" name="budget" type="number" fullWidth margin="normal" value={projectData.budget} onChange={handleChange} />
-        <TextField label="Priority" name="priority" fullWidth margin="normal" value={projectData.priority} onChange={handleChange} />
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}>
-            {initialData ? 'Update' : 'Add'}
-          </Button>
-        </Box>
-      </Box>
-    </Modal>
-  );
-}
-
-
+  
 function EnhancedTableToolbar(props) {
   const { numSelected, onAdd, onDelete, onEdit } = props;
 
@@ -181,7 +174,7 @@ function EnhancedTableToolbar(props) {
         </Typography>
       ) : (
         <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-          Projects
+          Employees
         </Typography>
       )}
       {numSelected === 1 ? (
@@ -208,7 +201,7 @@ function EnhancedTableToolbar(props) {
   );
 }
 
-export default function Projects() {
+export default function EmployeesList() {
   const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('name');
@@ -216,14 +209,14 @@ export default function Projects() {
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [projects, setProjects] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [currentProject, setCurrentProject] = useState(null);
+  const [currentEmployee, setCurrentEmployee] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const projectsData = await fetchProjects();
-      setProjects(projectsData);
+      const employeesData = await fetchEmployees();
+      setEmployees(employeesData);
     };
 
     fetchData();
@@ -237,7 +230,7 @@ export default function Projects() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = projects.map((n) => n.id);
+      const newSelected = employees.map((n) => n.id);
       setSelected(newSelected);
       return;
     }
@@ -263,40 +256,40 @@ export default function Projects() {
     setSelected(newSelected);
   };
 
-  const handleAddProject = () => {
-    setCurrentProject(null);
+  const handleAddEmployee = () => {
+    setCurrentEmployee(null);
     setModalOpen(true);
   };
 
-  const handleEditProject = () => {
-    const projectToEdit = projects.find((project) => project.id === selected[0]);
-    setCurrentProject(projectToEdit);
+  const handleEditEmployee = () => {
+    const employeeToEdit = employees.find((employee) => employee.id === selected[0]);
+    setCurrentEmployee(employeeToEdit);
     setModalOpen(true);
   };
 
-  const handleDeleteProjects = async () => {
+  const handleDeleteEmployees = async () => {
     try {
-      await Promise.all(selected.map((id) => deleteProject(id)));
+      await Promise.all(selected.map((id) => deleteEmployee(id)));
       setSelected([]);
-      const projectsData = await fetchProjects();
-      setProjects(projectsData);
+      const employeesData = await fetchEmployees();
+      setEmployees(employeesData);
     } catch (error) {
-      console.error('Error deleting projects:', error);
+      console.error('Error deleting employees:', error);
     }
   };
 
-  const handleModalSubmit = async (projectData) => {
+  const handleModalSubmit = async (employeeData) => {
     try {
-      if (currentProject) {
-        await updateProject(currentProject.id, projectData);
+      if (currentEmployee) {
+        await updateEmployee(currentEmployee.id, employeeData);
       } else {
-        await addProject({ ...projectData, organizationId });
+        await addEmployee({ ...employeeData, organizationId });
       }
-      const projectsData = await fetchProjects();
-      setProjects(projectsData);
+      const employeesData = await fetchEmployees();
+      setEmployees(employeesData);
       setModalOpen(false);
     } catch (error) {
-      console.error('Error saving project:', error);
+      console.error('Error saving employee:', error);
     }
   };
 
@@ -315,15 +308,15 @@ export default function Projects() {
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - projects.length) : 0;
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - employees.length) : 0;
 
   const visibleRows = React.useMemo(
     () =>
-      stableSort(projects, getComparator(order, orderBy)).slice(
+      stableSort(employees, getComparator(order, orderBy)).slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [order, orderBy, page, rowsPerPage, projects]
+    [order, orderBy, page, rowsPerPage, employees]
   );
 
   return (
@@ -332,9 +325,9 @@ export default function Projects() {
         <Paper sx={{ width: '100%', mb: 2 }}>
           <EnhancedTableToolbar
             numSelected={selected.length}
-            onAdd={handleAddProject}
-            onDelete={handleDeleteProjects}
-            onEdit={handleEditProject}
+            onAdd={handleAddEmployee}
+            onDelete={handleDeleteEmployees}
+            onEdit={handleEditEmployee}
           />
           <TableContainer>
             <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={dense ? 'small' : 'medium'}>
@@ -344,7 +337,7 @@ export default function Projects() {
                 orderBy={orderBy}
                 onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
-                rowCount={projects.length}
+                rowCount={employees.length}
               />
               <TableBody>
                 {visibleRows.map((row, index) => {
@@ -372,14 +365,15 @@ export default function Projects() {
                       <TableCell component="th" id={labelId} scope="row" padding="none">
                         {row.name}
                       </TableCell>
-                      <TableCell align="left">{row.description}</TableCell>
-                      <TableCell align="left">{row.startDate}</TableCell>
-                      <TableCell align="left">{row.endDate}</TableCell>
+                      <TableCell align="left">{row.position}</TableCell>
+                      <TableCell align="left">{row.email}</TableCell>
+                      <TableCell align="left">{row.phone}</TableCell>
+                      <TableCell align="left">{row.department}</TableCell>
+                      <TableCell align="left">{row.hireDate}</TableCell>
+                      <TableCell align="right">{row.salary}</TableCell>
                       <TableCell align="left">{row.status}</TableCell>
-                      <TableCell align="left">{row.managerName}</TableCell>
-                      <TableCell align="right">{row.teamMembers}</TableCell>
-                      <TableCell align="right">{row.budget}</TableCell>
-                      <TableCell align="left">{row.priority}</TableCell>
+                      <TableCell align="left">{row.manager}</TableCell>
+                      <TableCell align="left">{row.location}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -398,7 +392,7 @@ export default function Projects() {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={projects.length}
+            count={employees.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -406,11 +400,11 @@ export default function Projects() {
           />
         </Paper>
         <FormControlLabel control={<Switch checked={dense} onChange={handleChangeDense} />} label="Dense padding" />
-        <ProjectModal
+        <EmployeeModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onSubmit={handleModalSubmit}
-          initialData={currentProject}
+          initialData={currentEmployee}
           organizationId={organizationId}
         />
       </Box>

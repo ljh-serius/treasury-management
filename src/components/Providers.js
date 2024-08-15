@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
-  Toolbar, Typography, Paper, Checkbox, IconButton, Tooltip, FormControlLabel, Switch, Modal, TextField, Button, Container
+  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, FormControlLabel, Switch, Modal, TextField, Button, Container
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -50,7 +50,7 @@ function EnhancedTableHead(props) {
     <TableHead>
       <TableRow>
         <TableCell padding="checkbox">
-          <Checkbox
+          <MUICheckbox
             color="primary"
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
@@ -345,7 +345,7 @@ export default function Providers() {
                         sx={{ cursor: 'pointer' }}
                     >
                         <TableCell padding="checkbox">
-                        <Checkbox
+                        <MUICheckbox
                             color="primary"
                             checked={isItemSelected}
                             inputProps={{ 'aria-labelledby': labelId }}

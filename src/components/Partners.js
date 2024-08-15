@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
-  Toolbar, Typography, Paper, Checkbox, IconButton, Tooltip, Modal, TextField, Button, Container, Switch, FormControlLabel
+  Checkbox as MUICheckbox, FormControlLabel,
+  Toolbar, Typography, Paper, IconButton, Tooltip, Modal, TextField, Button, Container, Switch, 
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -37,18 +38,21 @@ function stableSort(array, comparator) {
 }
 
 function EnhancedTableHead(props) {
-  const { order, orderBy, onRequestSort } = props;
+  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, showWorkUnits } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
-
+  
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox">
-          <Checkbox
+      <TableCell padding="checkbox">
+          <MUICheckbox
             color="primary"
-            inputProps={{ 'aria-label': 'select all partners' }}
+            indeterminate={numSelected > 0 && numSelected < rowCount}
+            checked={rowCount > 0 && numSelected === rowCount}
+            onChange={onSelectAllClick}
+            inputProps={{ 'aria-label': 'select all units' }}
           />
         </TableCell>
         {headCells.map((headCell) => (
@@ -345,7 +349,7 @@ export default function Partners() {
                       sx={{ cursor: 'pointer' }}
                     >
                       <TableCell padding="checkbox">
-                        <Checkbox
+                        <MUICheckbox
                           color="primary"
                           checked={isItemSelected}
                           inputProps={{ 'aria-labelledby': labelId }}
