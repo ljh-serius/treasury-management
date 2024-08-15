@@ -196,7 +196,12 @@ export const fetchAllUnits = async (organizationId, filters) => {
 // Function to save a unit to Firestore within an entity of an organization
 export const saveUnitToFirestore = async (organizationId, entityId, unit, year, month) => {
   try {
-    const unitsCollectionRef = collection(db, "organizations", organizationId, "entities", entityId, "transaction-units", year, month);
+    // Convert year to string and ensure month is a string
+    const yearStr = year.toString();
+    const monthStr = month.toString();
+
+    // Reference to the correct Firestore collection
+    const unitsCollectionRef = collection(db, "organizations", organizationId, "entities", entityId, "transaction-units", yearStr, monthStr);
 
     await addDoc(unitsCollectionRef, {
       ...unit,
@@ -210,6 +215,7 @@ export const saveUnitToFirestore = async (organizationId, entityId, unit, year, 
     throw error;
   }
 };
+
 
 // Define the months array
 const months = [
