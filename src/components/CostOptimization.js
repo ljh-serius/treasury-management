@@ -3,7 +3,7 @@ import { Container, TextField, Button, Typography, Paper } from '@mui/material';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../utils/firebaseConfig';
 
-const CostOptimization = () => {
+const CashFlowAndCostOptimization = () => {
   const [cost, setCost] = useState('');
   const [description, setDescription] = useState('');
 
@@ -53,4 +53,4 @@ const CostOptimization = () => {
   );
 };
 
-export default CostOptimization;
+export default CashFlowAndCostOptimization;
