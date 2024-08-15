@@ -41,7 +41,7 @@ export default function BasicRichTreeView({ summaries, entities, onSelectSummary
     }, [summaries, entities])
     
     return (
-        <Box sx={{ minHeight: 100, minWidth: 250 }}>
+        <Box sx={{ mt: 2, mb: 1, minHeight: 50, minWidth: 250 }}>
             <RichTreeView
                 items={items}
                 selectedItems={selectedItems}

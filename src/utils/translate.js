@@ -131,7 +131,9 @@ export const translate =  (key, lanauge) => {
     "Show Work Units": "Afficher les unités de travail",
     "Show Product Units": "Afficher les unités des produits",
 
-    "Quantity": "Quantité"
+    "Quantity": "Quantité",
+    "Show Analysis": "Afficher l'analyse",
+    "Show Data": "Afficher les données"
   };
 
   if(lanauge == 'fr') {

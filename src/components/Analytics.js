@@ -477,7 +477,7 @@ const Analytics = () => {
   };
   
   return (
-    <Container maxWidth="xl" sx={{ mt: 12, mb: 12 }}>
+    <Container maxWidth="lg" sx={{ mt: 12, mb: 12 }}>
       <Typography variant="h4" gutterBottom>
         {translate('Comparative Analytics', language)}
       </Typography>

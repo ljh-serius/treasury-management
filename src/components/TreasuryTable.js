@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Container } from '@mui/material';
+import { Container, Grid, Box } from '@mui/material';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import {
-  DataGrid,
-  GridToolbar,
-} from '@mui/x-data-grid';
-import {
-  calculateTotal, monthNames, calculateMonthlyTreasury, calculateAccumulatedTreasury, prepareChartData, prepareCumulativeTreasuryData,
-  prepareMonthlyTreasuryData, calculateTotals
+  calculateTotal, monthNames, calculateMonthlyTreasury, calculateAccumulatedTreasury,
+  prepareChartData, prepareCumulativeTreasuryData, prepareMonthlyTreasuryData, calculateTotals
 } from './transactionHelpers';
+import TreasuryChart from './TreasuryChart'; // Import your chart component
 
 const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }, headerHeight = 64, drawerWidth = 240, showAnalytics = false }) => {
   const [encaissementsData, setEncaissementsData] = useState([]);
@@ -16,10 +14,8 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
   const [monthlyTreasuryData, setMonthlyTreasuryData] = useState([]);
 
   useEffect(() => {
-    // Only calculate and set state if transactions change
     const updatedInputValues = calculateTotals(transactions);
 
-    // Prevent unnecessary updates by checking if the data is actually different
     const newEncaissementsData = prepareChartData('encaissements', updatedInputValues);
     const newDecaissementsData = prepareChartData('decaissements', updatedInputValues);
     const newCumulativeTreasuryData = prepareCumulativeTreasuryData(updatedInputValues);
@@ -111,23 +107,60 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
   ];
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 12, mb: 12, width: '100%' }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        components={{ Toolbar: GridToolbar }}
-        disableSelectionOnClick
-        disableAutosize
-        disableColumnResize
-        hideFooter
-        pagination
-        sx={{
-          marginLeft: `${drawerWidth}px`,
-          '& .MuiDataGrid-main': {
-            minWidth: '100%',
-          },
-        }}
-        />
+    <Container maxWidth="xl" sx={{ mt: 12, mb: 12, width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px` }}>
+      {!showAnalytics && 
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            components={{ Toolbar: GridToolbar }}
+            disableSelectionOnClick
+            disableAutosize
+            disableColumnResize
+            hideFooter
+            pagination
+            sx={{
+              width: '80%', // Adjust the width as needed
+              '& .MuiDataGrid-main': {
+                minWidth: '100%',
+              },
+            }}
+          />
+        </Box>
+      }
+
+      {showAnalytics && (
+        <Grid container spacing={2} sx={{ mt: 4, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+          <Grid item xs={12} md={6}>
+            <TreasuryChart
+              title="Encaissements by Nature"
+              data={encaissementsData}
+              sx={{ width: '80%' }} // Adjust the width as needed
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TreasuryChart
+              title="Décaissements by Nature"
+              data={decaissementsData}
+              sx={{ width: '80%' }} // Adjust the width as needed
+            />
+          </Grid>
+          <Grid item xs={12} md={12}>
+            <TreasuryChart
+              title="Solde de Trésorerie"
+              data={monthlyTreasuryData}
+              sx={{ width: '80%' }} // Adjust the width as needed
+            />
+          </Grid>
+          <Grid item xs={12} md={12}>
+            <TreasuryChart
+              title="Trésorerie Cumulée"
+              data={cumulativeTreasuryData}
+              sx={{ width: '80%' }} // Adjust the width as needed
+            />
+          </Grid>
+        </Grid>
+      )}
     </Container>
   );
 };

@@ -101,6 +101,10 @@ const Dashboard = ({ children }) => {
       console.error("Error signing out: ", error);
     }
   };
+  
+  const toggleShowAnalytics = () => {
+    setShowAnalytics(!showAnalytics);
+  };
 
   const onSelectSummaryTreeView = (selectedSummary) => {
     const [entityId, summaryName] = selectedSummary.split('-');
@@ -274,6 +278,15 @@ const Dashboard = ({ children }) => {
         }}
       >
         <Toolbar>
+        <Button
+            variant="outlined"
+            color="inherit"
+            onClick={toggleShowAnalytics}
+            sx={{ ml: 'auto', fontSize: '0.8rem' }}
+          >
+            {showAnalytics && translate("Show Data", language)}
+            {!showAnalytics && translate("Show Analysis", language)}
+            </Button>
           <Button
             variant="outlined"
             color="inherit"
@@ -287,40 +300,23 @@ const Dashboard = ({ children }) => {
       <Drawer
         variant="permanent"
         open
-        sx={{
-          overflowY: 'auto',
-          boxSizing: 'content-box', // Ensure padding doesn't affect the overall width
-          paddingRight: '4px', // Space for the scrollbar
-          '& .MuiDrawer-paper': {
-            overflowY: 'overlay', // Use 'overlay' where supported
-            paddingRight: '4px', // Space for the scrollbar
-            'scrollbar-width': 'thin', // For Firefox
-            '&::-webkit-scrollbar': {
-              width: '4px', // For Chrome, Safari
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: '#888', // For Chrome, Safari
-              borderRadius: '10px',    // For Chrome, Safari
-            },
-          },
-        }}
       >
         {drawer}
       </Drawer>
 
-      {isTreasuryTable && summaries[selectedEntity] && summaries[selectedEntity][summaryName] ? (
-        <TreasuryTable
-          transactionName={summaryName}
-          transactions={summaries[selectedEntity][summaryName]}
-          drawerWidth={drawerWidth}
-          headerHeight={headerHeight}
-          showAnalytics={showAnalytics}
-        />
-      ) : (
-        children
-      )}
-
-
+      <main style={{ paddingLeft: '250px' ,margin: '100px auto'}}>
+        {isTreasuryTable && summaries[selectedEntity] && summaries[selectedEntity][summaryName] ? (
+          <TreasuryTable
+            transactionName={summaryName}
+            transactions={summaries[selectedEntity][summaryName]}
+            drawerWidth={drawerWidth}
+            headerHeight={headerHeight}
+            showAnalytics={showAnalytics}
+          />
+        ) : (
+          children
+        )}
+      </main>
     </Box>
   );
 };
