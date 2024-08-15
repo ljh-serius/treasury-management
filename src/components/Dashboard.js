@@ -54,6 +54,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import PrioritizeIcon from '@mui/icons-material/Sort';
 import RiskIcon from '@mui/icons-material/Warning';
+import TreeView from './TreeView';
 import { v4 as uuidv4 } from 'uuid';
 import TransactionBooks from './TransactionBooks'; // Adjust the path as necessary
 
@@ -319,147 +320,149 @@ const Dashboard = ({ children }) => {
   const drawer = (
     <div>
       <Toolbar />
-      <Divider />
-      <List>
-        <ListItem key="books" disablePadding>
-          <ListItemButton component={Link} to="/books">
-            <ListItemIcon>
-              <BookIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Transaction Books</Typography>} />
-          </ListItemButton>
-        </ListItem>
-      </List>
-      <Divider />
-      <List>
-        <ListItem key="projects" disablePadding>
-          <ListItemButton component={Link} to="/projects">
-            <ListItemIcon>
-              <ProjectsIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Projects</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="gantt-chart" disablePadding>
-          <ListItemButton component={Link} to="/gantt-chart">
-            <ListItemIcon>
-              <GanttChartIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Gantt Chart</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="project-prioritization" disablePadding>
-          <ListItemButton component={Link} to="/project-prioritization">
-            <ListItemIcon>
-              <PrioritizeIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Project Prioritization</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="providers" disablePadding>
-          <ListItemButton component={Link} to="/providers">
-            <ListItemIcon>
-              <ProvidersIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Providers</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="units" disablePadding>
-          <ListItemButton component={Link} to="/units">
-            <ListItemIcon>
-              <ListAltIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Units</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="product-line-assessment" disablePadding>
-          <ListItemButton component={Link} to="/product-line-assessment">
-            <ListItemIcon>
-              <ProductLineIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Product Line Assessment</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="cost-optimization" disablePadding>
-          <ListItemButton component={Link} to="/cost-optimization">
-            <ListItemIcon>
-              <CostIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Cost Optimization</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="product-prototypes" disablePadding>
-          <ListItemButton component={Link} to="/product-prototypes">
-            <ListItemIcon>
-              <PrototypeIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Product Prototypes</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="partners" disablePadding>
-          <ListItemButton component={Link} to="/partners">
-            <ListItemIcon>
-              <PartnersIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Partners</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="search-partners" disablePadding>
-          <ListItemButton component={Link} to="/search-partners">
-            <ListItemIcon>
-              <SearchIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Search Partners</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="risk-management" disablePadding>
-          <ListItemButton component={Link} to="/risk-management">
-            <ListItemIcon>
-              <RiskIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Risk Management</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="employees" disablePadding>
-          <ListItemButton component={Link} to="/employees">
-            <ListItemIcon>
-              <RiskIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Employees</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="analytics" disablePadding>
-          <ListItemButton component={Link} to="/analytics">
-            <ListItemIcon>
-              <InsertChartIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Analytics</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="summary" disablePadding>
-          <ListItemButton component={Link} to="/summary">
-            <ListItemIcon>
-              <AssessmentIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Summary</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="manage-parameters" disablePadding>
-          <ListItemButton component={Link} to="/manage-parameters">
-            <ListItemIcon>
-              <PeopleIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Manage Parameters</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton onClick={handleLogout}>
-            <ListItemIcon>
-              <LogoutIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Logout</Typography>} />
-          </ListItemButton>
-        </ListItem>
+        <Divider />
+        <List>
+          <ListItem key="books" disablePadding>
+            <ListItemButton component={Link} to="/books">
+              <ListItemIcon>
+                <BookIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Transaction Books</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <Divider />
+          <TreeView summaries={summaries || {}} entities={entities || []}></TreeView>
+        </List>
+        <Divider />
+        <List>
+          <ListItem key="projects" disablePadding>
+            <ListItemButton component={Link} to="/projects">
+              <ListItemIcon>
+                <ProjectsIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Projects</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="gantt-chart" disablePadding>
+            <ListItemButton component={Link} to="/gantt-chart">
+              <ListItemIcon>
+                <GanttChartIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Gantt Chart</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="project-prioritization" disablePadding>
+            <ListItemButton component={Link} to="/project-prioritization">
+              <ListItemIcon>
+                <PrioritizeIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Project Prioritization</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="providers" disablePadding>
+            <ListItemButton component={Link} to="/providers">
+              <ListItemIcon>
+                <ProvidersIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Providers</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="units" disablePadding>
+            <ListItemButton component={Link} to="/units">
+              <ListItemIcon>
+                <ListAltIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Units</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="product-line-assessment" disablePadding>
+            <ListItemButton component={Link} to="/product-line-assessment">
+              <ListItemIcon>
+                <ProductLineIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Product Line Assessment</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="cost-optimization" disablePadding>
+            <ListItemButton component={Link} to="/cost-optimization">
+              <ListItemIcon>
+                <CostIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Cost Optimization</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="product-prototypes" disablePadding>
+            <ListItemButton component={Link} to="/product-prototypes">
+              <ListItemIcon>
+                <PrototypeIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Product Prototypes</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="partners" disablePadding>
+            <ListItemButton component={Link} to="/partners">
+              <ListItemIcon>
+                <PartnersIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Partners</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="search-partners" disablePadding>
+            <ListItemButton component={Link} to="/search-partners">
+              <ListItemIcon>
+                <SearchIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Search Partners</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="risk-management" disablePadding>
+            <ListItemButton component={Link} to="/risk-management">
+              <ListItemIcon>
+                <RiskIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Risk Management</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="employees" disablePadding>
+            <ListItemButton component={Link} to="/employees">
+              <ListItemIcon>
+                <RiskIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Employees</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="analytics" disablePadding>
+            <ListItemButton component={Link} to="/analytics">
+              <ListItemIcon>
+                <InsertChartIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Analytics</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="summary" disablePadding>
+            <ListItemButton component={Link} to="/summary">
+              <ListItemIcon>
+                <AssessmentIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Summary</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key="manage-parameters" disablePadding>
+            <ListItemButton component={Link} to="/manage-parameters">
+              <ListItemIcon>
+                <PeopleIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Manage Parameters</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleLogout}>
+              <ListItemIcon>
+                <LogoutIcon style={{ fontSize: '1.6rem' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="body1">Logout</Typography>} />
+            </ListItemButton>
+          </ListItem>
       </List>
     </div>
   );
@@ -471,7 +474,7 @@ const Dashboard = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
+      <CssBaseline />entities
       <AppBar
         position="fixed"
         sx={{
