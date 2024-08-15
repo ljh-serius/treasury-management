@@ -1,25 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
+  Toolbar, Typography, Paper, Checkbox, IconButton, Tooltip, FormControlLabel, Switch, Modal, TextField, Button
+} from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
-import TableSortLabel from '@mui/material/TableSortLabel';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
-import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import EditIcon from '@mui/icons-material/Edit';
 import { visuallyHidden } from '@mui/utils';
 import { fetchProviders, addProvider, updateProvider, deleteProvider } from '../utils/providersFirebaseHelpers';
 
@@ -32,12 +19,8 @@ const headCells = [
 ];
 
 function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
+  if (b[orderBy] < a[orderBy]) return -1;
+  if (b[orderBy] > a[orderBy]) return 1;
   return 0;
 }
 
@@ -102,7 +85,7 @@ function EnhancedTableHead(props) {
 }
 
 function EnhancedTableToolbar(props) {
-  const { numSelected, onAdd, onDelete } = props;
+  const { numSelected, onAdd, onDelete, onEdit } = props;
 
   return (
     <Toolbar
@@ -123,6 +106,13 @@ function EnhancedTableToolbar(props) {
           Providers
         </Typography>
       )}
+      {numSelected === 1 ? (
+        <Tooltip title="Edit">
+          <IconButton onClick={onEdit}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
+      ) : null}
       {numSelected > 0 ? (
         <Tooltip title="Delete">
           <IconButton onClick={onDelete}>
@@ -140,6 +130,63 @@ function EnhancedTableToolbar(props) {
   );
 }
 
+function ProviderModal({ open, onClose, onSubmit, initialData, organizationId }) {
+  const [providerData, setProviderData] = useState(
+    initialData || {
+      name: '',
+      taxId: '',
+      address: '',
+      contactEmail: '',
+      contactPhone: '',
+      organizationId: [organizationId],
+    }
+  );
+
+  useEffect(() => {
+    setProviderData(initialData || {
+      name: '',
+      taxId: '',
+      address: '',
+      contactEmail: '',
+      contactPhone: '',
+      organizationId: [organizationId],
+    });
+  }, [initialData]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setProviderData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = () => {
+    onSubmit(providerData);
+  };
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+        <Typography variant="h6" component="h2">
+          {initialData ? 'Edit Provider' : 'Add Provider'}
+        </Typography>
+        <TextField label="Name" name="name" fullWidth margin="normal" value={providerData.name} onChange={handleChange} />
+        <TextField label="Tax ID" name="taxId" fullWidth margin="normal" value={providerData.taxId} onChange={handleChange} />
+        <TextField label="Address" name="address" fullWidth margin="normal" value={providerData.address} onChange={handleChange} />
+        <TextField label="Email" name="contactEmail" fullWidth margin="normal" value={providerData.contactEmail} onChange={handleChange} />
+        <TextField label="Phone" name="contactPhone" fullWidth margin="normal" value={providerData.contactPhone} onChange={handleChange} />
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
+          <Button variant="contained" onClick={handleSubmit}>
+            {initialData ? 'Update' : 'Add'}
+          </Button>
+        </Box>
+      </Box>
+    </Modal>
+  );
+}
+
 export default function EnhancedTable() {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('name');
@@ -148,6 +195,8 @@ export default function EnhancedTable() {
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [providers, setProviders] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentProvider, setCurrentProvider] = useState(null);
 
   const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
@@ -194,24 +243,15 @@ export default function EnhancedTable() {
     setSelected(newSelected);
   };
 
-  const handleAddProvider = async () => {
-    const newProvider = {
-      name: 'New Provider',
-      taxId: '123456',
-      address: '123 Main St',
-      contactEmail: 'provider@example.com',
-      contactPhone: '555-555-5555',
-      organizationId: [organizationId],
-    };
+  const handleAddProvider = () => {
+    setCurrentProvider(null); // Reset currentProvider for adding a new provider
+    setModalOpen(true);
+  };
 
-
-    try {
-      await addProvider(newProvider);
-      const providersData = await fetchProviders(organizationId);
-      setProviders(providersData);
-    } catch (error) {
-      console.error('Error adding provider:', error);
-    }
+  const handleEditProvider = () => {
+    const providerToEdit = providers.find((provider) => provider.id === selected[0]);
+    setCurrentProvider(providerToEdit);
+    setModalOpen(true);
   };
 
   const handleDeleteProviders = async () => {
@@ -222,6 +262,23 @@ export default function EnhancedTable() {
       setProviders(providersData);
     } catch (error) {
       console.error('Error deleting providers:', error);
+    }
+  };
+
+  const handleModalSubmit = async (providerData) => {
+    try {
+      if (currentProvider) {
+        // Update existing provider
+        await updateProvider(currentProvider.id, providerData);
+      } else {
+        // Add new provider
+        await addProvider(providerData);
+      }
+      const providersData = await fetchProviders(organizationId);
+      setProviders(providersData);
+      setModalOpen(false);
+    } catch (error) {
+      console.error('Error saving provider:', error);
     }
   };
 
@@ -258,6 +315,7 @@ export default function EnhancedTable() {
           numSelected={selected.length}
           onAdd={handleAddProvider}
           onDelete={handleDeleteProviders}
+          onEdit={handleEditProvider}
         />
         <TableContainer>
           <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={dense ? 'small' : 'medium'}>
@@ -325,6 +383,13 @@ export default function EnhancedTable() {
         />
       </Paper>
       <FormControlLabel control={<Switch checked={dense} onChange={handleChangeDense} />} label="Dense padding" />
+      <ProviderModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleModalSubmit}
+        initialData={currentProvider}
+        organizationId={organizationId}
+      />
     </Box>
   );
 }
