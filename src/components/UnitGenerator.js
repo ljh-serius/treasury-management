@@ -26,14 +26,17 @@ import {
   Typography,
   InputLabel,
   Select,
+  Checkbox,
+  ListItemText,
 } from '@mui/material';
 import { format } from 'date-fns';
-import { fetchAllUnits, saveUnitToFirestore } from '../utils/firebaseHelpers';
-import { auth, db } from '../utils/firebaseConfig';
-import { v4 as uuidv4 } from 'uuid';
+import { fetchAllUnits, saveUnitToFirestore, fetchEntities } from '../utils/firebaseHelpers';
+import { auth } from '../utils/firebaseConfig';
 import { translate } from '../utils/translate';
 import { useTranslation } from '../utils/TranslationProvider';
-import { collection, getDocs } from 'firebase/firestore';
+import { generateRandomUnits } from '../utils/units-generator';
+import { generateSepaXML } from '../utils/sepa-extractor';
+import { RepartitionRounded } from '@mui/icons-material';
 
 const categories = [
   'Category A', 'Category B', 'Category C', 'Category D', 'Category E',
@@ -44,150 +47,24 @@ const months = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-const generateRandomDate = () => {
-  const end = new Date();
-  const start = new Date(end.getFullYear() - 15, end.getMonth(), end.getDate());
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-};
-
-const generateRandomUnits = (count, unitType) => {
-  const newWorkUnits = [];
-  const newProductUnits = [];
-  for (let i = 0; i < count; i++) {
-    const randomDate = generateRandomDate();
-    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-    const unit = {
-      id: uuidv4(),
-      description: `Unit ${i + 1}`,
-      quantity: Math.floor(Math.random() * 100) + 1,
-      unitPrice: (Math.random() * 100).toFixed(2),
-      date: randomDate,
-      category: randomCategory,
-      type: unitType,
-    };
-    unit.totalAmount = parseFloat(unit.unitPrice) * parseInt(unit.quantity);
-    if (i % 2 === 0) {
-      newWorkUnits.push({
-        ...unit,
-        hoursWorked: (Math.random() * 10).toFixed(2),
-        rate: (Math.random() * 50).toFixed(2),
-      });
-    } else {
-      newProductUnits.push(unit);
-    }
-  }
-  return { newWorkUnits, newProductUnits };
-};
-
-const generateSepaXML = (units) => {
-  const randomIBAN = () => 'FR' + Math.floor(1000000000000000 + Math.random() * 9000000000000000).toString();
-  const randomBIC = () => 'ABCDEF' + Math.floor(100 + Math.random() * 900).toString();
-
-  const xmlHeader = `<?xml version="1.0" encoding="UTF-8"?>
-  <Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
-    <CstmrCdtTrfInitn>
-      <GrpHdr>
-        <MsgId>${uuidv4()}</MsgId>
-        <CreDtTm>${new Date().toISOString()}</CreDtTm>
-        <NbOfTxs>${units.length}</NbOfTxs>
-        <CtrlSum>${units.reduce((sum, unit) => sum + unit.totalAmount, 0).toFixed(2)}</CtrlSum>
-        <InitgPty>
-          <Nm>Your Company Name</Nm>
-        </InitgPty>
-      </GrpHdr>
-      <PmtInf>
-        <PmtInfId>${uuidv4()}</PmtInfId>
-        <PmtMtd>TRF</PmtMtd>
-        <BtchBookg>false</BtchBookg>
-        <NbOfTxs>${units.length}</NbOfTxs>
-        <CtrlSum>${units.reduce((sum, unit) => sum + unit.totalAmount, 0).toFixed(2)}</CtrlSum>
-        <PmtTpInf>
-          <SvcLvl>
-            <Cd>SEPA</Cd>
-          </SvcLvl>
-        </PmtTpInf>
-        <ReqdExctnDt>${new Date().toISOString().split('T')[0]}</ReqdExctnDt>
-        <Dbtr>
-          <Nm>Your Company Name</Nm>
-          <PstlAdr>
-            <Ctry>FR</Ctry>
-            <AdrLine>Your Company Address</AdrLine>
-          </PstlAdr>
-        </Dbtr>
-        <DbtrAcct>
-          <Id>
-            <IBAN>${randomIBAN()}</IBAN>
-          </Id>
-        </DbtrAcct>
-        <DbtrAgt>
-          <FinInstnId>
-            <BIC>${randomBIC()}</BIC>
-          </FinInstnId>
-        </DbtrAgt>
-        <ChrgBr>SLEV</ChrgBr>
-        <CdtTrfTxInf>`;
-
-  const xmlTransactions = units.map((unit) => {
-    const beneficiaryIBAN = randomIBAN();
-    const beneficiaryBIC = randomBIC();
-    const endToEndId = uuidv4();
-
-    return `
-          <PmtId>
-            <EndToEndId>${endToEndId}</EndToEndId>
-          </PmtId>
-          <Amt>
-            <InstdAmt Ccy="EUR">${unit.totalAmount.toFixed(2)}</InstdAmt>
-          </Amt>
-          <CdtrAgt>
-            <FinInstnId>
-              <BIC>${beneficiaryBIC}</BIC>
-            </FinInstnId>
-          </CdtrAgt>
-          <Cdtr>
-            <Nm>${unit.description}</Nm>
-          </Cdtr>
-          <CdtrAcct>
-            <Id>
-              <IBAN>${beneficiaryIBAN}</IBAN>
-            </Id>
-          </CdtrAcct>
-          <RmtInf>
-            <Ustrd>${unit.category}</Ustrd>
-          </RmtInf>`;
-  }).join('');
-
-  const xmlFooter = `        </CdtTrfTxInf>
-      </PmtInf>
-    </CstmrCdtTrfInitn>
-  </Document>`;
-
-  const sepaXML = `${xmlHeader}${xmlTransactions}${xmlFooter}`;
-
-  const blob = new Blob([sepaXML], { type: 'application/xml' });
-  const link = document.createElement('a');
-  link.href = window.URL.createObjectURL(blob);
-  link.download = `SEPA_Expenses_${new Date().toISOString().split('T')[0]}.xml`;
-  link.click();
-};
-
 const UnitGenerator = () => {
   const { language } = useTranslation();
   const [allUnits, setAllUnits] = useState([]);
   const [filteredUnits, setFilteredUnits] = useState([]);
   const [page, setPage] = useState(1);
   const [showWorkUnits, setShowWorkUnits] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedType, setSelectedType] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
   const [unitType, setUnitType] = useState('revenues');
-  const [selectedMonths, setSelectedMonths] = useState([]);
   const [filtersLoaded, setFiltersLoaded] = useState(false);
-  const [entities, setEntities] = useState([]);  // State to store the list of entities
-  const [selectedEntity, setSelectedEntity] = useState('');  // State to store the selected entity ID
+  const [entities, setEntities] = useState([]);
+  const [selectedEntity, setSelectedEntity] = useState('');
   const rowsPerPage = 10;
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [selectedMonths, setSelectedMonths] = useState([]);
+  const [currentSummaryName, setCurrentSummaryName] = useState([]);
+  const [currentEntityId, setCurrentEntityId] = useState([]);
 
   const userId = auth.currentUser?.uid;
 
@@ -202,69 +79,85 @@ const UnitGenerator = () => {
   };
 
   useEffect(() => {
-    const fetchEntities = async () => {
+    const fillEntities = async () => {
       const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
       if (organizationId) {
-        const entitiesCollectionRef = collection(db, 'organizations', organizationId, 'entities');
-        const entitiesSnapshot = await getDocs(entitiesCollectionRef);
-        const entitiesList = entitiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const entitiesList = await fetchEntities(organizationId);
         setEntities(entitiesList);
       }
     };
 
-    fetchEntities();
+    fillEntities();
   }, []);
 
+  const getDatabaseValue = (type) => {
+    if (type === 'decaissements') {
+      return 'Expenses';  // Return correct type for database query
+    } else if (type === 'encaissements') {
+      return 'Revenues';  // Return correct type for database query
+    }
+    return type;
+  };
+  
   useEffect(() => {
     const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-    
+    const currentSummaryName = loadFromLocalStorage(organizationId, 'currentSummaryName').data;
+    const currentEntityId = loadFromLocalStorage(organizationId, 'currentEntityId').data;
+
     if (organizationId) {
-      console.log("loading filters");
       const localFilters = loadFromLocalStorage(organizationId, 'selectedDetailsFilters');
 
-      if (localFilters) {
+      if (localFilters || currentSummaryName || currentEntityId) {
         const filters = localFilters.data;
 
-        let type = '';
-        if (filters.selectedType === 'encaissements') {
-          type = 'revenues';
-        } else if (filters.selectedType === 'decaissements') {
-          type = 'expenses';
+        // Update selected categories
+        setSelectedCategories([filters.selectedCategory] || []);
+
+        // Update selected types
+        if (filters.selectedType) {
+          setSelectedTypes([getDatabaseValue(filters.selectedType)]);
         }
 
-        setSelectedCategory(filters.selectedCategory || '');
-        setSelectedType(type);
-        setSelectedMonths(filters.selectedMonths || []);
+        setSelectedEntity(currentEntityId)
+        
+        // Update selected months
+        setSelectedMonths([filters.selectedMonths] || []);
+
+        // Update selected year
         setSelectedYear(filters.selectedYear || '');
       }
+
       setFiltersLoaded(true);
     }
   }, []);
 
   useEffect(() => {
     const fetchUnits = async () => {
-      if (filtersLoaded) {
-        const hasValidFilters = selectedCategory || selectedType || (selectedMonths.length > 0 && selectedYear);
+      // Check if any valid filters are applied
+      const hasValidFilters = 
+        (selectedCategories.length > 0 || selectedTypes.length > 0) || 
+        (selectedMonths.length > 0 && selectedYear);
 
-        if (hasValidFilters) {
-          const filters = {
-            selectedCategory,
-            selectedType,
-            selectedMonths,
-            selectedYear,
-            months,
-          };
+      if (hasValidFilters) {
+        const filters = {
+          selectedCategories: selectedCategories,
+          selectedTypes: selectedTypes.map((st) => { return st.toLowerCase()  }),
+          selectedMonths: selectedMonths,
+          selectedYear: selectedYear,
+          months,
+          selectedEntity
+        };
 
-          const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-          const fetchedUnits = await fetchAllUnits(organizationId, filters);
-          setAllUnits(fetchedUnits);
-          setFilteredUnits(fetchedUnits);
-        }
+        console.log("FILT FILT ", filters);
+        const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+        const fetchedUnits = await fetchAllUnits(organizationId, filters);
+        setAllUnits(fetchedUnits);
+        setFilteredUnits(fetchedUnits);
       }
     };
 
     fetchUnits();
-  }, [userId, filtersLoaded, selectedCategory, selectedType, selectedMonths, selectedYear]);
+  }, [userId, filtersLoaded, selectedCategories, selectedTypes, selectedMonths, selectedYear]);
 
   const handleGenerateUnits = async () => {
     setOpenDialog(true);
@@ -287,7 +180,6 @@ const UnitGenerator = () => {
         const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
         
         await saveUnitToFirestore(organizationId, selectedEntity, unit, year.toString(), month); // Save with entity ID
-
       }
     }
   };
@@ -301,12 +193,11 @@ const UnitGenerator = () => {
   const totalPages = Math.ceil(filteredUnits.length / rowsPerPage);
 
   const calculateTotal = () => {
-    return filteredUnits.reduce((sum, unit) => sum + (parseFloat(unit.unitPrice * unit.quantity) || 0), 0).toFixed(2);
+    return filteredUnits.reduce((sum, unit) => sum + (parseFloat(unit.unitPrice) *  parseFloat(unit.quantity) || 0), 0).toFixed(2);
   };
 
   const handleGenerateSepaFile = () => {
     const expenseUnits = filteredUnits.filter(unit => unit.type === 'expenses');
-    console.log('Filtered expense units:', expenseUnits);
 
     if (expenseUnits.length === 0) {
       alert(translate('No expenses found to generate SEPA XML.', language));
@@ -346,49 +237,53 @@ const UnitGenerator = () => {
           </Select>
         </FormControl>
 
-        <TextField
-          select
-          label={translate('Filter by Category', language)}
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          fullWidth
-          margin="normal"
-          sx={{ marginTop: 2 }}
-        >
-          <MenuItem value="">{translate('All Categories', language)}</MenuItem>
-          {categories.map((category) => (
-            <MenuItem key={category} value={category}>
-              {category}
-            </MenuItem>
-          ))}
-        </TextField>
-
-        <TextField
-          select
-          label={translate('Filter by Type', language)}
-          value={selectedType}
-          onChange={(e) => setSelectedType(e.target.value)}
-          fullWidth
-          margin="normal"
-          sx={{ marginTop: 2 }}
-        >
-          <MenuItem value="">{translate('All Types', language)}</MenuItem>
-          <MenuItem value="revenues">{translate('Revenues', language)}</MenuItem>
-          <MenuItem value="expenses">{translate('Expenses', language)}</MenuItem>
-        </TextField>
-
-        <FormControl fullWidth margin="normal" sx={{ marginTop: 2 }}>
-          <InputLabel id="month-select-label">{translate('Filter by Month', language)}</InputLabel>
+        <FormControl fullWidth>
+          <InputLabel>Categories</InputLabel>
           <Select
-            labelId="month-select-label"
             multiple
-            value={selectedMonths}
+            value={selectedCategories}  // Ensure this is an array
+            onChange={(e) => setSelectedCategories(e.target.value)}
+            renderValue={(selected) => selected.join(', ')}
+          >
+            {categories.map((category) => (
+              <MenuItem key={category} value={category}>
+                <Checkbox checked={selectedCategories.indexOf(category) > -1} />
+                <ListItemText primary={category} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+
+        <FormControl fullWidth>
+          <InputLabel>Types</InputLabel>
+          <Select
+            multiple
+            value={selectedTypes}  // Ensure this is an array
+            onChange={(e) => setSelectedTypes(e.target.value)}
+            renderValue={(selected) => selected.join(', ')}
+          >
+            {['Revenues', 'Expenses'].map((type) => (
+              <MenuItem key={type} value={type}>
+                <Checkbox checked={selectedTypes.indexOf(type) > -1} />
+                <ListItemText primary={type} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth>
+          <InputLabel>Months</InputLabel>
+          <Select
+            multiple
+            value={selectedMonths}  // Ensure this is an array
             onChange={(e) => setSelectedMonths(e.target.value)}
             renderValue={(selected) => selected.join(', ')}
           >
             {months.map((month) => (
               <MenuItem key={month} value={month}>
-                {translate(month, language)}
+                <Checkbox checked={selectedMonths.indexOf(month) > -1} />
+                <ListItemText primary={month} />
               </MenuItem>
             ))}
           </Select>

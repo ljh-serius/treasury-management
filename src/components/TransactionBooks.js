@@ -10,7 +10,6 @@ const TransactionBooks = ({ transactions }) => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  console.log("TTTT ", transactions)
   useEffect(() => {
     setLocalTransactions(transactions);
   }, [transactions]);

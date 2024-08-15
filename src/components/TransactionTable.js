@@ -192,7 +192,7 @@ const TransactionTable = ({
                           onClick={(event) => handleNatureMenuOpen(event, type, index, {
                             selectedCategory: transaction.nature, // assuming nature is the category
                             selectedType: type,
-                            selectedMonth: null, // This might be derived from `displayedMonths`
+                            selectedMonths: null, // This might be derived from `displayedMonths`
                             selectedYear: inputValues.name, // or another source if available
                             months: displayedMonths, // or another relevant list
                           })}

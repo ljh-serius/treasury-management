@@ -1,4 +1,4 @@
-import { collection, getDocs, addDoc, getDoc, setDoc, updateDoc, doc, deleteDoc, query, where } from "firebase/firestore";
+import { collection, collectionGroup, getDocs, addDoc, getDoc, setDoc, updateDoc, doc, deleteDoc, query, where } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -128,44 +128,68 @@ export const getTransactionDetails = async (organizationId, entityId, transactio
   }
 };
 
-// Function to fetch all transaction units within an entity of an organization
-export const fetchAllUnits = async (organizationId, entityId, filters) => {
-  if (!organizationId || !entityId) return [];
+export const fetchAllUnits = async (organizationId, filters) => {
+  if (!organizationId) return [];
 
   const allUnits = [];
-  const { selectedCategory, selectedType, selectedMonths = [], selectedYear, months } = filters;
+  const {
+    selectedCategories = [],
+    selectedTypes = [],
+    selectedMonths = [],
+    selectedYear = null,
+    months = [],
+    selectedEntity = '',  // Ajout de l'entity sélectionnée dans les filtres
+  } = filters;
 
   try {
     const year = selectedYear ? parseInt(selectedYear) : new Date().getFullYear();
-    const monthsToFetch = selectedMonths.length > 0 ? selectedMonths : months;
+    
+    // Filtrer les valeurs null des mois sélectionnés
+    const monthsToFetch = selectedMonths.filter(month => month !== null).length > 0 
+      ? selectedMonths.filter(month => month !== null) 
+      : months;
 
-    for (let month of monthsToFetch) {
-      const unitsRef = collection(db, "organizations", organizationId, "entities", entityId, "transaction-units", year.toString(), month);
-      let unitsQuery = unitsRef;
+    // Définir l'ensemble des entités à récupérer, soit toutes soit l'entité spécifique sélectionnée
+    const entityIds = selectedEntity 
+      ? [selectedEntity] 
+      : (await getDocs(collection(db, "organizations", organizationId, "entities"))).docs.map(doc => doc.id);
 
-      if (selectedCategory) {
-        unitsQuery = query(unitsQuery, where('category', '==', selectedCategory));
+    for (let entityId of entityIds) {
+      for (let month of monthsToFetch) {
+        const unitsRef = collection(db, "organizations", organizationId, "entities", entityId, "transaction-units", year.toString(), month);
+        let unitsQuery = unitsRef;
+
+        // Appliquer les filtres de catégories si spécifiés
+        if (selectedCategories.length > 0) {
+          unitsQuery = query(unitsQuery, where('category', 'in', selectedCategories));
+        }
+
+        // Appliquer les filtres de types si spécifiés
+        if (selectedTypes.length > 0) {
+          unitsQuery = query(unitsQuery, where('type', 'in', selectedTypes));
+        }
+
+        const unitsSnapshot = await getDocs(unitsQuery);
+        console.log(`Fetched ${unitsSnapshot.size} units for entity ${entityId} in ${month} ${year}`);
+
+        const units = unitsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          date: new Date(doc.data().date.seconds * 1000),
+        }));
+
+        allUnits.push(...units);
       }
-
-      if (selectedType) {
-        unitsQuery = query(unitsQuery, where('type', '==', selectedType));
-      }
-
-      const unitsSnapshot = await getDocs(unitsQuery);
-      const units = unitsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        date: new Date(doc.data().date.seconds * 1000),
-      }));
-
-      allUnits.push(...units);
     }
+
+    console.log(`Total units fetched: ${allUnits.length}`);
   } catch (error) {
     console.error("Error fetching units: ", error);
   }
 
   return allUnits;
 };
+
 
 // Function to save a unit to Firestore within an entity of an organization
 export const saveUnitToFirestore = async (organizationId, entityId, unit, year, month) => {

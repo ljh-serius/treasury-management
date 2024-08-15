@@ -18,12 +18,6 @@ import { auth } from '../utils/firebaseConfig';
 // Utility to get the current time
 const getCurrentTime = () => new Date().getTime();
 
-// Utility to check if data should be refetched
-const shouldRefetchData = (lastFetchTime, intervalInMs = 3600000) => {
-  const currentTime = getCurrentTime();
-  return !lastFetchTime || (currentTime - lastFetchTime) > intervalInMs;
-};
-
 const saveToLocalStorage = (userId, key, data) => {
   if (!userId) return;
   const fullKey = `${userId}_${key}`;
@@ -32,17 +26,6 @@ const saveToLocalStorage = (userId, key, data) => {
     data
   };
   localStorage.setItem(fullKey, JSON.stringify(dataToStore));
-};
-
-
-const loadFromLocalStorage = (userId, key) => {
-  if (!userId) return null;
-  const fullKey = `${userId}_${key}`;
-  const storedData = localStorage.getItem(fullKey);
-  if (storedData) {
-    return JSON.parse(storedData);
-  }
-  return null;
 };
 
 const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnackbarMessage, setSnackbarOpen }) => {
@@ -122,26 +105,6 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
       setSelectedMonths([]);
       setModalOpen(true);
     }
-  };
-
-  const handleConfirm = (name, amount) => {
-    const { type, index } = selectedTransaction;
-    const updatedTransactions = { ...transactions };
-
-    selectedMonths.forEach((month) => {
-      updatedTransactions[type][index].montants[month] = parseFloat(amount);
-    });
-
-    updatedTransactions[type][index].nature = name;
-
-    setTransactions(updatedTransactions);
-    setModalOpen(false);
-    setAction('');
-  };
-
-  const handleCancel = () => {
-    setAction('');
-    setModalOpen(false);
   };
 
   const handleChartHover = (type, seriesName) => {
@@ -224,7 +187,7 @@ const TreasuryTable = ({ transactions, setTransactions, transactionName, setSnac
   };
 
   const handleNatureMenuOpen = (event, type, index, filters) => {
-    const organizationId = localStorage.getItem('organizationId');
+    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
     saveToLocalStorage(organizationId, "selectedDetailsFilters", filters)
     setSelectedTransaction({ type, index, month: -1 });
     setNatureMenuAnchorEl(event.currentTarget);

@@ -18,6 +18,16 @@ import ManageParameters from './pages/ManageParameters';
 import { TranslationProvider } from './utils/TranslationProvider';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
+import GanttChart from './components/GanttChart';
+import Projects from './components/Projects';
+import Providers from './components/Providers';
+import ProductLineAssessment from './components/ProductLineAssessment';
+import CostOptimization from './components/CostOptimization';
+import ProductPrototypes from './components/ProductPrototypes';
+import Partners from './components/Partners';
+import SearchPartners from './components/SearchPartners';
+import ProjectPrioritization from './components/ProjectPrioritization';
+import RiskManagement from './components/RiskManagement';
 
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
 
@@ -126,7 +136,116 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="/registration" element={<OrganizationRegistration />} />
+          <Route
+            path="/registration"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                <OrganizationRegistration />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/gantt-chart"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                <GanttChart />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/projects"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Projects />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/providers"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Providers />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/product-line-assessment"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <ProductLineAssessment />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cost-optimization"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                    <CostOptimization />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/product-prototypes"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <ProductPrototypes />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partners"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Partners />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/search-partners"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <SearchPartners />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/project-prioritization"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <ProjectPrioritization />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/risk-management"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                <RiskManagement />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </TranslationProvider>
     </Elements>

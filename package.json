@@ -30,6 +30,7 @@
     "marked": "^14.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-gantt-chart": "^0.3.0-rc.11",
     "react-router-dom": "^6.26.0",
     "react-scripts": "5.0.1",
     "styled-components": "^6.1.11",
