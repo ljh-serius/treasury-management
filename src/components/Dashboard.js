@@ -46,15 +46,14 @@ import TreasuryTable from './TreasuryTable'; // Adjust the path as necessary
 
 const Dashboard = ({ children }) => {
   const drawerWidth = 230;
-  const headerHeight = 60
+  const headerHeight = 60;
 
   const { language, toggleLanguage } = useTranslation();
 
   const [summaries, setSummaries] = useState({});
-  const [summaryName, setSummaryName] = useState(translate('Main transaction book', language));
-  const [selectedEntity, setSelectedEntity] = useState('');
-  const [entities, setEntities] = useState([]);  // Make sure this is defined here
-  const [showAnalytics, setShowAnalytics] = useState(false);  // Make sure this is defined here
+  const [entities, setEntities] = useState([]);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [currentSummary, setCurrentSummary] = useState({});
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -71,21 +70,18 @@ const Dashboard = ({ children }) => {
 
         const data = await getAllStoreTransactionSummaries(organizationId);
 
-        setSummaries(data)
+        setSummaries(data);
 
         if (['admin', 'headquarter'].includes(userData.role)) {
           const fetchedEntities = await fetchEntities(organizationId);
 
-          setEntities(fetchedEntities)
+          setEntities(fetchedEntities);
 
-          if (fetchedEntities.length > 0) {
-            setSelectedEntity(fetchedEntities[0].id)
-          }
         } else if (userData.role === 'store') {
           const entityId = JSON.parse(localStorage.getItem("userData")).entityId;
 
           const data = await getStoreTransactionSummaries(organizationId, entityId);
-          setSummaries(data)
+          setSummaries(data);
         }
       }
     };
@@ -101,16 +97,27 @@ const Dashboard = ({ children }) => {
       console.error("Error signing out: ", error);
     }
   };
-  
+
   const toggleShowAnalytics = () => {
     setShowAnalytics(!showAnalytics);
   };
 
   const onSelectSummaryTreeView = (selectedSummary) => {
-    const [entityId, summaryName] = selectedSummary.split('-');
-    setSelectedEntity(entityId);
-    setSummaryName(summaryName);
-  }
+    const [identifier, holder, subHolder] = selectedSummary.split('-');
+    console.log("IDENTIFIER", identifier);
+    console.log("HOLDER", holder);
+    console.log("SUMMARIES ", summaries)
+    if(identifier === 'historical'){
+      setCurrentSummary(summaries.historicalSummary)
+    } else if (identifier === 'entity'){
+      setCurrentSummary(summaries.entitySummaries[holder])
+     }else if (identifier === 'year'){
+      setCurrentSummary(summaries.summaries[holder][subHolder])
+    }
+ 
+
+  };
+
 
 
   const drawer = (
@@ -127,7 +134,7 @@ const Dashboard = ({ children }) => {
           </ListItemButton>
         </ListItem>
         <Divider />
-        <TreeView summaries={summaries || {}} entities={entities || []} onSelectSummary={onSelectSummaryTreeView}></TreeView>
+        <TreeView data={summaries || {}} entities={entities || []} onSelectSummary={onSelectSummaryTreeView}></TreeView>
       </List>
       <Divider />
       <List>
@@ -313,10 +320,9 @@ const Dashboard = ({ children }) => {
       </Drawer>
 
       <main style={{ paddingLeft: '250px' ,margin: '100px auto'}}>
-        {isTreasuryTable && summaries[selectedEntity] && summaries[selectedEntity][summaryName] ? (
+        {isTreasuryTable && currentSummary ? (
           <TreasuryTable
-            transactionName={summaryName}
-            transactions={summaries[selectedEntity][summaryName]}
+            transactions={currentSummary}
             drawerWidth={drawerWidth}
             headerHeight={headerHeight}
             showAnalytics={showAnalytics}

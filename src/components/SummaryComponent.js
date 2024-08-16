@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { fetchUnitsSummaryForStore, saveSummaryToFirestore, saveHistoricalSummaryToFirestore, fetchHistoricalSummaryFromFirestore } from '../utils/firebaseHelpers';
-import { collection, getDocs } from "firebase/firestore";
+import {
+  fetchUnitsSummaryForStore, 
+  saveSummaryToFirestore, 
+  saveHistoricalSummaryToFirestore, 
+  fetchHistoricalSummaryFromFirestore, 
+  saveEntityGroupedSummaryToFirestore
+} from '../utils/firebaseHelpers';
+import { collection, getDocs, doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from '../utils/firebaseConfig';
 import TreasuryTable from './TreasuryTable'; // Import the TreasuryTable component
 
@@ -57,14 +63,59 @@ const SummaryComponent = () => {
 
     for (const entityDoc of entitiesSnapshot.docs) {
       const entityId = entityDoc.id;
+      
+      // Step 1: Generate and save yearly summary for each entity
       const entitySummary = await fetchUnitsSummaryForStore(organizationId, entityId);
-      summary[entityId] = entitySummary;
+      await Promise.all(Object.keys(entitySummary).map(year => 
+        saveSummaryToFirestore(organizationId, entityId, year, entitySummary[year])
+      ));
+      
+      // Step 2: Generate and save grouped data summary for each entity
+      const groupedEntityYearsSummary = groupDataByYear(entitySummary);
+      await saveEntityGroupedSummaryToFirestore(organizationId, entityId, groupedEntityYearsSummary);
+      
+      summary[entityId] = groupedEntityYearsSummary;
     }
 
-    return groupDataByStore(summary);
+    // Step 3: Generate and save the main summary for all entities
+    return groupDataByEntities(summary);
   };
 
-  const groupDataByStore = (summary) => {
+  // Helper function to group data by year
+  const groupDataByYear = (entitySummary) => {
+    const groupedSummary = {
+      encaissements: [],
+      decaissements: []
+    };
+
+    const accumulateData = (targetArray, sourceArray) => {
+      sourceArray.forEach(source => {
+        const existingCategory = targetArray.find(item => item.nature === source.nature);
+
+        if (existingCategory) {
+          existingCategory.montants = existingCategory.montants.map(
+            (monthTotal, index) => monthTotal + (source.montants[index] || 0)
+          );
+        } else {
+          targetArray.push({
+            nature: source.nature,
+            montantInitial: source.montantInitial,
+            montants: [...source.montants]
+          });
+        }
+      });
+    };
+
+    Object.entries(entitySummary).forEach(([year, data]) => {
+      accumulateData(groupedSummary.encaissements, data.encaissements);
+      accumulateData(groupedSummary.decaissements, data.decaissements);
+    });
+
+    return groupedSummary;
+  };
+
+  // Helper function to group data by entities for the organization
+  const groupDataByEntities = (summary) => {
     const groupedSummary = {
       "Bilan Historique": {
         encaissements: [],
@@ -77,27 +128,22 @@ const SummaryComponent = () => {
         const existingCategory = targetArray.find(item => item.nature === source.nature);
 
         if (existingCategory) {
-          // Add the montants of the current source to the existing category's montants
           existingCategory.montants = existingCategory.montants.map(
             (monthTotal, index) => monthTotal + (source.montants[index] || 0)
           );
         } else {
-          // If this category doesn't exist, add it with its montants
           targetArray.push({
             nature: source.nature,
             montantInitial: source.montantInitial,
-            montants: [...source.montants] // Copy montants array
+            montants: [...source.montants]
           });
         }
       });
     };
 
-    Object.values(summary).forEach(storeData => {
-      Object.entries(storeData).forEach(([year, data]) => {
-        // Accumulate data across all years for encaissements and decaissements
-        accumulateData(groupedSummary["Bilan Historique"].encaissements, data.encaissements);
-        accumulateData(groupedSummary["Bilan Historique"].decaissements, data.decaissements);
-      });
+    Object.values(summary).forEach(entitySummary => {
+      accumulateData(groupedSummary["Bilan Historique"].encaissements, entitySummary.encaissements);
+      accumulateData(groupedSummary["Bilan Historique"].decaissements, entitySummary.decaissements);
     });
 
     return groupedSummary;

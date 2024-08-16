@@ -46,17 +46,6 @@ export const updateUnit = async (organizationId, entityId, year, month, unitId, 
 export const deleteUnit = async (organizationId, entityId, year, month, unitId) => {
     try {
 
-        console.log("TEST ", [
-            "organizations", 
-            organizationId, 
-            "entities", 
-            entityId, 
-            "transaction-units", 
-            String(year),  
-            String(month)[0].toUpperCase() + String(month).slice(1).toLowerCase(), 
-            unitId
-
-        ])
         const unitsCollectionRef = collection(
             db, 
             "organizations", 

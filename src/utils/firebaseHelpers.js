@@ -21,38 +21,99 @@ export const createOrganization = async (orgName, customDomain, email, numUsers,
   return { tenantId, organizationId: orgDocRef.id };
 };
 
-
-export const getAllStoreTransactionSummaries = async (organizationId) => {
+export const getAllStoreTransactionSummaries = async (organizationId, options = { historical: true, entity: true, yearly: true }) => {
   try {
-    const summaries = {};
+    const summaries = {}; // Stores all yearly summaries per entity
+    const entitySummaries = {}; // Stores entity-level summaries
+    const historicalSummary = {
+      encaissements: [],
+      decaissements: []
+    }; // Stores the organization-level summary (Bilan Historique)
 
     // Fetch all entities within the organization
     const entitiesSnapshot = await getDocs(collection(db, 'organizations', organizationId, 'entities'));
     for (const entityDoc of entitiesSnapshot.docs) {
       const entityId = entityDoc.id;
 
-      // Fetch transaction summaries for each entity
-      const summariesCollection = collection(db, 'organizations', organizationId, 'entities', entityId, 'transactions-summary');
-      const summariesSnapshot = await getDocs(summariesCollection);
+      // Fetch transaction summaries for each entity if yearly summaries are requested
+      if (options.yearly || options.entity || options.historical) {
+        const summariesCollection = collection(db, 'organizations', organizationId, 'entities', entityId, 'transactions-summaries');
+        const summariesSnapshot = await getDocs(summariesCollection);
 
-      const entitySummaries = {};
-      summariesSnapshot.forEach((doc) => {
-        entitySummaries[doc.id] = doc.data();
-      });
+        const entityYearlySummaries = {};
+        const entitySummary = {
+          encaissements: [],
+          decaissements: []
+        };
 
-      summaries[entityId] = entitySummaries;
+        summariesSnapshot.forEach((doc) => {
+          const yearSummary = doc.data();
+          entityYearlySummaries[doc.id] = yearSummary;
+
+          // Aggregate year data into entity-level summary if requested
+          if (options.entity || options.historical) {
+            accumulateData(entitySummary.encaissements, yearSummary.encaissements);
+            accumulateData(entitySummary.decaissements, yearSummary.decaissements);
+          }
+        });
+
+        // Save the entity's yearly summaries and its aggregated summary
+        if (options.yearly) {
+          summaries[entityId] = entityYearlySummaries;
+        }
+        if (options.entity || options.historical) {
+          entitySummaries[entityId] = entitySummary;
+        }
+
+        // Aggregate entity-level data into the organization-level (historical) summary if requested
+        if (options.historical) {
+          accumulateData(historicalSummary.encaissements, entitySummary.encaissements);
+          accumulateData(historicalSummary.decaissements, entitySummary.decaissements);
+        }
+      }
     }
 
-    return summaries;
+    const result = {};
+    if (options.historical) {
+      result.historicalSummary = historicalSummary;
+    }
+    if (options.entity) {
+      result.entitySummaries = entitySummaries;
+    }
+    if (options.yearly) {
+      result.summaries = summaries;
+    }
+
+    return result;
   } catch (error) {
     console.error('Error fetching all store transaction summaries: ', error);
     throw error;
   }
 };
 
+// Helper function to accumulate data
+const accumulateData = (targetArray, sourceArray) => {
+  sourceArray.forEach(source => {
+    const existingCategory = targetArray.find(item => item.nature === source.nature);
+
+    if (existingCategory) {
+      existingCategory.montants = existingCategory.montants.map(
+        (monthTotal, index) => monthTotal + (source.montants[index] || 0)
+      );
+    } else {
+      targetArray.push({
+        nature: source.nature,
+        montantInitial: source.montantInitial,
+        montants: [...source.montants]
+      });
+    }
+  });
+};
+
+
 export const getStoreTransactionSummaries = async (organizationId, entityId) => {
   try {
-    const summariesCollection = collection(db, 'organizations', organizationId, 'entities', entityId, 'transactions-summary');
+    const summariesCollection = collection(db, 'organizations', organizationId, 'entities', entityId, 'transactions-summaries');
     const summariesSnapshot = await getDocs(summariesCollection);
 
     const summaries = {};
@@ -225,7 +286,7 @@ const months = [
 
 export const getAllTransactionSummaries = async (organizationId, entityId) => {
   try {
-    const summariesCollection = collection(db, 'organizations', organizationId, 'entities', entityId, 'transactions-summary');
+    const summariesCollection = collection(db, 'organizations', organizationId, 'entities', entityId, 'transactions-summaries');
     const summariesSnapshot = await getDocs(summariesCollection);
 
     const summaries = {};
@@ -325,19 +386,11 @@ export const fetchUnitsSummaryForStore = async (organizationId, entityId) => {
   }
 };
 
-
-/**
- * Fetch the historical summary for the given organization from Firestore.
- *
- * @param {string} organizationId - The ID of the organization.
- * @param {string} summaryType - The type of summary to fetch (e.g., 'Bilan Historique').
- * @returns {Promise<Object|null>} - A promise that resolves to the historical summary if it exists, or null if it doesn't.
- */
 export const fetchHistoricalSummaryFromFirestore = async (organizationId, summaryType) => {
   try {
 
     
-    const docRef = doc(db, "organizations", organizationId, "transactions-historical-summary", "Bilan Historique");
+    const docRef = doc(db, "organizations", organizationId, "historical-transactions-summary", "Bilan Historique");
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
@@ -364,7 +417,7 @@ export const saveSummaryToFirestore = async (organizationId, entityId, year, sum
 
     summary.name = year.toString();
 
-    const docRef = doc(db, "organizations", organizationId, "entities", entityId, "transactions-summary", year.toString());
+    const docRef = doc(db, "organizations", organizationId, "entities", entityId, "transactions-summaries", year.toString());
     await setDoc(docRef, summary);
 
     console.log(`Summary for ${year} saved successfully.`);
@@ -374,6 +427,28 @@ export const saveSummaryToFirestore = async (organizationId, entityId, year, sum
   }
 };
 
+
+export const saveEntityGroupedSummaryToFirestore = async (organizationId, entityId, summary) => {
+  try {
+    if (!summary) {
+      throw new Error("Summary data is undefined or null");
+    }
+
+    if (!organizationId || !entityId) {
+      throw new Error("Invalid organizationId, entityId, or year");
+    }
+
+    summary.name = entityId.toString();
+
+    const docRef = doc(db, "organizations", organizationId, "entities", entityId, "entity-transactions-summary", entityId);
+    await setDoc(docRef, summary);
+
+    console.log(`Summary for ${entityId} saved successfully.`);
+  } catch (error) {
+    console.error(`Error saving Entity summary for ${entityId} to Firestore:`, error);
+    throw error;
+  }
+};
 
 export const saveHistoricalSummaryToFirestore = async (organizationId, name, summary) => {
   try {
@@ -387,7 +462,7 @@ export const saveHistoricalSummaryToFirestore = async (organizationId, name, sum
 
     summary.name = name;
 
-    const docRef = doc(db, "organizations", organizationId, "transactions-historical-summary", name);
+    const docRef = doc(db, "organizations", organizationId, "historical-transactions-summary", name);
     await setDoc(docRef, summary);
 
     console.log(`Summary for 'Bilan Historique' saved successfully.`);

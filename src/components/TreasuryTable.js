@@ -105,8 +105,6 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
       headerName: 'Total',
       width: 150,
       valueGetter: (params) => {
-        console.log("PARAMS PARAMS  PARAMS  PARAMS  ", params)
-          // return calculateTotal(row.type.toLowerCase(), row.id.split('-')[1], transactions);
           return params
       },
     }
