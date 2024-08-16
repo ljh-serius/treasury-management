@@ -16,7 +16,8 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Grid
+  Grid,
+  TableFooter
 } from '@mui/material';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -482,7 +483,7 @@ const Analytics = () => {
   };
   
   return (
-    <Container maxWidth="lg"  sx={{ mt: 12, mb: 12, width: '60vw'}}>
+    <Container maxWidth="xl" sx={{ mt: 12, mb: 12, width: '60vw'}}>
       <Typography variant="h4" gutterBottom>
         {translate('Comparative Analytics', language)}
       </Typography>
@@ -519,8 +520,8 @@ const Analytics = () => {
               renderValue={(selected) => selected.join(', ')}
             >
               {availableBooks.map(({ originalBook, displayBook }) => (
-                <MenuItem key={originalBook} value={originalBook}>
-                  <Checkbox checked={selectedEntities.indexOf(originalBook) > -1} />
+                <MenuItem key={displayBook} value={displayBook}>
+                  <Checkbox checked={selectedEntities.indexOf(displayBook) > -1} />
                   <ListItemText primary={displayBook} />
                 </MenuItem>
               ))}

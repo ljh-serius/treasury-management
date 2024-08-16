@@ -93,7 +93,7 @@ const UnitDetails = () => {
   }
 
   return (
-    <Container maxWidth="lg"  sx={{ paddingTop: 3, paddingBottom: 7, dith: '60vw' }}>
+    <Container maxWidth="lg"  sx={{ paddingTop: 3, paddingBottom: 7, widith: '60vw' }}>
       <Box sx={{ padding: 3 }}>
         <Button variant="contained" color="primary" onClick={() => navigate(-1)}>
           Back to Summary

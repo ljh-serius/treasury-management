@@ -8,7 +8,7 @@ import {
 import TreasuryChart from './TreasuryChart'; // Import your chart component
 
 const calculateTotal = (type, index, transactions) => {
-  const transaction = transactions[type][index];
+  const transaction = {...transactions[type][index]};
   if (!transaction || !transaction.montants) return 0;
 
   const total = transaction.montants.reduce((sum, amount) => sum + (amount || 0), 0);
@@ -21,6 +21,7 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
   const [cumulativeTreasuryData, setCumulativeTreasuryData] = useState([]);
   const [monthlyTreasuryData, setMonthlyTreasuryData] = useState([]);
 
+  console.log("IS THERE A TOTAL DECAISSEMENTS ", transactions)
   useEffect(() => {
     const updatedInputValues = calculateTotals(transactions);
 
