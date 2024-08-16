@@ -51,21 +51,20 @@ const Analytics = () => {
   const [lineChartOptions, setLineChartOptions] = useState({});
   const [barChartOptions, setBarChartOptions] = useState({});
   const [heatmapOptions, setHeatmapOptions] = useState({});
-  
+  const [selectedBooks, setSelectedBooks] = useState([]); // Selected entities (book IDs)
+  const [selectedEntityYears, setSelectedEntityYears] = useState([]); // Selected entity-year pairs
+
   useEffect(() => {
     console.log("Entities:", entities);
     console.log("Books:", books);
   }, [entities, books]);
-  
-  const [selectedBooks, setSelectedBooks] = useState([]); // Selected entities (book IDs)
-  const [selectedEntities, setSelectedEntities] = useState([]); // Selected years/books
-  
+
   const handleBooksSelectChange = (event) => {
-    setSelectedBooks(event.target.value); 
+    setSelectedBooks(event.target.value);
   };
 
   const handleEntitiesSelectChange = (event) => {
-    setSelectedEntities(event.target.value); // No reset or pre-selection logic here
+    setSelectedEntityYears(event.target.value); // Update the selected entity-year pairs
   };
 
   // Generate available books with prefixes if necessary
@@ -74,7 +73,8 @@ const Analytics = () => {
     return Object.keys(books.summaries[bookId] || {}).map(bookName => {
       return {
         originalBook: bookName,
-        displayBook: prefix ? `${prefix} - ${bookName}` : bookName
+        displayBook: prefix ? `${prefix} - ${bookName}` : bookName,
+        bookId: bookId,
       };
     });
   });
@@ -105,7 +105,7 @@ const Analytics = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedBooks.length > 0 && selectedEntities.length > 0) {
+    if (selectedBooks.length > 0 && selectedEntityYears.length > 0) {
       const options = generateChartOptions(selectedBooks);
       setChartOptions(options);
 
@@ -121,47 +121,48 @@ const Analytics = () => {
       const heatmapOptions = generateHeatmapOptions(selectedBooks);
       setHeatmapOptions(heatmapOptions);
     }
-  }, [selectedBooks, selectedEntities, selectedMonths, books]);
+  }, [selectedBooks, selectedEntityYears, selectedMonths, books]);
+
 
   const generateChartOptions = (booksToAnalyze) => {
     const initialBalances = {};
     const totalEncaissements = {};
     const totalDecaissements = {};
     const finalTreasuries = {};
-  
+
     booksToAnalyze.forEach((entityId) => {
       console.log("ENTITY ID", entityId)
       const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
       if (!booksUnderEntity) return; // Skip if no books found under this entityId
-  
+
       Object.keys(booksUnderEntity).forEach((bookName) => {
-        if (!selectedEntities.includes(bookName)) return; // Only include selected years/books
-  
+        if (!selectedEntityYears.map(({ year }) => year).includes(bookName)) return; // Only include selected years/books
+
         const book = booksUnderEntity[bookName];
         if (!book) return;
-  
+
         const summary = calculateBudgetSummary(calculateTotals(book));
-  
+
         initialBalances[bookName] = (initialBalances[bookName] || 0) + summary.initialBalance;
-  
+
         const encaissementsArray = Array.isArray(summary.totalEncaissements) ? summary.totalEncaissements : [summary.totalEncaissements];
         const decaissementsArray = Array.isArray(summary.totalDecaissements) ? summary.totalDecaissements : [summary.totalDecaissements];
-  
+
         const filteredEncaissements = selectedMonths.length > 0
           ? encaissementsArray.filter((_, index) => selectedMonths.includes(index))
           : encaissementsArray;
-  
+
         const filteredDecaissements = selectedMonths.length > 0
           ? decaissementsArray.filter((_, index) => selectedMonths.includes(index))
           : decaissementsArray;
-  
+
         totalEncaissements[bookName] = (totalEncaissements[bookName] || 0) + filteredEncaissements.reduce((a, b) => a + b, 0);
         totalDecaissements[bookName] = (totalDecaissements[bookName] || 0) + filteredDecaissements.reduce((a, b) => a + b, 0);
-  
+
         finalTreasuries[bookName] = initialBalances[bookName] + totalEncaissements[bookName] - totalDecaissements[bookName];
       });
     });
-  
+
     return {
       title: {
         text: translate('Comparative Analysis of Budget Summaries', language),
@@ -213,19 +214,19 @@ const Analytics = () => {
       },
     };
   };
-  
+
   const generatePieChartOptions = (booksToAnalyze) => {
     const encaissementsData = {};
     const decaissementsData = {};
-  
+
     booksToAnalyze.forEach((entityId) => {
       const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
       if (!booksUnderEntity) return; // Skip if no books found under this entityId
-  
+
       Object.keys(booksUnderEntity).forEach((bookName) => {
         const book = booksUnderEntity[bookName];
         if (!book) return;
-  
+
         if (book.encaissements) {
           book.encaissements.forEach((enc) => {
             enc.montants.forEach((amount, month) => {
@@ -235,7 +236,7 @@ const Analytics = () => {
             });
           });
         }
-  
+
         if (book.decaissements) {
           book.decaissements.forEach((dec) => {
             dec.montants.forEach((amount, month) => {
@@ -247,7 +248,7 @@ const Analytics = () => {
         }
       });
     });
-  
+
     return {
       encaissements: {
         chart: {
@@ -289,18 +290,18 @@ const Analytics = () => {
       },
     };
   };
-  
+
   const generateLineChartOptions = (booksToAnalyze) => {
     const timeSeriesData = {};
-  
+
     booksToAnalyze.forEach((entityId) => {
       const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
       if (!booksUnderEntity) return; // Skip if no books found under this entityId
-  
+
       Object.keys(booksUnderEntity).forEach((bookName) => {
         const book = booksUnderEntity[bookName];
         if (!book) return;
-  
+
         if (book.encaissements) {
           book.encaissements.forEach((enc) => {
             enc.montants.forEach((amount, month) => {
@@ -311,7 +312,7 @@ const Analytics = () => {
             });
           });
         }
-  
+
         if (book.decaissements) {
           book.decaissements.forEach((dec) => {
             dec.montants.forEach((amount, month) => {
@@ -323,11 +324,11 @@ const Analytics = () => {
         }
       });
     });
-  
+
     const months = Object.keys(timeSeriesData).sort();
     const encaissementsSeries = months.map(month => timeSeriesData[month].encaissements);
     const decaissementsSeries = months.map(month => timeSeriesData[month].decaissements);
-  
+
     return {
       chart: { type: 'line' },
       title: { text: translate('Treasury Evolution Over Time', language) },
@@ -353,18 +354,18 @@ const Analytics = () => {
       credits: { enabled: false },
     };
   };
-  
+
   const generateBarChartOptions = (booksToAnalyze) => {
     const monthlyTotals = {};
-  
+
     booksToAnalyze.forEach((entityId) => {
       const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
       if (!booksUnderEntity) return; // Skip if no books found under this entityId
-  
+
       Object.keys(booksUnderEntity).forEach((bookName) => {
         const book = booksUnderEntity[bookName];
         if (!book) return;
-  
+
         if (book.encaissements) {
           book.encaissements.forEach((enc) => {
             enc.montants.forEach((amount, month) => {
@@ -378,7 +379,7 @@ const Analytics = () => {
             });
           });
         }
-  
+
         if (book.decaissements) {
           book.decaissements.forEach((dec) => {
             dec.montants.forEach((amount, month) => {
@@ -394,9 +395,9 @@ const Analytics = () => {
         }
       });
     });
-  
+
     const months = Object.keys(monthlyTotals).sort();
-  
+
     return {
       chart: { type: 'column' },
       title: { text: translate('Monthly Totals', language) },
@@ -420,19 +421,19 @@ const Analytics = () => {
       credits: { enabled: false },
     };
   };
-  
-  
+
+
   const generateHeatmapOptions = (booksToAnalyze) => {
     const heatmapData = [];
-  
+
     booksToAnalyze.forEach((entityId, bookIndex) => {
       const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
       if (!booksUnderEntity) return; // Skip if no books found under this entityId
-  
+
       Object.keys(booksUnderEntity).forEach((bookName) => {
         const book = booksUnderEntity[bookName];
         if (!book) return;
-  
+
         if (book.encaissements) {
           book.encaissements.forEach((enc) => {
             enc.montants.forEach((amount, month) => {
@@ -442,7 +443,7 @@ const Analytics = () => {
             });
           });
         }
-  
+
         if (book.decaissements) {
           book.decaissements.forEach((dec) => {
             dec.montants.forEach((amount, month) => {
@@ -454,7 +455,7 @@ const Analytics = () => {
         }
       });
     });
-  
+
     return {
       chart: { type: 'heatmap' },
       title: { text: translate('Monthly Transaction Heatmap', language) },
@@ -481,9 +482,36 @@ const Analytics = () => {
       credits: { enabled: false },
     };
   };
-  
+
+  // Sum up the values for the footer
+  const calculateFooterTotals = () => {
+    let initialBalanceSum = 0;
+    let totalEncaissementsSum = 0;
+    let totalDecaissementsSum = 0;
+    let finalTreasurySum = 0;
+
+    selectedEntityYears.forEach(({ bookId, year }) => {
+      const summary = calculateBudgetSummary(
+        calculateTotals(books.summaries[bookId][year])
+      );
+      initialBalanceSum += summary.initialBalance;
+      totalEncaissementsSum += summary.totalEncaissements;
+      totalDecaissementsSum += summary.totalDecaissements;
+      finalTreasurySum += summary.finalTreasury;
+    });
+
+    return {
+      initialBalanceSum,
+      totalEncaissementsSum,
+      totalDecaissementsSum,
+      finalTreasurySum
+    };
+  };
+
+  const footerTotals = calculateFooterTotals();
+
   return (
-    <Container maxWidth="xl" sx={{ mt: 12, mb: 12, width: '60vw'}}>
+    <Container maxWidth="lg"  sx={{ mt: 12, mb: 12, width: '60vw'}}>
       <Typography variant="h4" gutterBottom>
         {translate('Comparative Analytics', language)}
       </Typography>
@@ -496,7 +524,7 @@ const Analytics = () => {
               labelId="books-select-label"
               multiple
               value={selectedBooks}
-              onChange={handleBooksSelectChange} 
+              onChange={handleBooksSelectChange}
               renderValue={(selected) => selected.map(id => entities.find(item => item.id === id)?.name).join(', ')}
             >
               {entities.map(item => (
@@ -515,13 +543,20 @@ const Analytics = () => {
             <Select
               labelId="years-select-label"
               multiple
-              value={selectedEntities} 
-              onChange={handleEntitiesSelectChange}
-              renderValue={(selected) => selected.join(', ')}
+              value={selectedEntityYears.map(({ bookId, year }) => `${bookId}-${year}`)}
+              onChange={(event) => {
+                const value = event.target.value;
+                const entityYears = value.map(v => {
+                  const [bookId, year] = v.split('-');
+                  return { bookId, year };
+                });
+                setSelectedEntityYears(entityYears);
+              }}
+              renderValue={(selected) => selected.map(v => availableBooks.find(ab => ab.bookId === v.split('-')[0] && ab.originalBook === v.split('-')[1])?.displayBook).join(', ')}
             >
               {availableBooks.map(({ originalBook, displayBook }) => (
-                <MenuItem key={displayBook} value={displayBook}>
-                  <Checkbox checked={selectedEntities.indexOf(displayBook) > -1} />
+                <MenuItem key={originalBook} value={originalBook}>
+                  <Checkbox checked={selectedEntities.indexOf(originalBook) > -1} />
                   <ListItemText primary={displayBook} />
                 </MenuItem>
               ))}
@@ -549,7 +584,7 @@ const Analytics = () => {
         </Grid>
       </Grid>
 
-      {selectedBooks.length > 0 && selectedEntities.length > 0 && (
+      {selectedBooks.length > 0 && selectedEntityYears.length > 0 && (
         <Box mt={4}>
           <Typography variant="h6" gutterBottom>
             {translate('Global Annual', language)}:
@@ -558,6 +593,7 @@ const Analytics = () => {
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: '#424242' }}>
+                  <TableCell sx={{ color: '#ffffff' }}>{translate('Entity', language)}</TableCell>
                   <TableCell sx={{ color: '#ffffff' }}>{translate('Year', language)}</TableCell>
                   <TableCell sx={{ color: '#ffffff' }}>{translate('Initial Balance', language)}</TableCell>
                   <TableCell sx={{ color: '#ffffff' }}>{translate('Total Encaissements', language)}</TableCell>
@@ -566,25 +602,32 @@ const Analytics = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {selectedEntities.map((year) => {
+                {selectedEntityYears.map(({ bookId, year }) => {
+                  const entityName = entities.find(item => item.id === bookId)?.name;
                   const summary = calculateBudgetSummary(
-                    calculateTotals(books.summaries[selectedBooks[0]][year])
+                    calculateTotals(books.summaries[bookId][year])
                   );
                   return (
-                    <TableRow key={year} hover>
+                    <TableRow key={`${bookId}-${year}`} hover>
+                      <TableCell>{entityName}</TableCell>
                       <TableCell>{year}</TableCell>
                       <TableCell>{summary.initialBalance.toFixed(2)}</TableCell>
-                      <TableCell>
-                        {summary.totalEncaissements.toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        {summary.totalDecaissements.toFixed(2)}
-                      </TableCell>
+                      <TableCell>{summary.totalEncaissements.toFixed(2)}</TableCell>
+                      <TableCell>{summary.totalDecaissements.toFixed(2)}</TableCell>
                       <TableCell>{summary.finalTreasury.toFixed(2)}</TableCell>
                     </TableRow>
                   );
                 })}
               </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={2}>{translate('Total', language)}</TableCell>
+                  <TableCell>{footerTotals.initialBalanceSum.toFixed(2)}</TableCell>
+                  <TableCell>{footerTotals.totalEncaissementsSum.toFixed(2)}</TableCell>
+                  <TableCell>{footerTotals.totalDecaissementsSum.toFixed(2)}</TableCell>
+                  <TableCell>{footerTotals.finalTreasurySum.toFixed(2)}</TableCell>
+                </TableRow>
+              </TableFooter>
             </Table>
           </TableContainer>
         </Box>
@@ -618,22 +661,22 @@ const Analytics = () => {
           </Grid>
         )}
       </Box>
-        {Object.keys(lineChartOptions).length > 0 && (
-          <HighchartsReact highcharts={Highcharts} options={lineChartOptions} />
-        )}
+      {Object.keys(lineChartOptions).length > 0 && (
+        <HighchartsReact highcharts={Highcharts} options={lineChartOptions} />
+      )}
 
-        <Grid container spacing={4}>
-          {Object.keys(barChartOptions).length > 0 && (
-            <Grid item xs={12} md={6}>
-              <HighchartsReact highcharts={Highcharts} options={barChartOptions} />
-            </Grid>
-          )}
-          {Object.keys(heatmapOptions).length > 0 && (
-            <Grid item xs={12} md={6}>
-              <HighchartsReact highcharts={Highcharts} options={heatmapOptions} />
-            </Grid>
-          )}
-        </Grid>
+      <Grid container spacing={4}>
+        {Object.keys(barChartOptions).length > 0 && (
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={barChartOptions} />
+          </Grid>
+        )}
+        {Object.keys(heatmapOptions).length > 0 && (
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={heatmapOptions} />
+          </Grid>
+        )}
+      </Grid>
     </Container>
   );
 };

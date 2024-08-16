@@ -36,16 +36,26 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
     setMonthlyTreasuryData(newMonthlyTreasuryData);
   }, []);
 
+
+  console.log("SUMMARY ", transactions)
   const generateRows = () => {
     const rows = [];
     const encaissements = transactions.encaissements || [];
     const decaissements = transactions.decaissements || [];
-    const monthlyTreasury = calculateMonthlyTreasury(transactions || {});
-    const initialEncaissement = encaissements[encaissements.length - 1]?.montantInitial || 0;
-    const initialDecaissement = decaissements[decaissements.length - 1]?.montantInitial || 0;
-    const accumulatedTreasury = calculateAccumulatedTreasury(initialEncaissement - initialDecaissement, transactions || {});
     const displayedMonths = monthNames.slice(1);
   
+    // Find the "Total Category" in encaissements and decaissements
+    const totalEncaissements = encaissements.find((transaction) => transaction.nature === 'Total Category');
+    const totalDecaissements = decaissements.find((transaction) => transaction.nature === 'Total Category');
+  
+    // Calculate the difference for each month
+    const treasuryBalance = displayedMonths.map((_, i) => {
+      const encaissementAmount = totalEncaissements?.montants[i] || 0;
+      const decaissementAmount = totalDecaissements?.montants[i] || 0;
+      return encaissementAmount - decaissementAmount;
+    });
+  
+    // Push rows for encaissements and decaissements
     ["encaissements", "decaissements"].forEach((type) => {
       transactions[type]?.forEach((transaction, index) => {
         rows.push({
@@ -62,32 +72,37 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
       });
     });
   
-    if (monthlyTreasury.length) {
-      rows.push({
-        id: 'treasury-balance',
-        type: 'Treasury Balance',
-        ...displayedMonths.reduce((acc, _, i) => {
-          acc[`month_${i}`] = monthlyTreasury[i];
-          return acc;
-        }, {}),
-        total: monthlyTreasury.reduce((acc, curr) => acc + curr, 0),
-      });
-    }
+    // Add the row for Treasury Balance (Difference between Total Category in encaissements and decaissements)
+    rows.push({
+      id: 'treasury-balance',
+      type: 'Treasury Balance',
+      ...displayedMonths.reduce((acc, _, i) => {
+        acc[`month_${i}`] = treasuryBalance[i];
+        return acc;
+      }, {}),
+      total: treasuryBalance.reduce((acc, curr) => acc + curr, 0), // Sum of all monthly differences
+    });
   
-    if (accumulatedTreasury.length) {
-      rows.push({
-        id: 'accumulated-treasury',
-        type: 'Accumulated Treasury',
-        ...displayedMonths.reduce((acc, _, i) => {
-          acc[`month_${i}`] = accumulatedTreasury[i];
-          return acc;
-        }, {}),
-        total: accumulatedTreasury.slice(-1)[0],
-      });
-    }
+    // Calculate accumulated treasury based on the Treasury Balance
+    const accumulatedTreasury = treasuryBalance.reduce((acc, value, index) => {
+      acc[index] = (acc[index - 1] || 0) + value;
+      return acc;
+    }, []);
+  
+    // Add the row for Accumulated Treasury
+    rows.push({
+      id: 'accumulated-treasury',
+      type: 'Accumulated Treasury',
+      ...displayedMonths.reduce((acc, _, i) => {
+        acc[`month_${i}`] = accumulatedTreasury[i];
+        return acc;
+      }, {}),
+      total: accumulatedTreasury.slice(-1)[0], // Last value in the accumulated treasury
+    });
   
     return rows;
   };
+  
   
   const rows = generateRows();
 

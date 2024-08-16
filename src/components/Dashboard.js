@@ -104,9 +104,7 @@ const Dashboard = ({ children }) => {
 
   const onSelectSummaryTreeView = (selectedSummary) => {
     const [identifier, holder, subHolder] = selectedSummary.split('-');
-    console.log("IDENTIFIER", identifier);
-    console.log("HOLDER", holder);
-    console.log("SUMMARIES ", summaries)
+
     if(identifier === 'historical'){
       setCurrentSummary(summaries.historicalSummary)
     } else if (identifier === 'entity'){
@@ -114,11 +112,7 @@ const Dashboard = ({ children }) => {
      }else if (identifier === 'year'){
       setCurrentSummary(summaries.summaries[holder][subHolder])
     }
- 
-
   };
-
-
 
   const drawer = (
     <div>
