@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Grid, Box } from '@mui/material';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { Container, Grid, Box, Button } from '@mui/material';
+import { DataGrid, GridToolbar, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import {
   monthNames, calculateMonthlyTreasury, calculateAccumulatedTreasury,
   prepareChartData, prepareCumulativeTreasuryData, prepareMonthlyTreasuryData, calculateTotals
@@ -20,6 +20,7 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
   const [decaissementsData, setDecaissementsData] = useState([]);
   const [cumulativeTreasuryData, setCumulativeTreasuryData] = useState([]);
   const [monthlyTreasuryData, setMonthlyTreasuryData] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
 
   console.log("IS THERE A TOTAL DECAISSEMENTS ", transactions)
   useEffect(() => {
@@ -34,10 +35,8 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
     setDecaissementsData(newDecaissementsData);
     setCumulativeTreasuryData(newCumulativeTreasuryData);
     setMonthlyTreasuryData(newMonthlyTreasuryData);
-  }, []);
+  }, [transactions]);
 
-
-  console.log("SUMMARY ", transactions)
   const generateRows = () => {
     const rows = [];
     const encaissements = transactions.encaissements || [];
@@ -67,7 +66,7 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
             acc[`month_${i}`] = transaction.montants[i] || '';
             return acc;
           }, {}),
-          total: calculateTotal(type, index, transactions),
+          total: calculateTotal(type, index, transactions) || 0, // Ensure total is defined
         });
       });
     });
@@ -80,7 +79,7 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
         acc[`month_${i}`] = treasuryBalance[i];
         return acc;
       }, {}),
-      total: treasuryBalance.reduce((acc, curr) => acc + curr, 0), // Sum of all monthly differences
+      total: treasuryBalance.reduce((acc, curr) => acc + curr, 0) || 0, // Ensure total is defined
     });
   
     // Calculate accumulated treasury based on the Treasury Balance
@@ -97,12 +96,11 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
         acc[`month_${i}`] = accumulatedTreasury[i];
         return acc;
       }, {}),
-      total: accumulatedTreasury.slice(-1)[0], // Last value in the accumulated treasury
+      total: accumulatedTreasury.slice(-1)[0] || 0, // Ensure total is defined
     });
   
     return rows;
   };
-  
   
   const rows = generateRows();
 
@@ -121,24 +119,77 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
       headerName: 'Total',
       width: 150,
       valueGetter: (params) => {
-          return params
+        console.log("PARAMETER PARAMETER", params)
+        return params;  // Error might occur here if params.row or total is undefined
       },
     }
   ];
 
+  // Custom Toolbar with export and copy functionalities
+  const CustomToolbar = () => (
+    <GridToolbarContainer>
+      <GridToolbarExport />
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => {
+          const csvData = rows.map(row => columns.map(col => row[col.field] || '').join(',')).join('\n');
+          const blob = new Blob([csvData], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'data.csv';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }}
+        sx={{ ml: 1 }}
+      >
+        Export to CSV
+      </Button>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={() => {
+          if (selectedRows.length === 0) {
+            alert('No rows selected!');
+            return;
+          }
+          const selectedData = selectedRows.map(rowId => {
+            const row = rows.find(row => row.id === rowId);
+            return columns.map(col => row[col.field] || '').join('\t');
+          }).join('\n');
+          navigator.clipboard.writeText(selectedData).then(() => {
+            alert('Copied to clipboard!');
+          }).catch(err => {
+            alert('Failed to copy to clipboard!');
+            console.error(err);
+          });
+        }}
+        sx={{ ml: 1 }}
+      >
+        Copy Selected
+      </Button>
+    </GridToolbarContainer>
+  );
+
   return (
-    <Container maxWidth="lg"  sx={{ mt: 12, mb: 12 }}>
-      {!showAnalytics && 
+    <Container maxWidth="lg" sx={{ mt: 12, mb: 12 }}>
+      {!showAnalytics && (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
           <DataGrid
             rows={rows}
             columns={columns}
-            components={{ Toolbar: GridToolbar }}
+            components={{ Toolbar: CustomToolbar }}
             disableSelectionOnClick
             disableAutosize
             disableColumnResize
             hideFooter
             pagination
+            selectionModel={selectedRows}
+            onSelectionModelChange={(newSelection) => {
+              setSelectedRows(newSelection);
+            }}
             sx={{
               width: '80%', // Adjust the width as needed
               '& .MuiDataGrid-main': {
@@ -147,7 +198,7 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
             }}
           />
         </Box>
-      }
+      )}
 
       {showAnalytics && (
         <Grid container spacing={2} sx={{ mt: 4, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
