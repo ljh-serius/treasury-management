@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import { auth, db } from '../utils/firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -17,7 +16,6 @@ const OrganizationRegistration = () => {
   const [numUsers, setNumUsers] = useState(1);
   const [numStores, setNumStores] = useState(1);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
   const stripe = useStripe();
   const elements = useElements();
 
@@ -89,8 +87,7 @@ const OrganizationRegistration = () => {
       // Register the organization as a user in Firebase Auth
       const organizationCredentials = await createUserWithEmailAndPassword(auth, email, password);
       const organization = organizationCredentials.user;
-
-      // Create the organization in Firestore
+    
       const { tenantId, organizationId } = await createOrganization(orgName, domain, email, numUsers, numStores, totalPrice, organization.uid);
 
       addUser(organization.uid, firstName, lastName, email, 'admin', organizationId, null)

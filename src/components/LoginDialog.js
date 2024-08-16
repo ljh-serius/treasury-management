@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button } from '@mui/material';
 import { login } from '../utils/authHelpers';
+import { useNavigate } from 'react-router-dom';
 
 const LoginDialog = ({ open, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
-      await login(email, password);
+      const isDone = await login(email, password);
+      if(isDone){
+        navigate('/books');
+      }
       onClose(); // Close the dialog after successful login
     } catch (error) {
       console.error('Login failed:', error);

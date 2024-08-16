@@ -34,6 +34,7 @@ export const login = async (email, password) => {
           localStorage.setItem('userData', JSON.stringify(userData));
           localStorage.setItem('organizationData', JSON.stringify(organizationData));
 
+          return true;
           // Additional logic after successful login (e.g., redirecting the user)
           // window.location.href = '/dashboard'; // Example redirect
         } else {

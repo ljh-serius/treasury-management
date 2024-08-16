@@ -62,7 +62,7 @@ const App = () => {
         <Routes>
           <Route
             path="/"
-            element={user ? <Navigate to="/books" replace /> : <HomePage />}
+            element={<HomePage />}
           />
           <Route
             path="/books"
