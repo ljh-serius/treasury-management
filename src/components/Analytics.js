@@ -609,7 +609,6 @@ const renderSelectedValue = (selected) => {
     let finalTreasurySum = 0;
 
     selectedEntityYears.forEach(({ bookId, year }) => {
-      console.log("DATA DATA DATA ", { books: books.summaries[bookId][year], bookId, year} )
       const summary = calculateBudgetSummary(
         books.summaries[bookId][year]
       );
@@ -630,7 +629,7 @@ const renderSelectedValue = (selected) => {
   const footerTotals = calculateFooterTotals();
 
   return (
-    <Container maxWidth="lg"  sx={{ mt: 12, mb: 12, width: '60vw'}}>
+    <Container maxWidth="lg" sx={{ mt: 12, mb: 12, width: '60vw' }}>
       <Typography variant="h4" gutterBottom>
         {translate('Comparative Analytics', language)}
       </Typography>
