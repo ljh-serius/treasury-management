@@ -55,11 +55,6 @@ const Analytics = () => {
   const [selectedEntityYears, setSelectedEntityYears] = useState([]); // Selected entity-year pairs
   const [netTreasuryOptions, setNetTreasuryOptions] = useState({});
 
-  useEffect(() => {
-    console.log("Entities:", entities);
-    console.log("Books:", books);
-  }, [entities, books]);
-
   const handleBooksSelectChange = (event) => {
     setSelectedBooks(event.target.value);
   };
@@ -143,7 +138,6 @@ const Analytics = () => {
         const book = booksUnderEntity[bookName];
         if (!book) return;
 
-        console.log("BOOK ", book)
         // Calculate the budget summary with validated data
         const summary = calculateBudgetSummary(book);
 
@@ -710,7 +704,6 @@ const renderSelectedValue = (selected) => {
               <TableBody>
                 {selectedEntityYears.map(({ bookId, year }) => {
                   const entityName = entities.find(item => item.id === bookId)?.name;
-                  console.log("PARAMS ", [bookId, year])
 
                   const summary = calculateBudgetSummary(
                     books.summaries[bookId][year]

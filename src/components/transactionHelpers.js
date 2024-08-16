@@ -166,7 +166,5 @@ export const calculateBudgetSummary = (book) => {
 
   const result = { initialBalance, totalEncaissements, totalDecaissements, finalTreasury };
 
-  console.log(result);
-
   return result;
 };

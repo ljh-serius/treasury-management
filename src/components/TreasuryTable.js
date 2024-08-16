@@ -27,7 +27,6 @@ const TreasuryTable = ({
   const [monthlyTreasuryData, setMonthlyTreasuryData] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
 
-  console.log("IS THERE A TOTAL DECAISSEMENTS ", transactions)
   useEffect(() => {
     const updatedInputValues = calculateTotals(transactions);
 
