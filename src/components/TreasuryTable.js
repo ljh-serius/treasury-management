@@ -111,7 +111,7 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
   ];
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 12, mb: 12 }}>
+    <Container maxWidth="lg"  sx={{ mt: 12, mb: 12 }}>
       {!showAnalytics && 
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
           <DataGrid

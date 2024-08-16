@@ -5,7 +5,7 @@ import articles from '../utils/articles'; // The manually imported articles
 
 const Blog = ({ language, switchLanguage }) => {
   return (
-    <Container maxWidth="xl" sx={{ mt: 12, mb: 12 }}>
+    <Container maxWidth="lg"  sx={{ mt: 12, mb: 12 }}>
       <Button onClick={() => switchLanguage('en')}>English</Button>
       <Button onClick={() => switchLanguage('fr')}>Français</Button>
       <Typography variant="h4" gutterBottom>

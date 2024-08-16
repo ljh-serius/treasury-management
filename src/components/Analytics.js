@@ -26,7 +26,6 @@ import {
   calculateTotals,
 } from './transactionHelpers';
 import {
-  getStoreTransactionSummaries,
   getAllStoreTransactionSummaries,
   fetchEntities
 } from '../utils/firebaseHelpers';
@@ -51,7 +50,12 @@ const Analytics = () => {
   const [lineChartOptions, setLineChartOptions] = useState({});
   const [barChartOptions, setBarChartOptions] = useState({});
   const [heatmapOptions, setHeatmapOptions] = useState({});
-
+  
+  useEffect(() => {
+    console.log("Entities:", entities);
+    console.log("Books:", books);
+  }, [entities, books]);
+  
   const [selectedBooks, setSelectedBooks] = useState([]); // Selected entities (book IDs)
   const [selectedEntities, setSelectedEntities] = useState([]); // Selected years/books
   
@@ -66,7 +70,7 @@ const Analytics = () => {
   // Generate available books with prefixes if necessary
   const availableBooks = selectedBooks.flatMap(bookId => {
     const prefix = entities.find(item => item.id === bookId)?.name;
-    return Object.keys(books[bookId] || {}).map(bookName => {
+    return Object.keys(books.summaries[bookId] || {}).map(bookName => {
       return {
         originalBook: bookName,
         displayBook: prefix ? `${prefix} - ${bookName}` : bookName
@@ -125,7 +129,8 @@ const Analytics = () => {
     const finalTreasuries = {};
   
     booksToAnalyze.forEach((entityId) => {
-      const booksUnderEntity = books[entityId]; // Access all books under this entityId
+      console.log("ENTITY ID", entityId)
+      const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
       if (!booksUnderEntity) return; // Skip if no books found under this entityId
   
       Object.keys(booksUnderEntity).forEach((bookName) => {
@@ -213,7 +218,7 @@ const Analytics = () => {
     const decaissementsData = {};
   
     booksToAnalyze.forEach((entityId) => {
-      const booksUnderEntity = books[entityId]; // Access all books under this entityId
+      const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
       if (!booksUnderEntity) return; // Skip if no books found under this entityId
   
       Object.keys(booksUnderEntity).forEach((bookName) => {
@@ -288,7 +293,7 @@ const Analytics = () => {
     const timeSeriesData = {};
   
     booksToAnalyze.forEach((entityId) => {
-      const booksUnderEntity = books[entityId]; // Access all books under this entityId
+      const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
       if (!booksUnderEntity) return; // Skip if no books found under this entityId
   
       Object.keys(booksUnderEntity).forEach((bookName) => {
@@ -352,7 +357,7 @@ const Analytics = () => {
     const monthlyTotals = {};
   
     booksToAnalyze.forEach((entityId) => {
-      const booksUnderEntity = books[entityId]; // Access all books under this entityId
+      const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
       if (!booksUnderEntity) return; // Skip if no books found under this entityId
   
       Object.keys(booksUnderEntity).forEach((bookName) => {
@@ -420,7 +425,7 @@ const Analytics = () => {
     const heatmapData = [];
   
     booksToAnalyze.forEach((entityId, bookIndex) => {
-      const booksUnderEntity = books[entityId]; // Access all books under this entityId
+      const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
       if (!booksUnderEntity) return; // Skip if no books found under this entityId
   
       Object.keys(booksUnderEntity).forEach((bookName) => {
@@ -477,7 +482,7 @@ const Analytics = () => {
   };
   
   return (
-    <Container maxWidth="lg" sx={{ mt: 12, mb: 12 }}>
+    <Container maxWidth="lg"  sx={{ mt: 12, mb: 12, width: '60vw'}}>
       <Typography variant="h4" gutterBottom>
         {translate('Comparative Analytics', language)}
       </Typography>
@@ -562,7 +567,7 @@ const Analytics = () => {
               <TableBody>
                 {selectedEntities.map((year) => {
                   const summary = calculateBudgetSummary(
-                    calculateTotals(books[selectedBooks[0]][year])
+                    calculateTotals(books.summaries[selectedBooks[0]][year])
                   );
                   return (
                     <TableRow key={year} hover>
@@ -612,14 +617,10 @@ const Analytics = () => {
           </Grid>
         )}
       </Box>
-
-      <Box mt={4}>
         {Object.keys(lineChartOptions).length > 0 && (
           <HighchartsReact highcharts={Highcharts} options={lineChartOptions} />
         )}
-      </Box>
 
-      <Box mt={4}>
         <Grid container spacing={4}>
           {Object.keys(barChartOptions).length > 0 && (
             <Grid item xs={12} md={6}>
@@ -632,7 +633,6 @@ const Analytics = () => {
             </Grid>
           )}
         </Grid>
-      </Box>
     </Container>
   );
 };

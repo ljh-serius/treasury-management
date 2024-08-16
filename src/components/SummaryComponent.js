@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import {
-  fetchUnitsSummaryForStore, 
-  saveSummaryToFirestore, 
-  saveHistoricalSummaryToFirestore, 
+  fetchUnitsSummaryForStore,
   fetchHistoricalSummaryFromFirestore, 
-  saveEntityGroupedSummaryToFirestore
+  saveSummaryToFirestore,
+  saveEntityGroupedSummaryToFirestore,
+  saveHistoricalSummaryToFirestore
 } from '../utils/firebaseHelpers';
 import { collection, getDocs, doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from '../utils/firebaseConfig';
 import TreasuryTable from './TreasuryTable'; // Import the TreasuryTable component
+import { Container } from '@mui/material';
 
 const SummaryComponent = () => {
   const [summary, setSummary] = useState(null);
@@ -150,13 +151,13 @@ const SummaryComponent = () => {
   };
 
   return (
-    <div>
+    <Container maxWidth="lg"  sx={{ paddingTop: 3, paddingBottom: 7, width: "60vw"}}>
       {isLoaded ? (
         summary && <TreasuryTable transactions={summary["Bilan Historique"]} />
       ) : (
         <p>Loading...</p>
       )}
-    </div>
+    </Container>
   );
 };
 

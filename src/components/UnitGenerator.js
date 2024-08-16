@@ -443,7 +443,7 @@ export default function UnitGenerator() {
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, filteredUnits.length - page * rowsPerPage);
 
   return (
-    <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+    <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7, width: '60vw'}}>
       <Box sx={{ padding: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
           <Button variant="contained" color="primary" onClick={handleGenerateUnits}>

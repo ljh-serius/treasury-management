@@ -12,7 +12,7 @@ const ManageParameters = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+    <Container maxWidth="lg"  sx={{ paddingTop: 3, paddingBottom: 7, width: '60vw'}}>
         <Tabs value={selectedTab} onChange={handleTabChange}>
             <Tab label="Manage Users" />
             <Tab label="Manage Organization" />

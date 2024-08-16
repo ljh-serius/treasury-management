@@ -11,7 +11,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { auth } from './utils/firebaseConfig';
 import UnitGenerator from './components/UnitGenerator';
 import SummaryComponent from './components/SummaryComponent';
-import SaverComponent from './components/SaverComponent';
 import OrganizationRegistration from './components/OrganizationRegistration';
 import ManageParameters from './pages/ManageParameters';
 import { TranslationProvider } from './utils/TranslationProvider';
@@ -82,16 +81,6 @@ const App = () => {
               <ProtectedRoute user={user}>
                 <Dashboard>
                   <SummaryComponent />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/saver-by-entity"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <SaverComponent />
                 </Dashboard>
               </ProtectedRoute>
             }

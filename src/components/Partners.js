@@ -313,7 +313,7 @@ export default function Partners() {
   );
 
   return (
-    <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+    <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7, width: "60vw"}}>
       <Box sx={{ width: '100%' }}>
         <Paper sx={{ width: '100%', mb: 2 }}>
           <EnhancedTableToolbar
