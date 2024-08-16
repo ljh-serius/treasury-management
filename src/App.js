@@ -139,9 +139,7 @@ const App = () => {
             path="/registration"
             element={
               <ProtectedRoute user={user}>
-                <Dashboard>
                 <OrganizationRegistration />
-                </Dashboard>
               </ProtectedRoute>
             }
           />
