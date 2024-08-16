@@ -18,12 +18,10 @@ import { Elements } from '@stripe/react-stripe-js';
 import GanttChart from './components/GanttChart';
 import Projects from './components/Projects';
 import Providers from './components/Providers';
-import ProductLineAssessment from './components/ProductLineAssessment';
-import CostOptimization from './components/CostOptimization';
+import CostAllocation from './components/CostAllocation';
 import ProductPrototypes from './components/ProductPrototypes';
 import Partners from './components/Partners';
 import SearchPartners from './components/SearchPartners';
-import ProjectPrioritization from './components/ProjectPrioritization';
 import RiskManagement from './components/RiskManagement';
 import Employees from './components/Employees';
 import TreasuryTable from './components/TreasuryTable';
@@ -182,21 +180,11 @@ const App = () => {
             }
           />
           <Route
-            path="/product-line-assessment"
+            path="/cost-allocation"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                  <ProductLineAssessment />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cost-optimization"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                    <CostOptimization />
+                    <CostAllocation />
                 </Dashboard>
               </ProtectedRoute>
             }
@@ -227,16 +215,6 @@ const App = () => {
               <ProtectedRoute user={user}>
                 <Dashboard>
                   <SearchPartners />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/project-prioritization"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <ProjectPrioritization />
                 </Dashboard>
               </ProtectedRoute>
             }
