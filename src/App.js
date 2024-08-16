@@ -138,9 +138,7 @@ const App = () => {
           <Route
             path="/registration"
             element={
-              <ProtectedRoute user={user}>
-                <OrganizationRegistration />
-              </ProtectedRoute>
+              <OrganizationRegistration />
             }
           />
           <Route

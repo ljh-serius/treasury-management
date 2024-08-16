@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function BasicRichTreeView({ data, entities, onSelectSummary }) {
     const [selectedItems, setSelectedItems] = React.useState([]);
     const [items, setItems] = React.useState([]);
-    
+
     const navigate = useNavigate();
     const location = useLocation();
     
@@ -27,7 +28,7 @@ export default function BasicRichTreeView({ data, entities, onSelectSummary }) {
                     {
                         id: 'historical',
                         label: 'Historical Book',
-                        children: entities.map((entity, entityIndex) => {
+                        children: entities.map((entity) => {
                             const yearItems = data.summaries[entity.id]
                                 ? Object.keys(data.summaries[entity.id]).map((year) => ({
                                       id: `year-${entity.id}-${year}`,
@@ -52,10 +53,26 @@ export default function BasicRichTreeView({ data, entities, onSelectSummary }) {
 
         const mainItems = getItems();
         setItems(mainItems);
+
+        // Select 'historical' by default if items are available
+        if (mainItems.length > 0) {
+            setSelectedItems(['historical']);
+            onSelectSummary('historical')
+        }
     }, [data, entities]);
 
+    if (!data && !entities) {
+        return (
+            <Box sx={{ mt: 2, mb: 1, minWidth: 250 }}>
+                <Typography variant="body1" color="textSecondary">
+                    No summaries available.
+                </Typography>
+            </Box>
+        );
+    }
+
     return (
-        <Box sx={{ mt: 2, mb: 1, minHeight: 50, minWidth: 250 }}>
+        <Box sx={{ mt: 2, mb: 1, minWidth: 250 }}>
             <RichTreeView
                 items={items}
                 selectedItems={selectedItems}

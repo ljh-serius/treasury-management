@@ -54,6 +54,9 @@ const Dashboard = ({ children }) => {
   const [entities, setEntities] = useState([]);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [currentSummary, setCurrentSummary] = useState({});
+  const [bookName, setBookName] = useState(''); // Add state for bookName
+  const [entityName, setEntityName] = useState(''); // Add state for entityName
+  const organizationId = JSON.parse(localStorage.getItem("userData")).organizationId;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -61,7 +64,6 @@ const Dashboard = ({ children }) => {
 
       if (!user) return;
 
-      const organizationId = JSON.parse(localStorage.getItem("userData")).organizationId;
 
       const userDoc = await getDoc(doc(db, 'users', user.uid));
 
@@ -102,23 +104,40 @@ const Dashboard = ({ children }) => {
     setShowAnalytics(!showAnalytics);
   };
 
-  const onSelectSummaryTreeView = (selectedSummary) => {
+  const onSelectSummaryTreeView = async (selectedSummary) => {
     const [identifier, holder, subHolder] = selectedSummary.split('-');
-    console.log("IDENTIFIER", identifier);
-    console.log("HOLDER", holder);
-    console.log("SUMMARIES ", summaries)
+
+    console.log("PARAMS PRAMS FILTERS ",  [identifier, holder, subHolder])
     if(identifier === 'historical'){
-      setCurrentSummary(summaries.historicalSummary)
+      setCurrentSummary(summaries.historicalSummary);
+      const orgDocRef = doc(db, 'organizations', organizationId);
+      const orgDoc = await getDoc(orgDocRef);
+      const orgData = orgDoc.data();
+
+      console.log(orgData)
+      setBookName('Historical Transactions Book for ' + orgData.name); // Set appropriate book name
+      setEntityName(null); // Set appropriate entity name
     } else if (identifier === 'entity'){
-      setCurrentSummary(summaries.entitySummaries[holder])
-     }else if (identifier === 'year'){
-      setCurrentSummary(summaries.summaries[holder][subHolder])
+      const entity = summaries.entitySummaries[holder];
+
+      const entityName = entities.filter((entity) => {
+        return entity.id === holder;
+      })[0].name;
+
+      setCurrentSummary(entity);
+      setBookName('Entity Book'); // Set appropriate book name
+      setEntityName(entityName); // Set entity name based on holder
+    }else if (identifier === 'year'){
+      const summary = summaries.summaries[holder][subHolder];
+      const entityName = entities.filter((entity) => {
+        return entity.id === holder;
+      })[0].name;
+
+      setCurrentSummary(summary);
+      setBookName(subHolder) // Set appropriate book name
+      setEntityName(entityName); // Set appropriate entity name
     }
- 
-
   };
-
-
 
   const drawer = (
     <div>
@@ -285,7 +304,7 @@ const Dashboard = ({ children }) => {
         }}
       >
         <Toolbar>
-        <Button
+          <Button
             variant="outlined"
             color="inherit"
             onClick={toggleShowAnalytics}
@@ -293,7 +312,7 @@ const Dashboard = ({ children }) => {
           >
             {showAnalytics && translate("Show Data", language)}
             {!showAnalytics && translate("Show Analysis", language)}
-            </Button>
+          </Button>
           <Button
             variant="outlined"
             color="inherit"
@@ -311,13 +330,13 @@ const Dashboard = ({ children }) => {
         {drawer}
       </Drawer>
 
-      <main style={{ paddingLeft: '250px' ,margin: '100px auto'}}>
+      <main style={{ paddingLeft: '250px', margin: '100px auto' }}>
         {isTreasuryTable && currentSummary ? (
           <TreasuryTable
             transactions={currentSummary}
-            drawerWidth={drawerWidth}
-            headerHeight={headerHeight}
             showAnalytics={showAnalytics}
+            bookName={bookName} // Pass bookName as prop
+            entityName={entityName} // Pass entityName as prop
           />
         ) : (
           children

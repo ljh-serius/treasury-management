@@ -12,14 +12,14 @@ export const modalStyle = {
 };
 
 export const calculateTotals = (transactions = {}) => {
-  const updatedTransactions = { ...transactions };
-
-  // Ensure encaissements and decaissements are arrays, or provide default empty arrays
-  const encaissements = updatedTransactions.encaissements || [];
-  const decaissements = updatedTransactions.decaissements || [];
+  // Create a deep copy of the transactions to avoid modifying the original object
+  const updatedTransactions = {
+    encaissements: transactions.encaissements ? [...transactions.encaissements.map(t => ({ ...t }))] : [],
+    decaissements: transactions.decaissements ? [...transactions.decaissements.map(t => ({ ...t }))] : [],
+  };
 
   // Calculate total encaissements
-  const totalEncaissement = encaissements.reduce((total, transaction) => {
+  const totalEncaissement = updatedTransactions.encaissements.reduce((total, transaction) => {
     if (transaction.nature !== 'Total Encaissements') {
       total.montantInitial += transaction.montantInitial || 0;
       total.montants = total.montants.map((monthTotal, index) => monthTotal + (transaction.montants[index] || 0));
@@ -32,7 +32,7 @@ export const calculateTotals = (transactions = {}) => {
   });
 
   // Calculate total décaissements
-  const totalDecaissement = decaissements.reduce((total, transaction) => {
+  const totalDecaissement = updatedTransactions.decaissements.reduce((total, transaction) => {
     if (transaction.nature !== 'Total Décaissements') {
       total.montantInitial += transaction.montantInitial || 0;
       total.montants = total.montants.map((monthTotal, index) => monthTotal + (transaction.montants[index] || 0));
@@ -45,23 +45,23 @@ export const calculateTotals = (transactions = {}) => {
   });
 
   // Replace or append the totals in the arrays
-  if (encaissements.length > 0) {
-    encaissements[encaissements.length - 1] = totalEncaissement;
+  const lastEncaissement = updatedTransactions.encaissements[updatedTransactions.encaissements.length - 1];
+  if (lastEncaissement && lastEncaissement.nature === 'Total Encaissements') {
+    updatedTransactions.encaissements[updatedTransactions.encaissements.length - 1] = totalEncaissement;
   } else {
-    encaissements.push(totalEncaissement);
+    updatedTransactions.encaissements.push(totalEncaissement);
   }
 
-  if (decaissements.length > 0) {
-    decaissements[decaissements.length - 1] = totalDecaissement;
+  const lastDecaissement = updatedTransactions.decaissements[updatedTransactions.decaissements.length - 1];
+  if (lastDecaissement && lastDecaissement.nature === 'Total Décaissements') {
+    updatedTransactions.decaissements[updatedTransactions.decaissements.length - 1] = totalDecaissement;
   } else {
-    decaissements.push(totalDecaissement);
+    updatedTransactions.decaissements.push(totalDecaissement);
   }
-
-  updatedTransactions.encaissements = encaissements;
-  updatedTransactions.decaissements = decaissements;
 
   return updatedTransactions;
 };
+
 
 
 export const calculateMonthlyTreasury = (transactions) => {
@@ -138,20 +138,35 @@ export const calculatePercentageBalanceVsEncaissements = (monthlyTreasury, encai
   });
 };
 
+const sumUp = (numbers) => {
+  return numbers.reduce((total, num) => total + num, 0);
+}
+
+
 export const calculateBudgetSummary = (book) => {
-  // Calculate Initial Balance
-  const initialEncaissements = book.encaissements[book.encaissements.length - 1]?.montantInitial || 0;
-  const initialDecaissements = book.decaissements[book.encaissements.length - 1]?.montantInitial || 0;
+  const initialEncaissements = book.encaissements.filter((line) => {
+    return line.nature === 'Total Category';
+  })[0].montantInitial;
+
+  const initialDecaissements = book.encaissements.filter((line) => {
+    return line.nature === 'Total Category';
+  })[0].montantInitial;
+
   const initialBalance = initialEncaissements - initialDecaissements;
 
-  // Calculate Total Encaissements
-  const totalEncaissements = book.encaissements[book.encaissements.length - 1]?.montants.reduce((a, b) => a + b, 0) + book.encaissements[book.encaissements.length - 1]?.montantInitial || 0;
+  const totalEncaissements = sumUp(book.encaissements.filter((line) => {
+    return line.nature === 'Total Category';
+  })[0].montants);
 
-  // Calculate Total Decaissements
-  const totalDecaissements = book.decaissements[book.decaissements.length - 1]?.montants.reduce((a, b) => a + b, 0) + book.decaissements[book.decaissements.length - 1]?.montantInitial || 0;
+  const totalDecaissements = sumUp(book.decaissements.filter((line) => {
+    return line.nature === 'Total Category';
+  })[0].montants);
 
-  // Calculate Final Treasury
   const finalTreasury = totalEncaissements - totalDecaissements;
 
-  return { initialBalance, totalEncaissements, totalDecaissements, finalTreasury };
+  const result = { initialBalance, totalEncaissements, totalDecaissements, finalTreasury };
+
+  console.log(result);
+
+  return result;
 };
