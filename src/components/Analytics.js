@@ -64,18 +64,19 @@ const Analytics = () => {
     setSelectedBooks(event.target.value);
   };
 
-  // Generate available books with prefixes if necessary
-  const availableBooks = selectedBooks.flatMap(bookId => {
-    const prefix = entities.find(item => item.id === bookId)?.name;
-    return Object.keys(books.summaries[bookId] || {}).map(bookName => {
+  const availableEntityYearPairs = selectedBooks.flatMap(bookId => {
+    const entityName = entities.find(item => item.id === bookId)?.name;
+    return Object.keys(books.summaries[bookId] || {}).map(year => {
       return {
-        originalBook: bookName,
-        displayBook: prefix ? `${prefix} - ${bookName}` : bookName,
+        displayText: `${entityName} - ${year}`, // What the user sees
+        value: `${bookId}-${year}`, // The actual value we'll use to set the state
         bookId: bookId,
+        year: year,
       };
     });
   });
-
+  
+  
   useEffect(() => {
     const organizationId = JSON.parse(localStorage.getItem("userData")).organizationId;
 
@@ -583,6 +584,23 @@ const Analytics = () => {
   };
   
   
+const handleEntityYearChange = (event) => {
+  const selectedValues = event.target.value;
+  const entityYears = selectedValues.map(v => {
+    const [bookId, year] = v.split('-');
+    return { bookId, year };
+  });
+  setSelectedEntityYears(entityYears);
+};
+
+// RenderValue now uses the displayText
+const renderSelectedValue = (selected) => {
+  return selected.map(value => {
+    const item = availableEntityYearPairs.find(pair => pair.value === value);
+    return item?.displayText || '';
+  }).join(', ');
+};
+
   // Sum up the values for the footer
   const calculateFooterTotals = () => {
     let initialBalanceSum = 0;
@@ -591,8 +609,9 @@ const Analytics = () => {
     let finalTreasurySum = 0;
 
     selectedEntityYears.forEach(({ bookId, year }) => {
+      console.log("DATA DATA DATA ", { books: books.summaries[bookId][year], bookId, year} )
       const summary = calculateBudgetSummary(
-        calculateTotals(books.summaries[bookId][year])
+        books.summaries[bookId][year]
       );
       initialBalanceSum += summary.initialBalance;
       totalEncaissementsSum += summary.totalEncaissements;
@@ -636,7 +655,7 @@ const Analytics = () => {
             </Select>
           </FormControl>
         </Grid>
-
+      
         <Grid item xs={12} md={4}>
           <FormControl fullWidth margin="normal" disabled={selectedBooks.length === 0}>
             <InputLabel id="years-select-label">Select Years</InputLabel>
@@ -644,20 +663,13 @@ const Analytics = () => {
               labelId="years-select-label"
               multiple
               value={selectedEntityYears.map(({ bookId, year }) => `${bookId}-${year}`)}
-              onChange={(event) => {
-                const value = event.target.value;
-                const entityYears = value.map(v => {
-                  const [bookId, year] = v.split('-');
-                  return { bookId, year };
-                });
-                setSelectedEntityYears(entityYears);
-              }}
-              renderValue={(selected) => selected.map(v => availableBooks.find(ab => ab.bookId === v.split('-')[0] && ab.originalBook === v.split('-')[1])?.displayBook).join(', ')}
+              onChange={handleEntityYearChange}
+              renderValue={renderSelectedValue}
             >
-              {availableBooks.map(({ originalBook, displayBook }) => (
-                <MenuItem key={originalBook} value={originalBook}>
-                  <Checkbox checked={selectedEntities.indexOf(originalBook) > -1} />
-                  <ListItemText primary={displayBook} />
+              {availableEntityYearPairs.map(({ displayText, value }) => (
+                <MenuItem key={value} value={value}>
+                  <Checkbox checked={selectedEntityYears.some(pair => `${pair.bookId}-${pair.year}` === value)} />
+                  <ListItemText primary={displayText} />
                 </MenuItem>
               ))}
             </Select>
@@ -704,8 +716,10 @@ const Analytics = () => {
               <TableBody>
                 {selectedEntityYears.map(({ bookId, year }) => {
                   const entityName = entities.find(item => item.id === bookId)?.name;
+                  console.log("PARAMS ", [bookId, year])
+
                   const summary = calculateBudgetSummary(
-                    calculateTotals(books.summaries[bookId][year])
+                    books.summaries[bookId][year]
                   );
                   return (
                     <TableRow key={`${bookId}-${year}`} hover>

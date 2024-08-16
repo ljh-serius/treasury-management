@@ -152,8 +152,6 @@ export const calculateBudgetSummary = (book) => {
     return line.nature === 'Total Category';
   })[0].montantInitial;
 
-  console.log(" honestly", book)
-
   const initialBalance = initialEncaissements - initialDecaissements;
 
   const totalEncaissements = sumUp(book.encaissements.filter((line) => {
