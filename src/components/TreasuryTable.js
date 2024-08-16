@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Grid, Box, Button } from '@mui/material';
+import { Container, Grid, Box, Button, Typography } from '@mui/material';
 import { DataGrid, GridToolbar, GridToolbarContainer, GridToolbarExport } from '@mui/x-data-grid';
 import {
   monthNames, calculateMonthlyTreasury, calculateAccumulatedTreasury,
@@ -15,7 +15,12 @@ const calculateTotal = (type, index, transactions) => {
   return total;
 };
 
-const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }, headerHeight = 64, drawerWidth = 240, showAnalytics = false }) => {
+const TreasuryTable = ({ 
+  transactions = { encaissements: [], decaissements: [] }, 
+  showAnalytics = false,
+  bookName,   // New prop for book name
+  entityName // New prop for entity name
+}) => {
   const [encaissementsData, setEncaissementsData] = useState([]);
   const [decaissementsData, setDecaissementsData] = useState([]);
   const [cumulativeTreasuryData, setCumulativeTreasuryData] = useState([]);
@@ -119,8 +124,12 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
       headerName: 'Total',
       width: 150,
       valueGetter: (params) => {
-        console.log("PARAMETER PARAMETER", params)
-        return params;  // Error might occur here if params.row or total is undefined
+        // Ensure that params.row and params.row.total are defined
+        if (params.row && params.row.total !== undefined) {
+          return params.row.total;
+        }
+        console.warn('Warning: Total field is undefined for row:', params.row);
+        return 0;
       },
     }
   ];
@@ -175,6 +184,11 @@ const TreasuryTable = ({ transactions = { encaissements: [], decaissements: [] }
 
   return (
     <Container maxWidth="lg" sx={{ mt: 12, mb: 12 }}>
+      <Box sx={{ mb: 4, textAlign: 'left' }}>
+        { bookName && <Typography variant="h6"><strong>Book : </strong> {bookName}</Typography> }
+        { entityName && <Typography variant="h6"><strong>Entity : </strong> {entityName}</Typography> }
+      </Box>
+
       {!showAnalytics && (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
           <DataGrid
