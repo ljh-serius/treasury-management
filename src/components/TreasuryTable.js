@@ -19,7 +19,7 @@ const TreasuryTable = ({
   transactions = { encaissements: [], decaissements: [] }, 
   showAnalytics = false,
   bookName,   // New prop for book name
-  entityName // New prop for entity name
+  entityName  // New prop for entity name
 }) => {
   const [encaissementsData, setEncaissementsData] = useState([]);
   const [decaissementsData, setDecaissementsData] = useState([]);
@@ -124,12 +124,7 @@ const TreasuryTable = ({
       headerName: 'Total',
       width: 150,
       valueGetter: (params) => {
-        // Ensure that params.row and params.row.total are defined
-        if (params.row && params.row.total !== undefined) {
-          return params.row.total;
-        }
-        console.warn('Warning: Total field is undefined for row:', params.row);
-        return 0;
+        return params
       },
     }
   ];

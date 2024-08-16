@@ -123,52 +123,69 @@ const Analytics = () => {
     }
   }, [selectedBooks, selectedEntityYears, selectedMonths, books]);
 
-
   const generateChartOptions = (booksToAnalyze) => {
     const initialBalances = {};
     const totalEncaissements = {};
     const totalDecaissements = {};
     const finalTreasuries = {};
-
+  
     booksToAnalyze.forEach((entityId) => {
-      console.log("ENTITY ID", entityId)
-      const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
-      if (!booksUnderEntity) return; // Skip if no books found under this entityId
-
+      const booksUnderEntity = books.summaries[entityId];
+      if (!booksUnderEntity) return;
+  
       Object.keys(booksUnderEntity).forEach((bookName) => {
-        if (!selectedEntityYears.map(({ year }) => year).includes(bookName)) return; // Only include selected years/books
-
+        if (!selectedEntityYears.map(({ year }) => year).includes(bookName)) return;
+  
         const book = booksUnderEntity[bookName];
         if (!book) return;
-
-        const summary = calculateBudgetSummary(calculateTotals(book));
-
-        initialBalances[bookName] = (initialBalances[bookName] || 0) + summary.initialBalance;
-
+  
+        // Filter out "Total Category"
+        const filteredBook = {
+          encaissements: book.encaissements?.filter(enc => enc.nature !== 'Total Category') || [],
+          decaissements: book.decaissements?.filter(dec => dec.nature !== 'Total Category') || [],
+        };
+  
+        if (!filteredBook.encaissements.length && !filteredBook.decaissements.length) {
+          return;  // Skip processing if there's no valid data
+        }
+  
+        // Add a check to ensure the expected properties exist
+        if (filteredBook.encaissements.some(enc => enc.montantInitial === undefined) || 
+            filteredBook.decaissements.some(dec => dec.montantInitial === undefined)) {
+          console.warn(`Book ${bookName} under entity ${entityId} is missing 'montantInitial'. Skipping.`);
+          return;
+        }
+  
+        // Calculate the budget summary with valiated data
+        console.log("FILTERED BOOK ", book )
+        const summary = calculateBudgetSummary(book);
+  
+        initialBalances[bookName] = (initialBalances[bookName] || 0) + (summary.initialBalance || 0);
+  
         const encaissementsArray = Array.isArray(summary.totalEncaissements) ? summary.totalEncaissements : [summary.totalEncaissements];
         const decaissementsArray = Array.isArray(summary.totalDecaissements) ? summary.totalDecaissements : [summary.totalDecaissements];
-
+  
         const filteredEncaissements = selectedMonths.length > 0
           ? encaissementsArray.filter((_, index) => selectedMonths.includes(index))
           : encaissementsArray;
-
+  
         const filteredDecaissements = selectedMonths.length > 0
           ? decaissementsArray.filter((_, index) => selectedMonths.includes(index))
           : decaissementsArray;
-
+  
         totalEncaissements[bookName] = (totalEncaissements[bookName] || 0) + filteredEncaissements.reduce((a, b) => a + b, 0);
         totalDecaissements[bookName] = (totalDecaissements[bookName] || 0) + filteredDecaissements.reduce((a, b) => a + b, 0);
-
+  
         finalTreasuries[bookName] = initialBalances[bookName] + totalEncaissements[bookName] - totalDecaissements[bookName];
       });
     });
-
+  
     return {
       title: {
         text: translate('Comparative Analysis of Budget Summaries', language),
       },
       xAxis: {
-        categories: Object.keys(initialBalances), // Display the selected book names (years)
+        categories: Object.keys(initialBalances),
         title: {
           text: translate('Books', language),
         },
@@ -214,274 +231,296 @@ const Analytics = () => {
       },
     };
   };
+  
+  
 
-  const generatePieChartOptions = (booksToAnalyze) => {
-    const encaissementsData = {};
-    const decaissementsData = {};
 
-    booksToAnalyze.forEach((entityId) => {
-      const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
-      if (!booksUnderEntity) return; // Skip if no books found under this entityId
+const generatePieChartOptions = (booksToAnalyze) => {
+  const encaissementsData = {};
+  const decaissementsData = {};
+
+  booksToAnalyze.forEach((entityId) => {
+      const booksUnderEntity = books.summaries[entityId];
+      if (!booksUnderEntity) return;
 
       Object.keys(booksUnderEntity).forEach((bookName) => {
-        const book = booksUnderEntity[bookName];
-        if (!book) return;
+          const book = booksUnderEntity[bookName];
+          if (!book) return;
 
-        if (book.encaissements) {
-          book.encaissements.forEach((enc) => {
-            enc.montants.forEach((amount, month) => {
-              if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
-                encaissementsData[enc.nature] = (encaissementsData[enc.nature] || 0) + amount;
-              }
-            });
-          });
-        }
+          if (book.encaissements) {
+              book.encaissements
+                  .filter(enc => enc.nature !== 'Total Category') // Exclude 'Total Category'
+                  .forEach((enc) => {
+                      enc.montants.forEach((amount, month) => {
+                          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+                              encaissementsData[enc.nature] = (encaissementsData[enc.nature] || 0) + amount;
+                          }
+                      });
+                  });
+          }
 
-        if (book.decaissements) {
-          book.decaissements.forEach((dec) => {
-            dec.montants.forEach((amount, month) => {
-              if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
-                decaissementsData[dec.nature] = (decaissementsData[dec.nature] || 0) + amount;
-              }
-            });
-          });
-        }
+          if (book.decaissements) {
+              book.decaissements
+                  .filter(dec => dec.nature !== 'Total Category') // Exclude 'Total Category'
+                  .forEach((dec) => {
+                      dec.montants.forEach((amount, month) => {
+                          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+                              decaissementsData[dec.nature] = (decaissementsData[dec.nature] || 0) + amount;
+                          }
+                      });
+                  });
+          }
       });
-    });
+  });
 
-    return {
+  return {
       encaissements: {
-        chart: {
-          type: 'pie',
-        },
-        title: {
-          text: translate('Encaissements Breakdown', language),
-        },
-        series: [
-          {
-            name: translate('Encaissements', language),
-            data: Object.entries(encaissementsData).map(([name, value]) => ({
-              name,
-              y: value,
-            })),
-            dataLabels: { enabled: true },
+          chart: {
+              type: 'pie',
           },
-        ],
-        credits: { enabled: false },
+          title: {
+              text: translate('Encaissements Breakdown', language),
+          },
+          series: [
+              {
+                  name: translate('Encaissements', language),
+                  data: Object.entries(encaissementsData).map(([name, value]) => ({
+                      name,
+                      y: value,
+                  })),
+                  dataLabels: { enabled: true },
+              },
+          ],
+          credits: { enabled: false },
       },
       decaissements: {
-        chart: {
-          type: 'pie',
-        },
-        title: {
-          text: translate('Expenses Breakdown', language),
-        },
-        series: [
-          {
-            name: translate('Expenses', language),
-            data: Object.entries(decaissementsData).map(([name, value]) => ({
-              name,
-              y: value,
-            })),
-            dataLabels: { enabled: true },
+          chart: {
+              type: 'pie',
           },
-        ],
-        credits: { enabled: false },
+          title: {
+              text: translate('Expenses Breakdown', language),
+          },
+          series: [
+              {
+                  name: translate('Expenses', language),
+                  data: Object.entries(decaissementsData).map(([name, value]) => ({
+                      name,
+                      y: value,
+                  })),
+                  dataLabels: { enabled: true },
+              },
+          ],
+          credits: { enabled: false },
       },
-    };
   };
+};
 
-  const generateLineChartOptions = (booksToAnalyze) => {
-    const timeSeriesData = {};
 
-    booksToAnalyze.forEach((entityId) => {
-      const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
-      if (!booksUnderEntity) return; // Skip if no books found under this entityId
+const generateLineChartOptions = (booksToAnalyze) => {
+  const timeSeriesData = {};
+
+  booksToAnalyze.forEach((entityId) => {
+      const booksUnderEntity = books.summaries[entityId];
+      if (!booksUnderEntity) return;
 
       Object.keys(booksUnderEntity).forEach((bookName) => {
-        const book = booksUnderEntity[bookName];
-        if (!book) return;
+          const book = booksUnderEntity[bookName];
+          if (!book) return;
 
-        if (book.encaissements) {
-          book.encaissements.forEach((enc) => {
-            enc.montants.forEach((amount, month) => {
-              if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
-                timeSeriesData[month] = timeSeriesData[month] || { encaissements: 0, decaissements: 0 };
-                timeSeriesData[month].encaissements += amount;
-              }
-            });
-          });
-        }
+          if (book.encaissements) {
+              book.encaissements
+                  .filter(enc => enc.nature !== 'Total Category') // Exclude 'Total Category'
+                  .forEach((enc) => {
+                      enc.montants.forEach((amount, month) => {
+                          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+                              timeSeriesData[month] = timeSeriesData[month] || { encaissements: 0, decaissements: 0 };
+                              timeSeriesData[month].encaissements += amount;
+                          }
+                      });
+                  });
+          }
 
-        if (book.decaissements) {
-          book.decaissements.forEach((dec) => {
-            dec.montants.forEach((amount, month) => {
-              if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
-                timeSeriesData[month].decaissements += amount;
-              }
-            });
-          });
-        }
+          if (book.decaissements) {
+              book.decaissements
+                  .filter(dec => dec.nature !== 'Total Category') // Exclude 'Total Category'
+                  .forEach((dec) => {
+                      dec.montants.forEach((amount, month) => {
+                          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+                              timeSeriesData[month].decaissements += amount;
+                          }
+                      });
+                  });
+          }
       });
-    });
+  });
 
-    const months = Object.keys(timeSeriesData).sort();
-    const encaissementsSeries = months.map(month => timeSeriesData[month].encaissements);
-    const decaissementsSeries = months.map(month => timeSeriesData[month].decaissements);
+  const months = Object.keys(timeSeriesData).sort();
+  const encaissementsSeries = months.map(month => timeSeriesData[month].encaissements);
+  const decaissementsSeries = months.map(month => timeSeriesData[month].decaissements);
 
-    return {
+  return {
       chart: { type: 'line' },
       title: { text: translate('Treasury Evolution Over Time', language) },
       xAxis: {
-        categories: months.map(month => monthNames[month]),
-        title: { text: translate('Time', language) },
+          categories: months.map(month => monthNames[month]),
+          title: { text: translate('Time', language) },
       },
       yAxis: { title: { text: translate('Amount', language) }, min: 0 },
       series: [
-        {
-          name: translate('Total Encaissements', language),
-          data: encaissementsSeries,
-          type: 'line',
-          color: '#28a745',
-        },
-        {
-          name: translate('Total Decaissements', language),
-          data: decaissementsSeries,
-          type: 'line',
-          color: '#dc3545',
-        },
+          {
+              name: translate('Total Encaissements', language),
+              data: encaissementsSeries,
+              type: 'line',
+              color: '#28a745',
+          },
+          {
+              name: translate('Total Decaissements', language),
+              data: decaissementsSeries,
+              type: 'line',
+              color: '#dc3545',
+          },
       ],
       credits: { enabled: false },
-    };
   };
+};
 
-  const generateBarChartOptions = (booksToAnalyze) => {
-    const monthlyTotals = {};
 
-    booksToAnalyze.forEach((entityId) => {
-      const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
-      if (!booksUnderEntity) return; // Skip if no books found under this entityId
+const generateBarChartOptions = (booksToAnalyze) => {
+  const monthlyTotals = {};
+
+  booksToAnalyze.forEach((entityId) => {
+      const booksUnderEntity = books.summaries[entityId];
+      if (!booksUnderEntity) return;
 
       Object.keys(booksUnderEntity).forEach((bookName) => {
-        const book = booksUnderEntity[bookName];
-        if (!book) return;
+          const book = booksUnderEntity[bookName];
+          if (!book) return;
 
-        if (book.encaissements) {
-          book.encaissements.forEach((enc) => {
-            enc.montants.forEach((amount, month) => {
-              if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
-                monthlyTotals[month] = monthlyTotals[month] || {
-                  encaissements: 0,
-                  decaissements: 0,
-                };
-                monthlyTotals[month].encaissements += amount;
-              }
-            });
-          });
-        }
+          if (book.encaissements) {
+              book.encaissements
+                  .filter(enc => enc.nature !== 'Total Category') // Exclude 'Total Category'
+                  .forEach((enc) => {
+                      enc.montants.forEach((amount, month) => {
+                          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+                              monthlyTotals[month] = monthlyTotals[month] || {
+                                  encaissements: 0,
+                                  decaissements: 0,
+                              };
+                              monthlyTotals[month].encaissements += amount;
+                          }
+                      });
+                  });
+          }
 
-        if (book.decaissements) {
-          book.decaissements.forEach((dec) => {
-            dec.montants.forEach((amount, month) => {
-              if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
-                monthlyTotals[month] = monthlyTotals[month] || {
-                  encaissements: 0,
-                  decaissements: 0,
-                };
-                monthlyTotals[month].decaissements += amount;
-              }
-            });
-          });
-        }
+          if (book.decaissements) {
+              book.decaissements
+                  .filter(dec => dec.nature !== 'Total Category') // Exclude 'Total Category'
+                  .forEach((dec) => {
+                      dec.montants.forEach((amount, month) => {
+                          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+                              monthlyTotals[month] = monthlyTotals[month] || {
+                                  encaissements: 0,
+                                  decaissements: 0,
+                              };
+                              monthlyTotals[month].decaissements += amount;
+                          }
+                      });
+                  });
+          }
       });
-    });
+  });
 
-    const months = Object.keys(monthlyTotals).sort();
+  const months = Object.keys(monthlyTotals).sort();
 
-    return {
+  return {
       chart: { type: 'column' },
       title: { text: translate('Monthly Totals', language) },
       xAxis: {
-        categories: months.map(month => monthNames[month]),
-        title: { text: translate('Month', language) },
+          categories: months.map(month => monthNames[month]),
+          title: { text: translate('Month', language) },
       },
       yAxis: { title: { text: translate('Amount', language) }, min: 0 },
       series: [
-        {
-          name: translate('Total Encaissements', language),
-          data: months.map((month) => monthlyTotals[month].encaissements),
-          color: '#28a745',
-        },
-        {
-          name: translate('Total Decaissements', language),
-          data: months.map((month) => monthlyTotals[month].decaissements),
-          color: '#dc3545',
-        },
+          {
+              name: translate('Total Encaissements', language),
+              data: months.map((month) => monthlyTotals[month].encaissements),
+              color: '#28a745',
+          },
+          {
+              name: translate('Total Decaissements', language),
+              data: months.map((month) => monthlyTotals[month].decaissements),
+              color: '#dc3545',
+          },
       ],
       credits: { enabled: false },
-    };
   };
+};
 
 
-  const generateHeatmapOptions = (booksToAnalyze) => {
-    const heatmapData = [];
+const generateHeatmapOptions = (booksToAnalyze) => {
+  const heatmapData = [];
 
-    booksToAnalyze.forEach((entityId, bookIndex) => {
-      const booksUnderEntity = books.summaries[entityId]; // Access all books under this entityId
-      if (!booksUnderEntity) return; // Skip if no books found under this entityId
+  booksToAnalyze.forEach((entityId, bookIndex) => {
+      const booksUnderEntity = books.summaries[entityId];
+      if (!booksUnderEntity) return;
 
       Object.keys(booksUnderEntity).forEach((bookName) => {
-        const book = booksUnderEntity[bookName];
-        if (!book) return;
+          const book = booksUnderEntity[bookName];
+          if (!book) return;
 
-        if (book.encaissements) {
-          book.encaissements.forEach((enc) => {
-            enc.montants.forEach((amount, month) => {
-              if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
-                heatmapData.push([bookIndex, month, amount]);
-              }
-            });
-          });
-        }
+          if (book.encaissements) {
+              book.encaissements
+                  .filter(enc => enc.nature !== 'Total Category') // Exclude 'Total Category'
+                  .forEach((enc) => {
+                      enc.montants.forEach((amount, month) => {
+                          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+                              heatmapData.push([bookIndex, month, amount]);
+                          }
+                      });
+                  });
+          }
 
-        if (book.decaissements) {
-          book.decaissements.forEach((dec) => {
-            dec.montants.forEach((amount, month) => {
-              if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
-                heatmapData.push([bookIndex, month, -amount]);
-              }
-            });
-          });
-        }
+          if (book.decaissements) {
+              book.decaissements
+                  .filter(dec => dec.nature !== 'Total Category') // Exclude 'Total Category'
+                  .forEach((dec) => {
+                      dec.montants.forEach((amount, month) => {
+                          if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
+                              heatmapData.push([bookIndex, month, -amount]);
+                          }
+                      });
+                  });
+          }
       });
-    });
+  });
 
-    return {
+  return {
       chart: { type: 'heatmap' },
       title: { text: translate('Monthly Transaction Heatmap', language) },
       xAxis: {
-        categories: booksToAnalyze, // Display the selected entities
-        title: { text: translate('Books', language) },
+          categories: booksToAnalyze,
+          title: { text: translate('Books', language) },
       },
       yAxis: {
-        categories: monthNames,
-        title: { text: translate('Month', language) },
+          categories: monthNames,
+          title: { text: translate('Month', language) },
       },
       colorAxis: {
-        min: -Math.max(...heatmapData.map(data => Math.abs(data[2]))),
-        minColor: '#dc3545',
-        maxColor: '#28a745',
+          min: -Math.max(...heatmapData.map(data => Math.abs(data[2]))),
+          minColor: '#dc3545',
+          maxColor: '#28a745',
       },
       series: [
-        {
-          name: translate('Transactions', language),
-          borderWidth: 1,
-          data: heatmapData,
-        },
+          {
+              name: translate('Transactions', language),
+              borderWidth: 1,
+              data: heatmapData,
+          },
       ],
       credits: { enabled: false },
-    };
   };
+};
+
 
   // Sum up the values for the footer
   const calculateFooterTotals = () => {
