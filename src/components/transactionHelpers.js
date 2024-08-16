@@ -144,22 +144,22 @@ const sumUp = (numbers) => {
 
 
 export const calculateBudgetSummary = (book) => {
-  const initialEncaissements = book.encaissements.filter((line) => {
-    return line.nature === 'Total Category';
+  let initialEncaissements = book.encaissements.filter((line) => {
+    return line.nature === 'Total Revenues';
   })[0].montantInitial;
 
-  const initialDecaissements = book.encaissements.filter((line) => {
-    return line.nature === 'Total Category';
+  const initialDecaissements = book.decaissements.filter((line) => {
+    return line.nature === 'Total Expenses';
   })[0].montantInitial;
 
   const initialBalance = initialEncaissements - initialDecaissements;
 
   const totalEncaissements = sumUp(book.encaissements.filter((line) => {
-    return line.nature === 'Total Category';
+    return line.nature === 'Total Revenues';
   })[0].montants);
 
   const totalDecaissements = sumUp(book.decaissements.filter((line) => {
-    return line.nature === 'Total Category';
+    return line.nature === 'Total Expenses';
   })[0].montants);
 
   const finalTreasury = totalEncaissements - totalDecaissements;

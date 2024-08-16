@@ -143,12 +143,7 @@ const Analytics = () => {
         const book = booksUnderEntity[bookName];
         if (!book) return;
 
-        // Filter out "Total Category"
-        const filteredBook = {
-          encaissements: book.encaissements?.filter(enc => enc.nature !== 'Total Category') || [],
-          decaissements: book.decaissements?.filter(dec => dec.nature !== 'Total Category') || [],
-        };
-
+        console.log("BOOK ", book)
         // Calculate the budget summary with validated data
         const summary = calculateBudgetSummary(book);
 
@@ -241,7 +236,7 @@ const Analytics = () => {
 
         if (book.encaissements) {
           book.encaissements
-            .filter(enc => enc.nature !== 'Total Category') // Exclude 'Total Category'
+            .filter(enc => enc.nature !== 'Total Revenues') // Exclude 'Total Category'
             .forEach((enc) => {
               enc.montants.forEach((amount, month) => {
                 if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
@@ -253,7 +248,7 @@ const Analytics = () => {
 
         if (book.decaissements) {
           book.decaissements
-            .filter(dec => dec.nature !== 'Total Category') // Exclude 'Total Category'
+            .filter(dec => dec.nature !== 'Total Expenses') // Exclude 'Total Category'
             .forEach((dec) => {
               dec.montants.forEach((amount, month) => {
                 if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
@@ -321,7 +316,7 @@ const Analytics = () => {
   
         if (book.encaissements) {
           book.encaissements
-            .filter(enc => enc.nature !== 'Total Category')
+            .filter(enc => enc.nature !== 'Total Revenues')
             .forEach((enc) => {
               enc.montants.forEach((amount, month) => {
                 const key = `${bookName}-${month}`;
@@ -333,7 +328,7 @@ const Analytics = () => {
   
         if (book.decaissements) {
           book.decaissements
-            .filter(dec => dec.nature !== 'Total Category')
+            .filter(dec => dec.nature !== 'Total Expenses')
             .forEach((dec) => {
               dec.montants.forEach((amount, month) => {
                 const key = `${bookName}-${month}`;
@@ -400,7 +395,7 @@ const Analytics = () => {
 
         if (book.encaissements) {
           book.encaissements
-            .filter(enc => enc.nature !== 'Total Category') // Exclude 'Total Category'
+            .filter(enc => enc.nature !== 'Total Revenues') // Exclude 'Total Category'
             .forEach((enc) => {
               enc.montants.forEach((amount, month) => {
                 if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
@@ -416,7 +411,7 @@ const Analytics = () => {
 
         if (book.decaissements) {
           book.decaissements
-            .filter(dec => dec.nature !== 'Total Category') // Exclude 'Total Category'
+            .filter(dec => dec.nature !== 'Total Expenses') // Exclude 'Total Category'
             .forEach((dec) => {
               dec.montants.forEach((amount, month) => {
                 if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
@@ -473,7 +468,7 @@ const Analytics = () => {
 
         if (book.encaissements) {
           book.encaissements
-            .filter(enc => enc.nature !== 'Total Category') // Exclude 'Total Category'
+            .filter(enc => enc.nature !== 'Total Revenues') // Exclude 'Total Category'
             .forEach((enc) => {
               enc.montants.forEach((amount, month) => {
                 if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
@@ -485,7 +480,7 @@ const Analytics = () => {
 
         if (book.decaissements) {
           book.decaissements
-            .filter(dec => dec.nature !== 'Total Category') // Exclude 'Total Category'
+            .filter(dec => dec.nature !== 'Total Expenses') // Exclude 'Total Category'
             .forEach((dec) => {
               dec.montants.forEach((amount, month) => {
                 if (selectedMonths.length === 0 || selectedMonths.includes(month)) {

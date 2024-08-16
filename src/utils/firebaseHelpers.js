@@ -353,10 +353,10 @@ export const fetchUnitsSummaryForStore = async (organizationId, entityId) => {
         });
       }
 
-      const calculateTotal = (entries) => {
+      const calculateTotal = (entries, type) => {
 
         const totalEntry = {
-          nature: `Total ${entries.length > 0 ? entries[0].nature.split(" ")[0] : ""}`,
+          nature: `Total ${type}`,
           montantInitial: 0,
           montants: Array(12).fill(0),
         };
@@ -372,8 +372,8 @@ export const fetchUnitsSummaryForStore = async (organizationId, entityId) => {
         return totalEntry;
       };
 
-      summary[year].encaissements.push(calculateTotal(summary[year].encaissements));
-      summary[year].decaissements.push(calculateTotal(summary[year].decaissements));
+      summary[year].encaissements.push(calculateTotal(summary[year].encaissements, 'Revenues'));
+      summary[year].decaissements.push(calculateTotal(summary[year].decaissements, 'Expenses'));
     }
 
     console.log('Final Summary:', summary);

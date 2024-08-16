@@ -6,7 +6,6 @@ import Analytics from './components/Analytics';
 import HomePage from './components/HomePage';
 import Blog from './components/Blog';
 import Article from './components/Article';
-import UnitDetails from './components/UnitDetails';
 import ProtectedRoute from './components/ProtectedRoute';
 import { auth } from './utils/firebaseConfig';
 import UnitGenerator from './components/UnitGenerator';
@@ -28,6 +27,7 @@ import ProjectPrioritization from './components/ProjectPrioritization';
 import RiskManagement from './components/RiskManagement';
 import Employees from './components/Employees';
 import TreasuryTable from './components/TreasuryTable';
+
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
 
 if (!process.env.REACT_APP_STRIPE_PUBLIC_KEY) {
@@ -37,7 +37,6 @@ if (!process.env.REACT_APP_STRIPE_PUBLIC_KEY) {
 const App = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [organizationId, setOrganizationId] = useState(null); // State to store organizationId
   const [language, setLanguage] = useState('en'); // Default language
 
   useEffect(() => {

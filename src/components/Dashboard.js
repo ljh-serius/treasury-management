@@ -109,14 +109,17 @@ const Dashboard = ({ children }) => {
 
     console.log("PARAMS PRAMS FILTERS ",  [identifier, holder, subHolder])
     if(identifier === 'historical'){
+      console.log("orginzationId", organizationId)
       setCurrentSummary(summaries.historicalSummary);
       const orgDocRef = doc(db, 'organizations', organizationId);
       const orgDoc = await getDoc(orgDocRef);
-      const orgData = orgDoc.data();
-
-      console.log(orgData)
-      setBookName('Historical Transactions Book for ' + orgData.name); // Set appropriate book name
-      setEntityName(null); // Set appropriate entity name
+      if (orgDoc.exists()) {
+        console.log("Organization data:", orgDoc.data());
+        const orgData = orgDoc.data();
+        setBookName('Historical Transactions Book for ' + orgData.name); // Set appropriate book name
+        setEntityName(null); // Set appropriate entity name
+      }
+   
     } else if (identifier === 'entity'){
       const entity = summaries.entitySummaries[holder];
 

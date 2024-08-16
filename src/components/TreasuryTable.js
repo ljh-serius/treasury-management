@@ -49,8 +49,8 @@ const TreasuryTable = ({
     const displayedMonths = monthNames.slice(1);
   
     // Find the "Total Category" in encaissements and decaissements
-    const totalEncaissements = encaissements.find((transaction) => transaction.nature === 'Total Category');
-    const totalDecaissements = decaissements.find((transaction) => transaction.nature === 'Total Category');
+    const totalEncaissements = encaissements.find((transaction) => transaction.nature === 'Total Revenues');
+    const totalDecaissements = decaissements.find((transaction) => transaction.nature === 'Total Expenses');
   
     // Calculate the difference for each month
     const treasuryBalance = displayedMonths.map((_, i) => {
