@@ -53,6 +53,7 @@ const Analytics = () => {
   const [heatmapOptions, setHeatmapOptions] = useState({});
   const [selectedBooks, setSelectedBooks] = useState([]); // Selected entities (book IDs)
   const [selectedEntityYears, setSelectedEntityYears] = useState([]); // Selected entity-year pairs
+  const [netTreasuryOptions, setNetTreasuryOptions] = useState({});
 
   useEffect(() => {
     console.log("Entities:", entities);
@@ -102,23 +103,28 @@ const Analytics = () => {
 
   useEffect(() => {
     if (selectedBooks.length > 0 || selectedEntityYears.length > 0 || selectedMonths.length > 0) {
-      const options = generateChartOptions(selectedBooks.length > 0 ? selectedBooks : Object.keys(books.summaries));
+      const booksToAnalyze = selectedBooks.length > 0 ? selectedBooks : Object.keys(books.summaries);
+  
+      const options = generateChartOptions(booksToAnalyze);
       setChartOptions(options);
-
-      const pieOptions = generatePieChartOptions(selectedBooks.length > 0 ? selectedBooks : Object.keys(books.summaries));
+  
+      const pieOptions = generatePieChartOptions(booksToAnalyze);
       setPieChartOptions(pieOptions);
-
-      const lineOptions = generateLineChartOptions(selectedBooks.length > 0 ? selectedBooks : Object.keys(books.summaries));
+  
+      const lineOptions = generateLineChartOptions(booksToAnalyze);
       setLineChartOptions(lineOptions);
-
-      const barOptions = generateBarChartOptions(selectedBooks.length > 0 ? selectedBooks : Object.keys(books.summaries));
+  
+      const netTreasuryOptions = generateNetTreasuryEvolutionOptions(booksToAnalyze);
+      setNetTreasuryOptions(netTreasuryOptions);
+  
+      const barOptions = generateBarChartOptions(booksToAnalyze);
       setBarChartOptions(barOptions);
-
-      const heatmapOptions = generateHeatmapOptions(selectedBooks.length > 0 ? selectedBooks : Object.keys(books.summaries));
+  
+      const heatmapOptions = generateHeatmapOptions(booksToAnalyze);
       setHeatmapOptions(heatmapOptions);
     }
   }, [selectedBooks, selectedEntityYears, selectedMonths, books]);
-
+  
   const generateChartOptions = (booksToAnalyze) => {
     const initialBalances = {};
     const totalEncaissements = {};
@@ -299,57 +305,62 @@ const Analytics = () => {
       },
     };
   };
-
   const generateLineChartOptions = (booksToAnalyze) => {
     const timeSeriesData = {};
-
+  
     booksToAnalyze.forEach((entityId) => {
       const booksUnderEntity = books.summaries[entityId];
       if (!booksUnderEntity) return;
-
+  
       Object.keys(booksUnderEntity).forEach((bookName) => {
-        // If specific years are selected, filter by those; otherwise, consider all years
         if (selectedEntityYears.length > 0 && !selectedEntityYears.map(({ year }) => year).includes(bookName)) return;
-
+  
         const book = booksUnderEntity[bookName];
         if (!book) return;
-
+  
         if (book.encaissements) {
           book.encaissements
-            .filter(enc => enc.nature !== 'Total Category') // Exclude 'Total Category'
+            .filter(enc => enc.nature !== 'Total Category')
             .forEach((enc) => {
               enc.montants.forEach((amount, month) => {
-                if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
-                  timeSeriesData[month] = timeSeriesData[month] || { encaissements: 0, decaissements: 0 };
-                  timeSeriesData[month].encaissements += amount;
-                }
+                const key = `${bookName}-${month}`;
+                timeSeriesData[key] = timeSeriesData[key] || { encaissements: 0, decaissements: 0 };
+                timeSeriesData[key].encaissements += amount;
               });
             });
         }
-
+  
         if (book.decaissements) {
           book.decaissements
-            .filter(dec => dec.nature !== 'Total Category') // Exclude 'Total Category'
+            .filter(dec => dec.nature !== 'Total Category')
             .forEach((dec) => {
               dec.montants.forEach((amount, month) => {
-                if (selectedMonths.length === 0 || selectedMonths.includes(month)) {
-                  timeSeriesData[month].decaissements += amount;
-                }
+                const key = `${bookName}-${month}`;
+                timeSeriesData[key].decaissements += amount;
               });
             });
         }
       });
     });
-
-    const months = Object.keys(timeSeriesData).sort();
-    const encaissementsSeries = months.map(month => timeSeriesData[month].encaissements);
-    const decaissementsSeries = months.map(month => timeSeriesData[month].decaissements);
-
+  
+    const sortedKeys = Object.keys(timeSeriesData).sort((a, b) => {
+      const [yearA, monthA] = a.split('-').map(Number);
+      const [yearB, monthB] = b.split('-').map(Number);
+      return yearA === yearB ? monthA - monthB : yearA - yearB;
+    });
+  
+    const encaissementsSeries = sortedKeys.map(key => timeSeriesData[key].encaissements);
+    const decaissementsSeries = sortedKeys.map(key => timeSeriesData[key].decaissements);
+    const categories = sortedKeys.map(key => {
+      const [year, month] = key.split('-');
+      return `${monthNames[month]} ${year}`;
+    });
+  
     return {
       chart: { type: 'line' },
       title: { text: translate('Treasury Evolution Over Time', language) },
       xAxis: {
-        categories: months.map(month => monthNames[month]),
+        categories: categories,
         title: { text: translate('Time', language) },
       },
       yAxis: { title: { text: translate('Amount', language) }, min: 0 },
@@ -370,6 +381,7 @@ const Analytics = () => {
       credits: { enabled: false },
     };
   };
+  
 
   const generateBarChartOptions = (booksToAnalyze) => {
     const monthlyTotals = {};
@@ -510,8 +522,67 @@ const Analytics = () => {
       credits: { enabled: false },
     };
   };
-
-
+  const generateNetTreasuryEvolutionOptions = (booksToAnalyze) => {
+    const netTreasuryData = [];
+    const categories = [];
+  
+    booksToAnalyze.forEach((entityId) => {
+      const booksUnderEntity = books.summaries[entityId];
+      if (!booksUnderEntity) return;
+  
+      Object.keys(booksUnderEntity).forEach((bookName) => {
+        const year = parseInt(bookName, 10);
+        if (isNaN(year)) return;
+  
+        const book = booksUnderEntity[bookName];
+        if (!book) return;
+  
+        for (let month = 0; month < 12; month++) {
+          const key = `${year}-${month}`;
+          categories.push(key);
+  
+          const encaissementForMonth = book.encaissements
+            ? book.encaissements.reduce((acc, enc) => acc + (enc.montants[month] || 0), 0)
+            : 0;
+          const decaissementForMonth = book.decaissements
+            ? book.decaissements.reduce((acc, dec) => acc + (dec.montants[month] || 0), 0)
+            : 0;
+  
+          netTreasuryData.push(encaissementForMonth - decaissementForMonth);
+        }
+      });
+    });
+  
+    const sortedCategories = categories.sort((a, b) => {
+      const [yearA, monthA] = a.split('-').map(Number);
+      const [yearB, monthB] = b.split('-').map(Number);
+      return yearA === yearB ? monthA - monthB : yearA - yearB;
+    });
+  
+    return {
+      chart: { type: 'line' },
+      title: { text: translate('Net Treasury Evolution by Month Over the Years', language) },
+      xAxis: {
+        categories: sortedCategories.map(key => {
+          const [year, month] = key.split('-');
+          return `${monthNames[month]} ${year}`;
+        }),
+        title: { text: translate('Month and Year', language) },
+      },
+      yAxis: { title: { text: translate('Net Treasury', language) }, min: 0 },
+      series: [
+        {
+          name: translate('Net Treasury', language),
+          data: sortedCategories.map(key => netTreasuryData[categories.indexOf(key)]),
+          type: 'line',
+          color: '#007bff',
+        },
+      ],
+      credits: { enabled: false },
+    };
+  };
+  
+  
   // Sum up the values for the footer
   const calculateFooterTotals = () => {
     let initialBalanceSum = 0;
@@ -661,6 +732,15 @@ const Analytics = () => {
           </TableContainer>
         </Box>
       )}
+
+    <Box mt={4}>
+      <Typography variant="h6" gutterBottom>
+        {translate('Net Treasury Evolution', language)}:
+      </Typography>
+      {Object.keys(netTreasuryOptions).length > 0 && (
+        <HighchartsReact highcharts={Highcharts} options={netTreasuryOptions} />
+      )}
+    </Box>
 
       {/* Chart rendering areas */}
       <Box mt={4}>
