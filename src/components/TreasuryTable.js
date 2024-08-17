@@ -177,7 +177,7 @@ const TreasuryTable = ({
   );
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 12, mb: 12 }}>
+    <Container maxWidth="xl" sx={{ mt: 12, mb: 12 }}>
       <Box sx={{ mb: 4, textAlign: 'left' }}>
         { bookName && <Typography variant="h6"><strong>Book : </strong> {bookName}</Typography> }
         { entityName && <Typography variant="h6"><strong>Entity : </strong> {entityName}</Typography> }

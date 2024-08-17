@@ -151,7 +151,7 @@ const SummaryComponent = () => {
   };
 
   return (
-    <Container maxWidth="lg"  sx={{ paddingTop: 3, paddingBottom: 7, width: "60vw"}}>
+    <Container maxWidth="xl"  sx={{ paddingTop: 3, paddingBottom: 7}}>
       {isLoaded ? (
         summary && <TreasuryTable transactions={summary["Bilan Historique"]} />
       ) : (

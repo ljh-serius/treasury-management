@@ -21,7 +21,7 @@ const SearchPartners = () => {
   }, [searchTerm]);
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <Typography variant="h4" gutterBottom>
         Search Partners
       </Typography>

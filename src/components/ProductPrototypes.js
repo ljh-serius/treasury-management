@@ -29,7 +29,7 @@ const ProductPrototypes = () => {
   };
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <Typography variant="h4" gutterBottom>
         Product Prototypes
       </Typography>

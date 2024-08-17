@@ -150,7 +150,8 @@ const ManageUsers = () => {
   );
 
   return (
-    <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+}}>
       <Divider sx={{ mb: 3 }} />
       <form onSubmit={handleAddUser}>
         <Grid container spacing={2} sx={{ mb: 3 }}>

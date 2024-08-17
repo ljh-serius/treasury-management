@@ -25,6 +25,26 @@ const headCells = [
   { id: 'contractValue', numeric: true, disablePadding: false, label: 'Contract Value' },
   { id: 'riskLevel', numeric: false, disablePadding: false, label: 'Risk Level' },
   { id: 'complianceStatus', numeric: false, disablePadding: false, label: 'Compliance Status' },
+  { id: 'vendorCode', numeric: false, disablePadding: false, label: 'Vendor Code' },
+  { id: 'billingCycle', numeric: false, disablePadding: false, label: 'Billing Cycle' },
+  { id: 'sla', numeric: false, disablePadding: false, label: 'Service Level Agreement (SLA)' },
+  { id: 'paymentMethod', numeric: false, disablePadding: false, label: 'Payment Method' },
+  { id: 'discountRate', numeric: false, disablePadding: false, label: 'Discount Rate' },
+  { id: 'preferredCurrency', numeric: false, disablePadding: false, label: 'Preferred Currency' },
+  { id: 'lastAuditDate', numeric: false, disablePadding: false, label: 'Last Audit Date' },
+  { id: 'contractExpiryWarning', numeric: false, disablePadding: false, label: 'Contract Expiry Warning' },
+  { id: 'supportContact', numeric: false, disablePadding: false, label: 'Support Contact' },
+  { id: 'supportEmail', numeric: false, disablePadding: false, label: 'Support Email' },
+  { id: 'supportPhone', numeric: false, disablePadding: false, label: 'Support Phone' },
+  { id: 'accountManager', numeric: false, disablePadding: false, label: 'Account Manager' },
+  { id: 'partnerRating', numeric: false, disablePadding: false, label: 'Partner Rating' },
+  { id: 'partnershipStartDate', numeric: false, disablePadding: false, label: 'Partnership Start Date' },
+  { id: 'partnershipEndDate', numeric: false, disablePadding: false, label: 'Partnership End Date' },
+  { id: 'numberOfEmployees', numeric: true, disablePadding: false, label: 'Number of Employees' },
+  { id: 'annualRevenue', numeric: true, disablePadding: false, label: 'Annual Revenue' },
+  { id: 'partnershipLevel', numeric: false, disablePadding: false, label: 'Partnership Level' },
+  { id: 'preferredLanguage', numeric: false, disablePadding: false, label: 'Preferred Language' },
+  { id: 'taxExemptionStatus', numeric: false, disablePadding: false, label: 'Tax Exemption Status' },
   { id: 'costAllocationLink', numeric: false, disablePadding: false, label: 'Cost Allocation' },
 ];
 
@@ -157,6 +177,26 @@ function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) 
       paymentTerms: '',
       complianceStatus: '',
       notes: '',
+      vendorCode: '',
+      billingCycle: '',
+      sla: '',
+      paymentMethod: '',
+      discountRate: '',
+      preferredCurrency: '',
+      lastAuditDate: '',
+      contractExpiryWarning: false,
+      supportContact: '',
+      supportEmail: '',
+      supportPhone: '',
+      accountManager: '',
+      partnerRating: '',
+      partnershipStartDate: '',
+      partnershipEndDate: '',
+      numberOfEmployees: '',
+      annualRevenue: '',
+      partnershipLevel: '',
+      preferredLanguage: '',
+      taxExemptionStatus: '',
       status: 'Active',
       organizationId: organizationId,
     }
@@ -183,6 +223,26 @@ function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) 
       paymentTerms: '',
       complianceStatus: '',
       notes: '',
+      vendorCode: '',
+      billingCycle: '',
+      sla: '',
+      paymentMethod: '',
+      discountRate: '',
+      preferredCurrency: '',
+      lastAuditDate: '',
+      contractExpiryWarning: false,
+      supportContact: '',
+      supportEmail: '',
+      supportPhone: '',
+      accountManager: '',
+      partnerRating: '',
+      partnershipStartDate: '',
+      partnershipEndDate: '',
+      numberOfEmployees: '',
+      annualRevenue: '',
+      partnershipLevel: '',
+      preferredLanguage: '',
+      taxExemptionStatus: '',
       status: 'Active',
       organizationId: organizationId,
     });
@@ -207,11 +267,13 @@ function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) 
         top: '50%', 
         left: '50%', 
         transform: 'translate(-50%, -50%)', 
-        width: 1000,  // Increased width for the modal
+        width: '90vw',  // Expanded to 90% of the viewport width
+        height: '90vh', // Expanded to 90% of the viewport height
         bgcolor: 'background.paper', 
         border: '2px solid #000', 
         boxShadow: 24, 
-        p: 4 
+        p: 4,
+        overflowY: 'auto' // Make the modal scrollable
       }}>
         <Typography variant="h6" component="h2">
           {initialData ? 'Edit Partner' : 'Add Partner'}
@@ -247,7 +309,40 @@ function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) 
             <TextField label="Payment Terms" name="paymentTerms" fullWidth value={partnerData.paymentTerms} onChange={handleChange} />
             <TextField label="Compliance Status" name="complianceStatus" fullWidth value={partnerData.complianceStatus} onChange={handleChange} />
           </Box>
-          <TextField label="Notes" name="notes" fullWidth multiline rows={4} value={partnerData.notes} onChange={handleChange} />
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Vendor Code" name="vendorCode" fullWidth value={partnerData.vendorCode} onChange={handleChange} />
+            <TextField label="Billing Cycle" name="billingCycle" fullWidth value={partnerData.billingCycle} onChange={handleChange} />
+            <TextField label="Service Level Agreement (SLA)" name="sla" fullWidth value={partnerData.sla} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Payment Method" name="paymentMethod" fullWidth value={partnerData.paymentMethod} onChange={handleChange} />
+            <TextField label="Discount Rate" name="discountRate" fullWidth value={partnerData.discountRate} onChange={handleChange} />
+            <TextField label="Preferred Currency" name="preferredCurrency" fullWidth value={partnerData.preferredCurrency} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Last Audit Date" name="lastAuditDate" type="date" fullWidth value={partnerData.lastAuditDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+            <TextField label="Support Contact" name="supportContact" fullWidth value={partnerData.supportContact} onChange={handleChange} />
+            <TextField label="Support Email" name="supportEmail" fullWidth value={partnerData.supportEmail} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Support Phone" name="supportPhone" fullWidth value={partnerData.supportPhone} onChange={handleChange} />
+            <TextField label="Account Manager" name="accountManager" fullWidth value={partnerData.accountManager} onChange={handleChange} />
+            <TextField label="Partner Rating" name="partnerRating" fullWidth value={partnerData.partnerRating} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Partnership Start Date" name="partnershipStartDate" type="date" fullWidth value={partnerData.partnershipStartDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+            <TextField label="Partnership End Date" name="partnershipEndDate" type="date" fullWidth value={partnerData.partnershipEndDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+            <TextField label="Number of Employees" name="numberOfEmployees" fullWidth value={partnerData.numberOfEmployees} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Annual Revenue" name="annualRevenue" fullWidth value={partnerData.annualRevenue} onChange={handleChange} />
+            <TextField label="Partnership Level" name="partnershipLevel" fullWidth value={partnerData.partnershipLevel} onChange={handleChange} />
+            <TextField label="Preferred Language" name="preferredLanguage" fullWidth value={partnerData.preferredLanguage} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Tax Exemption Status" name="taxExemptionStatus" fullWidth value={partnerData.taxExemptionStatus} onChange={handleChange} />
+            <TextField label="Notes" name="notes" fullWidth multiline rows={4} value={partnerData.notes} onChange={handleChange} />
+          </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
             <Button onClick={onClose}>Cancel</Button>
             <Button variant="contained" onClick={handleSubmit}>
@@ -445,6 +540,26 @@ export default function Partners() {
                       <TableCell align="right">{row.contractValue}</TableCell>
                       <TableCell align="left">{row.riskLevel}</TableCell>
                       <TableCell align="left">{row.complianceStatus}</TableCell>
+                      <TableCell align="left">{row.vendorCode}</TableCell>
+                      <TableCell align="left">{row.billingCycle}</TableCell>
+                      <TableCell align="left">{row.sla}</TableCell>
+                      <TableCell align="left">{row.paymentMethod}</TableCell>
+                      <TableCell align="left">{row.discountRate}</TableCell>
+                      <TableCell align="left">{row.preferredCurrency}</TableCell>
+                      <TableCell align="left">{row.lastAuditDate}</TableCell>
+                      <TableCell align="left">{row.contractExpiryWarning ? 'Yes' : 'No'}</TableCell>
+                      <TableCell align="left">{row.supportContact}</TableCell>
+                      <TableCell align="left">{row.supportEmail}</TableCell>
+                      <TableCell align="left">{row.supportPhone}</TableCell>
+                      <TableCell align="left">{row.accountManager}</TableCell>
+                      <TableCell align="left">{row.partnerRating}</TableCell>
+                      <TableCell align="left">{row.partnershipStartDate}</TableCell>
+                      <TableCell align="left">{row.partnershipEndDate}</TableCell>
+                      <TableCell align="right">{row.numberOfEmployees}</TableCell>
+                      <TableCell align="right">{row.annualRevenue}</TableCell>
+                      <TableCell align="left">{row.partnershipLevel}</TableCell>
+                      <TableCell align="left">{row.preferredLanguage}</TableCell>
+                      <TableCell align="left">{row.taxExemptionStatus}</TableCell>
                       <TableCell align="left">
                         {costAllocationLink ? (
                           <Link href={costAllocationLink} underline="none">
@@ -463,7 +578,7 @@ export default function Partners() {
                       height: (dense ? 33 : 53) * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={14} />
+                    <TableCell colSpan={headCells.length + 1} />
                   </TableRow>
                 )}
               </TableBody>

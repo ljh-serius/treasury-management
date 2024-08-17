@@ -78,7 +78,7 @@ const RiskManagement = () => {
   };
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <Typography variant="h4" gutterBottom>
         Risk Management
       </Typography>

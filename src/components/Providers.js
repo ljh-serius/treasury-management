@@ -17,6 +17,21 @@ const headCells = [
   { id: 'address', numeric: false, disablePadding: false, label: 'Address' },
   { id: 'contactEmail', numeric: false, disablePadding: false, label: 'Email' },
   { id: 'contactPhone', numeric: false, disablePadding: false, label: 'Phone' },
+  { id: 'companyType', numeric: false, disablePadding: false, label: 'Company Type' },
+  { id: 'country', numeric: false, disablePadding: false, label: 'Country' },
+  { id: 'state', numeric: false, disablePadding: false, label: 'State/Province' },
+  { id: 'zipCode', numeric: false, disablePadding: false, label: 'Zip/Postal Code' },
+  { id: 'website', numeric: false, disablePadding: false, label: 'Website' },
+  { id: 'industry', numeric: false, disablePadding: false, label: 'Industry' },
+  { id: 'establishedDate', numeric: false, disablePadding: false, label: 'Established Date' },
+  { id: 'contractValue', numeric: true, disablePadding: false, label: 'Contract Value' },
+  { id: 'paymentTerms', numeric: false, disablePadding: false, label: 'Payment Terms' },
+  { id: 'bankAccount', numeric: false, disablePadding: false, label: 'Bank Account' },
+  { id: 'swiftCode', numeric: false, disablePadding: false, label: 'SWIFT Code' },
+  { id: 'accountManager', numeric: false, disablePadding: false, label: 'Account Manager' },
+  { id: 'servicesProvided', numeric: false, disablePadding: false, label: 'Services Provided' },
+  { id: 'preferredContactMethod', numeric: false, disablePadding: false, label: 'Preferred Contact Method' },
+  { id: 'rating', numeric: true, disablePadding: false, label: 'Rating' },
   { id: 'costAllocation', numeric: false, disablePadding: false, label: 'Cost Allocation' },
 ];
 
@@ -140,7 +155,22 @@ function ProviderModal({ open, onClose, onSubmit, initialData, organizationId })
       address: '',
       contactEmail: '',
       contactPhone: '',
-      organizationId: [organizationId],
+      companyType: '',
+      country: '',
+      state: '',
+      zipCode: '',
+      website: '',
+      industry: '',
+      establishedDate: '',
+      contractValue: '',
+      paymentTerms: '',
+      bankAccount: '',
+      swiftCode: '',
+      accountManager: '',
+      servicesProvided: '',
+      preferredContactMethod: '',
+      rating: '',
+      organizationId: organizationId,
     }
   );
 
@@ -151,9 +181,24 @@ function ProviderModal({ open, onClose, onSubmit, initialData, organizationId })
       address: '',
       contactEmail: '',
       contactPhone: '',
-      organizationId: [organizationId],
+      companyType: '',
+      country: '',
+      state: '',
+      zipCode: '',
+      website: '',
+      industry: '',
+      establishedDate: '',
+      contractValue: '',
+      paymentTerms: '',
+      bankAccount: '',
+      swiftCode: '',
+      accountManager: '',
+      servicesProvided: '',
+      preferredContactMethod: '',
+      rating: '',
+      organizationId: organizationId,
     });
-  }, [initialData]);
+  }, [initialData, organizationId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -169,20 +214,61 @@ function ProviderModal({ open, onClose, onSubmit, initialData, organizationId })
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+      <Box sx={{ 
+        position: 'absolute', 
+        top: '50%', 
+        left: '50%', 
+        transform: 'translate(-50%, -50%)', 
+        width: 1000,  // Increased width for the modal
+        bgcolor: 'background.paper', 
+        border: '2px solid #000', 
+        boxShadow: 24, 
+        p: 4 
+      }}>
         <Typography variant="h6" component="h2">
           {initialData ? 'Edit Provider' : 'Add Provider'}
         </Typography>
-        <TextField label="Name" name="name" fullWidth margin="normal" value={providerData.name} onChange={handleChange} />
-        <TextField label="Tax ID" name="taxId" fullWidth margin="normal" value={providerData.taxId} onChange={handleChange} />
-        <TextField label="Address" name="address" fullWidth margin="normal" value={providerData.address} onChange={handleChange} />
-        <TextField label="Email" name="contactEmail" fullWidth margin="normal" value={providerData.contactEmail} onChange={handleChange} />
-        <TextField label="Phone" name="contactPhone" fullWidth margin="normal" value={providerData.contactPhone} onChange={handleChange} />
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}>
-            {initialData ? 'Update' : 'Add'}
-          </Button>
+        <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Provider Name" name="name" fullWidth value={providerData.name} onChange={handleChange} />
+            <TextField label="Tax ID" name="taxId" fullWidth value={providerData.taxId} onChange={handleChange} />
+            <TextField label="Company Type" name="companyType" fullWidth value={providerData.companyType} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Address" name="address" fullWidth value={providerData.address} onChange={handleChange} />
+            <TextField label="Country" name="country" fullWidth value={providerData.country} onChange={handleChange} />
+            <TextField label="State/Province" name="state" fullWidth value={providerData.state} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Zip/Postal Code" name="zipCode" fullWidth value={providerData.zipCode} onChange={handleChange} />
+            <TextField label="Email" name="contactEmail" fullWidth value={providerData.contactEmail} onChange={handleChange} />
+            <TextField label="Phone" name="contactPhone" fullWidth value={providerData.contactPhone} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Website" name="website" fullWidth value={providerData.website} onChange={handleChange} />
+            <TextField label="Industry" name="industry" fullWidth value={providerData.industry} onChange={handleChange} />
+            <TextField label="Established Date" name="establishedDate" type="date" fullWidth value={providerData.establishedDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Contract Value" name="contractValue" fullWidth value={providerData.contractValue} onChange={handleChange} />
+            <TextField label="Payment Terms" name="paymentTerms" fullWidth value={providerData.paymentTerms} onChange={handleChange} />
+            <TextField label="Bank Account" name="bankAccount" fullWidth value={providerData.bankAccount} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="SWIFT Code" name="swiftCode" fullWidth value={providerData.swiftCode} onChange={handleChange} />
+            <TextField label="Account Manager" name="accountManager" fullWidth value={providerData.accountManager} onChange={handleChange} />
+            <TextField label="Services Provided" name="servicesProvided" fullWidth value={providerData.servicesProvided} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Preferred Contact Method" name="preferredContactMethod" fullWidth value={providerData.preferredContactMethod} onChange={handleChange} />
+            <TextField label="Rating" name="rating" type="number" fullWidth value={providerData.rating} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button variant="contained" onClick={handleSubmit}>
+              {initialData ? 'Update' : 'Add'}
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Modal>
@@ -319,81 +405,96 @@ export default function Providers() {
   );
 
   return (
-    <Container maxWidth="lg"  sx={{ paddingTop: 3, paddingBottom: 7, width: "60vw"}}>
-        <Box sx={{ width: '100%' }}>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7}}>
+      <Box sx={{ width: '100%' }}>
         <Paper sx={{ width: '100%', mb: 2 }}>
-            <EnhancedTableToolbar
+          <EnhancedTableToolbar
             numSelected={selected.length}
             onAdd={handleAddProvider}
             onDelete={handleDeleteProviders}
             onEdit={handleEditProvider}
-            />
-            <TableContainer>
+          />
+          <TableContainer>
             <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={dense ? 'small' : 'medium'}>
-                <EnhancedTableHead
+              <EnhancedTableHead
                 numSelected={selected.length}
                 order={order}
                 orderBy={orderBy}
                 onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
                 rowCount={providers.length}
-                />
-                <TableBody>
+              />
+              <TableBody>
                 {visibleRows.map((row, index) => {
-                    const isItemSelected = isSelected(row.id);
-                    const labelId = `enhanced-table-checkbox-${index}`;
-                    const costAllocationLink = getCostAllocationLink(row.id);
+                  const isItemSelected = isSelected(row.id);
+                  const labelId = `enhanced-table-checkbox-${index}`;
+                  const costAllocationLink = getCostAllocationLink(row.id);
 
-                    return (
+                  return (
                     <TableRow
-                        hover
-                        onClick={(event) => handleClick(event, row.id)}
-                        role="checkbox"
-                        aria-checked={isItemSelected}
-                        tabIndex={-1}
-                        key={row.id}
-                        selected={isItemSelected}
-                        sx={{ cursor: 'pointer' }}
+                      hover
+                      onClick={(event) => handleClick(event, row.id)}
+                      role="checkbox"
+                      aria-checked={isItemSelected}
+                      tabIndex={-1}
+                      key={row.id}
+                      selected={isItemSelected}
+                      sx={{ cursor: 'pointer' }}
                     >
-                        <TableCell padding="checkbox">
+                      <TableCell padding="checkbox">
                         <MUICheckbox
-                            color="primary"
-                            checked={isItemSelected}
-                            inputProps={{ 'aria-labelledby': labelId }}
+                          color="primary"
+                          checked={isItemSelected}
+                          inputProps={{ 'aria-labelledby': labelId }}
                         />
-                        </TableCell>
-                        <TableCell component="th" id={labelId} scope="row" padding="none">
+                      </TableCell>
+                      <TableCell component="th" id={labelId} scope="row" padding="none">
                         {row.name}
-                        </TableCell>
-                        <TableCell align="right">{row.taxId}</TableCell>
-                        <TableCell align="right">{row.address}</TableCell>
-                        <TableCell align="right">{row.contactEmail}</TableCell>
-                        <TableCell align="right">{row.contactPhone}</TableCell>
-                        <TableCell align="right">
-                          {costAllocationLink ? (
-                            <Link href={costAllocationLink} underline="none">
-                              View Cost Allocation
-                            </Link>
-                          ) : (
-                            'No Allocation'
-                          )}
-                        </TableCell>
+                      </TableCell>
+                      <TableCell align="right">{row.taxId}</TableCell>
+                      <TableCell align="right">{row.address}</TableCell>
+                      <TableCell align="right">{row.contactEmail}</TableCell>
+                      <TableCell align="right">{row.contactPhone}</TableCell>
+                      <TableCell align="right">{row.companyType}</TableCell>
+                      <TableCell align="right">{row.country}</TableCell>
+                      <TableCell align="right">{row.state}</TableCell>
+                      <TableCell align="right">{row.zipCode}</TableCell>
+                      <TableCell align="right">{row.website}</TableCell>
+                      <TableCell align="right">{row.industry}</TableCell>
+                      <TableCell align="right">{row.establishedDate}</TableCell>
+                      <TableCell align="right">{row.contractValue}</TableCell>
+                      <TableCell align="right">{row.paymentTerms}</TableCell>
+                      <TableCell align="right">{row.bankAccount}</TableCell>
+                      <TableCell align="right">{row.swiftCode}</TableCell>
+                      <TableCell align="right">{row.accountManager}</TableCell>
+                      <TableCell align="right">{row.servicesProvided}</TableCell>
+                      <TableCell align="right">{row.preferredContactMethod}</TableCell>
+                      <TableCell align="right">{row.rating}</TableCell>
+                      <TableCell align="right">
+                        {costAllocationLink ? (
+                          <Link href={costAllocationLink} underline="none">
+                            View Cost Allocation
+                          </Link>
+                        ) : (
+                          'No Allocation'
+                        )}
+                      </TableCell>
                     </TableRow>
-                    );
+                  );
                 })}
                 {emptyRows > 0 && (
-                    <TableRow
+                  <TableRow
                     style={{
-                        height: (dense ? 33 : 53) * emptyRows,
+                      height: (dense ? 33 : 53) * emptyRows,
                     }}
-                    >
-                    <TableCell colSpan={7} />
-                    </TableRow>
+                  >
+                    <TableCell colSpan={21} />
+                  </TableRow>
                 )}
-                </TableBody>
+              </TableBody>
             </Table>
-            </TableContainer>
-            <TablePagination
+          </TableContainer>
+          <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
             count={providers.length}
@@ -401,17 +502,17 @@ export default function Providers() {
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            />
+          />
         </Paper>
         <FormControlLabel control={<Switch checked={dense} onChange={handleChangeDense} />} label="Dense padding" />
         <ProviderModal
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
-            onSubmit={handleModalSubmit}
-            initialData={currentProvider}
-            organizationId={organizationId}
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleModalSubmit}
+          initialData={currentProvider}
+          organizationId={organizationId}
         />
-        </Box>
+      </Box>
     </Container>
   );
 }

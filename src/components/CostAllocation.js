@@ -188,7 +188,7 @@ export default function CostAllocation() {
   );
 
   return (
-    <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7, width: '60vw'}}>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7}}>
       <Box sx={{ width: '100%' }}>
         <Paper sx={{ width: '100%', mb: 2 }}>
           <EnhancedTableToolbar
