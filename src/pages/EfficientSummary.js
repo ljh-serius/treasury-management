@@ -41,18 +41,19 @@ function groupInvoicesByStoreYearMonth(invoices) {
     const month = date.getMonth(); // JavaScript months are 0-indexed (0 = January, 11 = December)
     const { store, invoiceType, category, amount } = invoice;
 
-    if (!groupedData[year]) groupedData[year] = {};
-    if (!groupedData[year][invoiceType]) groupedData[year][invoiceType] = {};
-    if (!groupedData[year][invoiceType][category]) {
-      groupedData[year][invoiceType][category] = {
+    if (!groupedData[store]) groupedData[store] = {};
+    if (!groupedData[store][year]) groupedData[store][year] = {};
+    if (!groupedData[store][year][invoiceType]) groupedData[store][year][invoiceType] = {};
+    if (!groupedData[store][year][invoiceType][category]) {
+      groupedData[store][year][invoiceType][category] = {
         initialBalance: 0,
         amounts: Array(12).fill(0), // Initialize the array for 12 months with 0
         total: 0
       };
     }
 
-    groupedData[year][invoiceType][category].amounts[month] += amount;
-    groupedData[year][invoiceType][category].total += amount;
+    groupedData[store][year][invoiceType][category].amounts[month] += amount;
+    groupedData[store][year][invoiceType][category].total += amount;
   });
 
   return groupedData;
@@ -62,102 +63,104 @@ function groupInvoicesByStoreYearMonth(invoices) {
 function transformGroupedData(groupedData) {
   const rows = [];
 
-  // Iterate through each year
-  Object.keys(groupedData).forEach(year => {
-    let totalExpenses = Array(12).fill(0);
-    let totalRevenues = Array(12).fill(0);
-    let totalExpenseAnnual = 0;
-    let totalRevenueAnnual = 0;
+  // Iterate through each store and year
+  Object.keys(groupedData).forEach(store => {
+    Object.keys(groupedData[store]).forEach(year => {
+      let totalExpenses = Array(12).fill(0);
+      let totalRevenues = Array(12).fill(0);
+      let totalExpenseAnnual = 0;
+      let totalRevenueAnnual = 0;
 
-    // Calculate totals for expenses and revenues
-    Object.keys(groupedData[year]).forEach(invoiceType => {
-      Object.keys(groupedData[year][invoiceType]).forEach(category => {
-        const data = groupedData[year][invoiceType][category];
+      // Calculate totals for expenses and revenues
+      Object.keys(groupedData[store][year]).forEach(invoiceType => {
+        Object.keys(groupedData[store][year][invoiceType]).forEach(category => {
+          const data = groupedData[store][year][invoiceType][category];
 
-        // Add the regular rows
-        rows.push({
-          id: `${year}-${invoiceType}-${category}`, // Create a unique ID
-          store: 'All Stores',
-          year,
-          invoiceType,
-          category,
-          initialBalance: data.initialBalance,
-          total: data.total,
-          January: data.amounts[0],
-          February: data.amounts[1],
-          March: data.amounts[2],
-          April: data.amounts[3],
-          May: data.amounts[4],
-          June: data.amounts[5],
-          July: data.amounts[6],
-          August: data.amounts[7],
-          September: data.amounts[8],
-          October: data.amounts[9],
-          November: data.amounts[10],
-          December: data.amounts[11],
+          // Add the regular rows
+          rows.push({
+            id: `${store}-${year}-${invoiceType}-${category}`, // Create a unique ID
+            store,
+            year,
+            invoiceType,
+            category,
+            initialBalance: data.initialBalance,
+            total: data.total,
+            January: data.amounts[0],
+            February: data.amounts[1],
+            March: data.amounts[2],
+            April: data.amounts[3],
+            May: data.amounts[4],
+            June: data.amounts[5],
+            July: data.amounts[6],
+            August: data.amounts[7],
+            September: data.amounts[8],
+            October: data.amounts[9],
+            November: data.amounts[10],
+            December: data.amounts[11],
+          });
+
+          // Accumulate totals for expenses and revenues
+          if (invoiceType === 'received') {
+            data.amounts.forEach((amount, month) => {
+              totalExpenses[month] += amount;
+            });
+            totalExpenseAnnual += data.total;
+          }
+
+          if (invoiceType === 'issued') {
+            data.amounts.forEach((amount, month) => {
+              totalRevenues[month] += amount;
+            });
+            totalRevenueAnnual += data.total;
+          }
         });
-
-        // Accumulate totals for expenses and revenues
-        if (invoiceType === 'received') {
-          data.amounts.forEach((amount, month) => {
-            totalExpenses[month] += amount;
-          });
-          totalExpenseAnnual += data.total;
-        }
-
-        if (invoiceType === 'issued') {
-          data.amounts.forEach((amount, month) => {
-            totalRevenues[month] += amount;
-          });
-          totalRevenueAnnual += data.total;
-        }
       });
-    });
 
-    // Add a single Total Expenses Row (for all stores and categories)
-    rows.push({
-      id: `TotalExpenses-${year}`,
-      store: 'All Stores',
-      year,
-      invoiceType: '',
-      category: 'Total Expenses',
-      initialBalance: 0,
-      total: totalExpenseAnnual,
-      January: totalExpenses[0],
-      February: totalExpenses[1],
-      March: totalExpenses[2],
-      April: totalExpenses[3],
-      May: totalExpenses[4],
-      June: totalExpenses[5],
-      July: totalExpenses[6],
-      August: totalExpenses[7],
-      September: totalExpenses[8],
-      October: totalExpenses[9],
-      November: totalExpenses[10],
-      December: totalExpenses[11],
-    });
+      // Add a single Total Expenses Row for this store and year
+      rows.push({
+        id: `TotalExpenses-${store}-${year}`,
+        store,
+        year,
+        invoiceType: '',
+        category: 'Total Expenses',
+        initialBalance: 0,
+        total: totalExpenseAnnual,
+        January: totalExpenses[0],
+        February: totalExpenses[1],
+        March: totalExpenses[2],
+        April: totalExpenses[3],
+        May: totalExpenses[4],
+        June: totalExpenses[5],
+        July: totalExpenses[6],
+        August: totalExpenses[7],
+        September: totalExpenses[8],
+        October: totalExpenses[9],
+        November: totalExpenses[10],
+        December: totalExpenses[11],
+      });
 
-    // Add a single Total Revenues Row (for all stores and categories)
-    rows.push({
-      id: `TotalRevenues-${year}`,
-      store: 'All Stores',
-      year,
-      invoiceType: '',
-      category: 'Total Revenues',
-      initialBalance: 0,
-      total: totalRevenueAnnual,
-      January: totalRevenues[0],
-      February: totalRevenues[1],
-      March: totalRevenues[2],
-      April: totalRevenues[3],
-      May: totalRevenues[4],
-      June: totalRevenues[5],
-      July: totalRevenues[6],
-      August: totalRevenues[7],
-      September: totalRevenues[8],
-      October: totalRevenues[9],
-      November: totalRevenues[10],
-      December: totalRevenues[11],
+      // Add a single Total Revenues Row for this store and year
+      rows.push({
+        id: `TotalRevenues-${store}-${year}`,
+        store,
+        year,
+        invoiceType: '',
+        category: 'Total Revenues',
+        initialBalance: 0,
+        total: totalRevenueAnnual,
+        January: totalRevenues[0],
+        February: totalRevenues[1],
+        March: totalRevenues[2],
+        April: totalRevenues[3],
+        May: totalRevenues[4],
+        June: totalRevenues[5],
+        July: totalRevenues[6],
+        August: totalRevenues[7],
+        September: totalRevenues[8],
+        October: totalRevenues[9],
+        November: totalRevenues[10],
+        December: totalRevenues[11],
+      });
     });
   });
 
