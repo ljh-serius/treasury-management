@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
   Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container,
-  FormControlLabel, Switch, Grid, FormControl, InputLabel, Select, MenuItem, Link
+  FormControlLabel, Switch, Grid, FormControl, InputLabel, Select, MenuItem, Card, CardContent, CardHeader, Chip, Stack
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -32,7 +35,7 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-function BaseTableHead({ headCells, order, orderBy, numSelected, rowCount, onSelectAllClick, onRequestSort }) {
+function BaseTableHead({ headCells, order, orderBy, onRequestSort }) {
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -41,13 +44,7 @@ function BaseTableHead({ headCells, order, orderBy, numSelected, rowCount, onSel
     <TableHead>
       <TableRow>
         <TableCell padding="checkbox">
-          <MUICheckbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{ 'aria-label': 'select all items' }}
-          />
+          <MUICheckbox color="primary" />
         </TableCell>
         {headCells.map((headCell) => (
           <TableCell
@@ -217,6 +214,112 @@ function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
   );
 }
 
+function FilterManager({ filters, setFilters, fieldConfig }) {
+  const [currentFilter, setCurrentFilter] = useState({ column: '', value: '', active: true });
+
+  const addFilter = () => {
+    if (currentFilter.column && currentFilter.value) {
+      setFilters((prevFilters) => [
+        ...prevFilters,
+        { id: Date.now(), ...currentFilter },
+      ]);
+      setCurrentFilter({ column: '', value: '', active: true });
+    }
+  };
+
+  const handleFilterChange = (key, value) => {
+    setCurrentFilter((prevFilter) => ({
+      ...prevFilter,
+      [key]: value,
+    }));
+  };
+
+  const toggleFilterActive = (id) => {
+    setFilters((prevFilters) =>
+      prevFilters.map((filter) =>
+        filter.id === id ? { ...filter, active: !filter.active } : filter
+      )
+    );
+  };
+
+  const removeFilter = (id) => {
+    setFilters((prevFilters) => prevFilters.filter((filter) => filter.id !== id));
+  };
+
+  return (
+    <Box sx={{ pl: 1, pt: 2, pb: 2, width: '100%' }}>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={4}>
+          <FormControl fullWidth size="small">
+            <InputLabel>Column</InputLabel>
+            <Select
+              value={currentFilter.column}
+              onChange={(e) => handleFilterChange('column', e.target.value)}
+              label="Column"
+            >
+              {Object.keys(fieldConfig).map((field) => (
+                <MenuItem key={field} value={field}>
+                  {fieldConfig[field].label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          {fieldConfig[currentFilter.column]?.type === 'select' ? (
+            <FormControl fullWidth size="small">
+              <InputLabel>Value</InputLabel>
+              <Select
+                value={currentFilter.value}
+                onChange={(e) => handleFilterChange('value', e.target.value)}
+                label="Value"
+              >
+                {fieldConfig[currentFilter.column]?.options.map((option) => (
+                  <MenuItem key={option.id} value={option.id}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          ) : (
+            <TextField
+              value={currentFilter.value}
+              onChange={(e) => handleFilterChange('value', e.target.value)}
+              size="small"
+              fullWidth
+              placeholder="Enter value"
+            />
+          )}
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Button
+            startIcon={<AddCircleOutlineIcon />}
+            onClick={addFilter}
+            variant="outlined"
+            fullWidth // Add this line to make the button the same width as the inputs
+          >
+            Add Filter
+          </Button>
+        </Grid>
+      </Grid>
+      <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: 'wrap' }}>
+        {filters.filter(filter => filter.column && filter.value).map((filter) => (
+          <Chip
+            key={filter.id}
+            label={`${fieldConfig[filter.column]?.label}: ${filter.value}`}
+            onDelete={() => removeFilter(filter.id)}
+            deleteIcon={<DeleteIcon />}
+            color={filter.active ? "primary" : "default"}
+            variant="outlined"
+            sx={{ marginBottom: 1 }}
+          />
+        ))}
+      </Stack>
+
+    </Box>
+  );
+}
+
 export default function BaseTableComponent({ fetchItems, addItem, updateItem, deleteItem, fieldConfig, entityName }) {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState(Object.keys(fieldConfig)[0]);
@@ -225,6 +328,8 @@ export default function BaseTableComponent({ fetchItems, addItem, updateItem, de
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [items, setItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
+  const [filters, setFilters] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
 
@@ -237,6 +342,20 @@ export default function BaseTableComponent({ fetchItems, addItem, updateItem, de
     fetchData();
   }, [fetchItems]);
 
+  useEffect(() => {
+    let filteredData = items;
+
+    filters.forEach((filter) => {
+      if (filter.active && filter.column && filter.value) {
+        filteredData = filteredData.filter((item) =>
+          item[filter.column]?.toString().toLowerCase().includes(filter.value.toLowerCase())
+        );
+      }
+    });
+
+    setFilteredItems(filteredData);
+  }, [filters, items]);
+
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -245,7 +364,7 @@ export default function BaseTableComponent({ fetchItems, addItem, updateItem, de
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = items.map((n) => n.id);
+      const newSelected = filteredItems.map((n) => n.id);
       setSelected(newSelected);
       return;
     }
@@ -277,12 +396,12 @@ export default function BaseTableComponent({ fetchItems, addItem, updateItem, de
   };
 
   const handleEditItem = () => {
-    const itemToEdit = items.find((item) => item.id === selected[0]);
+    const itemToEdit = filteredItems.find((item) => item.id === selected[0]);
     setCurrentItem(itemToEdit);
     setModalOpen(true);
   };
 
-  const handledeleteItems = async () => {
+  const handleDeleteItems = async () => {
     try {
       await Promise.all(selected.map((id) => deleteItem(id)));
       setSelected([]);
@@ -323,25 +442,26 @@ export default function BaseTableComponent({ fetchItems, addItem, updateItem, de
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - items.length) : 0;
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredItems.length) : 0;
 
   const visibleRows = React.useMemo(
     () =>
-      stableSort(items, getComparator(order, orderBy)).slice(
+      stableSort(filteredItems, getComparator(order, orderBy)).slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [order, orderBy, page, rowsPerPage, items]
+    [order, orderBy, page, rowsPerPage, filteredItems]
   );
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
-      <Box sx={{ width: '100%' }}>
+      <Box sx={{ maxWidth: '80vw' }}>
+        <FilterManager filters={filters} setFilters={setFilters} fieldConfig={fieldConfig} />
         <Paper sx={{ width: '100%', mb: 2 }}>
           <BaseTableToolbar
             numSelected={selected.length}
             onAdd={handleAddItem}
-            onDelete={handledeleteItems}
+            onDelete={handleDeleteItems}
             onEdit={handleEditItem}
           />
           <TableContainer>
@@ -351,12 +471,9 @@ export default function BaseTableComponent({ fetchItems, addItem, updateItem, de
                   id: key,
                   label: fieldConfig[key].label,
                 }))}
-                numSelected={selected.length}
                 order={order}
                 orderBy={orderBy}
-                onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
-                rowCount={items.length}
               />
               <TableBody>
                 {visibleRows.map((row, index) => {
@@ -404,7 +521,7 @@ export default function BaseTableComponent({ fetchItems, addItem, updateItem, de
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={items.length}
+            count={filteredItems.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}

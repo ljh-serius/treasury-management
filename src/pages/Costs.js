@@ -1,5 +1,5 @@
 import React from 'react';
-import BaseManagementComponent from '../components/BaseManagementComponent';
+import BaseManagementComponent from '../components/BaseManagementComponent/BaseManagementComponent';
 import {
   fieldsConfig,
   entityName,
@@ -10,7 +10,7 @@ import {
   headCells
 } from '../components/CostsConfig';
 
-function EmployeesManagement() {
+function CostsManagement() {
   return (
     <BaseManagementComponent
       fieldConfig={fieldsConfig}
@@ -24,4 +24,4 @@ function EmployeesManagement() {
   );
 }
 
-export default EmployeesManagement;
+export default CostsManagement;

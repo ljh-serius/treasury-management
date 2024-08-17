@@ -1,5 +1,5 @@
 import React from 'react';
-import BaseManagementComponent from '../components/BaseManagementComponent';
+import BaseManagementComponent from '../components/BaseManagementComponent/BaseManagementComponent';
 import {
   fieldsConfig,
   entityName,
