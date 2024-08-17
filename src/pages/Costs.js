@@ -10,17 +10,26 @@ import {
   headCells
 } from '../components/BaseManagementComponent/CostsConfig';
 
-function CostsManagement() {
+import CostsAnalysis from './Analysis/Costs'
+
+function CostsManagement({showAnalytics}) {
   return (
-    <BaseManagementComponent
-      fieldConfig={fieldsConfig}
-      entityName={entityName}
-      fetchItems={fetchItems}
-      addItem={addItem}
-      updateItem={updateItem}
-      deleteItem={deleteItem}
-      headCells={headCells} // Pass the dynamically generated head cells
-    />
+    <>
+      {
+        showAnalytics ?
+        ( <CostsAnalysis fetchCosts={fetchItems} /> ) : (
+            <BaseManagementComponent
+              fieldConfig={fieldsConfig}
+              entityName={entityName}
+              fetchItems={fetchItems}
+              addItem={addItem}
+              updateItem={updateItem}
+              deleteItem={deleteItem}
+              headCells={headCells}
+            />
+        )
+      }
+    </>
   );
 }
 

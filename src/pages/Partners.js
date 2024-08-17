@@ -10,17 +10,26 @@ import {
   headCells
 } from '../components/BaseManagementComponent/PartnersConfig';
 
-function PartnersManagement() {
+import PartnersAnalysis from './Analysis/Partners'
+
+function PartnersManagement({showAnalytics}) {
   return (
-    <BaseManagementComponent
-      fieldConfig={fieldsConfig}
-      entityName={entityName}
-      fetchItems={fetchItems}
-      addItem={addItem}
-      updateItem={updateItem}
-      deleteItem={deleteItem}
-      headCells={headCells} // Pass the dynamically generated head cells
-    />
+    <>
+      {
+        showAnalytics ?
+        ( <PartnersAnalysis fetchPartners={fetchItems} /> ) : (
+            <BaseManagementComponent
+            fieldConfig={fieldsConfig}
+            entityName={entityName}
+            fetchItems={fetchItems}
+            addItem={addItem}
+            updateItem={updateItem}
+            deleteItem={deleteItem}
+            headCells={headCells}
+          />
+        )
+      }
+    </>
   );
 }
 
