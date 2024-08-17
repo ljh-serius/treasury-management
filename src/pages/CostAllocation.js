@@ -4,11 +4,14 @@ import {
   Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch,
   FormControl, InputLabel, Select, MenuItem, ListItemText, Checkbox, Grid
 } from '@mui/material';
+
+import { visuallyHidden } from '@mui/utils';
 import { alpha } from '@mui/material/styles';
+
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
-import { visuallyHidden } from '@mui/utils';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'; // Import an icon, use any icon you prefer
 
 import { fetchProducts } from '../utils/productsFirebaseHelpers';
 import { fetchEmployees } from '../utils/employeesFirebaseHelpers';
@@ -17,6 +20,8 @@ import { fetchPartners } from '../utils/partnersFirebaseHelpers';
 import { fetchProviders } from '../utils/providersFirebaseHelpers';
 import { addCostAllocation, fetchCostAllocations, updateCostAllocation, deleteCostAllocation } from '../utils/costAllocationFirebaseHelpers';
 import { useParams } from 'react-router-dom';
+
+import { generateRandomCostsAllocations } from '../fakers/costsAllocationsFaker';
 
 const costAllocationFieldConfig = {
   cost: { label: 'Cost', type: 'number' },
@@ -59,14 +64,13 @@ const costAllocationFieldConfig = {
   auditTrail: { label: 'Audit Trail', type: 'text' },
 };
 
-// Generate head cells for the table based on the config object
 const headCells = Object.keys(costAllocationFieldConfig).map(key => ({
   id: key,
   label: costAllocationFieldConfig[key].label,
 }));
 
 export default function CostAllocation() {
-  const { id } = useParams(); // Get the optional id from the URL
+  const { id } = useParams();
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('cost');
   const [selected, setSelected] = useState([]);
@@ -79,16 +83,44 @@ export default function CostAllocation() {
   const [currentAllocation, setCurrentAllocation] = useState(null);
   const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
-  useEffect(() => {
+  const [employeeIds, setEmployeeIds] = useState([]);
+  const [productIds, setProductIds] = useState([]);
+  const [partnerIds, setPartnerIds] = useState([]);
+  const [providerIds, setProviderIds] = useState([]);
 
+  const [employees, setEmployees] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [partners, setPartners] = useState([]);
+  const [providers, setProviders] = useState([]);
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
     const fetchData = async () => {
+      const products = await fetchProducts();
+      const employees = await fetchEmployees();
+      const projects = await fetchProjects();
+      const partners = await fetchPartners(organizationId);
+      const providers = await fetchProviders(organizationId);
+
+      setProducts(products);
+      setEmployees(employees);
+      setProjects(projects);
+      setPartners(partners);
+      setProviders(providers);
+
+      setEmployeeIds(employees.map(employee => employee.id));
+      setProductIds(products.map(product => product.id));
+      setPartnerIds(partners.map(partner => partner.id));
+      setProviderIds(providers.map(provider => provider.id));
+
       const allocations = await fetchCostAllocations(organizationId);
+
+      console.log("ALLO ", allocations)
       setCostAllocations(allocations || []);
 
-      // If an ID is provided in the URL, filter the cost allocations
       if (id) {
         const filtered = allocations.filter(
-          (allocation) =>
+          allocation =>
             allocation.productIds.includes(id) ||
             allocation.employeeIds.includes(id) ||
             allocation.projectIds.includes(id) ||
@@ -102,7 +134,7 @@ export default function CostAllocation() {
     };
 
     fetchData();
-  }, [id]);
+  }, [id, organizationId]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -110,9 +142,9 @@ export default function CostAllocation() {
     setOrderBy(property);
   };
 
-  const handleSelectAllClick = (event) => {
+  const handleSelectAllClick = event => {
     if (event.target.checked) {
-      const newSelected = filteredAllocations.map((n) => n.id);
+      const newSelected = filteredAllocations.map(n => n.id);
       setSelected(newSelected);
       return;
     }
@@ -132,7 +164,7 @@ export default function CostAllocation() {
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
+        selected.slice(selectedIndex + 1)
       );
     }
     setSelected(newSelected);
@@ -144,21 +176,21 @@ export default function CostAllocation() {
   };
 
   const handleEditAllocation = () => {
-    const allocationToEdit = filteredAllocations.find((allocation) => allocation.id === selected[0]);
+    const allocationToEdit = filteredAllocations.find(allocation => allocation.id === selected[0]);
     setCurrentAllocation(allocationToEdit);
     setModalOpen(true);
   };
 
   const handleDeleteAllocations = async () => {
     try {
-      await Promise.all(selected.map((id) => deleteCostAllocation(id)));
+      await Promise.all(selected.map(id => deleteCostAllocation(id)));
       setSelected([]);
       const allocations = await fetchCostAllocations(organizationId);
       setCostAllocations(allocations || []);
 
       if (id) {
         const filtered = allocations.filter(
-          (allocation) =>
+          allocation =>
             allocation.productIds.includes(id) ||
             allocation.employeeIds.includes(id) ||
             allocation.projectIds.includes(id) ||
@@ -174,7 +206,7 @@ export default function CostAllocation() {
     }
   };
 
-  const handleModalSubmit = async (allocationData) => {
+  const handleModalSubmit = async allocationData => {
     try {
       if (currentAllocation) {
         await updateCostAllocation(currentAllocation.id, allocationData);
@@ -186,7 +218,7 @@ export default function CostAllocation() {
 
       if (id) {
         const filtered = allocations.filter(
-          (allocation) =>
+          allocation =>
             allocation.productIds.includes(id) ||
             allocation.employeeIds.includes(id) ||
             allocation.projectIds.includes(id) ||
@@ -207,16 +239,16 @@ export default function CostAllocation() {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = event => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  const handleChangeDense = (event) => {
+  const handleChangeDense = event => {
     setDense(event.target.checked);
   };
 
-  const isSelected = (id) => selected.indexOf(id) !== -1;
+  const isSelected = id => selected.indexOf(id) !== -1;
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredAllocations.length) : 0;
 
@@ -228,6 +260,31 @@ export default function CostAllocation() {
       ),
     [order, orderBy, page, rowsPerPage, filteredAllocations]
   );
+
+  const handleGenerateData = async () => {
+    try {
+      const randomData = generateRandomCostsAllocations(employeeIds, productIds, partnerIds, providerIds);
+      await addCostAllocation(randomData, organizationId);
+      const allocations = await fetchCostAllocations(organizationId);
+      setCostAllocations(allocations || []);
+
+      if (id) {
+        const filtered = allocations.filter(
+          allocation =>
+            allocation.productIds.includes(id) ||
+            allocation.employeeIds.includes(id) ||
+            allocation.projectIds.includes(id) ||
+            allocation.partnerIds.includes(id) ||
+            allocation.providerIds.includes(id)
+        );
+        setFilteredAllocations(filtered);
+      } else {
+        setFilteredAllocations(allocations);
+      }
+    } catch (error) {
+      console.error('Error generating or saving data:', error);
+    }
+  };
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
@@ -249,6 +306,7 @@ export default function CostAllocation() {
                 onRequestSort={handleRequestSort}
                 rowCount={filteredAllocations.length}
               />
+
               <TableBody>
                 {visibleRows.map((row, index) => {
                   const isItemSelected = isSelected(row.id);
@@ -257,7 +315,7 @@ export default function CostAllocation() {
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={event => handleClick(event, row.id)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
@@ -272,11 +330,19 @@ export default function CostAllocation() {
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      {headCells.map((headCell) => (
+                      {headCells.map(headCell => (
                         <TableCell key={headCell.id} align="left">
                           {row[headCell.id]}
                         </TableCell>
                       ))}
+                      <TableCell align="center">
+                        <IconButton
+                          aria-label="generate random data"
+                          onClick={() => handleGenerateData(row.id)}
+                        >
+                          <PlayArrowIcon />
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -334,12 +400,12 @@ function stableSort(array, comparator) {
     if (order !== 0) return order;
     return a[1] - b[1];
   });
-  return stabilizedThis.map((el) => el[0]);
+  return stabilizedThis.map(el => el[0]);
 }
 
 function EnhancedTableHead(props) {
   const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-  const createSortHandler = (property) => (event) => {
+  const createSortHandler = property => event => {
     onRequestSort(event, property);
   };
 
@@ -355,7 +421,7 @@ function EnhancedTableHead(props) {
             inputProps={{ 'aria-label': 'select all cost allocations' }}
           />
         </TableCell>
-        {headCells.map((headCell) => (
+        {headCells.map(headCell => (
           <TableCell
             key={headCell.id}
             align="left"
@@ -376,6 +442,7 @@ function EnhancedTableHead(props) {
             </TableSortLabel>
           </TableCell>
         ))}
+        <TableCell align="center">Action</TableCell>
       </TableRow>
     </TableHead>
   );
@@ -429,10 +496,7 @@ function EnhancedTableToolbar(props) {
 
 function CostAllocationModal({ open, onClose, onSubmit, initialData, organizationId }) {
   const [allocationData, setAllocationData] = useState(
-    initialData || Object.keys(costAllocationFieldConfig).reduce((acc, field) => {
-      acc[field] = costAllocationFieldConfig[field].multiple ? [] : ''; // Ensure multiple fields are initialized as arrays
-      return acc;
-    }, { organizationId })
+    initialData || createEmptyAllocationData(organizationId)
   );
 
   const [products, setProducts] = useState([]);
@@ -442,45 +506,55 @@ function CostAllocationModal({ open, onClose, onSubmit, initialData, organizatio
   const [providers, setProviders] = useState([]);
 
   useEffect(() => {
-    setAllocationData(
-      initialData || Object.keys(costAllocationFieldConfig).reduce((acc, field) => {
-        acc[field] = costAllocationFieldConfig[field].multiple ? [] : ''; // Ensure multiple fields are initialized as arrays
-        return acc;
-      }, { organizationId })
-    );
+    setAllocationData(initialData || createEmptyAllocationData(organizationId));
   }, [initialData, organizationId]);
 
   useEffect(() => {
     const fetchData = async () => {
-      setProducts(await fetchProducts());
-      setEmployees(await fetchEmployees());
-      setProjects(await fetchProjects());
-      setPartners(await fetchPartners(organizationId));
-      setProviders(await fetchProviders(organizationId));
+      const products = await fetchProducts();
+      const employees = await fetchEmployees();
+      const projects = await fetchProjects();
+      const partners = await fetchPartners(organizationId);
+      const providers = await fetchProviders(organizationId);
+
+      setProducts(products);
+      setEmployees(employees);
+      setProjects(projects);
+      setPartners(partners);
+      setProviders(providers);
     };
 
     fetchData();
   }, [organizationId]);
 
-  // Populate options dynamically in the config object
   useEffect(() => {
-    costAllocationFieldConfig.productIds.options = products.map((product) => ({ id: product.id, label: product.name }));
-    costAllocationFieldConfig.employeeIds.options = employees.map((employee) => ({ id: employee.id, label: employee.name }));
-    costAllocationFieldConfig.projectIds.options = projects.map((project) => ({ id: project.id, label: project.name }));
-    costAllocationFieldConfig.partnerIds.options = partners.map((partner) => ({ id: partner.id, label: partner.name }));
-    costAllocationFieldConfig.providerIds.options = providers.map((provider) => ({ id: provider.id, label: provider.name }));
+    costAllocationFieldConfig.productIds.options = products.map(product => ({ id: product.id, label: product.name }));
+    costAllocationFieldConfig.employeeIds.options = employees.map(employee => ({ id: employee.id, label: employee.name }));
+    costAllocationFieldConfig.projectIds.options = projects.map(project => ({ id: project.id, label: project.name }));
+    costAllocationFieldConfig.partnerIds.options = partners.map(partner => ({ id: partner.id, label: partner.name }));
+    costAllocationFieldConfig.providerIds.options = providers.map(provider => ({ id: provider.id, label: provider.name }));
   }, [products, employees, projects, partners, providers]);
 
-  const handleChange = (event) => {
+  const handleChange = event => {
     const { name, value } = event.target;
-    setAllocationData((prevData) => ({
+    setAllocationData(prevData => ({
       ...prevData,
-      [name]: value, // Ensure the value is correctly set for multiple selection fields
+      [name]: value,
     }));
   };
 
   const handleSubmit = () => {
-    onSubmit(allocationData);
+    const sanitizedData = {
+      ...allocationData,
+      organizationId,
+      productIds: allocationData.productIds || [],
+      employeeIds: allocationData.employeeIds || [],
+      projectIds: allocationData.projectIds || [],
+      partnerIds: allocationData.partnerIds || [],
+      providerIds: allocationData.providerIds || [],
+    };
+
+    onSubmit(sanitizedData);
   };
 
   return (
@@ -506,7 +580,7 @@ function CostAllocationModal({ open, onClose, onSubmit, initialData, organizatio
         </Typography>
         <Box sx={{ flexGrow: 1 }}>
           <Grid container spacing={2}>
-            {Object.keys(costAllocationFieldConfig).map((field) => (
+            {Object.keys(costAllocationFieldConfig).map(field => (
               <Grid item xs={12} sm={6} md={4} key={field}>
                 {costAllocationFieldConfig[field].type === 'select' ? (
                   <FormControl fullWidth>
@@ -516,28 +590,29 @@ function CostAllocationModal({ open, onClose, onSubmit, initialData, organizatio
                       value={allocationData[field] || ''}
                       onChange={handleChange}
                       multiple={costAllocationFieldConfig[field].multiple || false}
-                      renderValue={(selected) => {
+                      renderValue={selected => {
                         if (costAllocationFieldConfig[field].multiple) {
                           return selected
-                            .map((id) => {
-                              const option = costAllocationFieldConfig[field].options?.find((opt) => opt.id === id);
+                            .map(id => {
+                              const option = costAllocationFieldConfig[field].options?.find(opt => opt.id === id);
                               return option ? option.label : '';
                             })
                             .join(', ');
                         }
-                        const option = costAllocationFieldConfig[field].options?.find((opt) => opt.id === selected);
+                        const option = costAllocationFieldConfig[field].options?.find(opt => opt.id === selected);
                         return option ? option.label : '';
                       }}
                     >
-                      {costAllocationFieldConfig[field].options && Array.isArray(costAllocationFieldConfig[field].options)
+                      {costAllocationFieldConfig[field].options &&
+                        Array.isArray(costAllocationFieldConfig[field].options)
                         ? costAllocationFieldConfig[field].options.map((option, optionIndex) => (
-                            <MenuItem key={option.id + '-' + optionIndex} value={option.id}>
-                              {costAllocationFieldConfig[field].multiple && (
-                                <Checkbox checked={allocationData[field].includes(option.id)} />
-                              )}
-                              <ListItemText primary={option.label} />
-                            </MenuItem>
-                          ))
+                          <MenuItem key={option.id + '-' + optionIndex} value={option.id}>
+                            {costAllocationFieldConfig[field].multiple && (
+                              <Checkbox checked={allocationData[field].includes(option.id)} />
+                            )}
+                            <ListItemText primary={option.label} />
+                          </MenuItem>
+                        ))
                         : null}
                     </Select>
                   </FormControl>
@@ -568,3 +643,10 @@ function CostAllocationModal({ open, onClose, onSubmit, initialData, organizatio
     </Modal>
   );
 }
+
+const createEmptyAllocationData = organizationId => {
+  return Object.keys(costAllocationFieldConfig).reduce((acc, field) => {
+    acc[field] = costAllocationFieldConfig[field].multiple ? [] : '';
+    return acc;
+  }, { organizationId });
+};
