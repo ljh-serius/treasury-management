@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
   Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch,
-  FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText
+  FormControl, InputLabel, Select, MenuItem, ListItemText, Checkbox, Grid
 } from '@mui/material';
-
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
@@ -18,8 +16,54 @@ import { fetchProjects } from '../utils/projectsFirebaseHelpers';
 import { fetchPartners } from '../utils/partnersFirebaseHelpers';
 import { fetchProviders } from '../utils/providersFirebaseHelpers';
 import { addCostAllocation, fetchCostAllocations, updateCostAllocation, deleteCostAllocation } from '../utils/costAllocationFirebaseHelpers';
-
 import { useParams } from 'react-router-dom';
+
+const costAllocationFieldConfig = {
+  cost: { label: 'Cost', type: 'number' },
+  description: { label: 'Description', type: 'text' },
+  productIds: { label: 'Products', type: 'select', options: [], multiple: true },
+  employeeIds: { label: 'Employees', type: 'select', options: [], multiple: true },
+  projectIds: { label: 'Projects', type: 'select', options: [], multiple: true },
+  partnerIds: { label: 'Partners', type: 'select', options: [], multiple: true },
+  providerIds: { label: 'Providers', type: 'select', options: [], multiple: true },
+  allocationDate: { label: 'Allocation Date', type: 'date' },
+  allocationType: { label: 'Allocation Type', type: 'text' },
+  notes: { label: 'Notes', type: 'text' },
+  department: { label: 'Department', type: 'text' },
+  priority: { label: 'Priority', type: 'select', options: ['High', 'Medium', 'Low'] },
+  status: { label: 'Status', type: 'select', options: ['Active', 'Inactive'] },
+  duration: { label: 'Duration', type: 'number' },
+  currency: { label: 'Currency', type: 'text' },
+  approvedBy: { label: 'Approved By', type: 'text' },
+  allocationCode: { label: 'Allocation Code', type: 'text' },
+  fundingSource: { label: 'Funding Source', type: 'text' },
+  costCenter: { label: 'Cost Center', type: 'text' },
+  budgetCode: { label: 'Budget Code', type: 'text' },
+  financialYear: { label: 'Financial Year', type: 'number' },
+  quarter: { label: 'Quarter', type: 'select', options: ['Q1', 'Q2', 'Q3', 'Q4'] },
+  allocationMethod: { label: 'Allocation Method', type: 'text' },
+  roiEstimate: { label: 'ROI Estimate', type: 'number' },
+  taxImplications: { label: 'Tax Implications', type: 'text' },
+  capexOrOpex: { label: 'Capex/Opex', type: 'select', options: ['Capex', 'Opex'] },
+  riskAssessment: { label: 'Risk Assessment', type: 'text' },
+  complianceStatus: { label: 'Compliance Status', type: 'select', options: ['Compliant', 'Non-compliant'] },
+  paymentTerms: { label: 'Payment Terms', type: 'text' },
+  invoiceNumber: { label: 'Invoice Number', type: 'text' },
+  vatAmount: { label: 'VAT Amount', type: 'number' },
+  vatPercentage: { label: 'VAT Percentage', type: 'number' },
+  discountApplied: { label: 'Discount Applied', type: 'number' },
+  totalCostAfterDiscount: { label: 'Total Cost After Discount', type: 'number' },
+  exchangeRate: { label: 'Exchange Rate', type: 'number' },
+  costAllocationFactor: { label: 'Cost Allocation Factor', type: 'number' },
+  approvalStatus: { label: 'Approval Status', type: 'select', options: ['Pending', 'Approved', 'Rejected'] },
+  auditTrail: { label: 'Audit Trail', type: 'text' },
+};
+
+// Generate head cells for the table based on the config object
+const headCells = Object.keys(costAllocationFieldConfig).map(key => ({
+  id: key,
+  label: costAllocationFieldConfig[key].label,
+}));
 
 export default function CostAllocation() {
   const { id } = useParams(); // Get the optional id from the URL
@@ -33,9 +77,9 @@ export default function CostAllocation() {
   const [filteredAllocations, setFilteredAllocations] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentAllocation, setCurrentAllocation] = useState(null);
+  const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
   useEffect(() => {
-    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
     const fetchData = async () => {
       const allocations = await fetchCostAllocations(organizationId);
@@ -109,7 +153,6 @@ export default function CostAllocation() {
     try {
       await Promise.all(selected.map((id) => deleteCostAllocation(id)));
       setSelected([]);
-      const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
       const allocations = await fetchCostAllocations(organizationId);
       setCostAllocations(allocations || []);
 
@@ -133,7 +176,6 @@ export default function CostAllocation() {
 
   const handleModalSubmit = async (allocationData) => {
     try {
-      const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
       if (currentAllocation) {
         await updateCostAllocation(currentAllocation.id, allocationData);
       } else {
@@ -188,7 +230,7 @@ export default function CostAllocation() {
   );
 
   return (
-    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7}}>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Box sx={{ width: '100%' }}>
         <Paper sx={{ width: '100%', mb: 2 }}>
           <EnhancedTableToolbar
@@ -230,11 +272,11 @@ export default function CostAllocation() {
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      <TableCell component="th" id={labelId} scope="row" padding="none">
-                        {row.cost}
-                      </TableCell>
-                      <TableCell align="left">{row.description}</TableCell>
-                      {/* You can add additional cells here for linked entities if needed */}
+                      {headCells.map((headCell) => (
+                        <TableCell key={headCell.id} align="left">
+                          {row[headCell.id]}
+                        </TableCell>
+                      ))}
                     </TableRow>
                   );
                 })}
@@ -244,7 +286,7 @@ export default function CostAllocation() {
                       height: (dense ? 33 : 53) * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={12} />
+                    <TableCell colSpan={headCells.length + 2} />
                   </TableRow>
                 )}
               </TableBody>
@@ -266,12 +308,12 @@ export default function CostAllocation() {
           onClose={() => setModalOpen(false)}
           onSubmit={handleModalSubmit}
           initialData={currentAllocation}
+          organizationId={organizationId}
         />
       </Box>
     </Container>
   );
 }
-
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -313,44 +355,27 @@ function EnhancedTableHead(props) {
             inputProps={{ 'aria-label': 'select all cost allocations' }}
           />
         </TableCell>
-        <TableCell
-          key="cost"
-          align="right"
-          padding="normal"
-          sortDirection={orderBy === 'cost' ? order : false}
-        >
-          <TableSortLabel
-            active={orderBy === 'cost'}
-            direction={orderBy === 'cost' ? order : 'asc'}
-            onClick={createSortHandler('cost')}
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align="left"
+            padding="normal"
+            sortDirection={orderBy === headCell.id ? order : false}
           >
-            Cost
-            {orderBy === 'cost' ? (
-              <Box component="span" sx={visuallyHidden}>
-                {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-              </Box>
-            ) : null}
-          </TableSortLabel>
-        </TableCell>
-        <TableCell
-          key="description"
-          align="left"
-          padding="normal"
-          sortDirection={orderBy === 'description' ? order : false}
-        >
-          <TableSortLabel
-            active={orderBy === 'description'}
-            direction={orderBy === 'description' ? order : 'asc'}
-            onClick={createSortHandler('description')}
-          >
-            Description
-            {orderBy === 'description' ? (
-              <Box component="span" sx={visuallyHidden}>
-                {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-              </Box>
-            ) : null}
-          </TableSortLabel>
-        </TableCell>
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <Box component="span" sx={visuallyHidden}>
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                </Box>
+              ) : null}
+            </TableSortLabel>
+          </TableCell>
+        ))}
       </TableRow>
     </TableHead>
   );
@@ -402,10 +427,12 @@ function EnhancedTableToolbar(props) {
   );
 }
 
-
-function CostAllocationModal({ open, onClose, onSubmit, initialData }) {
+function CostAllocationModal({ open, onClose, onSubmit, initialData, organizationId }) {
   const [allocationData, setAllocationData] = useState(
-    initialData || { cost: '', description: '', productIds: [], employeeIds: [], projectIds: [], partnerIds: [], providerIds: [] }
+    initialData || Object.keys(costAllocationFieldConfig).reduce((acc, field) => {
+      acc[field] = costAllocationFieldConfig[field].multiple ? [] : ''; // Ensure multiple fields are initialized as arrays
+      return acc;
+    }, { organizationId })
   );
 
   const [products, setProducts] = useState([]);
@@ -415,24 +442,40 @@ function CostAllocationModal({ open, onClose, onSubmit, initialData }) {
   const [providers, setProviders] = useState([]);
 
   useEffect(() => {
-    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+    setAllocationData(
+      initialData || Object.keys(costAllocationFieldConfig).reduce((acc, field) => {
+        acc[field] = costAllocationFieldConfig[field].multiple ? [] : ''; // Ensure multiple fields are initialized as arrays
+        return acc;
+      }, { organizationId })
+    );
+  }, [initialData, organizationId]);
 
-    async function fetchData() {
+  useEffect(() => {
+    const fetchData = async () => {
       setProducts(await fetchProducts());
       setEmployees(await fetchEmployees());
       setProjects(await fetchProjects());
       setPartners(await fetchPartners(organizationId));
       setProviders(await fetchProviders(organizationId));
-    }
+    };
+
     fetchData();
-    setAllocationData(initialData || { cost: '', description: '', productIds: [], employeeIds: [], projectIds: [], partnerIds: [], providerIds: [] });
-  }, [initialData]);
+  }, [organizationId]);
+
+  // Populate options dynamically in the config object
+  useEffect(() => {
+    costAllocationFieldConfig.productIds.options = products.map((product) => ({ id: product.id, label: product.name }));
+    costAllocationFieldConfig.employeeIds.options = employees.map((employee) => ({ id: employee.id, label: employee.name }));
+    costAllocationFieldConfig.projectIds.options = projects.map((project) => ({ id: project.id, label: project.name }));
+    costAllocationFieldConfig.partnerIds.options = partners.map((partner) => ({ id: partner.id, label: partner.name }));
+    costAllocationFieldConfig.providerIds.options = providers.map((provider) => ({ id: provider.id, label: provider.name }));
+  }, [products, employees, projects, partners, providers]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setAllocationData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: value, // Ensure the value is correctly set for multiple selection fields
     }));
   };
 
@@ -442,105 +485,81 @@ function CostAllocationModal({ open, onClose, onSubmit, initialData }) {
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '80%',
+          maxWidth: 1200,
+          height: '80%',
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          boxShadow: 24,
+          p: 4,
+          overflowY: 'auto',
+        }}
+      >
         <Typography variant="h6" component="h2">
           {initialData ? 'Edit Cost Allocation' : 'Add Cost Allocation'}
         </Typography>
-        <TextField label="Cost" name="cost" type="number" fullWidth margin="normal" value={allocationData.cost} onChange={handleChange} />
-        <TextField label="Description" name="description" fullWidth margin="normal" value={allocationData.description} onChange={handleChange} />
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Products</InputLabel>
-          <Select
-            name="productIds"
-            multiple
-            value={allocationData.productIds}
-            onChange={handleChange}
-            renderValue={(selected) => selected.map(id => products.find(p => p.id === id)?.name).join(', ')}
-          >
-            {products.map((product) => (
-              <MenuItem key={product.id} value={product.id}>
-                <Checkbox checked={allocationData.productIds.includes(product.id)} />
-                <ListItemText primary={product.name} />
-              </MenuItem>
+        <Box sx={{ flexGrow: 1 }}>
+          <Grid container spacing={2}>
+            {Object.keys(costAllocationFieldConfig).map((field) => (
+              <Grid item xs={12} sm={6} md={4} key={field}>
+                {costAllocationFieldConfig[field].type === 'select' ? (
+                  <FormControl fullWidth>
+                    <InputLabel>{costAllocationFieldConfig[field].label}</InputLabel>
+                    <Select
+                      name={field}
+                      value={allocationData[field] || ''}
+                      onChange={handleChange}
+                      multiple={costAllocationFieldConfig[field].multiple || false}
+                      renderValue={(selected) => {
+                        if (costAllocationFieldConfig[field].multiple) {
+                          return selected
+                            .map((id) => {
+                              const option = costAllocationFieldConfig[field].options?.find((opt) => opt.id === id);
+                              return option ? option.label : '';
+                            })
+                            .join(', ');
+                        }
+                        const option = costAllocationFieldConfig[field].options?.find((opt) => opt.id === selected);
+                        return option ? option.label : '';
+                      }}
+                    >
+                      {costAllocationFieldConfig[field].options && Array.isArray(costAllocationFieldConfig[field].options)
+                        ? costAllocationFieldConfig[field].options.map((option, optionIndex) => (
+                            <MenuItem key={option.id + '-' + optionIndex} value={option.id}>
+                              {costAllocationFieldConfig[field].multiple && (
+                                <Checkbox checked={allocationData[field].includes(option.id)} />
+                              )}
+                              <ListItemText primary={option.label} />
+                            </MenuItem>
+                          ))
+                        : null}
+                    </Select>
+                  </FormControl>
+                ) : (
+                  <TextField
+                    label={costAllocationFieldConfig[field].label}
+                    name={field}
+                    type={costAllocationFieldConfig[field].type}
+                    value={allocationData[field] || ''}
+                    onChange={handleChange}
+                    fullWidth
+                    multiline={costAllocationFieldConfig[field].multiline || false}
+                    rows={costAllocationFieldConfig[field].rows || 1}
+                    InputLabelProps={costAllocationFieldConfig[field].type === 'date' ? { shrink: true } : undefined}
+                  />
+                )}
+              </Grid>
             ))}
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Employees</InputLabel>
-          <Select
-            name="employeeIds"
-            multiple
-            value={allocationData.employeeIds}
-            onChange={handleChange}
-            renderValue={(selected) => selected.map(id => employees.find(e => e.id === id)?.name).join(', ')}
-          >
-            {employees.map((employee) => (
-              <MenuItem key={employee.id} value={employee.id}>
-                <Checkbox checked={allocationData.employeeIds.includes(employee.id)} />
-                <ListItemText primary={employee.name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Projects</InputLabel>
-          <Select
-            name="projectIds"
-            multiple
-            value={allocationData.projectIds}
-            onChange={handleChange}
-            renderValue={(selected) => selected.map(id => projects.find(p => p.id === id)?.name).join(', ')}
-          >
-            {projects.map((project) => (
-              <MenuItem key={project.id} value={project.id}>
-                <Checkbox checked={allocationData.projectIds.includes(project.id)} />
-                <ListItemText primary={project.name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Partners</InputLabel>
-          <Select
-            name="partnerIds"
-            multiple
-            value={allocationData.partnerIds}
-            onChange={handleChange}
-            renderValue={(selected) => selected.map(id => partners.find(p => p.id === id)?.name).join(', ')}
-          >
-            {partners.map((partner) => (
-              <MenuItem key={partner.id} value={partner.id}>
-                <Checkbox checked={allocationData.partnerIds.includes(partner.id)} />
-                <ListItemText primary={partner.name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Providers</InputLabel>
-          <Select
-            name="providerIds"
-            multiple
-            value={allocationData.providerIds}
-            onChange={handleChange}
-            renderValue={(selected) => selected.map(id => providers.find(p => p.id === id)?.name).join(', ')}
-          >
-            {providers.map((provider) => (
-              <MenuItem key={provider.id} value={provider.id}>
-                <Checkbox checked={allocationData.providerIds.includes(provider.id)} />
-                <ListItemText primary={provider.name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
+          </Grid>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+          <Button onClick={onClose}>Cancel</Button>
           <Button variant="contained" onClick={handleSubmit}>
             {initialData ? 'Update' : 'Add'}
           </Button>
