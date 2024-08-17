@@ -10,17 +10,26 @@ import {
   headCells
 } from '../components/BaseManagementComponent/ProjectsConfig';
 
-function ProjectsManagement() {
+import ProjectsAnalysis from './Analysis/Projects'
+
+function ProjectsManagement({showAnalytics}) {
   return (
-    <BaseManagementComponent
-      fieldConfig={fieldsConfig}
-      entityName={entityName}
-      fetchItems={fetchItems}
-      addItem={addItem}
-      updateItem={updateItem}
-      deleteItem={deleteItem}
-      headCells={headCells} // Pass the dynamically generated head cells
-    />
+    <>
+      {
+        showAnalytics ?
+        ( <ProjectsAnalysis fetchProjects={fetchItems} /> ) : (
+            <BaseManagementComponent
+            fieldConfig={fieldsConfig}
+            entityName={entityName}
+            fetchItems={fetchItems}
+            addItem={addItem}
+            updateItem={updateItem}
+            deleteItem={deleteItem}
+            headCells={headCells}
+          />
+        )
+      }
+    </>
   );
 }
 
