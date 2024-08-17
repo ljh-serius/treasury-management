@@ -1,14 +1,27 @@
 import React from 'react';
-import ProjectsStatistics from '../components/ProjectsStatistics';
-import ProjectsManagement from '../components/ProjectsManagement';
+import BaseManagementComponent from '../components/BaseManagementComponent';
+import {
+  fieldsConfig,
+  entityName,
+  fetchItems,
+  addItem,
+  updateItem,
+  deleteItem,
+  headCells
+} from '../components/ProjectsConfig';
 
-const CostsAllocations = ({ showAnalytics }) => {
-    console.log("SHOW SHOW ANALYTICS ANALYTICS", showAnalytics)
+function ProjectsManagement() {
   return (
-    <div>
-      {showAnalytics ? <ProjectsStatistics /> : <ProjectsManagement /> }
-    </div>
+    <BaseManagementComponent
+      fieldConfig={fieldsConfig}
+      entityName={entityName}
+      fetchItems={fetchItems}
+      addItem={addItem}
+      updateItem={updateItem}
+      deleteItem={deleteItem}
+      headCells={headCells} // Pass the dynamically generated head cells
+    />
   );
-};
+}
 
-export default CostsAllocations;
+export default ProjectsManagement;

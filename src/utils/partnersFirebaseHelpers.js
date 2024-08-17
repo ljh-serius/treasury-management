@@ -16,8 +16,9 @@ export const fetchPartners = async (organizationId) => {
 };
 
 // Function to add a new partner linked to an organization
-export const addPartner = async (partnerData) => {
+export const addPartner = async (partnerData, organizationId) => {
   try {
+    partnerData.organizationId = organizationId;
     const partnersCollection = collection(db, 'partners');
     const docRef = await addDoc(partnersCollection, partnerData);
     return docRef.id; // Return the ID of the newly created document

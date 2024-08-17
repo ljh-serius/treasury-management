@@ -215,14 +215,6 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Analytics</Typography>} />
           </ListItemButton>
         </ListItem>
-        <ListItem key="cost-allocation" disablePadding>
-          <ListItemButton component={Link} to="/cost-allocation">
-            <ListItemIcon>
-              <AttachMoneyIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Cost Allocation</Typography>} />
-          </ListItemButton>
-        </ListItem>
         <ListItem key="invoices" disablePadding>
           <ListItemButton component={Link} to="/invoices">
             <ListItemIcon>
@@ -231,20 +223,12 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Invoices</Typography>} />
           </ListItemButton>
         </ListItem>
-        <ListItem key="product-prototypes" disablePadding>
-          <ListItemButton component={Link} to="/product-prototypes">
+        <ListItem key="costs" disablePadding>
+          <ListItemButton component={Link} to="/costs">
             <ListItemIcon>
-              <BuildIcon style={{ fontSize: '1.6rem' }} />
+              <AttachMoneyIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Product Prototypes</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="search-partners" disablePadding>
-          <ListItemButton component={Link} to="/search-partners">
-            <ListItemIcon>
-              <SearchIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Search Partners</Typography>} />
+            <ListItemText primary={<Typography variant="body1">Costs</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem key="risk-management" disablePadding>
@@ -253,6 +237,14 @@ const Dashboard = ({ children }) => {
               <ShieldIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
             <ListItemText primary={<Typography variant="body1">Risk Management</Typography>} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key="product-prototypes" disablePadding>
+          <ListItemButton component={Link} to="/product-prototypes">
+            <ListItemIcon>
+              <BuildIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Product Prototypes</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem key="gantt-chart" disablePadding>

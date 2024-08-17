@@ -15,8 +15,9 @@ export const fetchProducts = async () => {
 };
 
 // Function to add a new product
-export const addProduct = async (productData) => {
+export const addProduct = async (productData, organizationId) => {
   try {
+    productData.organizationId = organizationId;
     const productsCollection = collection(db, 'products');
     const docRef = await addDoc(productsCollection, productData);
     return docRef.id; // Return the ID of the newly created document

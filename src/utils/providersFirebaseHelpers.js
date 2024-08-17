@@ -9,7 +9,8 @@ export const fetchProviders = async (organizationId) => {
 };
 
 // Add a new provider
-export const addProvider = async (provider) => {
+export const addProvider = async (provider, organizationId) => {
+  provider.organizationId = organizationId;
   return await addDoc(collection(db, 'providers'), provider);
 };
 

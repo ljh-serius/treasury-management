@@ -9,7 +9,8 @@ export const fetchEmployees = async () => {
 };
 
 // Add a new employee to the 'employees' collection
-export const addEmployee = async (employeeData) => {
+export const addEmployee = async (employeeData, organizationId) => {
+  employeeData.organizationId = organizationId;
   await addDoc(collection(db, 'employees'), employeeData);
 };
 

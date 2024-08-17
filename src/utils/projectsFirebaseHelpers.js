@@ -9,7 +9,8 @@ export const fetchProjects = async () => {
 };
 
 // Add a new project to the 'projects' collection
-export const addProject = async (projectData) => {
+export const addProject = async (projectData, organizationId) => {
+  projectData.organizationId = organizationId;
   await addDoc(collection(db, 'projects'), projectData);
 };
 

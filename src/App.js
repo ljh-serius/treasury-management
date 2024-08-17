@@ -19,10 +19,9 @@ import GanttChart from './pages/GanttChart';
 import Projects from './pages/Projects';
 import Providers from './pages/Providers';
 import Products from './pages/Products';
-import CostsAllocations from './pages/CostsAllocations';
+import Costs from './pages/Costs';
 import ProductPrototypes from './pages/ProductPrototypes';
 import Partners from './pages/Partners';
-import SearchPartners from './pages/SearchPartners';
 import RiskManagement from './pages/RiskManagement';
 import Employees from './pages/Employees';
 import TreasuryTable from './components/TreasuryTable';
@@ -190,36 +189,6 @@ const App = () => {
             }
           />
           <Route
-            path="/cost-allocation/:id"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                    <CostsAllocations />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cost-allocation"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                    <CostsAllocations />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/product-prototypes"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <ProductPrototypes />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/partners"
             element={
               <ProtectedRoute user={user}>
@@ -230,11 +199,21 @@ const App = () => {
             }
           />
           <Route
-            path="/search-partners"
+            path="/costs/:id"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                  <SearchPartners />
+                    <Costs />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/costs"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                    <Costs />
                 </Dashboard>
               </ProtectedRoute>
             }
@@ -245,6 +224,16 @@ const App = () => {
               <ProtectedRoute user={user}>
                 <Dashboard>
                   <RiskManagement />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/product-prototypes"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <ProductPrototypes />
                 </Dashboard>
               </ProtectedRoute>
             }

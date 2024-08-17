@@ -8,9 +8,9 @@ import {
   updateItem,
   deleteItem,
   headCells
-} from '../components/PartnersConfig';
+} from '../components/CostsConfig';
 
-function PartnersManagement() {
+function EmployeesManagement() {
   return (
     <BaseManagementComponent
       fieldConfig={fieldsConfig}
@@ -24,4 +24,4 @@ function PartnersManagement() {
   );
 }
 
-export default PartnersManagement;
+export default EmployeesManagement;
