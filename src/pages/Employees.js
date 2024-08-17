@@ -10,17 +10,26 @@ import {
   headCells
 } from '../components/BaseManagementComponent/EmployeesConfig';
 
-function EmployeesManagement() {
+import EmployeesAnalysis from './Analysis/Employees'
+
+function EmployeesManagement({showAnalytics}) {
   return (
-    <BaseManagementComponent
-      fieldConfig={fieldsConfig}
-      entityName={entityName}
-      fetchItems={fetchItems}
-      addItem={addItem}
-      updateItem={updateItem}
-      deleteItem={deleteItem}
-      headCells={headCells} // Pass the dynamically generated head cells
-    />
+    <>
+      {
+        showAnalytics ?
+        ( <EmployeesAnalysis fetchEmployees={fetchItems} /> ) : (
+            <BaseManagementComponent
+            fieldConfig={fieldsConfig}
+            entityName={entityName}
+            fetchItems={fetchItems}
+            addItem={addItem}
+            updateItem={updateItem}
+            deleteItem={deleteItem}
+            headCells={headCells}
+          />
+        )
+      }
+    </>
   );
 }
 
