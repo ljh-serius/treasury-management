@@ -194,6 +194,7 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Risks</Typography>} />
           </ListItemButton>
         </ListItem>
+        <Divider />
         <ListItem key="gantt-chart" disablePadding>
           <ListItemButton component={Link} to="/gantt-chart">
             <ListItemIcon>
@@ -202,6 +203,7 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Gantt Chart</Typography>} />
           </ListItemButton>
         </ListItem>
+        <Divider />
         <ListItem key="analytics" disablePadding>
           <ListItemButton component={Link} to="/analytics">
             <ListItemIcon>
@@ -210,6 +212,7 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Analytics</Typography>} />
           </ListItemButton>
         </ListItem>
+        <Divider />
         <ListItem key="manage-parameters" disablePadding>
           <ListItemButton component={Link} to="/parameters">
             <ListItemIcon>
@@ -218,6 +221,7 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Parameters</Typography>} />
           </ListItemButton>
         </ListItem>
+        <Divider />
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout}>
             <ListItemIcon>
@@ -226,6 +230,7 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Logout</Typography>} />
           </ListItemButton>
         </ListItem>
+        <Divider />
       </List>
     </div>
   );
