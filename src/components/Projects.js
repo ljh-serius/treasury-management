@@ -173,16 +173,20 @@ function ProjectModal({ open, onClose, onSubmit, initialData, organizationId }) 
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box 
-        sx={{ 
-          position: 'absolute', 
-          top: 0, 
-          left: 0, 
-          width: '100%', 
-          height: '100%', 
-          bgcolor: 'background.paper', 
-          overflowY: 'auto', 
-          p: 4, 
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '80%',
+          maxWidth: 1200,
+          height: '80%',
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          boxShadow: 24,
+          p: 4,
+          overflowY: 'auto',
         }}
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
