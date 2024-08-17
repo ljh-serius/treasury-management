@@ -17,6 +17,7 @@ export const fetchDocuments = async (organizationId, subcollectionName) => {
 // Function to add a new document linked to an organization in a subcollection
 export const addDocument = async (organizationId, subcollectionName, documentData) => {
   try {
+    documentData.organizationId = organizationId;
     const subcollectionRef = collection(db, 'organizations', organizationId, subcollectionName);
     const docRef = await addDoc(subcollectionRef, documentData);
     return docRef.id; // Return the ID of the newly created document

@@ -139,6 +139,7 @@ export const fieldsConfig = {
   energyConsumption: {
     label: 'Energy Consumption',
     type: 'select',
+    multiple: false,
     options: [
       { id: 'low', label: 'Low' },
       { id: 'medium', label: 'Medium' },

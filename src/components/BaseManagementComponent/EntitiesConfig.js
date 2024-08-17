@@ -2,30 +2,86 @@ import {
     fetchDocuments, addDocument, updateDocument, deleteDocument
 } from '../../utils/firebaseCrudHelpers';
 
+const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+
+export const fetchItems = () => fetchDocuments(organizationId, 'entities');
+export const addItem = (item) => addDocument(organizationId, 'entities', item);
+export const updateItem = (id, item) => updateDocument(organizationId, 'entities', id, item);
+export const deleteItem = (id) => deleteDocument(organizationId, 'entities', id);
+
+const getEntitiesOptions = async (types) =>  {
+    return (await fetchItems()).filter((entity) => {
+        return types.includes(entity.type);
+    }).map((entity) => {
+        return {
+            id: entity.id,
+            label: entity.name
+        }
+    });
+}
 
 export const fieldsConfig = {
+    name: { label: 'name', type: 'text', faker: 'company.name' },
+    type: {
+        label: 'Manager ID',
+        type: 'select',
+        options: [
+            {
+                id: 'store',
+                label: 'Store'
+            },
+            {
+                id: 'agency',
+                label: 'Agency'
+            },
+            {
+                id: 'department',
+                label: 'Department'
+            },
+            {
+                id: 'service',
+                label: 'Service'
+            },
+        ], // Populated with relevant managers
+        multiple: false,
+        faker: 'random.arrayElement'
+    },
     entityId: { label: 'Entity ID', type: 'text', faker: 'datatype.uuid' },
     parentId: {
         label: 'Parent Entity ID',
         type: 'select',
-        options: [], // Populated with relevant parent entities
-        multiple: false,
-        faker: 'random.uuid'
+        options: await getEntitiesOptions(['store', 'agency', 'department', 'service']), // Populated with relevant parent entities
+        multiple: true,
+        faker: 'random.arrayElement'
     },
-    organizationId: {
-        label: 'Organization ID',
-        type: 'text',
-        faker: 'datatype.uuid'
+    storeId:  {
+        label: 'Parent Entity ID',
+        type: 'select',
+        options: await getEntitiesOptions(['store']), // Populated with relevant parent entities
+        multiple: true,
+        faker: 'random.arrayElement'
     },
-    storeId: { label: 'Store ID', type: 'text', faker: 'datatype.uuid' },
-    agencyId: { label: 'Agency ID', type: 'text', faker: 'datatype.uuid' },
-    subOrganizationId: {
-        label: 'Sub-Organization ID',
-        type: 'text',
-        faker: 'datatype.uuid'
+    agencyId:  {
+        label: 'Parent Entity ID',
+        type: 'select',
+        options: await getEntitiesOptions(['agency']), // Populated with relevant parent entities
+        multiple: true,
+        faker: 'random.arrayElement'
     },
-    departmentId: { label: 'Department ID', type: 'text', faker: 'datatype.uuid' },
-    serviceId: { label: 'Service ID', type: 'text', faker: 'datatype.uuid' },
+    departmentId: {
+        label: 'Parent Entity ID',
+        type: 'select',
+        options: await getEntitiesOptions(['department']), // Populated with relevant parent entities
+        multiple: true,
+        faker: 'random.arrayElement'
+    },
+    serviceId: {
+        label: 'Parent Entity ID',
+        type: 'select',
+        options: await getEntitiesOptions(['service']), // Populated with relevant parent entities
+        multiple: true,
+        faker: 'random.arrayElement'
+    },
     locationId: { label: 'Location ID', type: 'text', faker: 'datatype.uuid' },
     regionId: { label: 'Region ID', type: 'text', faker: 'datatype.uuid' },
     countryId: { label: 'Country ID', type: 'text', faker: 'address.countryCode' },
@@ -56,10 +112,3 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
 }));
 
 export const entityName = 'Entities';
-
-const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-
-export const fetchItems = () => fetchDocuments(organizationId, 'entities');
-export const addItem = (item) => addDocument(organizationId, 'entities', item);
-export const updateItem = (id, item) => updateDocument(organizationId, 'entities', id, item);
-export const deleteItem = (id) => deleteDocument(organizationId, 'entities', id);

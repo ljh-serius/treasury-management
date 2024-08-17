@@ -2,41 +2,90 @@ import {
     fetchDocuments, addDocument, updateDocument, deleteDocument
 } from '../../utils/firebaseCrudHelpers';
 
+import { fetchItems as fetchProducts } from './ProductsConfig';
+import { fetchItems as fetchEmployees } from './EmployeesConfig';
+import { fetchItems as fetchProjects } from './ProjectsConfig';
+import { fetchItems as fetchPartners } from './PartnersConfig';
+import { fetchItems as fetchProviders } from './ProvidersConfig';
+
+const productsOptions = (await fetchProducts()).map((product) => {
+    return {
+        id: product.id,
+        label: product.name
+    }
+})
+
+console.log("PRODUCTS OPTIONS ", productsOptions)
+const employeesOptions = (await fetchEmployees()).map((employee) => {
+    return {
+        id: employee.id,
+        label: employee.name
+    }
+})
+
+const projectsOptions = (await fetchProjects()).map((project) => {
+    return {
+        id: project.id,
+        label: project.name
+    }
+})
+
+const partnersOptions = (await fetchPartners()).map((partner) => {
+    return {
+        id: partner.id,
+        label: partner.name
+    }
+})
+
+const providersOptions = (await fetchProviders()).map((provider) => {
+    return {
+        id: provider.id,
+        label: provider.name
+    }
+})
+
 export const fieldsConfig = {
     cost: { label: 'Cost', type: 'number', faker: 'finance.amount' },
     description: { label: 'Description', type: 'text', faker: 'lorem.sentence' },
     productIds: {
-        label: 'Products',
+        label: 'Cost for Products',
+        link: '/products',
         type: 'select',
-        options: [],
+        options: productsOptions,
         multiple: true,
         faker: 'random.arrayElements'
     },
     employeeIds: {
-        label: 'Employees',
+        label: 'Cost for Employees',
+        link: '/employees',
         type: 'select',
-        options: [],
+        options: employeesOptions,
         multiple: true,
         faker: 'random.arrayElements'
     },
     projectIds: {
-        label: 'Projects',
+        label: 'Cost for Projects',
+        link: '/projects',
         type: 'select',
-        options: [],
+        options: projectsOptions,
         multiple: true,
         faker: 'random.arrayElements'
     },
     partnerIds: {
-        label: 'Partners',
+        label: 'Cost for Partners',
+        link: '/partners',
         type: 'select',
-        options: [],
+        link: true,
+        options: partnersOptions,
         multiple: true,
         faker: 'random.arrayElements'
     },
     providerIds: {
-        label: 'Providers',
+        link: '/providers',
+        label: 'Cost for Providers',
         type: 'select',
-        options: [],
+        link: true,
+        options: providersOptions,
         multiple: true,
         faker: 'random.arrayElements'
     },
