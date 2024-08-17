@@ -8,7 +8,7 @@ import Blog from './pages/Blog';
 import Article from './pages/Article';
 import ProtectedRoute from './components/ProtectedRoute';
 import { auth } from './utils/firebaseConfig';
-import UnitGenerator from './pages/UnitGenerator';
+import ProductsAndServices from './pages/ProductsAndServices';
 import SummaryComponent from './components/SummaryComponent';
 import OrganizationRegistration from './components/OrganizationRegistration';
 import ManageParameters from './pages/ManageParameters';
@@ -94,11 +94,11 @@ const App = () => {
             }
           />
           <Route
-            path="/units"
+            path="/products-and-services"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                  <UnitGenerator />
+                  <ProductsAndServices />
                 </Dashboard>
               </ProtectedRoute>
             }

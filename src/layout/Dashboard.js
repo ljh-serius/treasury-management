@@ -207,12 +207,12 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Employees</Typography>} />
           </ListItemButton>
         </ListItem>
-        <ListItem key="units" disablePadding>
-          <ListItemButton component={Link} to="/units">
+        <ListItem key="analytics" disablePadding>
+          <ListItemButton component={Link} to="/analytics">
             <ListItemIcon>
-              <ViewListIcon style={{ fontSize: '1.6rem' }} />
+              <BarChartIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Units</Typography>} />
+            <ListItemText primary={<Typography variant="body1">Analytics</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem key="cost-allocation" disablePadding>
@@ -221,6 +221,14 @@ const Dashboard = ({ children }) => {
               <AttachMoneyIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
             <ListItemText primary={<Typography variant="body1">Cost Allocation</Typography>} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key="products-and-services" disablePadding>
+          <ListItemButton component={Link} to="/products-and-services">
+            <ListItemIcon>
+              <ViewListIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Products and Services</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem key="product-prototypes" disablePadding>
@@ -245,14 +253,6 @@ const Dashboard = ({ children }) => {
               <ShieldIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
             <ListItemText primary={<Typography variant="body1">Risk Management</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="analytics" disablePadding>
-          <ListItemButton component={Link} to="/analytics">
-            <ListItemIcon>
-              <BarChartIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Analytics</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem key="gantt-chart" disablePadding>
