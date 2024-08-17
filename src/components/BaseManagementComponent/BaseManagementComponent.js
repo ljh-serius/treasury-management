@@ -12,6 +12,17 @@ import CloseIcon from '@mui/icons-material/Close';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { faker } from '@faker-js/faker';
+
+function getRandomArbitraryInteger(min, max) {
+  return Math.floor(Math.random() * (max - min) + min);
+}
+
+const truncateText = (text, wordLimit) => {
+  const words = text.split(' ');
+  if (words.length <= wordLimit) return text;
+  return words.slice(0, wordLimit).join(' ') + '...';
+};
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -296,7 +307,7 @@ function FilterManager({ filters, setFilters, fieldConfig }) {
             startIcon={<AddCircleOutlineIcon />}
             onClick={addFilter}
             variant="outlined"
-            fullWidth // Add this line to make the button the same width as the inputs
+            fullWidth
           >
             Add Filter
           </Button>
@@ -315,12 +326,18 @@ function FilterManager({ filters, setFilters, fieldConfig }) {
           />
         ))}
       </Stack>
-
     </Box>
   );
 }
 
-export default function BaseTableComponent({ fetchItems, addItem, updateItem, deleteItem, fieldConfig, entityName }) {
+export default function BaseTableComponent({
+  fetchItems,
+  addItem,
+  updateItem,
+  deleteItem,
+  fieldConfig,
+  entityName
+}) {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState(Object.keys(fieldConfig)[0]);
   const [selected, setSelected] = useState([]);
@@ -427,6 +444,66 @@ export default function BaseTableComponent({ fetchItems, addItem, updateItem, de
     }
   };
 
+  const generateRandomRow = async () => {
+    const getRandomElementId = (arr) => {
+      if (!Array.isArray(arr) || arr.length === 0) return null;
+      const randomIndex = Math.floor(Math.random() * arr.length);
+      const element = arr[randomIndex];
+      return element && element.id ? element.id : null;
+    };
+
+    const getMultipleRandomElementIds = (arr) => {
+      if (!Array.isArray(arr) || arr.length === 0) return [];
+      const randomCount = Math.floor(Math.random() * arr.length) + 1;
+      let result = [];
+      for (let i = 0; i < randomCount; i++) {
+        result.push(getRandomElementId(arr));
+      }
+      return result;
+    };
+
+    const newRow = Object.keys(fieldConfig).reduce((acc, key) => {
+      const field = fieldConfig[key];
+      let value;
+
+      if (field.faker) {
+        const fakerPath = field.faker.split('.');
+        if (fakerPath[0] === 'random' && field.type === 'select' && field.multiple) {
+          value = getMultipleRandomElementIds(field.options);
+        } else if (fakerPath[0] === 'random' && field.type === 'select') {
+          value = getRandomElementId(field.options);
+        } else {
+          value = fakerPath.reduce((acc, method) => acc[method], faker);
+
+          // Special handling for date.past to extract the year
+          if (field.faker === 'date.past') {
+            value = value().getFullYear() - getRandomArbitraryInteger(10, 20);
+          } else if(field.faker === 'date.future') {
+            value = value().getFullYear() + getRandomArbitraryInteger(10, 20);
+          } else {
+            value = typeof value === 'function' ? value() : value;
+          }
+        }
+      } else {
+        value = field.type === 'number' ? faker.datatype.number() : faker.lorem.word();
+      }
+
+      acc[key] = value;
+      return acc;
+    }, {});
+
+    try {
+      // Add the generated row to the database
+      await addItem(newRow);
+
+      // Fetch updated items and refresh the table
+      const data = await fetchItems();
+      setItems(data);
+    } catch (error) {
+      console.error(`Error generating and saving random ${entityName}:`, error);
+    }
+  };
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -464,6 +541,9 @@ export default function BaseTableComponent({ fetchItems, addItem, updateItem, de
             onDelete={handleDeleteItems}
             onEdit={handleEditItem}
           />
+          <Button onClick={generateRandomRow} variant="contained" color="secondary" sx={{ margin: 2 }}>
+            Generate Random Row
+          </Button>
           <TableContainer>
             <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={dense ? 'small' : 'medium'}>
               <BaseTableHead
@@ -500,7 +580,7 @@ export default function BaseTableComponent({ fetchItems, addItem, updateItem, de
                       </TableCell>
                       {Object.keys(fieldConfig).map((field) => (
                         <TableCell key={field} align={fieldConfig[field].numeric ? 'right' : 'left'}>
-                          {row[field]}
+                          {fieldConfig[field].type === 'text' ? truncateText(row[field], 5) : JSON.stringify(row[field])}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -516,6 +596,7 @@ export default function BaseTableComponent({ fetchItems, addItem, updateItem, de
                   </TableRow>
                 )}
               </TableBody>
+
             </Table>
           </TableContainer>
           <TablePagination
