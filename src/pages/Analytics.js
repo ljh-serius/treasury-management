@@ -618,7 +618,7 @@ const renderSelectedValue = (selected) => {
   const footerTotals = calculateFooterTotals();
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 12, mb: 12, width: '60vw' }}>
+    <Container maxWidth="xl">
       <Typography variant="h4" gutterBottom>
         {translate('Comparative Analytics', language)}
       </Typography>

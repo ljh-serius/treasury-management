@@ -1,92 +1,104 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  AppBar,
-  Toolbar,
   Box,
   CssBaseline,
-  Divider,
   Drawer,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Divider,
   Typography,
+  IconButton,
   Button,
 } from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
+import MuiAppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Link } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
-import { auth, db } from '../utils/firebaseConfig';
-import { getDoc, doc } from "firebase/firestore";
-import {
-  getAllStoreTransactionSummaries,
-  getStoreTransactionSummaries,
-  fetchEntities,
-} from '../utils/firebaseHelpers';
+import { auth } from '../utils/firebaseConfig';
 import { translate } from '../utils/translate';
 import { useTranslation } from '../utils/TranslationProvider';
-import TimelineIcon from '@mui/icons-material/Timeline';
+
+import SummarizeIcon from '@mui/icons-material/Summarize';
 import WorkIcon from '@mui/icons-material/Work';
 import StorefrontIcon from '@mui/icons-material/Storefront';
-import BusinessIcon from '@mui/icons-material/Business';
-import ViewListIcon from '@mui/icons-material/ViewList';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import BuildIcon from '@mui/icons-material/Build';
+import GroupIcon from '@mui/icons-material/Group';
+import InventoryIcon from '@mui/icons-material/Inventory';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import ShieldIcon from '@mui/icons-material/Shield';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import SummarizeIcon from '@mui/icons-material/Summarize';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import SecurityIcon from '@mui/icons-material/Security';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import InsightsIcon from '@mui/icons-material/Insights';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
-import TreasuryTable from '../components/Summary/TreasuryTable'; // Adjust the path as necessary
 
+
+const drawerWidth = 240;
+
+const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
+  ({ theme, open }) => ({
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    marginLeft: `-${drawerWidth}px`,
+    ...(open && {
+      transition: theme.transitions.create('margin', {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+      marginLeft: 0,
+    }),
+  }),
+);
+
+const AppBar = styled(MuiAppBar, {
+  shouldForwardProp: (prop) => prop !== 'open',
+})(({ theme, open }) => ({
+  transition: theme.transitions.create(['margin', 'width'], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
+    width: `calc(100% - ${drawerWidth}px)`,
+    marginLeft: `${drawerWidth}px`,
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  }),
+}));
+
+const DrawerHeader = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(0, 1),
+  ...theme.mixins.toolbar,
+  justifyContent: 'flex-end',
+}));
 
 const Dashboard = ({ children }) => {
-  const drawerWidth = 230;
-  const headerHeight = 60;
-
+  const theme = useTheme();
   const { language, toggleLanguage } = useTranslation();
-
-  const [summaries, setSummaries] = useState({});
-  const [entities, setEntities] = useState([]);
+  const [open, setOpen] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
-  const [currentSummary, setCurrentSummary] = useState({});
-  const [bookName, setBookName] = useState(''); // Add state for bookName
-  const [entityName, setEntityName] = useState(''); // Add state for entityName
-  const organizationId = JSON.parse(localStorage.getItem("userData")).organizationId;
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const user = auth.currentUser;
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
 
-      if (!user) return;
-
-
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-
-        const data = await getAllStoreTransactionSummaries(organizationId);
-
-        setSummaries(data);
-
-        if (['admin', 'headquarter'].includes(userData.role)) {
-          const fetchedEntities = await fetchEntities(organizationId);
-
-          setEntities(fetchedEntities);
-
-        } else if (userData.role === 'store') {
-          const entityId = JSON.parse(localStorage.getItem("userData")).entityId;
-
-          const data = await getStoreTransactionSummaries(organizationId, entityId);
-          setSummaries(data);
-        }
-      }
-    };
-
-    fetchUserData();
-  }, []);
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
 
   const handleLogout = async () => {
     try {
@@ -101,45 +113,13 @@ const Dashboard = ({ children }) => {
     setShowAnalytics(!showAnalytics);
   };
 
-  const onSelectSummaryTreeView = async (selectedSummary) => {
-    const [identifier, holder, subHolder] = selectedSummary.split('-');
-
-    if (identifier === 'historical') {
-      setCurrentSummary(summaries.historicalSummary);
-      const orgDocRef = doc(db, 'organizations', organizationId);
-      const orgDoc = await getDoc(orgDocRef);
-      if (orgDoc.exists()) {
-        const orgData = orgDoc.data();
-        setBookName('Historical Transactions Book for ' + orgData.name); // Set appropriate book name
-        setEntityName(null); // Set appropriate entity name
-      }
-
-    } else if (identifier === 'entity') {
-      const entity = summaries.entitySummaries[holder];
-
-      const entityName = entities.filter((entity) => {
-        return entity.id === holder;
-      })[0].name;
-
-      setCurrentSummary(entity);
-      setBookName('Entity Book'); // Set appropriate book name
-      setEntityName(entityName); // Set entity name based on holder
-    } else if (identifier === 'year') {
-      const summary = summaries.summaries[holder][subHolder];
-      const entityName = entities.filter((entity) => {
-        return entity.id === holder;
-      })[0].name;
-
-      setCurrentSummary(summary);
-      setBookName(subHolder) // Set appropriate book name
-      setEntityName(entityName); // Set appropriate entity name
-    }
-  };
-
-
   const drawer = (
     <div>
-      <Toolbar />
+      <DrawerHeader>
+        <IconButton onClick={handleDrawerClose}>
+          {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        </IconButton>
+      </DrawerHeader>
       <Divider />
       <List>
         <ListItem key="treasury" disablePadding>
@@ -169,7 +149,7 @@ const Dashboard = ({ children }) => {
         <ListItem key="partners" disablePadding>
           <ListItemButton component={Link} to="/partners">
             <ListItemIcon>
-              <PeopleAltIcon style={{ fontSize: '1.6rem' }} />
+              <GroupIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
             <ListItemText primary={<Typography variant="body1">Partners</Typography>} />
           </ListItemButton>
@@ -177,7 +157,7 @@ const Dashboard = ({ children }) => {
         <ListItem key="products" disablePadding>
           <ListItemButton component={Link} to="/products">
             <ListItemIcon>
-              <BusinessIcon style={{ fontSize: '1.6rem' }} />
+              <InventoryIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
             <ListItemText primary={<Typography variant="body1">Products</Typography>} />
           </ListItemButton>
@@ -193,7 +173,7 @@ const Dashboard = ({ children }) => {
         <ListItem key="invoices" disablePadding>
           <ListItemButton component={Link} to="/invoices">
             <ListItemIcon>
-              <ViewListIcon style={{ fontSize: '1.6rem' }} />
+              <ReceiptIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
             <ListItemText primary={<Typography variant="body1">Invoices</Typography>} />
           </ListItemButton>
@@ -201,7 +181,7 @@ const Dashboard = ({ children }) => {
         <ListItem key="costs" disablePadding>
           <ListItemButton component={Link} to="/costs">
             <ListItemIcon>
-              <AttachMoneyIcon style={{ fontSize: '1.6rem' }} />
+              <MonetizationOnIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
             <ListItemText primary={<Typography variant="body1">Costs</Typography>} />
           </ListItemButton>
@@ -209,7 +189,7 @@ const Dashboard = ({ children }) => {
         <ListItem key="risks" disablePadding>
           <ListItemButton component={Link} to="/risks">
             <ListItemIcon>
-              <ShieldIcon style={{ fontSize: '1.6rem' }} />
+              <SecurityIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
             <ListItemText primary={<Typography variant="body1">Risks</Typography>} />
           </ListItemButton>
@@ -225,7 +205,7 @@ const Dashboard = ({ children }) => {
         <ListItem key="analytics" disablePadding>
           <ListItemButton component={Link} to="/analytics">
             <ListItemIcon>
-              <BarChartIcon style={{ fontSize: '1.6rem' }} />
+              <InsightsIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
             <ListItemText primary={<Typography variant="body1">Analytics</Typography>} />
           </ListItemButton>
@@ -250,59 +230,62 @@ const Dashboard = ({ children }) => {
     </div>
   );
 
-  const isTreasuryTable = React.Children.toArray(children).some(
-    (child) => React.isValidElement(child) && child.type === TreasuryTable
-  );
-
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-        }}
-      >
+      <AppBar position="fixed" open={open}>
         <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={handleDrawerOpen}
+            edge="start"
+            sx={{ mr: 2, ...(open && { display: 'none' }) }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap component="div">
+            Dashboard
+          </Typography>
           <Button
             variant="outlined"
             color="inherit"
             onClick={toggleShowAnalytics}
             sx={{ ml: 'auto', fontSize: '0.8rem' }}
           >
-            {showAnalytics && translate("Show Data", language)}
-            {!showAnalytics && translate("Show Analysis", language)}
+            {showAnalytics ? translate("Show Data", language) : translate("Show Analysis", language)}
           </Button>
           <Button
             variant="outlined"
             color="inherit"
             onClick={toggleLanguage}
-            sx={{ ml: 'auto', fontSize: '0.8rem' }}
+            sx={{ ml: 2, fontSize: '0.8rem' }}
           >
             {translate("Switch Language", language)}
           </Button>
         </Toolbar>
       </AppBar>
       <Drawer
-        variant="permanent"
-        open
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+          },
+        }}
+        variant="persistent"
+        anchor="left"
+        open={open}
       >
         {drawer}
       </Drawer>
-
-      <main style={{ paddingLeft: '250px', margin: '100px auto' }}>
-        {isTreasuryTable && currentSummary ? (
-          <TreasuryTable
-            transactions={currentSummary}
-            showAnalytics={showAnalytics}
-            bookName={bookName} // Pass bookName as prop
-            entityName={entityName} // Pass entityName as prop
-          />
-        ) : (
-          React.cloneElement(children, { showAnalytics })
-        )}
-      </main>
+      <Main open={open}>
+        <DrawerHeader />
+        <Box>
+          {React.cloneElement(children, { showAnalytics })}
+        </Box>
+      </Main>
     </Box>
   );
 };

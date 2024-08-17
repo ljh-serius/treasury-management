@@ -271,7 +271,7 @@ function FilterManager({ filters, setFilters, fieldConfig }) {
     <Box sx={{ pl: 1, pt: 2, pb: 2, width: '100%' }}>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={4}>
-          <FormControl fullWidth size="small">
+          <FormControl fullWidth >
             <InputLabel>Column</InputLabel>
             <Select
               value={currentFilter.column}
@@ -288,7 +288,7 @@ function FilterManager({ filters, setFilters, fieldConfig }) {
         </Grid>
         <Grid item xs={12} sm={4}>
           {fieldConfig[currentFilter.column]?.type === 'select' ? (
-            <FormControl fullWidth size="small">
+            <FormControl fullWidth>
               <InputLabel>Value</InputLabel>
               <Select
                 value={currentFilter.value}
@@ -306,8 +306,6 @@ function FilterManager({ filters, setFilters, fieldConfig }) {
             <TextField
               value={currentFilter.value}
               onChange={(e) => handleFilterChange('value', e.target.value)}
-              size="small"
-              fullWidth
               placeholder="Enter value"
             />
           )}
@@ -318,6 +316,7 @@ function FilterManager({ filters, setFilters, fieldConfig }) {
             onClick={addFilter}
             variant="outlined"
             fullWidth
+            height="64px"
           >
             Add Filter
           </Button>
