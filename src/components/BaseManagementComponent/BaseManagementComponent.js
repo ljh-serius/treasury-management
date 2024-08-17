@@ -46,7 +46,7 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-function BaseTableHead({ headCells, order, orderBy, onRequestSort }) {
+function BaseTableHead({ headCells, order, orderBy, onRequestSort, onSelectAllClick, numSelected, rowCount }) {
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -55,7 +55,15 @@ function BaseTableHead({ headCells, order, orderBy, onRequestSort }) {
     <TableHead>
       <TableRow>
         <TableCell padding="checkbox">
-          <MUICheckbox color="primary" />
+          <MUICheckbox
+            color="primary"
+            indeterminate={numSelected > 0 && numSelected < rowCount}
+            checked={rowCount > 0 && numSelected === rowCount}
+            onChange={onSelectAllClick}
+            inputProps={{
+              'aria-label': 'select all items',
+            }}
+          />
         </TableCell>
         {headCells.map((headCell) => (
           <TableCell
@@ -478,7 +486,7 @@ export default function BaseTableComponent({
           // Special handling for date.past to extract the year
           if (field.faker === 'date.past') {
             value = value().getFullYear() - getRandomArbitraryInteger(10, 20);
-          } else if(field.faker === 'date.future') {
+          } else if (field.faker === 'date.future') {
             value = value().getFullYear() + getRandomArbitraryInteger(10, 20);
           } else {
             value = typeof value === 'function' ? value() : value;
@@ -554,6 +562,9 @@ export default function BaseTableComponent({
                 order={order}
                 orderBy={orderBy}
                 onRequestSort={handleRequestSort}
+                onSelectAllClick={handleSelectAllClick}
+                numSelected={selected.length}
+                rowCount={filteredItems.length}
               />
               <TableBody>
                 {visibleRows.map((row, index) => {
@@ -621,3 +632,4 @@ export default function BaseTableComponent({
     </Container>
   );
 }
+
