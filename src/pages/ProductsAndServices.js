@@ -203,7 +203,7 @@ function EnhancedTableToolbar(props) {
   );
 }
 
-export default function UnitGenerator() {
+export default function ProductsAndServices() {
   const { language } = useTranslation();
   const [allUnits, setAllUnits] = useState([]);
   const [filteredUnits, setFilteredUnits] = useState([]);

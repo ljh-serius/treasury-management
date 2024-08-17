@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import { Delete, Edit, Search } from '@mui/icons-material';
 
-const ManageEntities = () => {
+const EntityManagement = () => {
   const [entities, setEntities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
@@ -213,4 +213,4 @@ const ManageEntities = () => {
   );
 };
 
-export default ManageEntities;
+export default EntityManagement;

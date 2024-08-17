@@ -11,7 +11,7 @@ import { auth } from './utils/firebaseConfig';
 import ProductsAndServices from './pages/ProductsAndServices';
 import SummaryComponent from './components/SummaryComponent';
 import OrganizationRegistration from './components/OrganizationRegistration';
-import ManageParameters from './pages/ManageParameters';
+import ParametersManagement from './pages/ParametersManagement';
 import { TranslationProvider } from './utils/TranslationProvider';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
@@ -108,7 +108,7 @@ const App = () => {
               element={
                 <ProtectedRoute user={user}>
                   <Dashboard>
-                    <ManageParameters />
+                    <ParametersManagement />
                   </Dashboard>
                 </ProtectedRoute>
               }
@@ -164,7 +164,7 @@ const App = () => {
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                <GanttChart />
+                  <GanttChart />
                 </Dashboard>
               </ProtectedRoute>
             }
@@ -244,7 +244,7 @@ const App = () => {
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                <RiskManagement />
+                  <RiskManagement />
                 </Dashboard>
               </ProtectedRoute>
             }

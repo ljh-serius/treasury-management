@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../utils/firebaseConfig';
-import { Container, Paper, Typography, TextField, Button, Box, Grid, CircularProgress, Alert } from '@mui/material';
+import { Container, TextField, Button, Box, Grid, CircularProgress, Alert } from '@mui/material';
 
-const ManageOrganization = () => {
+const OrganizationManagement = () => {
   const [organization, setOrganization] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -74,7 +74,6 @@ const ManageOrganization = () => {
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
-}}>
         <Box component="form" noValidate autoComplete="off">
           <Grid container spacing={2}>
             <Grid item xs={12}>
@@ -164,4 +163,4 @@ const ManageOrganization = () => {
   );
 };
 
-export default ManageOrganization;
+export default OrganizationManagement;

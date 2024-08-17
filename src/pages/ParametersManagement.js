@@ -1,10 +1,10 @@
 import React from 'react';
 import { Tabs, Tab, Box, Container } from '@mui/material';
-import ManageUsers from './ManageUsers';
-import ManageOrganization from './ManageOrganization';
-import EntityManager from './EntityManager';
+import UsersManagement from './UsersManagement';
+import OrganizationManagement from './OrganizationManagement';
+import EnitiesManagement from './EnitiesManagement';
 
-const ManageParameters = () => {
+const ParametersManagement = () => {
   const [selectedTab, setSelectedTab] = React.useState(0);
 
   const handleTabChange = (event, newValue) => {
@@ -19,16 +19,16 @@ const ManageParameters = () => {
             <Tab label="Manage Entiteis" />
         </Tabs>
         {selectedTab === 0 && (
-            <ManageUsers />
+            <UsersManagement />
         )}
         {selectedTab === 1 && (
-            <ManageOrganization />
+            <OrganizationManagement />
         )}
         {selectedTab === 2 && (
-            <EntityManager />
+            <EnitiesManagement />
         )}
     </Container>
   );
 };
 
-export default ManageParameters;
+export default ParametersManagement;

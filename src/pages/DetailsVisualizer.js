@@ -28,7 +28,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 
 const stores = ['Store 1', 'Store 2', 'Store 3'];
 
-const UnitDetails = () => {
+const DetailsVisualizer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { unit } = location.state || {};
@@ -340,4 +340,4 @@ const UnitDetails = () => {
   );
 };
 
-export default UnitDetails;
+export default DetailsVisualizer;
