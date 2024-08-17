@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
-  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch, Link, Checkbox
+  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch, Link
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -12,41 +12,48 @@ import { visuallyHidden } from '@mui/utils';
 import { fetchEmployees, addEmployee, updateEmployee, deleteEmployee } from '../utils/employeesFirebaseHelpers';
 import { fetchCostAllocations } from '../utils/costAllocationFirebaseHelpers';
 
-const headCells = [
-  { id: 'name', label: 'Name' },
-  { id: 'position', label: 'Position' },
-  { id: 'email', label: 'Email' },
-  { id: 'phone', label: 'Phone' },
-  { id: 'department', label: 'Department' },
-  { id: 'hireDate', label: 'Hire Date' },
-  { id: 'salary', label: 'Salary' },
-  { id: 'status', label: 'Status' },
-  { id: 'manager', label: 'Manager' },
-  { id: 'location', label: 'Location' },
-  { id: 'address', label: 'Address' },
-  { id: 'dateOfBirth', label: 'Date of Birth' },
-  { id: 'gender', label: 'Gender' },
-  { id: 'maritalStatus', label: 'Marital Status' },
-  { id: 'nationality', label: 'Nationality' },
-  { id: 'emergencyContactName', label: 'Emergency Contact Name' },
-  { id: 'emergencyContactPhone', label: 'Emergency Contact Phone' },
-  { id: 'bankAccountNumber', label: 'Bank Account Number' },
-  { id: 'socialSecurityNumber', label: 'Social Security Number' },
-  { id: 'taxId', label: 'Tax ID' },
-  { id: 'jobTitle', label: 'Job Title' },
-  { id: 'employmentType', label: 'Employment Type' },
-  { id: 'workSchedule', label: 'Work Schedule' },
-  { id: 'yearsOfExperience', label: 'Years of Experience' },
-  { id: 'highestEducation', label: 'Highest Education' },
-  { id: 'certifications', label: 'Certifications' },
-  { id: 'languagesSpoken', label: 'Languages Spoken' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'performanceRating', label: 'Performance Rating' },
-  { id: 'probationEndDate', label: 'Probation End Date' },
-  { id: 'healthInsuranceProvider', label: 'Health Insurance Provider' },
-  { id: 'healthInsuranceNumber', label: 'Health Insurance Number' },
-  { id: 'additionalNotes', label: 'Additional Notes' },
-];
+// Configuration object for employee fields
+const employeesFieldConfig = {
+  name: { label: 'Name', type: 'text' },
+  position: { label: 'Position', type: 'text' },
+  email: { label: 'Email', type: 'email' },
+  phone: { label: 'Phone', type: 'text' },
+  department: { label: 'Department', type: 'text' },
+  hireDate: { label: 'Hire Date', type: 'date' },
+  salary: { label: 'Salary', type: 'number' },
+  status: { label: 'Status', type: 'text' },
+  manager: { label: 'Manager', type: 'text' },
+  location: { label: 'Location', type: 'text' },
+  address: { label: 'Address', type: 'text' },
+  dateOfBirth: { label: 'Date of Birth', type: 'date' },
+  gender: { label: 'Gender', type: 'text' },
+  maritalStatus: { label: 'Marital Status', type: 'text' },
+  nationality: { label: 'Nationality', type: 'text' },
+  emergencyContactName: { label: 'Emergency Contact Name', type: 'text' },
+  emergencyContactPhone: { label: 'Emergency Contact Phone', type: 'text' },
+  bankAccountNumber: { label: 'Bank Account Number', type: 'text' },
+  socialSecurityNumber: { label: 'Social Security Number', type: 'text' },
+  taxId: { label: 'Tax ID', type: 'text' },
+  jobTitle: { label: 'Job Title', type: 'text' },
+  employmentType: { label: 'Employment Type', type: 'text' },
+  workSchedule: { label: 'Work Schedule', type: 'text' },
+  yearsOfExperience: { label: 'Years of Experience', type: 'number' },
+  highestEducation: { label: 'Highest Education', type: 'text' },
+  certifications: { label: 'Certifications', type: 'text' },
+  languagesSpoken: { label: 'Languages Spoken', type: 'text' },
+  skills: { label: 'Skills', type: 'text' },
+  performanceRating: { label: 'Performance Rating', type: 'number' },
+  probationEndDate: { label: 'Probation End Date', type: 'date' },
+  healthInsuranceProvider: { label: 'Health Insurance Provider', type: 'text' },
+  healthInsuranceNumber: { label: 'Health Insurance Number', type: 'text' },
+  additionalNotes: { label: 'Additional Notes', type: 'text' },
+};
+
+// Generate head cells dynamically from the config object
+const headCells = Object.keys(employeesFieldConfig).map(key => ({
+  id: key,
+  label: employeesFieldConfig[key].label,
+}));
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -161,91 +168,21 @@ function EnhancedTableToolbar(props) {
 }
 
 function EmployeeModal({ open, onClose, onSubmit, initialData, organizationId }) {
-  const [employeeData, setEmployeeData] = useState({
-    name: '',
-    position: '',
-    email: '',
-    phone: '',
-    department: '',
-    hireDate: '',
-    salary: '',
-    status: 'Active',
-    manager: '',
-    location: '',
-    address: '',
-    dateOfBirth: '',
-    gender: '',
-    maritalStatus: '',
-    nationality: '',
-    emergencyContactName: '',
-    emergencyContactPhone: '',
-    bankAccountNumber: '',
-    socialSecurityNumber: '',
-    taxId: '',
-    jobTitle: '',
-    employmentType: '',
-    workSchedule: '',
-    yearsOfExperience: '',
-    highestEducation: '',
-    certifications: '',
-    languagesSpoken: '',
-    skills: '',
-    performanceRating: '',
-    probationEndDate: '',
-    healthInsuranceProvider: '',
-    healthInsuranceNumber: '',
-    additionalNotes: '',
-    organizationId,
-  });
+  const [employeeData, setEmployeeData] = useState({ organizationId });
 
   useEffect(() => {
     if (initialData) {
       setEmployeeData(initialData);
     } else {
-      setEmployeeData({
-        name: '',
-        position: '',
-        email: '',
-        phone: '',
-        department: '',
-        hireDate: '',
-        salary: '',
-        status: 'Active',
-        manager: '',
-        location: '',
-        address: '',
-        dateOfBirth: '',
-        gender: '',
-        maritalStatus: '',
-        nationality: '',
-        emergencyContactName: '',
-        emergencyContactPhone: '',
-        bankAccountNumber: '',
-        socialSecurityNumber: '',
-        taxId: '',
-        jobTitle: '',
-        employmentType: '',
-        workSchedule: '',
-        yearsOfExperience: '',
-        highestEducation: '',
-        certifications: '',
-        languagesSpoken: '',
-        skills: '',
-        performanceRating: '',
-        probationEndDate: '',
-        healthInsuranceProvider: '',
-        healthInsuranceNumber: '',
-        additionalNotes: '',
-        organizationId,
-      });
+      setEmployeeData({ organizationId });
     }
   }, [initialData, organizationId]);
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    const { name, value, type } = event.target;
     setEmployeeData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: type === 'checkbox' ? event.target.checked : value,
     }));
   };
 
@@ -281,40 +218,25 @@ function EmployeeModal({ open, onClose, onSubmit, initialData, organizationId })
             gap: 2,
           }}
         >
-          {/* All employee fields */}
-          <TextField label="Name" name="name" fullWidth margin="normal" value={employeeData.name} onChange={handleChange} />
-          <TextField label="Position" name="position" fullWidth margin="normal" value={employeeData.position} onChange={handleChange} />
-          <TextField label="Email" name="email" fullWidth margin="normal" value={employeeData.email} onChange={handleChange} />
-          <TextField label="Phone" name="phone" fullWidth margin="normal" value={employeeData.phone} onChange={handleChange} />
-          <TextField label="Department" name="department" fullWidth margin="normal" value={employeeData.department} onChange={handleChange} />
-          <TextField label="Hire Date" name="hireDate" type="date" fullWidth margin="normal" value={employeeData.hireDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-          <TextField label="Salary" name="salary" type="number" fullWidth margin="normal" value={employeeData.salary} onChange={handleChange} />
-          <TextField label="Status" name="status" fullWidth margin="normal" value={employeeData.status} onChange={handleChange} />
-          <TextField label="Manager" name="manager" fullWidth margin="normal" value={employeeData.manager} onChange={handleChange} />
-          <TextField label="Location" name="location" fullWidth margin="normal" value={employeeData.location} onChange={handleChange} />
-          <TextField label="Address" name="address" fullWidth margin="normal" value={employeeData.address} onChange={handleChange} />
-          <TextField label="Date of Birth" name="dateOfBirth" type="date" fullWidth margin="normal" value={employeeData.dateOfBirth} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-          <TextField label="Gender" name="gender" fullWidth margin="normal" value={employeeData.gender} onChange={handleChange} />
-          <TextField label="Marital Status" name="maritalStatus" fullWidth margin="normal" value={employeeData.maritalStatus} onChange={handleChange} />
-          <TextField label="Nationality" name="nationality" fullWidth margin="normal" value={employeeData.nationality} onChange={handleChange} />
-          <TextField label="Emergency Contact Name" name="emergencyContactName" fullWidth margin="normal" value={employeeData.emergencyContactName} onChange={handleChange} />
-          <TextField label="Emergency Contact Phone" name="emergencyContactPhone" fullWidth margin="normal" value={employeeData.emergencyContactPhone} onChange={handleChange} />
-          <TextField label="Bank Account Number" name="bankAccountNumber" fullWidth margin="normal" value={employeeData.bankAccountNumber} onChange={handleChange} />
-          <TextField label="Social Security Number" name="socialSecurityNumber" fullWidth margin="normal" value={employeeData.socialSecurityNumber} onChange={handleChange} />
-          <TextField label="Tax ID" name="taxId" fullWidth margin="normal" value={employeeData.taxId} onChange={handleChange} />
-          <TextField label="Job Title" name="jobTitle" fullWidth margin="normal" value={employeeData.jobTitle} onChange={handleChange} />
-          <TextField label="Employment Type" name="employmentType" fullWidth margin="normal" value={employeeData.employmentType} onChange={handleChange} />
-          <TextField label="Work Schedule" name="workSchedule" fullWidth margin="normal" value={employeeData.workSchedule} onChange={handleChange} />
-          <TextField label="Years of Experience" name="yearsOfExperience" fullWidth margin="normal" value={employeeData.yearsOfExperience} onChange={handleChange} />
-          <TextField label="Highest Education" name="highestEducation" fullWidth margin="normal" value={employeeData.highestEducation} onChange={handleChange} />
-          <TextField label="Certifications" name="certifications" fullWidth margin="normal" value={employeeData.certifications} onChange={handleChange} />
-          <TextField label="Languages Spoken" name="languagesSpoken" fullWidth margin="normal" value={employeeData.languagesSpoken} onChange={handleChange} />
-          <TextField label="Skills" name="skills" fullWidth margin="normal" value={employeeData.skills} onChange={handleChange} />
-          <TextField label="Performance Rating" name="performanceRating" fullWidth margin="normal" value={employeeData.performanceRating} onChange={handleChange} />
-          <TextField label="Probation End Date" name="probationEndDate" type="date" fullWidth margin="normal" value={employeeData.probationEndDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-          <TextField label="Health Insurance Provider" name="healthInsuranceProvider" fullWidth margin="normal" value={employeeData.healthInsuranceProvider} onChange={handleChange} />
-          <TextField label="Health Insurance Number" name="healthInsuranceNumber" fullWidth margin="normal" value={employeeData.healthInsuranceNumber} onChange={handleChange} />
-          <TextField label="Additional Notes" name="additionalNotes" fullWidth margin="normal" multiline rows={4} value={employeeData.additionalNotes} onChange={handleChange} />
+          {/* Render fields dynamically based on config */}
+          {Object.keys(employeesFieldConfig).map((fieldKey) => {
+            const field = employeesFieldConfig[fieldKey];
+            return (
+              <TextField
+                key={fieldKey}
+                label={field.label}
+                name={fieldKey}
+                type={field.type}
+                fullWidth
+                margin="normal"
+                value={employeeData[fieldKey] || ''}
+                onChange={handleChange}
+                InputLabelProps={field.type === 'date' ? { shrink: true } : {}}
+                multiline={field.type === 'text' && fieldKey === 'additionalNotes'}
+                rows={fieldKey === 'additionalNotes' ? 4 : 1}
+              />
+            );
+          })}
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'end', gap: 2 }}>
           <Button variant="outlined" onClick={onClose}>Cancel</Button>

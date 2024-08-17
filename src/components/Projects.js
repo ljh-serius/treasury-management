@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
-  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch, Link
+  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch, Link, Grid
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 
@@ -14,44 +14,48 @@ import { fetchProjects, addProject, updateProject, deleteProject } from '../util
 import { fetchCostAllocations } from '../utils/costAllocationFirebaseHelpers';
 import { visuallyHidden } from '@mui/utils';
 
-const headCells = [
-  { id: 'name', numeric: false, disablePadding: true, label: 'Project Name' },
-  { id: 'description', numeric: false, disablePadding: false, label: 'Description' },
-  { id: 'startDate', numeric: false, disablePadding: false, label: 'Start Date' },
-  { id: 'endDate', numeric: false, disablePadding: false, label: 'End Date' },
-  { id: 'status', numeric: false, disablePadding: false, label: 'Status' },
-  { id: 'managerName', numeric: false, disablePadding: false, label: 'Manager' },
-  { id: 'managerEmail', numeric: false, disablePadding: false, label: 'Manager Email' },
-  { id: 'teamMembers', numeric: true, disablePadding: false, label: 'Team Members' },
-  { id: 'budget', numeric: true, disablePadding: false, label: 'Budget' },
-  { id: 'priority', numeric: false, disablePadding: false, label: 'Priority' },
-  { id: 'costAllocation', numeric: false, disablePadding: false, label: 'Cost Allocation' },
-  { id: 'projectType', numeric: false, disablePadding: false, label: 'Project Type' },
-  { id: 'clientName', numeric: false, disablePadding: false, label: 'Client Name' },
-  { id: 'phase', numeric: false, disablePadding: false, label: 'Project Phase' },
-  { id: 'progress', numeric: true, disablePadding: false, label: 'Progress (%)' },
-  { id: 'risks', numeric: false, disablePadding: false, label: 'Risks Identified' },
-  { id: 'lastUpdated', numeric: false, disablePadding: false, label: 'Last Updated' },
-  { id: 'estimatedCompletion', numeric: false, disablePadding: false, label: 'Estimated Completion' },
-  { id: 'actualCompletion', numeric: false, disablePadding: false, label: 'Actual Completion' },
-  { id: 'revenueGenerated', numeric: true, disablePadding: false, label: 'Revenue Generated' },
-  { id: 'dependencies', numeric: false, disablePadding: false, label: 'Dependencies' },
-  { id: 'projectCategory', numeric: false, disablePadding: false, label: 'Project Category' },
-  { id: 'resourceAllocation', numeric: false, disablePadding: false, label: 'Resource Allocation' },
-  { id: 'technologyStack', numeric: false, disablePadding: false, label: 'Technology Stack' },
-  { id: 'stakeholders', numeric: false, disablePadding: false, label: 'Stakeholders' },
-  { id: 'complianceRequirements', numeric: false, disablePadding: false, label: 'Compliance Requirements' },
-  { id: 'riskMitigation', numeric: false, disablePadding: false, label: 'Risk Mitigation' },
-  { id: 'criticalPath', numeric: false, disablePadding: false, label: 'Critical Path' },
-  { id: 'milestones', numeric: false, disablePadding: false, label: 'Milestones' },
-  { id: 'KPIs', numeric: false, disablePadding: false, label: 'KPIs' },
-  { id: 'projectSponsor', numeric: false, disablePadding: false, label: 'Project Sponsor' },
-  { id: 'businessImpact', numeric: false, disablePadding: false, label: 'Business Impact' },
-  { id: 'operatingCosts', numeric: false, disablePadding: false, label: 'Operating Costs' },
-  { id: 'userStories', numeric: false, disablePadding: false, label: 'User Stories' },
-  { id: 'codeRepository', numeric: false, disablePadding: false, label: 'Code Repository' },
-  { id: 'documentation', numeric: false, disablePadding: false, label: 'Documentation' },
-];
+const projectFieldConfig = {
+  name: { label: 'Project Name', type: 'text' },
+  description: { label: 'Description', type: 'text', multiline: true, rows: 4 },
+  startDate: { label: 'Start Date', type: 'date' },
+  endDate: { label: 'End Date', type: 'date' },
+  status: { label: 'Status', type: 'text' },
+  managerName: { label: 'Manager Name', type: 'text' },
+  managerEmail: { label: 'Manager Email', type: 'email' },
+  teamMembers: { label: 'Team Members', type: 'number' },
+  budget: { label: 'Budget', type: 'number' },
+  priority: { label: 'Priority', type: 'text' },
+  projectType: { label: 'Project Type', type: 'text' },
+  clientName: { label: 'Client Name', type: 'text' },
+  phase: { label: 'Project Phase', type: 'text' },
+  progress: { label: 'Progress (%)', type: 'number' },
+  risks: { label: 'Risks Identified', type: 'text' },
+  lastUpdated: { label: 'Last Updated', type: 'date' },
+  estimatedCompletion: { label: 'Estimated Completion', type: 'date' },
+  actualCompletion: { label: 'Actual Completion', type: 'date' },
+  revenueGenerated: { label: 'Revenue Generated', type: 'number' },
+  dependencies: { label: 'Dependencies', type: 'text' },
+  projectCategory: { label: 'Project Category', type: 'text' },
+  resourceAllocation: { label: 'Resource Allocation', type: 'text' },
+  technologyStack: { label: 'Technology Stack', type: 'text' },
+  stakeholders: { label: 'Stakeholders', type: 'text' },
+  complianceRequirements: { label: 'Compliance Requirements', type: 'text' },
+  riskMitigation: { label: 'Risk Mitigation', type: 'text' },
+  criticalPath: { label: 'Critical Path', type: 'text' },
+  milestones: { label: 'Milestones', type: 'text' },
+  KPIs: { label: 'KPIs', type: 'text' },
+  projectSponsor: { label: 'Project Sponsor', type: 'text' },
+  businessImpact: { label: 'Business Impact', type: 'text' },
+  operatingCosts: { label: 'Operating Costs', type: 'text' },
+  userStories: { label: 'User Stories', type: 'text' },
+  codeRepository: { label: 'Code Repository', type: 'text' },
+  documentation: { label: 'Documentation', type: 'text' },
+};
+
+const headCells = Object.keys(projectFieldConfig).map(key => ({
+  id: key,
+  label: projectFieldConfig[key].label,
+}));
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -74,89 +78,21 @@ function stableSort(array, comparator) {
   });
   return stabilizedThis.map((el) => el[0]);
 }
-
-
 function ProjectModal({ open, onClose, onSubmit, initialData, organizationId }) {
   const [projectData, setProjectData] = useState(
-    initialData || {
-      name: '',
-      description: '',
-      startDate: '',
-      endDate: '',
-      status: 'Active',
-      managerName: '',
-      managerEmail: '',
-      teamMembers: '',
-      budget: '',
-      priority: 'Medium',
-      projectType: '',
-      clientName: '',
-      phase: '',
-      progress: '',
-      risks: '',
-      lastUpdated: '',
-      estimatedCompletion: '',
-      actualCompletion: '',
-      revenueGenerated: '',
-      dependencies: '',
-      projectCategory: '',
-      resourceAllocation: '',
-      technologyStack: '',
-      stakeholders: '',
-      complianceRequirements: '',
-      riskMitigation: '',
-      criticalPath: '',
-      milestones: '',
-      KPIs: '',
-      projectSponsor: '',
-      businessImpact: '',
-      operatingCosts: '',
-      userStories: '',
-      codeRepository: '',
-      documentation: '',
-      organizationId: organizationId,
-    }
+    initialData || Object.keys(projectFieldConfig).reduce((acc, field) => {
+      acc[field] = '';
+      return acc;
+    }, { organizationId })
   );
 
   useEffect(() => {
-    setProjectData(initialData || {
-      name: '',
-      description: '',
-      startDate: '',
-      endDate: '',
-      status: 'Active',
-      managerName: '',
-      managerEmail: '',
-      teamMembers: '',
-      budget: '',
-      priority: 'Medium',
-      projectType: '',
-      clientName: '',
-      phase: '',
-      progress: '',
-      risks: '',
-      lastUpdated: '',
-      estimatedCompletion: '',
-      actualCompletion: '',
-      revenueGenerated: '',
-      dependencies: '',
-      projectCategory: '',
-      resourceAllocation: '',
-      technologyStack: '',
-      stakeholders: '',
-      complianceRequirements: '',
-      riskMitigation: '',
-      criticalPath: '',
-      milestones: '',
-      KPIs: '',
-      projectSponsor: '',
-      businessImpact: '',
-      operatingCosts: '',
-      userStories: '',
-      codeRepository: '',
-      documentation: '',
-      organizationId: organizationId,
-    });
+    setProjectData(
+      initialData || Object.keys(projectFieldConfig).reduce((acc, field) => {
+        acc[field] = '';
+        return acc;
+      }, { organizationId })
+    );
   }, [initialData, organizationId]);
 
   const handleChange = (event) => {
@@ -197,75 +133,35 @@ function ProjectModal({ open, onClose, onSubmit, initialData, organizationId }) 
             <CloseIcon />
           </IconButton>
         </Box>
-        <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Name" name="name" fullWidth value={projectData.name} onChange={handleChange} />
-            <TextField label="Project Type" name="projectType" fullWidth value={projectData.projectType} onChange={handleChange} />
-            <TextField label="Project Category" name="projectCategory" fullWidth value={projectData.projectCategory} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Client Name" name="clientName" fullWidth value={projectData.clientName} onChange={handleChange} />
-            <TextField label="Manager Name" name="managerName" fullWidth value={projectData.managerName} onChange={handleChange} />
-            <TextField label="Manager Email" name="managerEmail" fullWidth value={projectData.managerEmail} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Priority" name="priority" fullWidth value={projectData.priority} onChange={handleChange} />
-            <TextField label="Phase" name="phase" fullWidth value={projectData.phase} onChange={handleChange} />
-            <TextField label="Progress (%)" name="progress" type="number" fullWidth value={projectData.progress} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Start Date" name="startDate" type="date" fullWidth value={projectData.startDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-            <TextField label="End Date" name="endDate" type="date" fullWidth value={projectData.endDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-            <TextField label="Status" name="status" fullWidth value={projectData.status} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Team Members" name="teamMembers" type="number" fullWidth value={projectData.teamMembers} onChange={handleChange} />
-            <TextField label="Budget" name="budget" type="number" fullWidth value={projectData.budget} onChange={handleChange} />
-            <TextField label="Revenue Generated" name="revenueGenerated" type="number" fullWidth value={projectData.revenueGenerated} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Risks Identified" name="risks" fullWidth value={projectData.risks} onChange={handleChange} />
-            <TextField label="Dependencies" name="dependencies" fullWidth value={projectData.dependencies} onChange={handleChange} />
-            <TextField label="Compliance Requirements" name="complianceRequirements" fullWidth value={projectData.complianceRequirements} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Critical Path" name="criticalPath" fullWidth value={projectData.criticalPath} onChange={handleChange} />
-            <TextField label="Milestones" name="milestones" fullWidth value={projectData.milestones} onChange={handleChange} />
-            <TextField label="KPIs" name="KPIs" fullWidth value={projectData.KPIs} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Project Sponsor" name="projectSponsor" fullWidth value={projectData.projectSponsor} onChange={handleChange} />
-            <TextField label="Business Impact" name="businessImpact" fullWidth value={projectData.businessImpact} onChange={handleChange} />
-            <TextField label="Operating Costs" name="operatingCosts" fullWidth value={projectData.operatingCosts} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Resource Allocation" name="resourceAllocation" fullWidth value={projectData.resourceAllocation} onChange={handleChange} />
-            <TextField label="Technology Stack" name="technologyStack" fullWidth value={projectData.technologyStack} onChange={handleChange} />
-            <TextField label="Stakeholders" name="stakeholders" fullWidth value={projectData.stakeholders} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="User Stories" name="userStories" fullWidth value={projectData.userStories} onChange={handleChange} />
-            <TextField label="Code Repository" name="codeRepository" fullWidth value={projectData.codeRepository} onChange={handleChange} />
-            <TextField label="Documentation" name="documentation" fullWidth value={projectData.documentation} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Estimated Completion" name="estimatedCompletion" type="date" fullWidth value={projectData.estimatedCompletion} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-            <TextField label="Actual Completion" name="actualCompletion" type="date" fullWidth value={projectData.actualCompletion} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-          </Box>
-          <TextField label="Last Updated" name="lastUpdated" type="date" fullWidth value={projectData.lastUpdated} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-          <TextField label="Description" name="description" fullWidth multiline rows={4} value={projectData.description} onChange={handleChange} />
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button variant="contained" onClick={handleSubmit}>
-              {initialData ? 'Update' : 'Add'}
-            </Button>
-          </Box>
+        <Box sx={{ flexGrow: 1 }}>
+          <Grid container spacing={2}>
+            {Object.keys(projectFieldConfig).map((field) => (
+              <Grid item xs={12} sm={6} md={4} key={field}>
+                <TextField
+                  label={projectFieldConfig[field].label}
+                  name={field}
+                  type={projectFieldConfig[field].type}
+                  value={projectData[field]}
+                  onChange={handleChange}
+                  fullWidth
+                  multiline={projectFieldConfig[field].multiline || false}
+                  rows={projectFieldConfig[field].rows || 1}
+                  InputLabelProps={projectFieldConfig[field].type === 'date' ? { shrink: true } : undefined}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button variant="contained" onClick={handleSubmit}>
+            {initialData ? 'Update' : 'Add'}
+          </Button>
         </Box>
       </Box>
     </Modal>
   );
 }
-
 
 function EnhancedTableHead(props) {
   const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
@@ -529,7 +425,7 @@ export default function Projects() {
                         />
                       </TableCell>
                       {headCells.map((field) => (
-                        <TableCell key={field.id} align="left">
+                        <TableCell key={field.id} align={field.numeric ? 'right' : 'left'}>
                           {row[field.id]}
                         </TableCell>
                       ))}

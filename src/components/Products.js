@@ -12,67 +12,73 @@ import { visuallyHidden } from '@mui/utils';
 import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../utils/productsFirebaseHelpers';
 import { fetchCostAllocations } from '../utils/costAllocationFirebaseHelpers';
 
-const headCells = [
-  { id: 'name', label: 'Name' },
-  { id: 'description', label: 'Description' },
-  { id: 'price', label: 'Price' },
-  { id: 'sku', label: 'SKU' },
-  { id: 'category', label: 'Category' },
-  { id: 'supplier', label: 'Supplier' },
-  { id: 'stock', label: 'Stock Quantity' },
-  { id: 'minOrderQuantity', label: 'Min Order Quantity' },
-  { id: 'maxOrderQuantity', label: 'Max Order Quantity' },
-  { id: 'weight', label: 'Weight' },
-  { id: 'dimensions', label: 'Dimensions' },
-  { id: 'color', label: 'Color' },
-  { id: 'material', label: 'Material' },
-  { id: 'warranty', label: 'Warranty' },
-  { id: 'returnPolicy', label: 'Return Policy' },
-  { id: 'manufactureDate', label: 'Manufacture Date' },
-  { id: 'expirationDate', label: 'Expiration Date' },
-  { id: 'location', label: 'Location' },
-  { id: 'brand', label: 'Brand' },
-  { id: 'modelNumber', label: 'Model Number' },
-  { id: 'barcode', label: 'Barcode' },
-  { id: 'countryOfOrigin', label: 'Country of Origin' },
-  { id: 'batchNumber', label: 'Batch Number' },
-  { id: 'productionDate', label: 'Production Date' },
-  { id: 'expirationPeriod', label: 'Expiration Period' },
-  { id: 'leadTime', label: 'Lead Time' },
-  { id: 'shippingWeight', label: 'Shipping Weight' },
-  { id: 'packagingType', label: 'Packaging Type' },
-  { id: 'shelfLife', label: 'Shelf Life' },
-  { id: 'certification', label: 'Certification' },
-  { id: 'recyclable', label: 'Recyclable' },
-  { id: 'hazardousMaterial', label: 'Hazardous Material' },
-  { id: 'temperatureRequirements', label: 'Temperature Requirements' },
-  { id: 'storageInstructions', label: 'Storage Instructions' },
-  { id: 'safetyInstructions', label: 'Safety Instructions' },
-  { id: 'assemblyRequired', label: 'Assembly Required' },
-  { id: 'instructionsIncluded', label: 'Instructions Included' },
-  { id: 'energyConsumption', label: 'Energy Consumption' },
-  { id: 'waterResistance', label: 'Water Resistance' },
-  { id: 'fireResistance', label: 'Fire Resistance' },
-  { id: 'chemicalResistance', label: 'Chemical Resistance' },
-  { id: 'uvResistance', label: 'UV Resistance' },
-  { id: 'warrantyPeriod', label: 'Warranty Period' },
-  { id: 'serviceSupport', label: 'Service & Support' },
-  { id: 'returnable', label: 'Returnable' },
-  { id: 'discount', label: 'Discount' },
-  { id: 'promotionalOffer', label: 'Promotional Offer' },
-  { id: 'rating', label: 'Rating' },
-  { id: 'reviewCount', label: 'Review Count' },
-  { id: 'bestBeforeDate', label: 'Best Before Date' },
-  { id: 'salesStartDate', label: 'Sales Start Date' },
-  { id: 'salesEndDate', label: 'Sales End Date' },
-  { id: 'legalDisclaimer', label: 'Legal Disclaimer' },
-  { id: 'productManual', label: 'Product Manual' },
-  { id: 'videoTutorialLink', label: 'Video Tutorial Link' },
-  { id: 'warrantyDetails', label: 'Warranty Details' },
-  { id: 'customizable', label: 'Customizable' },
-  { id: 'availableColors', label: 'Available Colors' },
-  { id: 'availableSizes', label: 'Available Sizes' },
-];
+// Configuration object for the product fields
+const productFieldConfig = {
+  name: { label: 'Name', type: 'text' },
+  description: { label: 'Description', type: 'text', multiline: true, rows: 4 },
+  price: { label: 'Price', type: 'number' },
+  sku: { label: 'SKU', type: 'text' },
+  category: { label: 'Category', type: 'text' },
+  supplier: { label: 'Supplier', type: 'text' },
+  stock: { label: 'Stock Quantity', type: 'number' },
+  minOrderQuantity: { label: 'Min Order Quantity', type: 'number' },
+  maxOrderQuantity: { label: 'Max Order Quantity', type: 'number' },
+  weight: { label: 'Weight', type: 'text' },
+  dimensions: { label: 'Dimensions', type: 'text' },
+  color: { label: 'Color', type: 'text' },
+  material: { label: 'Material', type: 'text' },
+  warranty: { label: 'Warranty', type: 'text' },
+  returnPolicy: { label: 'Return Policy', type: 'text' },
+  manufactureDate: { label: 'Manufacture Date', type: 'date' },
+  expirationDate: { label: 'Expiration Date', type: 'date' },
+  location: { label: 'Location', type: 'text' },
+  brand: { label: 'Brand', type: 'text' },
+  modelNumber: { label: 'Model Number', type: 'text' },
+  barcode: { label: 'Barcode', type: 'text' },
+  countryOfOrigin: { label: 'Country of Origin', type: 'text' },
+  batchNumber: { label: 'Batch Number', type: 'text' },
+  productionDate: { label: 'Production Date', type: 'date' },
+  expirationPeriod: { label: 'Expiration Period', type: 'text' },
+  leadTime: { label: 'Lead Time', type: 'text' },
+  shippingWeight: { label: 'Shipping Weight', type: 'text' },
+  packagingType: { label: 'Packaging Type', type: 'text' },
+  shelfLife: { label: 'Shelf Life', type: 'text' },
+  certification: { label: 'Certification', type: 'text' },
+  recyclable: { label: 'Recyclable', type: 'checkbox' },
+  hazardousMaterial: { label: 'Hazardous Material', type: 'checkbox' },
+  temperatureRequirements: { label: 'Temperature Requirements', type: 'text' },
+  storageInstructions: { label: 'Storage Instructions', type: 'text' },
+  safetyInstructions: { label: 'Safety Instructions', type: 'text' },
+  assemblyRequired: { label: 'Assembly Required', type: 'checkbox' },
+  instructionsIncluded: { label: 'Instructions Included', type: 'checkbox' },
+  energyConsumption: { label: 'Energy Consumption', type: 'text' },
+  waterResistance: { label: 'Water Resistance', type: 'text' },
+  fireResistance: { label: 'Fire Resistance', type: 'text' },
+  chemicalResistance: { label: 'Chemical Resistance', type: 'text' },
+  uvResistance: { label: 'UV Resistance', type: 'text' },
+  warrantyPeriod: { label: 'Warranty Period', type: 'text' },
+  serviceSupport: { label: 'Service & Support', type: 'text' },
+  returnable: { label: 'Returnable', type: 'checkbox' },
+  discount: { label: 'Discount', type: 'text' },
+  promotionalOffer: { label: 'Promotional Offer', type: 'text' },
+  rating: { label: 'Rating', type: 'number' },
+  reviewCount: { label: 'Review Count', type: 'number' },
+  bestBeforeDate: { label: 'Best Before Date', type: 'date' },
+  salesStartDate: { label: 'Sales Start Date', type: 'date' },
+  salesEndDate: { label: 'Sales End Date', type: 'date' },
+  legalDisclaimer: { label: 'Legal Disclaimer', type: 'text' },
+  productManual: { label: 'Product Manual', type: 'text' },
+  videoTutorialLink: { label: 'Video Tutorial Link', type: 'text' },
+  warrantyDetails: { label: 'Warranty Details', type: 'text' },
+  customizable: { label: 'Customizable', type: 'checkbox' },
+  availableColors: { label: 'Available Colors', type: 'text' },
+  availableSizes: { label: 'Available Sizes', type: 'text' },
+};
+
+const headCells = Object.keys(productFieldConfig).map(key => ({
+  id: key,
+  label: productFieldConfig[key].label,
+}));
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -185,135 +191,28 @@ function EnhancedTableToolbar(props) {
     </Toolbar>
   );
 }
+
 function ProductModal({ open, onClose, onSubmit, initialData, organizationId }) {
-  const [productData, setProductData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    sku: '',
-    category: '',
-    supplier: '',
-    stock: '',
-    minOrderQuantity: '',
-    maxOrderQuantity: '',
-    weight: '',
-    dimensions: '',
-    color: '',
-    material: '',
-    warranty: '',
-    returnPolicy: '',
-    manufactureDate: '',
-    expirationDate: '',
-    location: '',
-    brand: '',
-    modelNumber: '',
-    barcode: '',
-    countryOfOrigin: '',
-    batchNumber: '',
-    productionDate: '',
-    expirationPeriod: '',
-    leadTime: '',
-    shippingWeight: '',
-    packagingType: '',
-    shelfLife: '',
-    certification: '',
-    recyclable: false,
-    hazardousMaterial: false,
-    temperatureRequirements: '',
-    storageInstructions: '',
-    safetyInstructions: '',
-    assemblyRequired: false,
-    instructionsIncluded: false,
-    energyConsumption: '',
-    waterResistance: '',
-    fireResistance: '',
-    chemicalResistance: '',
-    uvResistance: '',
-    warrantyPeriod: '',
-    serviceSupport: '',
-    returnable: false,
-    discount: '',
-    promotionalOffer: '',
-    rating: '',
-    reviewCount: '',
-    bestBeforeDate: '',
-    salesStartDate: '',
-    salesEndDate: '',
-    legalDisclaimer: '',
-    productManual: '',
-    videoTutorialLink: '',
-    warrantyDetails: '',
-    customizable: false,
-    availableColors: '',
-    availableSizes: '',
-    organizationId,
+  const [productData, setProductData] = useState(() => {
+    const defaultData = {};
+    Object.keys(productFieldConfig).forEach((key) => {
+      defaultData[key] = productFieldConfig[key].type === 'checkbox' ? false : '';
+    });
+    defaultData.organizationId = organizationId;
+    return defaultData;
   });
 
   useEffect(() => {
     if (initialData) {
       setProductData(initialData);
     } else {
-      setProductData({
-        name: '',
-        description: '',
-        price: '',
-        sku: '',
-        category: '',
-        supplier: '',
-        stock: '',
-        minOrderQuantity: '',
-        maxOrderQuantity: '',
-        weight: '',
-        dimensions: '',
-        color: '',
-        material: '',
-        warranty: '',
-        returnPolicy: '',
-        manufactureDate: '',
-        expirationDate: '',
-        location: '',
-        brand: '',
-        modelNumber: '',
-        barcode: '',
-        countryOfOrigin: '',
-        batchNumber: '',
-        productionDate: '',
-        expirationPeriod: '',
-        leadTime: '',
-        shippingWeight: '',
-        packagingType: '',
-        shelfLife: '',
-        certification: '',
-        recyclable: false,
-        hazardousMaterial: false,
-        temperatureRequirements: '',
-        storageInstructions: '',
-        safetyInstructions: '',
-        assemblyRequired: false,
-        instructionsIncluded: false,
-        energyConsumption: '',
-        waterResistance: '',
-        fireResistance: '',
-        chemicalResistance: '',
-        uvResistance: '',
-        warrantyPeriod: '',
-        serviceSupport: '',
-        returnable: false,
-        discount: '',
-        promotionalOffer: '',
-        rating: '',
-        reviewCount: '',
-        bestBeforeDate: '',
-        salesStartDate: '',
-        salesEndDate: '',
-        legalDisclaimer: '',
-        productManual: '',
-        videoTutorialLink: '',
-        warrantyDetails: '',
-        customizable: false,
-        availableColors: '',
-        availableSizes: '',
-        organizationId,
+      setProductData(() => {
+        const defaultData = {};
+        Object.keys(productFieldConfig).forEach((key) => {
+          defaultData[key] = productFieldConfig[key].type === 'checkbox' ? false : '';
+        });
+        defaultData.organizationId = organizationId;
+        return defaultData;
       });
     }
   }, [initialData, organizationId]);
@@ -352,526 +251,45 @@ function ProductModal({ open, onClose, onSubmit, initialData, organizationId }) 
           {initialData ? 'Edit Product' : 'Add Product'}
         </Typography>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
-        <TextField
-            label="Name"
-            name="name"
-            fullWidth
-            margin="normal"
-            value={productData.name}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Description"
-            name="description"
-            fullWidth
-            margin="normal"
-            value={productData.description}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Price"
-            name="price"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={productData.price}
-            onChange={handleChange}
-          />
-          <TextField
-            label="SKU"
-            name="sku"
-            fullWidth
-            margin="normal"
-            value={productData.sku}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Category"
-            name="category"
-            fullWidth
-            margin="normal"
-            value={productData.category}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Supplier"
-            name="supplier"
-            fullWidth
-            margin="normal"
-            value={productData.supplier}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Stock"
-            name="stock"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={productData.stock}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Min Order Quantity"
-            name="minOrderQuantity"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={productData.minOrderQuantity}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Max Order Quantity"
-            name="maxOrderQuantity"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={productData.maxOrderQuantity}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Weight"
-            name="weight"
-            fullWidth
-            margin="normal"
-            value={productData.weight}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Dimensions"
-            name="dimensions"
-            fullWidth
-            margin="normal"
-            value={productData.dimensions}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Color"
-            name="color"
-            fullWidth
-            margin="normal"
-            value={productData.color}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Material"
-            name="material"
-            fullWidth
-            margin="normal"
-            value={productData.material}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Warranty"
-            name="warranty"
-            fullWidth
-            margin="normal"
-            value={productData.warranty}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Return Policy"
-            name="returnPolicy"
-            fullWidth
-            margin="normal"
-            value={productData.returnPolicy}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Manufacture Date"
-            name="manufactureDate"
-            type="date"
-            fullWidth
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-            value={productData.manufactureDate}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Expiration Date"
-            name="expirationDate"
-            type="date"
-            fullWidth
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-            value={productData.expirationDate}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Location"
-            name="location"
-            fullWidth
-            margin="normal"
-            value={productData.location}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Brand"
-            name="brand"
-            fullWidth
-            margin="normal"
-            value={productData.brand}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Model Number"
-            name="modelNumber"
-            fullWidth
-            margin="normal"
-            value={productData.modelNumber}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Barcode"
-            name="barcode"
-            fullWidth
-            margin="normal"
-            value={productData.barcode}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Country of Origin"
-            name="countryOfOrigin"
-            fullWidth
-            margin="normal"
-            value={productData.countryOfOrigin}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Batch Number"
-            name="batchNumber"
-            fullWidth
-            margin="normal"
-            value={productData.batchNumber}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Production Date"
-            name="productionDate"
-            type="date"
-            fullWidth
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-            value={productData.productionDate}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Expiration Period"
-            name="expirationPeriod"
-            fullWidth
-            margin="normal"
-            value={productData.expirationPeriod}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Lead Time"
-            name="leadTime"
-            fullWidth
-            margin="normal"
-            value={productData.leadTime}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Shipping Weight"
-            name="shippingWeight"
-            fullWidth
-            margin="normal"
-            value={productData.shippingWeight}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Packaging Type"
-            name="packagingType"
-            fullWidth
-            margin="normal"
-            value={productData.packagingType}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Shelf Life"
-            name="shelfLife"
-            fullWidth
-            margin="normal"
-            value={productData.shelfLife}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Certification"
-            name="certification"
-            fullWidth
-            margin="normal"
-            value={productData.certification}
-            onChange={handleChange}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="recyclable"
-                checked={productData.recyclable}
-                onChange={handleChange}
+          {Object.keys(productFieldConfig).map((field) => {
+            const config = productFieldConfig[field];
+            return config.type === 'checkbox' ? (
+              <FormControlLabel
+                key={field}
+                control={
+                  <Checkbox
+                    name={field}
+                    checked={productData[field]}
+                    onChange={handleChange}
+                  />
+                }
+                label={config.label}
               />
-            }
-            label="Recyclable"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="hazardousMaterial"
-                checked={productData.hazardousMaterial}
+            ) : (
+              <TextField
+                key={field}
+                label={config.label}
+                name={field}
+                type={config.type}
+                fullWidth
+                margin="normal"
+                value={productData[field]}
                 onChange={handleChange}
+                multiline={config.multiline || false}
+                rows={config.rows || 1}
+                InputLabelProps={config.type === 'date' ? { shrink: true } : undefined}
               />
-            }
-            label="Hazardous Material"
-          />
-          <TextField
-            label="Temperature Requirements"
-            name="temperatureRequirements"
-            fullWidth
-            margin="normal"
-            value={productData.temperatureRequirements}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Storage Instructions"
-            name="storageInstructions"
-            fullWidth
-            margin="normal"
-            value={productData.storageInstructions}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Safety Instructions"
-            name="safetyInstructions"
-            fullWidth
-            margin="normal"
-            value={productData.safetyInstructions}
-            onChange={handleChange}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="assemblyRequired"
-                checked={productData.assemblyRequired}
-                onChange={handleChange}
-              />
-            }
-            label="Assembly Required"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="instructionsIncluded"
-                checked={productData.instructionsIncluded}
-                onChange={handleChange}
-              />
-            }
-            label="Instructions Included"
-          />
-          <TextField
-            label="Energy Consumption"
-            name="energyConsumption"
-            fullWidth
-            margin="normal"
-            value={productData.energyConsumption}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Water Resistance"
-            name="waterResistance"
-            fullWidth
-            margin="normal"
-            value={productData.waterResistance}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Fire Resistance"
-            name="fireResistance"
-            fullWidth
-            margin="normal"
-            value={productData.fireResistance}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Chemical Resistance"
-            name="chemicalResistance"
-            fullWidth
-            margin="normal"
-            value={productData.chemicalResistance}
-            onChange={handleChange}
-          />
-          <TextField
-            label="UV Resistance"
-            name="uvResistance"
-            fullWidth
-            margin="normal"
-            value={productData.uvResistance}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Warranty Period"
-            name="warrantyPeriod"
-            fullWidth
-            margin="normal"
-            value={productData.warrantyPeriod}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Service Support"
-            name="serviceSupport"
-            fullWidth
-            margin="normal"
-            value={productData.serviceSupport}
-            onChange={handleChange}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="returnable"
-                checked={productData.returnable}
-                onChange={handleChange}
-              />
-            }
-            label="Returnable"
-          />
-          <TextField
-            label="Discount"
-            name="discount"
-            fullWidth
-            margin="normal"
-            value={productData.discount}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Promotional Offer"
-            name="promotionalOffer"
-            fullWidth
-            margin="normal"
-            value={productData.promotionalOffer}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Rating"
-            name="rating"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={productData.rating}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Review Count"
-            name="reviewCount"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={productData.reviewCount}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Best Before Date"
-            name="bestBeforeDate"
-            type="date"
-            fullWidth
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-            value={productData.bestBeforeDate}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Sales Start Date"
-            name="salesStartDate"
-            type="date"
-            fullWidth
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-            value={productData.salesStartDate}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Sales End Date"
-            name="salesEndDate"
-            type="date"
-            fullWidth
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-            value={productData.salesEndDate}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Legal Disclaimer"
-            name="legalDisclaimer"
-            fullWidth
-            margin="normal"
-            value={productData.legalDisclaimer}
-            onChange={handleChange}
-          />
-                    <TextField
-            label="Legal Disclaimer"
-            name="legalDisclaimer"
-            fullWidth
-            margin="normal"
-            value={productData.legalDisclaimer}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Product Manual"
-            name="productManual"
-            fullWidth
-            margin="normal"
-            value={productData.productManual}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Video Tutorial Link"
-            name="videoTutorialLink"
-            fullWidth
-            margin="normal"
-            value={productData.videoTutorialLink}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Warranty Details"
-            name="warrantyDetails"
-            fullWidth
-            margin="normal"
-            value={productData.warrantyDetails}
-            onChange={handleChange}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="customizable"
-                checked={productData.customizable}
-                onChange={handleChange}
-              />
-            }
-            label="Customizable"
-          />
-          <TextField
-            label="Available Colors"
-            name="availableColors"
-            fullWidth
-            margin="normal"
-            value={productData.availableColors}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Available Sizes"
-            name="availableSizes"
-            fullWidth
-            margin="normal"
-            value={productData.availableSizes}
-            onChange={handleChange}
-          />
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
-          <Button variant="outlined" onClick={onClose}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}>Save</Button>
+            );
+          })}
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
+            <Button variant="outlined" onClick={onClose}>Cancel</Button>
+            <Button variant="contained" onClick={handleSubmit}>Save</Button>
+          </Box>
         </Box>
-      </Box>
       </Box>
     </Modal>
   );
 }
-
 
 export default function ProductsManagement() {
   const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;

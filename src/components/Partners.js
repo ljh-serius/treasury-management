@@ -11,41 +11,52 @@ import EditIcon from '@mui/icons-material/Edit';
 import { fetchPartners, addPartner, updatePartner, deletePartner } from '../utils/partnersFirebaseHelpers';
 import { fetchCostAllocations } from '../utils/costAllocationFirebaseHelpers';
 
-const headCells = [
-  { id: 'name', numeric: false, disablePadding: true, label: 'Partner Name' },
-  { id: 'service', numeric: false, disablePadding: false, label: 'Service' },
-  { id: 'partnerType', numeric: false, disablePadding: false, label: 'Partner Type' },
-  { id: 'contactName', numeric: false, disablePadding: false, label: 'Contact Name' },
-  { id: 'contactEmail', numeric: false, disablePadding: false, label: 'Contact Email' },
-  { id: 'contactPhone', numeric: false, disablePadding: false, label: 'Contact Phone' },
-  { id: 'region', numeric: false, disablePadding: false, label: 'Region' },
-  { id: 'startDate', numeric: false, disablePadding: false, label: 'Start Date' },
-  { id: 'endDate', numeric: false, disablePadding: false, label: 'End Date' },
-  { id: 'contractValue', numeric: true, disablePadding: false, label: 'Contract Value' },
-  { id: 'riskLevel', numeric: false, disablePadding: false, label: 'Risk Level' },
-  { id: 'complianceStatus', numeric: false, disablePadding: false, label: 'Compliance Status' },
-  { id: 'vendorCode', numeric: false, disablePadding: false, label: 'Vendor Code' },
-  { id: 'billingCycle', numeric: false, disablePadding: false, label: 'Billing Cycle' },
-  { id: 'sla', numeric: false, disablePadding: false, label: 'Service Level Agreement (SLA)' },
-  { id: 'paymentMethod', numeric: false, disablePadding: false, label: 'Payment Method' },
-  { id: 'discountRate', numeric: false, disablePadding: false, label: 'Discount Rate' },
-  { id: 'preferredCurrency', numeric: false, disablePadding: false, label: 'Preferred Currency' },
-  { id: 'lastAuditDate', numeric: false, disablePadding: false, label: 'Last Audit Date' },
-  { id: 'contractExpiryWarning', numeric: false, disablePadding: false, label: 'Contract Expiry Warning' },
-  { id: 'supportContact', numeric: false, disablePadding: false, label: 'Support Contact' },
-  { id: 'supportEmail', numeric: false, disablePadding: false, label: 'Support Email' },
-  { id: 'supportPhone', numeric: false, disablePadding: false, label: 'Support Phone' },
-  { id: 'accountManager', numeric: false, disablePadding: false, label: 'Account Manager' },
-  { id: 'partnerRating', numeric: false, disablePadding: false, label: 'Partner Rating' },
-  { id: 'partnershipStartDate', numeric: false, disablePadding: false, label: 'Partnership Start Date' },
-  { id: 'partnershipEndDate', numeric: false, disablePadding: false, label: 'Partnership End Date' },
-  { id: 'numberOfEmployees', numeric: true, disablePadding: false, label: 'Number of Employees' },
-  { id: 'annualRevenue', numeric: true, disablePadding: false, label: 'Annual Revenue' },
-  { id: 'partnershipLevel', numeric: false, disablePadding: false, label: 'Partnership Level' },
-  { id: 'preferredLanguage', numeric: false, disablePadding: false, label: 'Preferred Language' },
-  { id: 'taxExemptionStatus', numeric: false, disablePadding: false, label: 'Tax Exemption Status' },
-  { id: 'costAllocationLink', numeric: false, disablePadding: false, label: 'Cost Allocation' },
-];
+
+const partnerFieldConfig = {
+  name: { label: 'Partner Name', type: 'text' },
+  service: { label: 'Service', type: 'text' },
+  partnerType: { label: 'Partner Type', type: 'text' },
+  contactName: { label: 'Contact Name', type: 'text' },
+  contactEmail: { label: 'Contact Email', type: 'email' },
+  contactPhone: { label: 'Contact Phone', type: 'tel' },
+  address: { label: 'Address', type: 'text' },
+  website: { label: 'Website', type: 'url' },
+  industry: { label: 'Industry', type: 'text' },
+  agreementDate: { label: 'Agreement Date', type: 'date' },
+  contractValue: { label: 'Contract Value', type: 'number' },
+  startDate: { label: 'Start Date', type: 'date' },
+  endDate: { label: 'End Date', type: 'date' },
+  renewalDate: { label: 'Renewal Date', type: 'date' },
+  riskLevel: { label: 'Risk Level', type: 'text' },
+  region: { label: 'Region', type: 'text' },
+  paymentTerms: { label: 'Payment Terms', type: 'text' },
+  complianceStatus: { label: 'Compliance Status', type: 'text' },
+  notes: { label: 'Notes', type: 'text', multiline: true, rows: 4 },
+  vendorCode: { label: 'Vendor Code', type: 'text' },
+  billingCycle: { label: 'Billing Cycle', type: 'text' },
+  sla: { label: 'Service Level Agreement (SLA)', type: 'text' },
+  paymentMethod: { label: 'Payment Method', type: 'text' },
+  discountRate: { label: 'Discount Rate', type: 'number' },
+  preferredCurrency: { label: 'Preferred Currency', type: 'text' },
+  lastAuditDate: { label: 'Last Audit Date', type: 'date' },
+  supportContact: { label: 'Support Contact', type: 'text' },
+  supportEmail: { label: 'Support Email', type: 'email' },
+  supportPhone: { label: 'Support Phone', type: 'tel' },
+  accountManager: { label: 'Account Manager', type: 'text' },
+  partnerRating: { label: 'Partner Rating', type: 'text' },
+  partnershipStartDate: { label: 'Partnership Start Date', type: 'date' },
+  partnershipEndDate: { label: 'Partnership End Date', type: 'date' },
+  numberOfEmployees: { label: 'Number of Employees', type: 'number' },
+  annualRevenue: { label: 'Annual Revenue', type: 'number' },
+  partnershipLevel: { label: 'Partnership Level', type: 'text' },
+  preferredLanguage: { label: 'Preferred Language', type: 'text' },
+  taxExemptionStatus: { label: 'Tax Exemption Status', type: 'text' },
+};
+
+const headCells = Object.keys(partnerFieldConfig).map(key => ({
+  id: key,
+  label: partnerFieldConfig[key].label,
+}));
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -74,7 +85,7 @@ function EnhancedTableHead(props) {
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
-  
+
   return (
     <TableHead>
       <TableRow>
@@ -154,59 +165,18 @@ function EnhancedTableToolbar(props) {
   );
 }
 
-const partnerFields = [
-  { label: 'Partner Name', name: 'name' },
-  { label: 'Service', name: 'service' },
-  { label: 'Partner Type', name: 'partnerType' },
-  { label: 'Contact Name', name: 'contactName' },
-  { label: 'Contact Email', name: 'contactEmail', type: 'email' },
-  { label: 'Contact Phone', name: 'contactPhone', type: 'tel' },
-  { label: 'Address', name: 'address' },
-  { label: 'Website', name: 'website', type: 'url' },
-  { label: 'Industry', name: 'industry' },
-  { label: 'Agreement Date', name: 'agreementDate', type: 'date' },
-  { label: 'Contract Value', name: 'contractValue', type: 'number' },
-  { label: 'Start Date', name: 'startDate', type: 'date' },
-  { label: 'End Date', name: 'endDate', type: 'date' },
-  { label: 'Renewal Date', name: 'renewalDate', type: 'date' },
-  { label: 'Risk Level', name: 'riskLevel' },
-  { label: 'Region', name: 'region' },
-  { label: 'Payment Terms', name: 'paymentTerms' },
-  { label: 'Compliance Status', name: 'complianceStatus' },
-  { label: 'Notes', name: 'notes', multiline: true, rows: 4 },
-  { label: 'Vendor Code', name: 'vendorCode' },
-  { label: 'Billing Cycle', name: 'billingCycle' },
-  { label: 'Service Level Agreement (SLA)', name: 'sla' },
-  { label: 'Payment Method', name: 'paymentMethod' },
-  { label: 'Discount Rate', name: 'discountRate', type: 'number' },
-  { label: 'Preferred Currency', name: 'preferredCurrency' },
-  { label: 'Last Audit Date', name: 'lastAuditDate', type: 'date' },
-  { label: 'Support Contact', name: 'supportContact' },
-  { label: 'Support Email', name: 'supportEmail', type: 'email' },
-  { label: 'Support Phone', name: 'supportPhone', type: 'tel' },
-  { label: 'Account Manager', name: 'accountManager' },
-  { label: 'Partner Rating', name: 'partnerRating' },
-  { label: 'Partnership Start Date', name: 'partnershipStartDate', type: 'date' },
-  { label: 'Partnership End Date', name: 'partnershipEndDate', type: 'date' },
-  { label: 'Number of Employees', name: 'numberOfEmployees', type: 'number' },
-  { label: 'Annual Revenue', name: 'annualRevenue', type: 'number' },
-  { label: 'Partnership Level', name: 'partnershipLevel' },
-  { label: 'Preferred Language', name: 'preferredLanguage' },
-  { label: 'Tax Exemption Status', name: 'taxExemptionStatus' },
-];
-
 function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) {
   const [partnerData, setPartnerData] = useState(
-    initialData || partnerFields.reduce((acc, field) => {
-      acc[field.name] = '';
+    initialData || Object.keys(partnerFieldConfig).reduce((acc, field) => {
+      acc[field] = '';
       return acc;
     }, { organizationId })
   );
 
   useEffect(() => {
     setPartnerData(
-      initialData || partnerFields.reduce((acc, field) => {
-        acc[field.name] = '';
+      initialData || Object.keys(partnerFieldConfig).reduce((acc, field) => {
+        acc[field] = '';
         return acc;
       }, { organizationId })
     );
@@ -247,18 +217,18 @@ function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) 
         </Typography>
         <Box sx={{ flexGrow: 1 }}>
           <Grid container spacing={2}>
-            {partnerFields.map((field) => (
-              <Grid item xs={12} sm={6} md={4} key={field.name}>
+            {Object.keys(partnerFieldConfig).map((field) => (
+              <Grid item xs={12} sm={6} md={4} key={field}>
                 <TextField
-                  label={field.label}
-                  name={field.name}
-                  type={field.type || 'text'}
-                  value={partnerData[field.name]}
+                  label={partnerFieldConfig[field].label}
+                  name={field}
+                  type={partnerFieldConfig[field].type}
+                  value={partnerData[field]}
                   onChange={handleChange}
                   fullWidth
-                  multiline={field.multiline || false}
-                  rows={field.rows || 1}
-                  InputLabelProps={field.type === 'date' ? { shrink: true } : undefined}
+                  multiline={partnerFieldConfig[field].multiline || false}
+                  rows={partnerFieldConfig[field].rows || 1}
+                  InputLabelProps={partnerFieldConfig[field].type === 'date' ? { shrink: true } : undefined}
                 />
               </Grid>
             ))}
@@ -274,7 +244,6 @@ function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) 
     </Modal>
   );
 }
-
 
 export default function Partners() {
   const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
@@ -385,14 +354,14 @@ export default function Partners() {
     setDense(event.target.checked);
   };
 
-  const isSelected = (id) => selected.indexOf(id) !== -1;
-
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - partners.length) : 0;
-
   const getCostAllocationLink = (partnerId) => {
     const allocation = costAllocations.find(allocation => allocation.partnerIds.includes(partnerId));
     return allocation ? `#/cost-allocation/${partnerId}` : null;
   };
+
+  const isSelected = (id) => selected.indexOf(id) !== -1;
+
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - partners.length) : 0;
 
   const visibleRows = React.useMemo(
     () =>
@@ -404,7 +373,7 @@ export default function Partners() {
   );
 
   return (
-    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7}}>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Box sx={{ width: '100%' }}>
         <Paper sx={{ width: '100%', mb: 2 }}>
           <EnhancedTableToolbar
@@ -448,7 +417,7 @@ export default function Partners() {
                         />
                       </TableCell>
                       {headCells.map((field) => (
-                        <TableCell key={field.id} align="left">
+                        <TableCell key={field.id} align={field.numeric ? 'right' : 'left'}>
                           {row[field.id]}
                         </TableCell>
                       ))}
