@@ -167,6 +167,14 @@ const Dashboard = ({ children }) => {
       </List>
       <Divider />
       <List>
+      <ListItem key="try" disablePadding>
+          <ListItemButton component={Link} to="/try">
+            <ListItemIcon>
+              <WorkIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Try</Typography>} />
+          </ListItemButton>
+        </ListItem>
         <ListItem key="projects" disablePadding>
           <ListItemButton component={Link} to="/projects">
             <ListItemIcon>

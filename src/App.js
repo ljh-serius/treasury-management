@@ -25,6 +25,7 @@ import Partners from './pages/Partners';
 import RiskManagement from './pages/RiskManagement';
 import Employees from './pages/Employees';
 import TreasuryTable from './components/TreasuryTable';
+import EfficientSummary from './pages/EfficientSummary';
 import InvoicesCheck from './pages/InvoicesCheck'
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
 
@@ -88,6 +89,17 @@ const App = () => {
               <ProtectedRoute user={user}>
                 <Dashboard>
                   <Analytics />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/try"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <EfficientSummary />
                 </Dashboard>
               </ProtectedRoute>
             }
