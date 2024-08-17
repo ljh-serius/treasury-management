@@ -18,10 +18,21 @@ const headCells = [
   { id: 'endDate', numeric: false, disablePadding: false, label: 'End Date' },
   { id: 'status', numeric: false, disablePadding: false, label: 'Status' },
   { id: 'managerName', numeric: false, disablePadding: false, label: 'Manager' },
+  { id: 'managerEmail', numeric: false, disablePadding: false, label: 'Manager Email' },
   { id: 'teamMembers', numeric: true, disablePadding: false, label: 'Team Members' },
   { id: 'budget', numeric: true, disablePadding: false, label: 'Budget' },
   { id: 'priority', numeric: false, disablePadding: false, label: 'Priority' },
   { id: 'costAllocation', numeric: false, disablePadding: false, label: 'Cost Allocation' },
+  { id: 'projectType', numeric: false, disablePadding: false, label: 'Project Type' },
+  { id: 'clientName', numeric: false, disablePadding: false, label: 'Client Name' },
+  { id: 'phase', numeric: false, disablePadding: false, label: 'Project Phase' },
+  { id: 'progress', numeric: true, disablePadding: false, label: 'Progress (%)' },
+  { id: 'risks', numeric: false, disablePadding: false, label: 'Risks Identified' },
+  { id: 'lastUpdated', numeric: false, disablePadding: false, label: 'Last Updated' },
+  { id: 'estimatedCompletion', numeric: false, disablePadding: false, label: 'Estimated Completion' },
+  { id: 'actualCompletion', numeric: false, disablePadding: false, label: 'Actual Completion' },
+  { id: 'revenueGenerated', numeric: true, disablePadding: false, label: 'Revenue Generated' },
+  { id: 'dependencies', numeric: false, disablePadding: false, label: 'Dependencies' },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -59,6 +70,16 @@ function ProjectModal({ open, onClose, onSubmit, initialData, organizationId }) 
       teamMembers: '',
       budget: '',
       priority: 'Medium',
+      projectType: '',
+      clientName: '',
+      phase: '',
+      progress: '',
+      risks: '',
+      lastUpdated: '',
+      estimatedCompletion: '',
+      actualCompletion: '',
+      revenueGenerated: '',
+      dependencies: '',
       organizationId: organizationId,
     }
   );
@@ -75,6 +96,16 @@ function ProjectModal({ open, onClose, onSubmit, initialData, organizationId }) 
       teamMembers: '',
       budget: '',
       priority: 'Medium',
+      projectType: '',
+      clientName: '',
+      phase: '',
+      progress: '',
+      risks: '',
+      lastUpdated: '',
+      estimatedCompletion: '',
+      actualCompletion: '',
+      revenueGenerated: '',
+      dependencies: '',
       organizationId: organizationId,
     });
   }, [initialData, organizationId]);
@@ -93,30 +124,71 @@ function ProjectModal({ open, onClose, onSubmit, initialData, organizationId }) 
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+      <Box sx={{ 
+        position: 'absolute', 
+        top: '50%', 
+        left: '50%', 
+        transform: 'translate(-50%, -50%)', 
+        width: 800, // Increased width
+        bgcolor: 'background.paper', 
+        border: '2px solid #000', 
+        boxShadow: 24, 
+        p: 4 
+      }}>
         <Typography variant="h6" component="h2">
           {initialData ? 'Edit Project' : 'Add Project'}
         </Typography>
-        <TextField label="Name" name="name" fullWidth margin="normal" value={projectData.name} onChange={handleChange} />
-        <TextField label="Description" name="description" fullWidth margin="normal" value={projectData.description} onChange={handleChange} />
-        <TextField label="Start Date" name="startDate" type="date" fullWidth margin="normal" value={projectData.startDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-        <TextField label="End Date" name="endDate" type="date" fullWidth margin="normal" value={projectData.endDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-        <TextField label="Status" name="status" fullWidth margin="normal" value={projectData.status} onChange={handleChange} />
-        <TextField label="Manager Name" name="managerName" fullWidth margin="normal" value={projectData.managerName} onChange={handleChange} />
-        <TextField label="Manager Email" name="managerEmail" fullWidth margin="normal" value={projectData.managerEmail} onChange={handleChange} />
-        <TextField label="Team Members" name="teamMembers" type="number" fullWidth margin="normal" value={projectData.teamMembers} onChange={handleChange} />
-        <TextField label="Budget" name="budget" type="number" fullWidth margin="normal" value={projectData.budget} onChange={handleChange} />
-        <TextField label="Priority" name="priority" fullWidth margin="normal" value={projectData.priority} onChange={handleChange} />
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}>
-            {initialData ? 'Update' : 'Add'}
-          </Button>
+        <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Name" name="name" fullWidth value={projectData.name} onChange={handleChange} />
+            <TextField label="Project Type" name="projectType" fullWidth value={projectData.projectType} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Client Name" name="clientName" fullWidth value={projectData.clientName} onChange={handleChange} />
+            <TextField label="Manager Name" name="managerName" fullWidth value={projectData.managerName} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Manager Email" name="managerEmail" fullWidth value={projectData.managerEmail} onChange={handleChange} />
+            <TextField label="Priority" name="priority" fullWidth value={projectData.priority} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Start Date" name="startDate" type="date" fullWidth value={projectData.startDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+            <TextField label="End Date" name="endDate" type="date" fullWidth value={projectData.endDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Status" name="status" fullWidth value={projectData.status} onChange={handleChange} />
+            <TextField label="Phase" name="phase" fullWidth value={projectData.phase} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Team Members" name="teamMembers" type="number" fullWidth value={projectData.teamMembers} onChange={handleChange} />
+            <TextField label="Budget" name="budget" type="number" fullWidth value={projectData.budget} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Progress (%)" name="progress" type="number" fullWidth value={projectData.progress} onChange={handleChange} />
+            <TextField label="Revenue Generated" name="revenueGenerated" type="number" fullWidth value={projectData.revenueGenerated} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Risks Identified" name="risks" fullWidth value={projectData.risks} onChange={handleChange} />
+            <TextField label="Dependencies" name="dependencies" fullWidth value={projectData.dependencies} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Estimated Completion" name="estimatedCompletion" type="date" fullWidth value={projectData.estimatedCompletion} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+            <TextField label="Actual Completion" name="actualCompletion" type="date" fullWidth value={projectData.actualCompletion} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+          </Box>
+          <TextField label="Last Updated" name="lastUpdated" type="date" fullWidth value={projectData.lastUpdated} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+          <TextField label="Description" name="description" fullWidth multiline rows={4} value={projectData.description} onChange={handleChange} />
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button variant="contained" onClick={handleSubmit}>
+              {initialData ? 'Update' : 'Add'}
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Modal>
   );
 }
+
 
 function EnhancedTableHead(props) {
   const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
@@ -387,9 +459,20 @@ export default function Projects() {
                       <TableCell align="left">{row.endDate}</TableCell>
                       <TableCell align="left">{row.status}</TableCell>
                       <TableCell align="left">{row.managerName}</TableCell>
+                      <TableCell align="left">{row.managerEmail}</TableCell>
                       <TableCell align="right">{row.teamMembers}</TableCell>
                       <TableCell align="right">{row.budget}</TableCell>
                       <TableCell align="left">{row.priority}</TableCell>
+                      <TableCell align="left">{row.projectType}</TableCell>
+                      <TableCell align="left">{row.clientName}</TableCell>
+                      <TableCell align="left">{row.phase}</TableCell>
+                      <TableCell align="right">{row.progress}</TableCell>
+                      <TableCell align="left">{row.risks}</TableCell>
+                      <TableCell align="left">{row.lastUpdated}</TableCell>
+                      <TableCell align="left">{row.estimatedCompletion}</TableCell>
+                      <TableCell align="left">{row.actualCompletion}</TableCell>
+                      <TableCell align="right">{row.revenueGenerated}</TableCell>
+                      <TableCell align="left">{row.dependencies}</TableCell>
                       <TableCell align="left">
                         {costAllocationLink ? (
                           <Link href={costAllocationLink} underline="none">
@@ -408,7 +491,7 @@ export default function Projects() {
                       height: (dense ? 33 : 53) * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={12} />
+                    <TableCell colSpan={22} />
                   </TableRow>
                 )}
               </TableBody>

@@ -15,6 +15,16 @@ import { fetchCostAllocations } from '../utils/costAllocationFirebaseHelpers';
 const headCells = [
   { id: 'name', numeric: false, disablePadding: true, label: 'Partner Name' },
   { id: 'service', numeric: false, disablePadding: false, label: 'Service' },
+  { id: 'partnerType', numeric: false, disablePadding: false, label: 'Partner Type' },
+  { id: 'contactName', numeric: false, disablePadding: false, label: 'Contact Name' },
+  { id: 'contactEmail', numeric: false, disablePadding: false, label: 'Contact Email' },
+  { id: 'contactPhone', numeric: false, disablePadding: false, label: 'Contact Phone' },
+  { id: 'region', numeric: false, disablePadding: false, label: 'Region' },
+  { id: 'startDate', numeric: false, disablePadding: false, label: 'Start Date' },
+  { id: 'endDate', numeric: false, disablePadding: false, label: 'End Date' },
+  { id: 'contractValue', numeric: true, disablePadding: false, label: 'Contract Value' },
+  { id: 'riskLevel', numeric: false, disablePadding: false, label: 'Risk Level' },
+  { id: 'complianceStatus', numeric: false, disablePadding: false, label: 'Compliance Status' },
   { id: 'costAllocationLink', numeric: false, disablePadding: false, label: 'Cost Allocation' },
 ];
 
@@ -49,13 +59,13 @@ function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-      <TableCell padding="checkbox">
+        <TableCell padding="checkbox">
           <MUICheckbox
             color="primary"
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
-            inputProps={{ 'aria-label': 'select all units' }}
+            inputProps={{ 'aria-label': 'select all partners' }}
           />
         </TableCell>
         {headCells.map((headCell) => (
@@ -137,6 +147,16 @@ function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) 
       website: '',
       industry: '',
       agreementDate: '',
+      partnerType: '',
+      contractValue: '',
+      startDate: '',
+      endDate: '',
+      renewalDate: '',
+      riskLevel: '',
+      region: '',
+      paymentTerms: '',
+      complianceStatus: '',
+      notes: '',
       status: 'Active',
       organizationId: organizationId,
     }
@@ -153,6 +173,16 @@ function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) 
       website: '',
       industry: '',
       agreementDate: '',
+      partnerType: '',
+      contractValue: '',
+      startDate: '',
+      endDate: '',
+      renewalDate: '',
+      riskLevel: '',
+      region: '',
+      paymentTerms: '',
+      complianceStatus: '',
+      notes: '',
       status: 'Active',
       organizationId: organizationId,
     });
@@ -172,18 +202,58 @@ function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) 
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+      <Box sx={{ 
+        position: 'absolute', 
+        top: '50%', 
+        left: '50%', 
+        transform: 'translate(-50%, -50%)', 
+        width: 1000,  // Increased width for the modal
+        bgcolor: 'background.paper', 
+        border: '2px solid #000', 
+        boxShadow: 24, 
+        p: 4 
+      }}>
         <Typography variant="h6" component="h2">
           {initialData ? 'Edit Partner' : 'Add Partner'}
         </Typography>
-        <TextField label="Name" name="name" fullWidth margin="normal" value={partnerData.name} onChange={handleChange} />
-        <TextField label="Service" name="service" fullWidth margin="normal" value={partnerData.service} onChange={handleChange} />
-        {/* Add additional fields for contactName, contactEmail, etc. as needed */}
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}>
-            {initialData ? 'Update' : 'Add'}
-          </Button>
+        <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Partner Name" name="name" fullWidth value={partnerData.name} onChange={handleChange} />
+            <TextField label="Service" name="service" fullWidth value={partnerData.service} onChange={handleChange} />
+            <TextField label="Partner Type" name="partnerType" fullWidth value={partnerData.partnerType} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Contact Name" name="contactName" fullWidth value={partnerData.contactName} onChange={handleChange} />
+            <TextField label="Contact Email" name="contactEmail" fullWidth value={partnerData.contactEmail} onChange={handleChange} />
+            <TextField label="Contact Phone" name="contactPhone" fullWidth value={partnerData.contactPhone} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Address" name="address" fullWidth value={partnerData.address} onChange={handleChange} />
+            <TextField label="Website" name="website" fullWidth value={partnerData.website} onChange={handleChange} />
+            <TextField label="Industry" name="industry" fullWidth value={partnerData.industry} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Agreement Date" name="agreementDate" type="date" fullWidth value={partnerData.agreementDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+            <TextField label="Contract Value" name="contractValue" fullWidth value={partnerData.contractValue} onChange={handleChange} />
+            <TextField label="Start Date" name="startDate" type="date" fullWidth value={partnerData.startDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="End Date" name="endDate" type="date" fullWidth value={partnerData.endDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+            <TextField label="Renewal Date" name="renewalDate" type="date" fullWidth value={partnerData.renewalDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+            <TextField label="Risk Level" name="riskLevel" fullWidth value={partnerData.riskLevel} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Region" name="region" fullWidth value={partnerData.region} onChange={handleChange} />
+            <TextField label="Payment Terms" name="paymentTerms" fullWidth value={partnerData.paymentTerms} onChange={handleChange} />
+            <TextField label="Compliance Status" name="complianceStatus" fullWidth value={partnerData.complianceStatus} onChange={handleChange} />
+          </Box>
+          <TextField label="Notes" name="notes" fullWidth multiline rows={4} value={partnerData.notes} onChange={handleChange} />
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button variant="contained" onClick={handleSubmit}>
+              {initialData ? 'Update' : 'Add'}
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Modal>
@@ -305,7 +375,7 @@ export default function Partners() {
 
   const getCostAllocationLink = (partnerId) => {
     const allocation = costAllocations.find(allocation => allocation.partnerIds.includes(partnerId));
-    return allocation ? `#/cost-allocation/${allocation.id}` : null;
+    return allocation ? `#/cost-allocation/${partnerId}` : null;
   };
 
   const visibleRows = React.useMemo(
@@ -365,6 +435,16 @@ export default function Partners() {
                         {row.name}
                       </TableCell>
                       <TableCell align="left">{row.service}</TableCell>
+                      <TableCell align="left">{row.partnerType}</TableCell>
+                      <TableCell align="left">{row.contactName}</TableCell>
+                      <TableCell align="left">{row.contactEmail}</TableCell>
+                      <TableCell align="left">{row.contactPhone}</TableCell>
+                      <TableCell align="left">{row.region}</TableCell>
+                      <TableCell align="left">{row.startDate}</TableCell>
+                      <TableCell align="left">{row.endDate}</TableCell>
+                      <TableCell align="right">{row.contractValue}</TableCell>
+                      <TableCell align="left">{row.riskLevel}</TableCell>
+                      <TableCell align="left">{row.complianceStatus}</TableCell>
                       <TableCell align="left">
                         {costAllocationLink ? (
                           <Link href={costAllocationLink} underline="none">
@@ -383,7 +463,7 @@ export default function Partners() {
                       height: (dense ? 33 : 53) * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={12} />
+                    <TableCell colSpan={14} />
                   </TableRow>
                 )}
               </TableBody>
