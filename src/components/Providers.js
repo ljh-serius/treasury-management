@@ -538,29 +538,12 @@ export default function Providers() {
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      <TableCell component="th" id={labelId} scope="row" padding="none">
-                        {row.name}
-                      </TableCell>
-                      <TableCell align="right">{row.taxId}</TableCell>
-                      <TableCell align="right">{row.address}</TableCell>
-                      <TableCell align="right">{row.contactEmail}</TableCell>
-                      <TableCell align="right">{row.contactPhone}</TableCell>
-                      <TableCell align="right">{row.companyType}</TableCell>
-                      <TableCell align="right">{row.country}</TableCell>
-                      <TableCell align="right">{row.state}</TableCell>
-                      <TableCell align="right">{row.zipCode}</TableCell>
-                      <TableCell align="right">{row.website}</TableCell>
-                      <TableCell align="right">{row.industry}</TableCell>
-                      <TableCell align="right">{row.establishedDate}</TableCell>
-                      <TableCell align="right">{row.contractValue}</TableCell>
-                      <TableCell align="right">{row.paymentTerms}</TableCell>
-                      <TableCell align="right">{row.bankAccount}</TableCell>
-                      <TableCell align="right">{row.swiftCode}</TableCell>
-                      <TableCell align="right">{row.accountManager}</TableCell>
-                      <TableCell align="right">{row.servicesProvided}</TableCell>
-                      <TableCell align="right">{row.preferredContactMethod}</TableCell>
-                      <TableCell align="right">{row.rating}</TableCell>
-                      <TableCell align="right">
+                      {headCells.map((field) => (
+                        <TableCell key={field.id} align="left">
+                          {row[field.id]}
+                        </TableCell>
+                      ))}
+                      <TableCell align="left">
                         {costAllocationLink ? (
                           <Link href={costAllocationLink} underline="none">
                             View Cost Allocation
@@ -578,7 +561,7 @@ export default function Providers() {
                       height: (dense ? 33 : 53) * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={21} />
+                    <TableCell colSpan={headCells.length + 2} />
                   </TableRow>
                 )}
               </TableBody>

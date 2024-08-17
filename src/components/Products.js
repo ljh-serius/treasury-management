@@ -351,13 +351,8 @@ function ProductModal({ open, onClose, onSubmit, initialData, organizationId }) 
         <Typography variant="h6" component="h2">
           {initialData ? 'Edit Product' : 'Add Product'}
         </Typography>
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 2,
-          }}
-        >        <TextField
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
+        <TextField
             label="Name"
             name="name"
             fullWidth
@@ -867,14 +862,12 @@ function ProductModal({ open, onClose, onSubmit, initialData, organizationId }) 
             value={productData.availableSizes}
             onChange={handleChange}
           />
-         
-      </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'end', gap: 2 }}>
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
           <Button variant="outlined" onClick={onClose}>Cancel</Button>
           <Button variant="contained" onClick={handleSubmit}>Save</Button>
         </Box>
       </Box>
-      
+      </Box>
     </Modal>
   );
 }

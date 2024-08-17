@@ -486,7 +486,7 @@ export default function Partners() {
   );
 
   return (
-    <Container maxWidth="lg" sx={{ paddingTop: 3, paddingBottom: 7, width: "60vw"}}>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7}}>
       <Box sx={{ width: '100%' }}>
         <Paper sx={{ width: '100%', mb: 2 }}>
           <EnhancedTableToolbar
@@ -529,40 +529,11 @@ export default function Partners() {
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      <TableCell component="th" id={labelId} scope="row" padding="none">
-                        {row.name}
-                      </TableCell>
-                      <TableCell align="left">{row.service}</TableCell>
-                      <TableCell align="left">{row.partnerType}</TableCell>
-                      <TableCell align="left">{row.contactName}</TableCell>
-                      <TableCell align="left">{row.contactEmail}</TableCell>
-                      <TableCell align="left">{row.contactPhone}</TableCell>
-                      <TableCell align="left">{row.region}</TableCell>
-                      <TableCell align="left">{row.startDate}</TableCell>
-                      <TableCell align="left">{row.endDate}</TableCell>
-                      <TableCell align="right">{row.contractValue}</TableCell>
-                      <TableCell align="left">{row.riskLevel}</TableCell>
-                      <TableCell align="left">{row.complianceStatus}</TableCell>
-                      <TableCell align="left">{row.vendorCode}</TableCell>
-                      <TableCell align="left">{row.billingCycle}</TableCell>
-                      <TableCell align="left">{row.sla}</TableCell>
-                      <TableCell align="left">{row.paymentMethod}</TableCell>
-                      <TableCell align="left">{row.discountRate}</TableCell>
-                      <TableCell align="left">{row.preferredCurrency}</TableCell>
-                      <TableCell align="left">{row.lastAuditDate}</TableCell>
-                      <TableCell align="left">{row.contractExpiryWarning ? 'Yes' : 'No'}</TableCell>
-                      <TableCell align="left">{row.supportContact}</TableCell>
-                      <TableCell align="left">{row.supportEmail}</TableCell>
-                      <TableCell align="left">{row.supportPhone}</TableCell>
-                      <TableCell align="left">{row.accountManager}</TableCell>
-                      <TableCell align="left">{row.partnerRating}</TableCell>
-                      <TableCell align="left">{row.partnershipStartDate}</TableCell>
-                      <TableCell align="left">{row.partnershipEndDate}</TableCell>
-                      <TableCell align="right">{row.numberOfEmployees}</TableCell>
-                      <TableCell align="right">{row.annualRevenue}</TableCell>
-                      <TableCell align="left">{row.partnershipLevel}</TableCell>
-                      <TableCell align="left">{row.preferredLanguage}</TableCell>
-                      <TableCell align="left">{row.taxExemptionStatus}</TableCell>
+                      {headCells.map((field) => (
+                        <TableCell key={field.id} align="left">
+                          {row[field.id]}
+                        </TableCell>
+                      ))}
                       <TableCell align="left">
                         {costAllocationLink ? (
                           <Link href={costAllocationLink} underline="none">
@@ -581,7 +552,7 @@ export default function Partners() {
                       height: (dense ? 33 : 53) * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={headCells.length + 1} />
+                    <TableCell colSpan={headCells.length + 2} />
                   </TableRow>
                 )}
               </TableBody>

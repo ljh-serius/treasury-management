@@ -494,6 +494,7 @@ export default function Projects() {
             onDelete={handleDeleteProjects}
             onEdit={handleEditProject}
           />
+          />
           <TableContainer>
             <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={dense ? 'small' : 'medium'}>
               <EnhancedTableHead
@@ -528,43 +529,11 @@ export default function Projects() {
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      <TableCell component="th" id={labelId} scope="row" padding="none">
-                        {row.name}
-                      </TableCell>
-                      <TableCell align="left">{row.description}</TableCell>
-                      <TableCell align="left">{row.startDate}</TableCell>
-                      <TableCell align="left">{row.endDate}</TableCell>
-                      <TableCell align="left">{row.status}</TableCell>
-                      <TableCell align="left">{row.managerName}</TableCell>
-                      <TableCell align="left">{row.managerEmail}</TableCell>
-                      <TableCell align="right">{row.teamMembers}</TableCell>
-                      <TableCell align="right">{row.budget}</TableCell>
-                      <TableCell align="left">{row.priority}</TableCell>
-                      <TableCell align="left">{row.projectType}</TableCell>
-                      <TableCell align="left">{row.clientName}</TableCell>
-                      <TableCell align="left">{row.phase}</TableCell>
-                      <TableCell align="right">{row.progress}</TableCell>
-                      <TableCell align="left">{row.risks}</TableCell>
-                      <TableCell align="left">{row.lastUpdated}</TableCell>
-                      <TableCell align="left">{row.estimatedCompletion}</TableCell>
-                      <TableCell align="left">{row.actualCompletion}</TableCell>
-                      <TableCell align="right">{row.revenueGenerated}</TableCell>
-                      <TableCell align="left">{row.dependencies}</TableCell>
-                      <TableCell align="left">{row.projectCategory}</TableCell>
-                      <TableCell align="left">{row.resourceAllocation}</TableCell>
-                      <TableCell align="left">{row.technologyStack}</TableCell>
-                      <TableCell align="left">{row.stakeholders}</TableCell>
-                      <TableCell align="left">{row.complianceRequirements}</TableCell>
-                      <TableCell align="left">{row.riskMitigation}</TableCell>
-                      <TableCell align="left">{row.criticalPath}</TableCell>
-                      <TableCell align="left">{row.milestones}</TableCell>
-                      <TableCell align="left">{row.KPIs}</TableCell>
-                      <TableCell align="left">{row.projectSponsor}</TableCell>
-                      <TableCell align="left">{row.businessImpact}</TableCell>
-                      <TableCell align="left">{row.operatingCosts}</TableCell>
-                      <TableCell align="left">{row.userStories}</TableCell>
-                      <TableCell align="left">{row.codeRepository}</TableCell>
-                      <TableCell align="left">{row.documentation}</TableCell>
+                      {headCells.map((field) => (
+                        <TableCell key={field.id} align="left">
+                          {row[field.id]}
+                        </TableCell>
+                      ))}
                       <TableCell align="left">
                         {costAllocationLink ? (
                           <Link href={costAllocationLink} underline="none">
@@ -583,7 +552,7 @@ export default function Projects() {
                       height: (dense ? 33 : 53) * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={45} />
+                    <TableCell colSpan={headCells.length + 2} />
                   </TableRow>
                 )}
               </TableBody>
