@@ -1,6 +1,6 @@
 import { faker, } from '@faker-js/faker';
 
-import { costAllocationFieldConfig } from '../pages/CostAllocation';
+import { costAllocationFieldConfig } from '../components/CostsAllocationsManagement';
 
 export const generateRandomCostsAllocations = (
   employeeIds,
@@ -9,14 +9,6 @@ export const generateRandomCostsAllocations = (
   providerIds,
   projectIds
 ) => {
-
-  console.log('WHATS NEXT',[
-    employeeIds,
-    productIds,
-    partnerIds,
-    providerIds,
-    projectIds
-  ] )
   const getRandomElementId = (arr) => {
     if (!Array.isArray(arr) || arr.length === 0) return null; // Return null if input is invalid
     const randomIndex = Math.floor(Math.random() * arr.length); // Generate a random index

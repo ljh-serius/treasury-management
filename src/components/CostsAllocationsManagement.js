@@ -158,7 +158,7 @@ const headCells = Object.keys(costAllocationFieldConfig).map(key => ({
   label: costAllocationFieldConfig[key].label,
 }));
 
-export default function CostAllocation() {
+export default function CostsAllocationsManagement() {
   const { id } = useParams();
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('cost');
@@ -204,10 +204,6 @@ export default function CostAllocation() {
       setPartnerIds(fetchedPartners.map((partner) => partner.id));
       setProviderIds(fetchedProviders.map((provider) => provider.id));
       setProjectIds(fetchedProjects.map((project) => project.id));
-
-      console.log(fetchedEmployees)
-      console.log(fetchedProducts.map((product) => product.id))
-
 
       const allocations = await fetchCostAllocations(organizationId);
       setCostAllocations(allocations || []);
@@ -358,18 +354,8 @@ export default function CostAllocation() {
   const handleGenerateData = async () => {
     try {
       // Generate random data
-      console.log("IDS IDS IDS IDS IDS ", [employeeIds, productIds, partnerIds, providerIds, projectIds])
       const randomData = generateRandomCostsAllocations(employeeIds, productIds, partnerIds, providerIds, projectIds);
   
-      console.log("COMPLETELY RANDOM", randomData)
-
-      // Validate that all required fields are filled and properly formatted
-      if (!randomData.cost || !randomData.allocationDate || !randomData.productIds.length || !randomData.employeeIds.length) {
-        throw new Error('Generated data is missing required fields.');
-      }
-  
-      console.log("TTT", randomData)
-
       // Save the generated data to the database
       await addCostAllocation(randomData, organizationId);
   

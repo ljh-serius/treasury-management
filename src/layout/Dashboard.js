@@ -333,7 +333,7 @@ const Dashboard = ({ children }) => {
             entityName={entityName} // Pass entityName as prop
           />
         ) : (
-          children
+          React.cloneElement(children, { showAnalytics })
         )}
       </main>
     </Box>

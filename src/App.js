@@ -19,7 +19,7 @@ import GanttChart from './pages/GanttChart';
 import Projects from './pages/Projects';
 import Providers from './pages/Providers';
 import Products from './pages/Products';
-import CostAllocation from './pages/CostAllocation';
+import CostsAllocations from './pages/CostsAllocations';
 import ProductPrototypes from './pages/ProductPrototypes';
 import Partners from './pages/Partners';
 import SearchPartners from './pages/SearchPartners';
@@ -194,7 +194,7 @@ const App = () => {
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                    <CostAllocation />
+                    <CostsAllocations />
                 </Dashboard>
               </ProtectedRoute>
             }
@@ -204,7 +204,7 @@ const App = () => {
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                    <CostAllocation />
+                    <CostsAllocations />
                 </Dashboard>
               </ProtectedRoute>
             }
