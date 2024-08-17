@@ -594,7 +594,8 @@ export default function BaseTableComponent({
                       </TableCell>
                       {Object.keys(fieldConfig).map((field) => (
                         <TableCell key={field} align={fieldConfig[field].numeric ? 'right' : 'left'}>
-                          {fieldConfig[field].type === 'text' ? truncateText((row[field] || '').toString(), 5) : (row[field])}
+                          {fieldConfig[field].type === 'text' ? (row[field] ? truncateText((row[field] || '').toString(), 5) : '') : (row[field].toString())}
+
                         </TableCell>
                       ))}
                     </TableRow>

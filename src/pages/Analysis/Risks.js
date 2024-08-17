@@ -34,6 +34,7 @@ export default function ExtendedRiskAnalysisDashboard({ fetchRisks }) {
     setRiskSeverityDistribution(Object.keys(severityCounts).map(key => ({
       name: key,
       y: severityCounts[key],
+      riskNames: data.filter(risk => risk.severity === key).map(risk => risk.riskName).join(', ')
     })));
 
     // Risk Type Distribution
@@ -45,6 +46,7 @@ export default function ExtendedRiskAnalysisDashboard({ fetchRisks }) {
     setRiskTypeDistribution(Object.keys(typeCounts).map(key => ({
       name: key,
       y: typeCounts[key],
+      riskNames: data.filter(risk => risk.riskType === key).map(risk => risk.riskName).join(', ')
     })));
 
     // Risk Trend Data (Monthly trends of new risks)
@@ -99,6 +101,9 @@ export default function ExtendedRiskAnalysisDashboard({ fetchRisks }) {
     title: {
       text: 'Risk Severity Distribution',
     },
+    tooltip: {
+      pointFormat: '{point.name}: <b>{point.y}</b><br/>Risks: {point.riskNames}'
+    },
     series: [
       {
         name: 'Risks',
@@ -114,6 +119,9 @@ export default function ExtendedRiskAnalysisDashboard({ fetchRisks }) {
     },
     title: {
       text: 'Risk Type Distribution',
+    },
+    tooltip: {
+      pointFormat: '{point.name}: <b>{point.y}</b><br/>Risks: {point.riskNames}'
     },
     series: [
       {
@@ -148,6 +156,9 @@ export default function ExtendedRiskAnalysisDashboard({ fetchRisks }) {
     },
     title: {
       text: 'Financial Impact of Risks',
+    },
+    tooltip: {
+      pointFormat: '<b>{point.name}</b>: ${point.y:.2f}'
     },
     series: [
       {
