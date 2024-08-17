@@ -134,32 +134,32 @@ import { Link } from 'react-router-dom';
   function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
     const [formData, setFormData] = useState(
       initialData || Object.keys(fieldConfig).reduce((acc, field) => {
-        acc[field] = '';
+        acc[field] = fieldConfig[field].multiple ? [] : '';
         return acc;
       }, {})
     );
-
+  
     useEffect(() => {
       setFormData(
         initialData || Object.keys(fieldConfig).reduce((acc, field) => {
-          acc[field] = '';
+          acc[field] = fieldConfig[field].multiple ? [] : '';
           return acc;
         }, {})
       );
     }, [initialData, fieldConfig]);
-
+  
     const handleChange = (event) => {
       const { name, value } = event.target;
       setFormData((prevData) => ({
         ...prevData,
-        [name]: value,
+        [name]: fieldConfig[name].multiple ? value : value,
       }));
     };
-
+  
     const handleSubmit = () => {
       onSubmit(formData);
     };
-
+  
     return (
       <Modal open={open} onClose={onClose}>
         <Box
@@ -198,6 +198,7 @@ import { Link } from 'react-router-dom';
                         name={field}
                         value={formData[field]}
                         onChange={handleChange}
+                        multiple={fieldConfig[field].multiple || false}
                       >
                         {fieldConfig[field].options.length > 0 && fieldConfig[field].options.map(option => (
                           <MenuItem key={option.id} value={option.id}>
@@ -233,7 +234,7 @@ import { Link } from 'react-router-dom';
       </Modal>
     );
   }
-
+  
   function FilterManager({ filters, setFilters, fieldConfig }) {
     const [currentFilter, setCurrentFilter] = useState({ column: '', value: '', active: true });
 
@@ -463,14 +464,17 @@ import { Link } from 'react-router-dom';
       const getMultipleRandomElementIds = (arr) => {
         if (!Array.isArray(arr) || arr.length === 0) return [];
         const randomCount = Math.floor(Math.random() * arr.length) + 1;
-        let result = [];
-        for (let i = 0; i < randomCount; i++) {
-          result.push(getRandomElementId(arr));
+        let result = new Set();
+      
+        while (result.size < randomCount) {
+          const randomElement = getRandomElementId(arr);
+          result.add(randomElement);
         }
-        console.log("RESULT ", result)
-        return result;
+      
+        console.log("RESULT ", Array.from(result));
+        return Array.from(result);
       };
-    
+      
       const newRow = Object.keys(fieldConfig).reduce((acc, key) => {
         const field = fieldConfig[key];
         let value;
