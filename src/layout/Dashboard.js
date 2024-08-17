@@ -41,8 +41,8 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
-import TreeView from './TreeView'; // Assuming you have this component
-import TreasuryTable from './TreasuryTable'; // Adjust the path as necessary
+import TreeView from '../components/TreeView'; // Assuming you have this component
+import TreasuryTable from '../components/TreasuryTable'; // Adjust the path as necessary
 
 
 const Dashboard = ({ children }) => {

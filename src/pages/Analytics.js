@@ -25,7 +25,7 @@ import heatmap from 'highcharts/modules/heatmap';
 import {
   calculateBudgetSummary,
   calculateTotals,
-} from './transactionHelpers';
+} from '../utils/transactionHelpers';
 import {
   getAllStoreTransactionSummaries,
   fetchEntities

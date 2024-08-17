@@ -3,7 +3,7 @@ import { Card, CardContent, Typography, Grid, Paper } from '@mui/material';
 import {
   calculateTotals,
   calculateBudgetSummary
-} from './transactionHelpers';
+} from '../utils/transactionHelpers';
 
 const BudgetSummary = ({transactions}) => {
   // Calculate totals for encaissements and decaissements
