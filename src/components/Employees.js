@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
-  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch
+  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch, Link
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import { fetchEmployees, addEmployee, updateEmployee, deleteEmployee } from '../utils/employeesFirebaseHelpers';
+import { fetchCostAllocations } from '../utils/costAllocationFirebaseHelpers';
 
 const headCells = [
   { id: 'name', numeric: false, disablePadding: true, label: 'Name' },
@@ -20,6 +21,7 @@ const headCells = [
   { id: 'status', numeric: false, disablePadding: false, label: 'Status' },
   { id: 'manager', numeric: false, disablePadding: false, label: 'Manager' },
   { id: 'location', numeric: false, disablePadding: false, label: 'Location' },
+  { id: 'costAllocation', numeric: false, disablePadding: false, label: 'Cost Allocation' },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -45,116 +47,116 @@ function stableSort(array, comparator) {
 }
 
 function EmployeeModal({ open, onClose, onSubmit, initialData, organizationId }) {
-    const [employeeData, setEmployeeData] = useState(
-      initialData || {
-        name: '',
-        position: '',
-        email: '',
-        phone: '',
-        department: '',
-        hireDate: '',
-        salary: '',
-        status: 'Active',
-        manager: '',
-        location: '',
-        organizationId: organizationId,
-      }
-    );
-  
-    useEffect(() => {
-      setEmployeeData(initialData || {
-        name: '',
-        position: '',
-        email: '',
-        phone: '',
-        department: '',
-        hireDate: '',
-        salary: '',
-        status: 'Active',
-        manager: '',
-        location: '',
-        organizationId: organizationId,
-      });
-    }, [initialData, organizationId]);
-  
-    const handleChange = (event) => {
-      const { name, value } = event.target;
-      setEmployeeData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    };
-  
-    const handleSubmit = () => {
-      onSubmit(employeeData);
-    };
-  
-    return (
-      <Modal open={open} onClose={onClose}>
-        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
-          <Typography variant="h6" component="h2">
-            {initialData ? 'Edit Employee' : 'Add Employee'}
-          </Typography>
-          <TextField label="Name" name="name" fullWidth margin="normal" value={employeeData.name} onChange={handleChange} />
-          <TextField label="Position" name="position" fullWidth margin="normal" value={employeeData.position} onChange={handleChange} />
-          <TextField label="Email" name="email" fullWidth margin="normal" value={employeeData.email} onChange={handleChange} />
-          <TextField label="Phone" name="phone" fullWidth margin="normal" value={employeeData.phone} onChange={handleChange} />
-          <TextField label="Department" name="department" fullWidth margin="normal" value={employeeData.department} onChange={handleChange} />
-          <TextField label="Hire Date" name="hireDate" type="date" fullWidth margin="normal" value={employeeData.hireDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-          <TextField label="Salary" name="salary" type="number" fullWidth margin="normal" value={employeeData.salary} onChange={handleChange} />
-          <TextField label="Status" name="status" fullWidth margin="normal" value={employeeData.status} onChange={handleChange} />
-          <TextField label="Manager" name="manager" fullWidth margin="normal" value={employeeData.manager} onChange={handleChange} />
-          <TextField label="Location" name="location" fullWidth margin="normal" value={employeeData.location} onChange={handleChange} />
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-            <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
-            <Button variant="contained" onClick={handleSubmit}>
-              {initialData ? 'Update' : 'Add'}
-            </Button>
-          </Box>
+  const [employeeData, setEmployeeData] = useState(
+    initialData || {
+      name: '',
+      position: '',
+      email: '',
+      phone: '',
+      department: '',
+      hireDate: '',
+      salary: '',
+      status: 'Active',
+      manager: '',
+      location: '',
+      organizationId: organizationId,
+    }
+  );
+
+  useEffect(() => {
+    setEmployeeData(initialData || {
+      name: '',
+      position: '',
+      email: '',
+      phone: '',
+      department: '',
+      hireDate: '',
+      salary: '',
+      status: 'Active',
+      manager: '',
+      location: '',
+      organizationId: organizationId,
+    });
+  }, [initialData, organizationId]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setEmployeeData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = () => {
+    onSubmit(employeeData);
+  };
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+        <Typography variant="h6" component="h2">
+          {initialData ? 'Edit Employee' : 'Add Employee'}
+        </Typography>
+        <TextField label="Name" name="name" fullWidth margin="normal" value={employeeData.name} onChange={handleChange} />
+        <TextField label="Position" name="position" fullWidth margin="normal" value={employeeData.position} onChange={handleChange} />
+        <TextField label="Email" name="email" fullWidth margin="normal" value={employeeData.email} onChange={handleChange} />
+        <TextField label="Phone" name="phone" fullWidth margin="normal" value={employeeData.phone} onChange={handleChange} />
+        <TextField label="Department" name="department" fullWidth margin="normal" value={employeeData.department} onChange={handleChange} />
+        <TextField label="Hire Date" name="hireDate" type="date" fullWidth margin="normal" value={employeeData.hireDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+        <TextField label="Salary" name="salary" type="number" fullWidth margin="normal" value={employeeData.salary} onChange={handleChange} />
+        <TextField label="Status" name="status" fullWidth margin="normal" value={employeeData.status} onChange={handleChange} />
+        <TextField label="Manager" name="manager" fullWidth margin="normal" value={employeeData.manager} onChange={handleChange} />
+        <TextField label="Location" name="location" fullWidth margin="normal" value={employeeData.location} onChange={handleChange} />
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
+          <Button variant="contained" onClick={handleSubmit}>
+            {initialData ? 'Update' : 'Add'}
+          </Button>
         </Box>
-      </Modal>
-    );
-  }
+      </Box>
+    </Modal>
+  );
+}
 
 function EnhancedTableHead(props) {
-    const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, showWorkUnits } = props;
-    const createSortHandler = (property) => (event) => {
-      onRequestSort(event, property);
-    };
-    
-    return (
-      <TableHead>
-        <TableRow>
-        <TableCell padding="checkbox">
-          <MUICheckbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{ 'aria-label': 'select all units' }}
-          />
-        </TableCell>
-          {headCells.map((headCell) => (
-            <TableCell
-              key={headCell.id}
-              align={headCell.numeric ? 'right' : 'left'}
-              padding={headCell.disablePadding ? 'none' : 'normal'}
-              sortDirection={orderBy === headCell.id ? order : false}
-            >
-              <TableSortLabel
-                active={orderBy === headCell.id}
-                direction={orderBy === headCell.id ? order : 'asc'}
-                onClick={createSortHandler(headCell.id)}
-              >
-                {headCell.label}
-              </TableSortLabel>
-            </TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
-    );
-}
+  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const createSortHandler = (property) => (event) => {
+    onRequestSort(event, property);
+  };
   
+  return (
+    <TableHead>
+      <TableRow>
+      <TableCell padding="checkbox">
+        <MUICheckbox
+          color="primary"
+          indeterminate={numSelected > 0 && numSelected < rowCount}
+          checked={rowCount > 0 && numSelected === rowCount}
+          onChange={onSelectAllClick}
+          inputProps={{ 'aria-label': 'select all employees' }}
+        />
+      </TableCell>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align={headCell.numeric ? 'right' : 'left'}
+            padding={headCell.disablePadding ? 'none' : 'normal'}
+            sortDirection={orderBy === headCell.id ? order : false}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  );
+}
+
 function EnhancedTableToolbar(props) {
   const { numSelected, onAdd, onDelete, onEdit } = props;
 
@@ -210,6 +212,7 @@ export default function EmployeesList() {
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [employees, setEmployees] = useState([]);
+  const [costAllocations, setCostAllocations] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentEmployee, setCurrentEmployee] = useState(null);
 
@@ -217,10 +220,13 @@ export default function EmployeesList() {
     const fetchData = async () => {
       const employeesData = await fetchEmployees();
       setEmployees(employeesData);
+
+      const costAllocationsData = await fetchCostAllocations(organizationId);
+      setCostAllocations(costAllocationsData);
     };
 
     fetchData();
-  }, []);
+  }, [organizationId]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -306,6 +312,11 @@ export default function EmployeesList() {
     setDense(event.target.checked);
   };
 
+  const getCostAllocationLink = (employeeId) => {
+    const allocation = costAllocations.find(allocation => allocation.employeeIds.includes(employeeId));
+    return allocation ? `#/cost-allocation/${employeeId}` : null;
+  };
+
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - employees.length) : 0;
@@ -343,6 +354,7 @@ export default function EmployeesList() {
                 {visibleRows.map((row, index) => {
                   const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${index}`;
+                  const costAllocationLink = getCostAllocationLink(row.id);
 
                   return (
                     <TableRow
@@ -374,6 +386,15 @@ export default function EmployeesList() {
                       <TableCell align="left">{row.status}</TableCell>
                       <TableCell align="left">{row.manager}</TableCell>
                       <TableCell align="left">{row.location}</TableCell>
+                      <TableCell align="left">
+                        {costAllocationLink ? (
+                          <Link href={costAllocationLink} underline="none">
+                            View Cost Allocation
+                          </Link>
+                        ) : (
+                          'No Allocation'
+                        )}
+                      </TableCell>
                     </TableRow>
                   );
                 })}

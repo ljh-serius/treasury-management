@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
-  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch,
-  FormControl, InputLabel, Select, MenuItem, ListItemText
+  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch, Link
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -11,11 +10,29 @@ import EditIcon from '@mui/icons-material/Edit';
 import { visuallyHidden } from '@mui/utils';
 
 import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../utils/productsFirebaseHelpers';
+import { fetchCostAllocations } from '../utils/costAllocationFirebaseHelpers';
 
-function ProductModal({ open, onClose, onSubmit, initialData }) {
-  const [productData, setProductData] = useState(
-    initialData || { name: '', description: '', price: '' }
-  );
+function ProductModal({ open, onClose, onSubmit, initialData, organizationId }) {
+  const [productData, setProductData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    organizationId,
+  });
+
+  // Update the form data whenever the initialData prop changes
+  useEffect(() => {
+    if (initialData) {
+      setProductData(initialData);
+    } else {
+      setProductData({
+        name: '',
+        description: '',
+        price: '',
+        organizationId,
+      });
+    }
+  }, [initialData, organizationId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -31,15 +48,51 @@ function ProductModal({ open, onClose, onSubmit, initialData }) {
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          boxShadow: 24,
+          p: 4,
+        }}
+      >
         <Typography variant="h6" component="h2">
           {initialData ? 'Edit Product' : 'Add Product'}
         </Typography>
-        <TextField label="Name" name="name" fullWidth margin="normal" value={productData.name} onChange={handleChange} />
-        <TextField label="Description" name="description" fullWidth margin="normal" value={productData.description} onChange={handleChange} />
-        <TextField label="Price" name="price" type="number" fullWidth margin="normal" value={productData.price} onChange={handleChange} />
+        <TextField
+          label="Name"
+          name="name"
+          fullWidth
+          margin="normal"
+          value={productData.name}
+          onChange={handleChange}
+        />
+        <TextField
+          label="Description"
+          name="description"
+          fullWidth
+          margin="normal"
+          value={productData.description}
+          onChange={handleChange}
+        />
+        <TextField
+          label="Price"
+          name="price"
+          type="number"
+          fullWidth
+          margin="normal"
+          value={productData.price}
+          onChange={handleChange}
+        />
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
+          <Button onClick={onClose} sx={{ mr: 1 }}>
+            Cancel
+          </Button>
           <Button variant="contained" onClick={handleSubmit}>
             {initialData ? 'Update' : 'Add'}
           </Button>
@@ -49,7 +102,9 @@ function ProductModal({ open, onClose, onSubmit, initialData }) {
   );
 }
 
+
 export default function ProductsManagement() {
+  const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('name');
   const [selected, setSelected] = useState([]);
@@ -57,17 +112,21 @@ export default function ProductsManagement() {
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [products, setProducts] = useState([]);
+  const [costAllocations, setCostAllocations] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const products = await fetchProducts();
-      setProducts(products || []);
+      const productsData = await fetchProducts();
+      setProducts(productsData || []);
+
+      const costAllocationsData = await fetchCostAllocations(organizationId);
+      setCostAllocations(costAllocationsData);
     };
 
     fetchData();
-  }, []);
+  }, [organizationId]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -118,8 +177,8 @@ export default function ProductsManagement() {
     try {
       await Promise.all(selected.map((id) => deleteProduct(id)));
       setSelected([]);
-      const products = await fetchProducts();
-      setProducts(products || []);
+      const productsData = await fetchProducts();
+      setProducts(productsData || []);
     } catch (error) {
       console.error('Error deleting products:', error);
     }
@@ -130,10 +189,10 @@ export default function ProductsManagement() {
       if (currentProduct) {
         await updateProduct(currentProduct.id, productData);
       } else {
-        await addProduct(productData);
+        await addProduct({ ...productData, organizationId });
       }
-      const products = await fetchProducts();
-      setProducts(products || []);
+      const productsData = await fetchProducts();
+      setProducts(productsData || []);
       setModalOpen(false);
     } catch (error) {
       console.error('Error saving product:', error);
@@ -151,6 +210,11 @@ export default function ProductsManagement() {
 
   const handleChangeDense = (event) => {
     setDense(event.target.checked);
+  };
+
+  const getCostAllocationLink = (productId) => {
+    const allocation = costAllocations.find(allocation => allocation.productIds.includes(productId));
+    return allocation ? `#/cost-allocation/${productId}` : null;
   };
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
@@ -190,6 +254,7 @@ export default function ProductsManagement() {
                 {visibleRows.map((row, index) => {
                   const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${index}`;
+                  const costAllocationLink = getCostAllocationLink(row.id);
 
                   return (
                     <TableRow
@@ -214,6 +279,15 @@ export default function ProductsManagement() {
                       </TableCell>
                       <TableCell align="left">{row.description}</TableCell>
                       <TableCell align="right">{row.price}</TableCell>
+                      <TableCell align="left">
+                        {costAllocationLink ? (
+                          <Link href={costAllocationLink} underline="none">
+                            View Cost Allocation
+                          </Link>
+                        ) : (
+                          'No Allocation'
+                        )}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -245,6 +319,7 @@ export default function ProductsManagement() {
           onClose={() => setModalOpen(false)}
           onSubmit={handleModalSubmit}
           initialData={currentProduct}
+          organizationId={organizationId}
         />
       </Box>
     </Container>

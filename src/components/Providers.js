@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
-  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, FormControlLabel, Switch, Modal, TextField, Button, Container
+  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, FormControlLabel, Switch, Modal, TextField, Button, Container, Link
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -9,6 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import { visuallyHidden } from '@mui/utils';
 import { fetchProviders, addProvider, updateProvider, deleteProvider } from '../utils/providersFirebaseHelpers';
+import { fetchCostAllocations } from '../utils/costAllocationFirebaseHelpers';
 
 const headCells = [
   { id: 'name', numeric: false, disablePadding: true, label: 'Provider Name' },
@@ -16,6 +17,7 @@ const headCells = [
   { id: 'address', numeric: false, disablePadding: false, label: 'Address' },
   { id: 'contactEmail', numeric: false, disablePadding: false, label: 'Email' },
   { id: 'contactPhone', numeric: false, disablePadding: false, label: 'Phone' },
+  { id: 'costAllocation', numeric: false, disablePadding: false, label: 'Cost Allocation' },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -195,6 +197,7 @@ export default function Providers() {
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [providers, setProviders] = useState([]);
+  const [costAllocations, setCostAllocations] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentProvider, setCurrentProvider] = useState(null);
 
@@ -203,11 +206,13 @@ export default function Providers() {
   useEffect(() => {
     const fetchData = async () => {
       const providersData = await fetchProviders(organizationId);
+      const costAllocationsData = await fetchCostAllocations(organizationId);
       setProviders(providersData);
+      setCostAllocations(costAllocationsData);
     };
 
     fetchData();
-  }, []);
+  }, [organizationId]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -295,6 +300,11 @@ export default function Providers() {
     setDense(event.target.checked);
   };
 
+  const getCostAllocationLink = (providerId) => {
+    const allocation = costAllocations.find(allocation => allocation.providerIds.includes(providerId));
+    return allocation ? `#/cost-allocation/${providerId}` : null;
+  };
+
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - providers.length) : 0;
@@ -332,6 +342,7 @@ export default function Providers() {
                 {visibleRows.map((row, index) => {
                     const isItemSelected = isSelected(row.id);
                     const labelId = `enhanced-table-checkbox-${index}`;
+                    const costAllocationLink = getCostAllocationLink(row.id);
 
                     return (
                     <TableRow
@@ -358,6 +369,15 @@ export default function Providers() {
                         <TableCell align="right">{row.address}</TableCell>
                         <TableCell align="right">{row.contactEmail}</TableCell>
                         <TableCell align="right">{row.contactPhone}</TableCell>
+                        <TableCell align="right">
+                          {costAllocationLink ? (
+                            <Link href={costAllocationLink} underline="none">
+                              View Cost Allocation
+                            </Link>
+                          ) : (
+                            'No Allocation'
+                          )}
+                        </TableCell>
                     </TableRow>
                     );
                 })}
@@ -367,7 +387,7 @@ export default function Providers() {
                         height: (dense ? 33 : 53) * emptyRows,
                     }}
                     >
-                    <TableCell colSpan={6} />
+                    <TableCell colSpan={7} />
                     </TableRow>
                 )}
                 </TableBody>

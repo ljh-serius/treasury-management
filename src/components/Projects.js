@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
-  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch
+  Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch, Link
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import { fetchProjects, addProject, updateProject, deleteProject } from '../utils/projectsFirebaseHelpers';
+import { fetchCostAllocations } from '../utils/costAllocationFirebaseHelpers';
 import { visuallyHidden } from '@mui/utils';
 
 const headCells = [
@@ -20,6 +21,7 @@ const headCells = [
   { id: 'teamMembers', numeric: true, disablePadding: false, label: 'Team Members' },
   { id: 'budget', numeric: true, disablePadding: false, label: 'Budget' },
   { id: 'priority', numeric: false, disablePadding: false, label: 'Priority' },
+  { id: 'costAllocation', numeric: false, disablePadding: false, label: 'Cost Allocation' },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -42,51 +44,6 @@ function stableSort(array, comparator) {
     return a[1] - b[1];
   });
   return stabilizedThis.map((el) => el[0]);
-}
-
-
-function EnhancedTableHead(props) {
-  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-  const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
-  };
-
-  return (
-    <TableHead>
-      <TableRow>
-        <TableCell padding="checkbox">
-          <MUICheckbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{ 'aria-label': 'select all projects' }}
-          />
-        </TableCell>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'normal'}
-            sortDirection={orderBy === headCell.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                </Box>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-  );
 }
 
 function ProjectModal({ open, onClose, onSubmit, initialData, organizationId }) {
@@ -161,6 +118,49 @@ function ProjectModal({ open, onClose, onSubmit, initialData, organizationId }) 
   );
 }
 
+function EnhancedTableHead(props) {
+  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const createSortHandler = (property) => (event) => {
+    onRequestSort(event, property);
+  };
+
+  return (
+    <TableHead>
+      <TableRow>
+        <TableCell padding="checkbox">
+          <MUICheckbox
+            color="primary"
+            indeterminate={numSelected > 0 && numSelected < rowCount}
+            checked={rowCount > 0 && numSelected === rowCount}
+            onChange={onSelectAllClick}
+            inputProps={{ 'aria-label': 'select all projects' }}
+          />
+        </TableCell>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align={headCell.numeric ? 'right' : 'left'}
+            padding={headCell.disablePadding ? 'none' : 'normal'}
+            sortDirection={orderBy === headCell.id ? order : false}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <Box component="span" sx={visuallyHidden}>
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                </Box>
+              ) : null}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  );
+}
 
 function EnhancedTableToolbar(props) {
   const { numSelected, onAdd, onDelete, onEdit } = props;
@@ -217,6 +217,7 @@ export default function Projects() {
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [projects, setProjects] = useState([]);
+  const [costAllocations, setCostAllocations] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentProject, setCurrentProject] = useState(null);
 
@@ -224,10 +225,13 @@ export default function Projects() {
     const fetchData = async () => {
       const projectsData = await fetchProjects();
       setProjects(projectsData);
+
+      const costAllocationsData = await fetchCostAllocations(organizationId);
+      setCostAllocations(costAllocationsData);
     };
 
     fetchData();
-  }, []);
+  }, [organizationId]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -313,6 +317,11 @@ export default function Projects() {
     setDense(event.target.checked);
   };
 
+  const getCostAllocationLink = (projectId) => {
+    const allocation = costAllocations.find(allocation => allocation.projectIds.includes(projectId));
+    return allocation ? `#/cost-allocation/${projectId}` : null;
+  };
+
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - projects.length) : 0;
@@ -350,6 +359,7 @@ export default function Projects() {
                 {visibleRows.map((row, index) => {
                   const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${index}`;
+                  const costAllocationLink = getCostAllocationLink(row.id);
 
                   return (
                     <TableRow
@@ -380,6 +390,15 @@ export default function Projects() {
                       <TableCell align="right">{row.teamMembers}</TableCell>
                       <TableCell align="right">{row.budget}</TableCell>
                       <TableCell align="left">{row.priority}</TableCell>
+                      <TableCell align="left">
+                        {costAllocationLink ? (
+                          <Link href={costAllocationLink} underline="none">
+                            View Cost Allocation
+                          </Link>
+                        ) : (
+                          'No Allocation'
+                        )}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
