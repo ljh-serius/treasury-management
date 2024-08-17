@@ -20,9 +20,7 @@ function getRandomArbitraryInteger(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
-const truncateText = (text, wordLimit, type) => {
-  console.log("TEXT : -- ", text)
-  console.log("TYPE : -- ", type)
+const truncateText = (text, wordLimit) => {
   const words = text.split(' ');
   if (words.length <= wordLimit) return text;
   return words.slice(0, wordLimit).join(' ') + '...';
@@ -597,7 +595,7 @@ export default function BaseTableComponent({
                       </TableCell>
                       {Object.keys(fieldConfig).map((field) => (
                         <TableCell key={field} align={fieldConfig[field].numeric ? 'right' : 'left'}>
-                          {fieldConfig[field].type === 'text' ? truncateText((row[field] || '').toString(), 5, field) : (row[field])}
+                          {fieldConfig[field].type === 'text' ? truncateText((row[field] || '').toString(), 5) : (row[field])}
                         </TableCell>
                       ))}
                     </TableRow>
