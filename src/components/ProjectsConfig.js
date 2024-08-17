@@ -3,10 +3,10 @@ import {
 } from '../utils/firebaseCrudHelpers';
 
 export const fieldsConfig = {
-  name: { label: 'Project Name', type: 'text' },
-  description: { label: 'Description', type: 'text', multiline: true, rows: 4 },
-  startDate: { label: 'Start Date', type: 'date' },
-  endDate: { label: 'End Date', type: 'date' },
+  name: { label: 'Project Name', type: 'text', faker: 'commerce.productName' },
+  description: { label: 'Description', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraphs' },
+  startDate: { label: 'Start Date', type: 'date', faker: 'date.past' },
+  endDate: { label: 'End Date', type: 'date', faker: 'date.future' },
   status: {
     label: 'Status',
     type: 'select',
@@ -16,11 +16,12 @@ export const fieldsConfig = {
       { id: 'completed', label: 'Completed' },
       { id: 'on_hold', label: 'On Hold' },
     ],
+    faker: 'random.arrayElement',
   },
-  managerName: { label: 'Manager Name', type: 'text' },
-  managerEmail: { label: 'Manager Email', type: 'email' },
-  teamMembers: { label: 'Team Members', type: 'number' },
-  budget: { label: 'Budget', type: 'number' },
+  managerName: { label: 'Manager Name', type: 'text', faker: 'name.fullName' },
+  managerEmail: { label: 'Manager Email', type: 'email', faker: 'internet.email' },
+  teamMembers: { label: 'Team Members', type: 'number', faker: 'datatype.number' },
+  budget: { label: 'Budget', type: 'number', faker: 'finance.amount' },
   priority: {
     label: 'Priority',
     type: 'select',
@@ -29,6 +30,7 @@ export const fieldsConfig = {
       { id: 'medium', label: 'Medium' },
       { id: 'high', label: 'High' },
     ],
+    faker: 'random.arrayElement',
   },
   projectType: {
     label: 'Project Type',
@@ -38,6 +40,7 @@ export const fieldsConfig = {
       { id: 'client', label: 'Client' },
       { id: 'rnd', label: 'R&D' },
     ],
+    faker: 'random.arrayElement',
   },
   clientName: {
     label: 'Client Name',
@@ -48,6 +51,7 @@ export const fieldsConfig = {
       { id: 'client3', label: 'Client 3' },
       { id: 'client4', label: 'Client 4' },
     ],
+    faker: 'random.arrayElement',
   },
   phase: {
     label: 'Project Phase',
@@ -57,13 +61,14 @@ export const fieldsConfig = {
       { id: 'execution', label: 'Execution' },
       { id: 'closure', label: 'Closure' },
     ],
+    faker: 'random.arrayElement',
   },
-  progress: { label: 'Progress (%)', type: 'number' },
-  risks: { label: 'Risks Identified', type: 'text' },
-  lastUpdated: { label: 'Last Updated', type: 'date' },
-  estimatedCompletion: { label: 'Estimated Completion', type: 'date' },
-  actualCompletion: { label: 'Actual Completion', type: 'date' },
-  revenueGenerated: { label: 'Revenue Generated', type: 'number' },
+  progress: { label: 'Progress (%)', type: 'number', faker: 'datatype.number' },
+  risks: { label: 'Risks Identified', type: 'text', faker: 'lorem.sentence' },
+  lastUpdated: { label: 'Last Updated', type: 'date', faker: 'date.recent' },
+  estimatedCompletion: { label: 'Estimated Completion', type: 'date', faker: 'date.future' },
+  actualCompletion: { label: 'Actual Completion', type: 'date', faker: 'date.future' },
+  revenueGenerated: { label: 'Revenue Generated', type: 'number', faker: 'finance.amount' },
   dependencies: {
     label: 'Dependencies',
     type: 'select',
@@ -72,6 +77,7 @@ export const fieldsConfig = {
       { id: 'dep2', label: 'Dependency 2' },
       { id: 'dep3', label: 'Dependency 3' },
     ],
+    faker: 'random.arrayElement',
   },
   projectCategory: {
     label: 'Project Category',
@@ -81,8 +87,9 @@ export const fieldsConfig = {
       { id: 'category2', label: 'Category 2' },
       { id: 'category3', label: 'Category 3' },
     ],
+    faker: 'random.arrayElement',
   },
-  resourceAllocation: { label: 'Resource Allocation', type: 'text' },
+  resourceAllocation: { label: 'Resource Allocation', type: 'text', faker: 'lorem.words' },
   technologyStack: {
     label: 'Technology Stack',
     type: 'select',
@@ -91,6 +98,7 @@ export const fieldsConfig = {
       { id: 'tech2', label: 'Tech Stack 2' },
       { id: 'tech3', label: 'Tech Stack 3' },
     ],
+    faker: 'random.arrayElement',
   },
   stakeholders: {
     label: 'Stakeholders',
@@ -100,9 +108,10 @@ export const fieldsConfig = {
       { id: 'stakeholder2', label: 'Stakeholder 2' },
       { id: 'stakeholder3', label: 'Stakeholder 3' },
     ],
+    faker: 'random.arrayElement',
   },
-  complianceRequirements: { label: 'Compliance Requirements', type: 'text' },
-  riskMitigation: { label: 'Risk Mitigation', type: 'text' },
+  complianceRequirements: { label: 'Compliance Requirements', type: 'text', faker: 'lorem.sentence' },
+  riskMitigation: { label: 'Risk Mitigation', type: 'text', faker: 'lorem.sentence' },
   criticalPath: {
     label: 'Critical Path',
     type: 'select',
@@ -110,9 +119,10 @@ export const fieldsConfig = {
       { id: 'present', label: 'Present' },
       { id: 'absent', label: 'Absent' },
     ],
+    faker: 'random.arrayElement',
   },
-  milestones: { label: 'Milestones', type: 'text' },
-  KPIs: { label: 'KPIs', type: 'text' },
+  milestones: { label: 'Milestones', type: 'text', faker: 'lorem.words' },
+  KPIs: { label: 'KPIs', type: 'text', faker: 'lorem.words' },
   projectSponsor: {
     label: 'Project Sponsor',
     type: 'select',
@@ -121,6 +131,7 @@ export const fieldsConfig = {
       { id: 'sponsor2', label: 'Sponsor 2' },
       { id: 'sponsor3', label: 'Sponsor 3' },
     ],
+    faker: 'random.arrayElement',
   },
   businessImpact: {
     label: 'Business Impact',
@@ -131,16 +142,18 @@ export const fieldsConfig = {
       { id: 'high', label: 'High Impact' },
       { id: 'critical', label: 'Critical Impact' },
     ],
+    faker: 'random.arrayElement',
   },
-  operatingCosts: { label: 'Operating Costs', type: 'number' },
+  operatingCosts: { label: 'Operating Costs', type: 'number', faker: 'finance.amount' },
   userStories: {
     label: 'User Stories',
     type: 'text',
     multiline: true,
     rows: 4,
+    faker: 'lorem.paragraphs',
   },
-  codeRepository: { label: 'Code Repository', type: 'text' },
-  documentation: { label: 'Documentation', type: 'text' },
+  codeRepository: { label: 'Code Repository', type: 'text', faker: 'internet.url' },
+  documentation: { label: 'Documentation', type: 'text', faker: 'lorem.paragraph' },
 };
 
 export const headCells = Object.keys(fieldsConfig).map(key => ({

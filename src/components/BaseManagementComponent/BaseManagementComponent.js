@@ -19,6 +19,7 @@ function getRandomArbitraryInteger(min, max) {
 }
 
 const truncateText = (text, wordLimit) => {
+  console.log("TEXT : -- ", text)
   const words = text.split(' ');
   if (words.length <= wordLimit) return text;
   return words.slice(0, wordLimit).join(' ') + '...';
@@ -488,6 +489,10 @@ export default function BaseTableComponent({
             value = value().getFullYear() - getRandomArbitraryInteger(10, 20);
           } else if (field.faker === 'date.future') {
             value = value().getFullYear() + getRandomArbitraryInteger(10, 20);
+          } else if (field.faker === 'date.recent') {
+            value = value().getFullYear();
+          } else if (field.faker === 'color.cmyk') {
+            value = JSON.stringity(value())
           } else {
             value = typeof value === 'function' ? value() : value;
           }
@@ -591,7 +596,7 @@ export default function BaseTableComponent({
                       </TableCell>
                       {Object.keys(fieldConfig).map((field) => (
                         <TableCell key={field} align={fieldConfig[field].numeric ? 'right' : 'left'}>
-                          {fieldConfig[field].type === 'text' ? truncateText(row[field], 5) : JSON.stringify(row[field])}
+                          {fieldConfig[field].type === 'text' ? truncateText((row[field]).toString(), 5) : (row[field])}
                         </TableCell>
                       ))}
                     </TableRow>
