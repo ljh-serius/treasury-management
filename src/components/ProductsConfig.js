@@ -70,7 +70,7 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
   label: fieldsConfig[key].label,
 }));
 
-export const entityName = 'Product';
+export const entityName = 'Products';
 
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 

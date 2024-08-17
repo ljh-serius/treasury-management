@@ -48,7 +48,7 @@ export const fieldsConfig = {
       { id: 'spanish', label: 'Español' },
       { id: 'german', label: 'Deutsch' },
     ],
-    multiple: true,
+    multiple: false,
     faker: 'random.arrayElements',
   },
   taxExemptionStatus: { label: 'Tax Exemption Status', type: 'text', faker: 'random.word' },
@@ -60,7 +60,7 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
   label: fieldsConfig[key].label,
 }));
 
-export const entityName = 'Partner';
+export const entityName = 'Partners';
 
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 

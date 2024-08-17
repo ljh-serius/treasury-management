@@ -11,6 +11,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { Timestamp } from 'firebase/firestore';
+
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { faker } from '@faker-js/faker';
 
@@ -18,8 +20,9 @@ function getRandomArbitraryInteger(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
-const truncateText = (text, wordLimit) => {
+const truncateText = (text, wordLimit, type) => {
   console.log("TEXT : -- ", text)
+  console.log("TYPE : -- ", type)
   const words = text.split(' ');
   if (words.length <= wordLimit) return text;
   return words.slice(0, wordLimit).join(' ') + '...';
@@ -452,7 +455,7 @@ export default function BaseTableComponent({
       console.error(`Error saving ${entityName}:`, error);
     }
   };
-
+  
   const generateRandomRow = async () => {
     const getRandomElementId = (arr) => {
       if (!Array.isArray(arr) || arr.length === 0) return null;
@@ -460,7 +463,7 @@ export default function BaseTableComponent({
       const element = arr[randomIndex];
       return element && element.id ? element.id : null;
     };
-
+  
     const getMultipleRandomElementIds = (arr) => {
       if (!Array.isArray(arr) || arr.length === 0) return [];
       const randomCount = Math.floor(Math.random() * arr.length) + 1;
@@ -470,11 +473,11 @@ export default function BaseTableComponent({
       }
       return result;
     };
-
+  
     const newRow = Object.keys(fieldConfig).reduce((acc, key) => {
       const field = fieldConfig[key];
       let value;
-
+  
       if (field.faker) {
         const fakerPath = field.faker.split('.');
         if (fakerPath[0] === 'random' && field.type === 'select' && field.multiple) {
@@ -483,16 +486,16 @@ export default function BaseTableComponent({
           value = getRandomElementId(field.options);
         } else {
           value = fakerPath.reduce((acc, method) => acc[method], faker);
-
-          // Special handling for date.past to extract the year
+  
+          // Handle different types of date generation
           if (field.faker === 'date.past') {
-            value = value().getFullYear() - getRandomArbitraryInteger(10, 20);
+            value = new Date(value(10, 0)).toISOString(); // Past date within the last 10 years
           } else if (field.faker === 'date.future') {
-            value = value().getFullYear() + getRandomArbitraryInteger(10, 20);
+            value = new Date(value(10, 1)).toISOString(); // Future date within the next 10 years
           } else if (field.faker === 'date.recent') {
-            value = value().getFullYear();
-          } else if (field.faker === 'color.cmyk') {
-            value = JSON.stringity(value())
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            value = new Date(value(sixMonthsAgo)).toISOString(); // Date within the last 6 months
           } else {
             value = typeof value === 'function' ? value() : value;
           }
@@ -500,23 +503,21 @@ export default function BaseTableComponent({
       } else {
         value = field.type === 'number' ? faker.datatype.number() : faker.lorem.word();
       }
-
+  
       acc[key] = value;
       return acc;
     }, {});
-
+  
     try {
-      // Add the generated row to the database
       await addItem(newRow);
-
-      // Fetch updated items and refresh the table
       const data = await fetchItems();
       setItems(data);
     } catch (error) {
       console.error(`Error generating and saving random ${entityName}:`, error);
     }
   };
-
+  
+  
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -596,7 +597,7 @@ export default function BaseTableComponent({
                       </TableCell>
                       {Object.keys(fieldConfig).map((field) => (
                         <TableCell key={field} align={fieldConfig[field].numeric ? 'right' : 'left'}>
-                          {fieldConfig[field].type === 'text' ? truncateText((row[field]).toString(), 5) : (row[field])}
+                          {fieldConfig[field].type === 'text' ? truncateText((row[field] || '').toString(), 5, field) : (row[field])}
                         </TableCell>
                       ))}
                     </TableRow>

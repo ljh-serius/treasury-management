@@ -25,7 +25,7 @@ import Partners from './pages/Partners';
 import RiskManagement from './pages/RiskManagement';
 import Employees from './pages/Employees';
 import TreasuryTable from './components/TreasuryTable';
-
+import InvoicesCheck from './pages/InvoicesCheck'
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
 
 if (!process.env.REACT_APP_STRIPE_PUBLIC_KEY) {
@@ -93,7 +93,17 @@ const App = () => {
             }
           />
           <Route
-            path="/Invoices"
+            path="/invoices-check"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <InvoicesCheck />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invoices"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
@@ -194,6 +204,16 @@ const App = () => {
               <ProtectedRoute user={user}>
                 <Dashboard>
                   <Partners />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/invoices"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                    <Invoices />
                 </Dashboard>
               </ProtectedRoute>
             }
