@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
   Checkbox as MUICheckbox, FormControlLabel,
-  Toolbar, Typography, Paper, IconButton, Tooltip, Modal, TextField, Button, Container, Switch, 
-  Link,
+  Toolbar, Typography, Paper, IconButton, Tooltip, Modal, TextField, Button, Container, Switch, Grid, Link
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -155,97 +154,62 @@ function EnhancedTableToolbar(props) {
   );
 }
 
+const partnerFields = [
+  { label: 'Partner Name', name: 'name' },
+  { label: 'Service', name: 'service' },
+  { label: 'Partner Type', name: 'partnerType' },
+  { label: 'Contact Name', name: 'contactName' },
+  { label: 'Contact Email', name: 'contactEmail', type: 'email' },
+  { label: 'Contact Phone', name: 'contactPhone', type: 'tel' },
+  { label: 'Address', name: 'address' },
+  { label: 'Website', name: 'website', type: 'url' },
+  { label: 'Industry', name: 'industry' },
+  { label: 'Agreement Date', name: 'agreementDate', type: 'date' },
+  { label: 'Contract Value', name: 'contractValue', type: 'number' },
+  { label: 'Start Date', name: 'startDate', type: 'date' },
+  { label: 'End Date', name: 'endDate', type: 'date' },
+  { label: 'Renewal Date', name: 'renewalDate', type: 'date' },
+  { label: 'Risk Level', name: 'riskLevel' },
+  { label: 'Region', name: 'region' },
+  { label: 'Payment Terms', name: 'paymentTerms' },
+  { label: 'Compliance Status', name: 'complianceStatus' },
+  { label: 'Notes', name: 'notes', multiline: true, rows: 4 },
+  { label: 'Vendor Code', name: 'vendorCode' },
+  { label: 'Billing Cycle', name: 'billingCycle' },
+  { label: 'Service Level Agreement (SLA)', name: 'sla' },
+  { label: 'Payment Method', name: 'paymentMethod' },
+  { label: 'Discount Rate', name: 'discountRate', type: 'number' },
+  { label: 'Preferred Currency', name: 'preferredCurrency' },
+  { label: 'Last Audit Date', name: 'lastAuditDate', type: 'date' },
+  { label: 'Support Contact', name: 'supportContact' },
+  { label: 'Support Email', name: 'supportEmail', type: 'email' },
+  { label: 'Support Phone', name: 'supportPhone', type: 'tel' },
+  { label: 'Account Manager', name: 'accountManager' },
+  { label: 'Partner Rating', name: 'partnerRating' },
+  { label: 'Partnership Start Date', name: 'partnershipStartDate', type: 'date' },
+  { label: 'Partnership End Date', name: 'partnershipEndDate', type: 'date' },
+  { label: 'Number of Employees', name: 'numberOfEmployees', type: 'number' },
+  { label: 'Annual Revenue', name: 'annualRevenue', type: 'number' },
+  { label: 'Partnership Level', name: 'partnershipLevel' },
+  { label: 'Preferred Language', name: 'preferredLanguage' },
+  { label: 'Tax Exemption Status', name: 'taxExemptionStatus' },
+];
+
 function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) {
   const [partnerData, setPartnerData] = useState(
-    initialData || {
-      name: '',
-      service: '',
-      contactName: '',
-      contactEmail: '',
-      contactPhone: '',
-      address: '',
-      website: '',
-      industry: '',
-      agreementDate: '',
-      partnerType: '',
-      contractValue: '',
-      startDate: '',
-      endDate: '',
-      renewalDate: '',
-      riskLevel: '',
-      region: '',
-      paymentTerms: '',
-      complianceStatus: '',
-      notes: '',
-      vendorCode: '',
-      billingCycle: '',
-      sla: '',
-      paymentMethod: '',
-      discountRate: '',
-      preferredCurrency: '',
-      lastAuditDate: '',
-      contractExpiryWarning: false,
-      supportContact: '',
-      supportEmail: '',
-      supportPhone: '',
-      accountManager: '',
-      partnerRating: '',
-      partnershipStartDate: '',
-      partnershipEndDate: '',
-      numberOfEmployees: '',
-      annualRevenue: '',
-      partnershipLevel: '',
-      preferredLanguage: '',
-      taxExemptionStatus: '',
-      status: 'Active',
-      organizationId: organizationId,
-    }
+    initialData || partnerFields.reduce((acc, field) => {
+      acc[field.name] = '';
+      return acc;
+    }, { organizationId })
   );
 
   useEffect(() => {
-    setPartnerData(initialData || {
-      name: '',
-      service: '',
-      contactName: '',
-      contactEmail: '',
-      contactPhone: '',
-      address: '',
-      website: '',
-      industry: '',
-      agreementDate: '',
-      partnerType: '',
-      contractValue: '',
-      startDate: '',
-      endDate: '',
-      renewalDate: '',
-      riskLevel: '',
-      region: '',
-      paymentTerms: '',
-      complianceStatus: '',
-      notes: '',
-      vendorCode: '',
-      billingCycle: '',
-      sla: '',
-      paymentMethod: '',
-      discountRate: '',
-      preferredCurrency: '',
-      lastAuditDate: '',
-      contractExpiryWarning: false,
-      supportContact: '',
-      supportEmail: '',
-      supportPhone: '',
-      accountManager: '',
-      partnerRating: '',
-      partnershipStartDate: '',
-      partnershipEndDate: '',
-      numberOfEmployees: '',
-      annualRevenue: '',
-      partnershipLevel: '',
-      preferredLanguage: '',
-      taxExemptionStatus: '',
-      status: 'Active',
-      organizationId: organizationId,
-    });
+    setPartnerData(
+      initialData || partnerFields.reduce((acc, field) => {
+        acc[field.name] = '';
+        return acc;
+      }, { organizationId })
+    );
   }, [initialData, organizationId]);
 
   const handleChange = (event) => {
@@ -281,82 +245,36 @@ function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) 
         <Typography variant="h6" component="h2">
           {initialData ? 'Edit Partner' : 'Add Partner'}
         </Typography>
-        <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Partner Name" name="name" fullWidth value={partnerData.name} onChange={handleChange} />
-            <TextField label="Service" name="service" fullWidth value={partnerData.service} onChange={handleChange} />
-            <TextField label="Partner Type" name="partnerType" fullWidth value={partnerData.partnerType} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Contact Name" name="contactName" fullWidth value={partnerData.contactName} onChange={handleChange} />
-            <TextField label="Contact Email" name="contactEmail" fullWidth value={partnerData.contactEmail} onChange={handleChange} />
-            <TextField label="Contact Phone" name="contactPhone" fullWidth value={partnerData.contactPhone} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Address" name="address" fullWidth value={partnerData.address} onChange={handleChange} />
-            <TextField label="Website" name="website" fullWidth value={partnerData.website} onChange={handleChange} />
-            <TextField label="Industry" name="industry" fullWidth value={partnerData.industry} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Agreement Date" name="agreementDate" type="date" fullWidth value={partnerData.agreementDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-            <TextField label="Contract Value" name="contractValue" fullWidth value={partnerData.contractValue} onChange={handleChange} />
-            <TextField label="Start Date" name="startDate" type="date" fullWidth value={partnerData.startDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="End Date" name="endDate" type="date" fullWidth value={partnerData.endDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-            <TextField label="Renewal Date" name="renewalDate" type="date" fullWidth value={partnerData.renewalDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-            <TextField label="Risk Level" name="riskLevel" fullWidth value={partnerData.riskLevel} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Region" name="region" fullWidth value={partnerData.region} onChange={handleChange} />
-            <TextField label="Payment Terms" name="paymentTerms" fullWidth value={partnerData.paymentTerms} onChange={handleChange} />
-            <TextField label="Compliance Status" name="complianceStatus" fullWidth value={partnerData.complianceStatus} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Vendor Code" name="vendorCode" fullWidth value={partnerData.vendorCode} onChange={handleChange} />
-            <TextField label="Billing Cycle" name="billingCycle" fullWidth value={partnerData.billingCycle} onChange={handleChange} />
-            <TextField label="Service Level Agreement (SLA)" name="sla" fullWidth value={partnerData.sla} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Payment Method" name="paymentMethod" fullWidth value={partnerData.paymentMethod} onChange={handleChange} />
-            <TextField label="Discount Rate" name="discountRate" fullWidth value={partnerData.discountRate} onChange={handleChange} />
-            <TextField label="Preferred Currency" name="preferredCurrency" fullWidth value={partnerData.preferredCurrency} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Last Audit Date" name="lastAuditDate" type="date" fullWidth value={partnerData.lastAuditDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-            <TextField label="Support Contact" name="supportContact" fullWidth value={partnerData.supportContact} onChange={handleChange} />
-            <TextField label="Support Email" name="supportEmail" fullWidth value={partnerData.supportEmail} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Support Phone" name="supportPhone" fullWidth value={partnerData.supportPhone} onChange={handleChange} />
-            <TextField label="Account Manager" name="accountManager" fullWidth value={partnerData.accountManager} onChange={handleChange} />
-            <TextField label="Partner Rating" name="partnerRating" fullWidth value={partnerData.partnerRating} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Partnership Start Date" name="partnershipStartDate" type="date" fullWidth value={partnerData.partnershipStartDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-            <TextField label="Partnership End Date" name="partnershipEndDate" type="date" fullWidth value={partnerData.partnershipEndDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-            <TextField label="Number of Employees" name="numberOfEmployees" fullWidth value={partnerData.numberOfEmployees} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Annual Revenue" name="annualRevenue" fullWidth value={partnerData.annualRevenue} onChange={handleChange} />
-            <TextField label="Partnership Level" name="partnershipLevel" fullWidth value={partnerData.partnershipLevel} onChange={handleChange} />
-            <TextField label="Preferred Language" name="preferredLanguage" fullWidth value={partnerData.preferredLanguage} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Tax Exemption Status" name="taxExemptionStatus" fullWidth value={partnerData.taxExemptionStatus} onChange={handleChange} />
-            <TextField label="Notes" name="notes" fullWidth multiline rows={4} value={partnerData.notes} onChange={handleChange} />
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button variant="contained" onClick={handleSubmit}>
-              {initialData ? 'Update' : 'Add'}
-            </Button>
-          </Box>
+        <Box sx={{ flexGrow: 1 }}>
+          <Grid container spacing={2}>
+            {partnerFields.map((field) => (
+              <Grid item xs={12} sm={6} md={4} key={field.name}>
+                <TextField
+                  label={field.label}
+                  name={field.name}
+                  type={field.type || 'text'}
+                  value={partnerData[field.name]}
+                  onChange={handleChange}
+                  fullWidth
+                  multiline={field.multiline || false}
+                  rows={field.rows || 1}
+                  InputLabelProps={field.type === 'date' ? { shrink: true } : undefined}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button variant="contained" onClick={handleSubmit}>
+            {initialData ? 'Update' : 'Add'}
+          </Button>
         </Box>
       </Box>
     </Modal>
   );
 }
+
 
 export default function Partners() {
   const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;

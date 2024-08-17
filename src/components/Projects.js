@@ -494,7 +494,6 @@ export default function Projects() {
             onDelete={handleDeleteProjects}
             onEdit={handleEditProject}
           />
-          />
           <TableContainer>
             <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={dense ? 'small' : 'medium'}>
               <EnhancedTableHead
