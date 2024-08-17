@@ -11,7 +11,7 @@ import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow'; // Import an icon, use any icon you prefer
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 import { fetchProducts } from '../utils/productsFirebaseHelpers';
 import { fetchEmployees } from '../utils/employeesFirebaseHelpers';
@@ -23,20 +23,76 @@ import { useParams } from 'react-router-dom';
 
 import { generateRandomCostsAllocations } from '../fakers/costsAllocationsFaker';
 
-const costAllocationFieldConfig = {
+export const costAllocationFieldConfig = {
   cost: { label: 'Cost', type: 'number' },
   description: { label: 'Description', type: 'text' },
-  productIds: { label: 'Products', type: 'select', options: [], multiple: true },
-  employeeIds: { label: 'Employees', type: 'select', options: [], multiple: true },
-  projectIds: { label: 'Projects', type: 'select', options: [], multiple: true },
-  partnerIds: { label: 'Partners', type: 'select', options: [], multiple: true },
-  providerIds: { label: 'Providers', type: 'select', options: [], multiple: true },
+  productIds: { 
+    label: 'Products', 
+    type: 'select', 
+    options: [], 
+    multiple: true 
+  },
+  employeeIds: { 
+    label: 'Employees', 
+    type: 'select', 
+    options: [], 
+    multiple: true 
+  },
+  projectIds: { 
+    label: 'Projects', 
+    type: 'select', 
+    options: [], 
+    multiple: true 
+  },
+  partnerIds: { 
+    label: 'Partners', 
+    type: 'select', 
+    options: [], 
+    multiple: true 
+  },
+  providerIds: { 
+    label: 'Providers', 
+    type: 'select', 
+    options: [], 
+    multiple: true 
+  },
   allocationDate: { label: 'Allocation Date', type: 'date' },
-  allocationType: { label: 'Allocation Type', type: 'text' },
+  allocationType: { 
+    label: 'Allocation Type', 
+    type: 'select', 
+    options: [
+      { id: '1', label: 'Type 1' },
+      { id: '2', label: 'Type 2' },
+      { id: '3', label: 'Type 3' }
+    ] 
+  },
   notes: { label: 'Notes', type: 'text' },
-  department: { label: 'Department', type: 'text' },
-  priority: { label: 'Priority', type: 'select', options: ['High', 'Medium', 'Low'] },
-  status: { label: 'Status', type: 'select', options: ['Active', 'Inactive'] },
+  department: { 
+    label: 'Department', 
+    type: 'select', 
+    options: [
+      { id: 'finance', label: 'Finance' },
+      { id: 'hr', label: 'Human Resources' },
+      { id: 'it', label: 'IT' }
+    ] 
+  },
+  priority: { 
+    label: 'Priority', 
+    type: 'select', 
+    options: [
+      { id: 'high', label: 'High' },
+      { id: 'medium', label: 'Medium' },
+      { id: 'low', label: 'Low' }
+    ] 
+  },
+  status: { 
+    label: 'Status', 
+    type: 'select', 
+    options: [
+      { id: 'active', label: 'Active' },
+      { id: 'inactive', label: 'Inactive' }
+    ] 
+  },
   duration: { label: 'Duration', type: 'number' },
   currency: { label: 'Currency', type: 'text' },
   approvedBy: { label: 'Approved By', type: 'text' },
@@ -45,13 +101,36 @@ const costAllocationFieldConfig = {
   costCenter: { label: 'Cost Center', type: 'text' },
   budgetCode: { label: 'Budget Code', type: 'text' },
   financialYear: { label: 'Financial Year', type: 'number' },
-  quarter: { label: 'Quarter', type: 'select', options: ['Q1', 'Q2', 'Q3', 'Q4'] },
+  quarter: { 
+    label: 'Quarter', 
+    type: 'select', 
+    options: [
+      { id: 'q1', label: 'Q1' },
+      { id: 'q2', label: 'Q2' },
+      { id: 'q3', label: 'Q3' },
+      { id: 'q4', label: 'Q4' }
+    ] 
+  },
   allocationMethod: { label: 'Allocation Method', type: 'text' },
   roiEstimate: { label: 'ROI Estimate', type: 'number' },
   taxImplications: { label: 'Tax Implications', type: 'text' },
-  capexOrOpex: { label: 'Capex/Opex', type: 'select', options: ['Capex', 'Opex'] },
+  capexOrOpex: { 
+    label: 'Capex/Opex', 
+    type: 'select', 
+    options: [
+      { id: 'capex', label: 'Capex' },
+      { id: 'opex', label: 'Opex' }
+    ] 
+  },
   riskAssessment: { label: 'Risk Assessment', type: 'text' },
-  complianceStatus: { label: 'Compliance Status', type: 'select', options: ['Compliant', 'Non-compliant'] },
+  complianceStatus: { 
+    label: 'Compliance Status', 
+    type: 'select', 
+    options: [
+      { id: 'compliant', label: 'Compliant' },
+      { id: 'non_compliant', label: 'Non-compliant' }
+    ] 
+  },
   paymentTerms: { label: 'Payment Terms', type: 'text' },
   invoiceNumber: { label: 'Invoice Number', type: 'text' },
   vatAmount: { label: 'VAT Amount', type: 'number' },
@@ -60,10 +139,20 @@ const costAllocationFieldConfig = {
   totalCostAfterDiscount: { label: 'Total Cost After Discount', type: 'number' },
   exchangeRate: { label: 'Exchange Rate', type: 'number' },
   costAllocationFactor: { label: 'Cost Allocation Factor', type: 'number' },
-  approvalStatus: { label: 'Approval Status', type: 'select', options: ['Pending', 'Approved', 'Rejected'] },
+  approvalStatus: { 
+    label: 'Approval Status', 
+    type: 'select', 
+    options: [
+      { id: 'pending', label: 'Pending' },
+      { id: 'approved', label: 'Approved' },
+      { id: 'rejected', label: 'Rejected' }
+    ] 
+  },
   auditTrail: { label: 'Audit Trail', type: 'text' },
 };
 
+
+// Generate head cells for the table based on the config object
 const headCells = Object.keys(costAllocationFieldConfig).map(key => ({
   id: key,
   label: costAllocationFieldConfig[key].label,
@@ -87,6 +176,7 @@ export default function CostAllocation() {
   const [productIds, setProductIds] = useState([]);
   const [partnerIds, setPartnerIds] = useState([]);
   const [providerIds, setProviderIds] = useState([]);
+  const [projectIds, setProjectIds] = useState([]);
 
   const [employees, setEmployees] = useState([]);
   const [products, setProducts] = useState([]);
@@ -96,31 +186,35 @@ export default function CostAllocation() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const products = await fetchProducts();
-      const employees = await fetchEmployees();
-      const projects = await fetchProjects();
-      const partners = await fetchPartners(organizationId);
-      const providers = await fetchProviders(organizationId);
+      const fetchedProducts = await fetchProducts();
+      const fetchedEmployees = await fetchEmployees();
+      const fetchedProjects = await fetchProjects();
+      const fetchedPartners = await fetchPartners(organizationId);
+      const fetchedProviders = await fetchProviders(organizationId);
 
-      setProducts(products);
-      setEmployees(employees);
-      setProjects(projects);
-      setPartners(partners);
-      setProviders(providers);
+      setEmployees(fetchedEmployees);
+      setProjects(fetchedProjects);
+      setPartners(fetchedPartners);
+      setProviders(fetchedProviders);
+      setProducts(fetchedProducts);
 
-      setEmployeeIds(employees.map(employee => employee.id));
-      setProductIds(products.map(product => product.id));
-      setPartnerIds(partners.map(partner => partner.id));
-      setProviderIds(providers.map(provider => provider.id));
+
+      setEmployeeIds(fetchedEmployees.map((employee) => employee.id));
+      setProductIds(fetchedProducts.map((product) => product.id));
+      setPartnerIds(fetchedPartners.map((partner) => partner.id));
+      setProviderIds(fetchedProviders.map((provider) => provider.id));
+      setProjectIds(fetchedProjects.map((project) => project.id));
+
+      console.log(fetchedEmployees)
+      console.log(fetchedProducts.map((product) => product.id))
+
 
       const allocations = await fetchCostAllocations(organizationId);
-
-      console.log("ALLO ", allocations)
       setCostAllocations(allocations || []);
 
       if (id) {
         const filtered = allocations.filter(
-          allocation =>
+          (allocation) =>
             allocation.productIds.includes(id) ||
             allocation.employeeIds.includes(id) ||
             allocation.projectIds.includes(id) ||
@@ -142,9 +236,9 @@ export default function CostAllocation() {
     setOrderBy(property);
   };
 
-  const handleSelectAllClick = event => {
+  const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = filteredAllocations.map(n => n.id);
+      const newSelected = filteredAllocations.map((n) => n.id);
       setSelected(newSelected);
       return;
     }
@@ -164,7 +258,7 @@ export default function CostAllocation() {
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
+        selected.slice(selectedIndex + 1),
       );
     }
     setSelected(newSelected);
@@ -176,21 +270,21 @@ export default function CostAllocation() {
   };
 
   const handleEditAllocation = () => {
-    const allocationToEdit = filteredAllocations.find(allocation => allocation.id === selected[0]);
+    const allocationToEdit = filteredAllocations.find((allocation) => allocation.id === selected[0]);
     setCurrentAllocation(allocationToEdit);
     setModalOpen(true);
   };
 
   const handleDeleteAllocations = async () => {
     try {
-      await Promise.all(selected.map(id => deleteCostAllocation(id)));
+      await Promise.all(selected.map((id) => deleteCostAllocation(id)));
       setSelected([]);
       const allocations = await fetchCostAllocations(organizationId);
       setCostAllocations(allocations || []);
 
       if (id) {
         const filtered = allocations.filter(
-          allocation =>
+          (allocation) =>
             allocation.productIds.includes(id) ||
             allocation.employeeIds.includes(id) ||
             allocation.projectIds.includes(id) ||
@@ -206,7 +300,7 @@ export default function CostAllocation() {
     }
   };
 
-  const handleModalSubmit = async allocationData => {
+  const handleModalSubmit = async (allocationData) => {
     try {
       if (currentAllocation) {
         await updateCostAllocation(currentAllocation.id, allocationData);
@@ -218,7 +312,7 @@ export default function CostAllocation() {
 
       if (id) {
         const filtered = allocations.filter(
-          allocation =>
+          (allocation) =>
             allocation.productIds.includes(id) ||
             allocation.employeeIds.includes(id) ||
             allocation.projectIds.includes(id) ||
@@ -239,16 +333,16 @@ export default function CostAllocation() {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = event => {
+  const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  const handleChangeDense = event => {
+  const handleChangeDense = (event) => {
     setDense(event.target.checked);
   };
 
-  const isSelected = id => selected.indexOf(id) !== -1;
+  const isSelected = (id) => selected.indexOf(id) !== -1;
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredAllocations.length) : 0;
 
@@ -263,14 +357,30 @@ export default function CostAllocation() {
 
   const handleGenerateData = async () => {
     try {
-      const randomData = generateRandomCostsAllocations(employeeIds, productIds, partnerIds, providerIds);
+      // Generate random data
+      console.log("IDS IDS IDS IDS IDS ", [employeeIds, productIds, partnerIds, providerIds, projectIds])
+      const randomData = generateRandomCostsAllocations(employeeIds, productIds, partnerIds, providerIds, projectIds);
+  
+      console.log("COMPLETELY RANDOM", randomData)
+
+      // Validate that all required fields are filled and properly formatted
+      if (!randomData.cost || !randomData.allocationDate || !randomData.productIds.length || !randomData.employeeIds.length) {
+        throw new Error('Generated data is missing required fields.');
+      }
+  
+      console.log("TTT", randomData)
+
+      // Save the generated data to the database
       await addCostAllocation(randomData, organizationId);
+  
+      // Refetch the updated allocations
       const allocations = await fetchCostAllocations(organizationId);
       setCostAllocations(allocations || []);
-
+  
+      // Apply any filtering logic if necessary
       if (id) {
         const filtered = allocations.filter(
-          allocation =>
+          (allocation) =>
             allocation.productIds.includes(id) ||
             allocation.employeeIds.includes(id) ||
             allocation.projectIds.includes(id) ||
@@ -281,11 +391,13 @@ export default function CostAllocation() {
       } else {
         setFilteredAllocations(allocations);
       }
+  
+      console.log("Random data generated and saved:", randomData);
     } catch (error) {
       console.error('Error generating or saving data:', error);
     }
   };
-
+  
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Box sx={{ width: '100%' }}>
@@ -315,7 +427,7 @@ export default function CostAllocation() {
                   return (
                     <TableRow
                       hover
-                      onClick={event => handleClick(event, row.id)}
+                      onClick={(event) => handleClick(event, row.id)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
@@ -330,7 +442,7 @@ export default function CostAllocation() {
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      {headCells.map(headCell => (
+                      {headCells.map((headCell) => (
                         <TableCell key={headCell.id} align="left">
                           {row[headCell.id]}
                         </TableCell>
@@ -400,12 +512,12 @@ function stableSort(array, comparator) {
     if (order !== 0) return order;
     return a[1] - b[1];
   });
-  return stabilizedThis.map(el => el[0]);
+  return stabilizedThis.map((el) => el[0]);
 }
 
 function EnhancedTableHead(props) {
   const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-  const createSortHandler = property => event => {
+  const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
 
@@ -421,7 +533,7 @@ function EnhancedTableHead(props) {
             inputProps={{ 'aria-label': 'select all cost allocations' }}
           />
         </TableCell>
-        {headCells.map(headCell => (
+        {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
             align="left"
@@ -528,16 +640,16 @@ function CostAllocationModal({ open, onClose, onSubmit, initialData, organizatio
   }, [organizationId]);
 
   useEffect(() => {
-    costAllocationFieldConfig.productIds.options = products.map(product => ({ id: product.id, label: product.name }));
-    costAllocationFieldConfig.employeeIds.options = employees.map(employee => ({ id: employee.id, label: employee.name }));
-    costAllocationFieldConfig.projectIds.options = projects.map(project => ({ id: project.id, label: project.name }));
-    costAllocationFieldConfig.partnerIds.options = partners.map(partner => ({ id: partner.id, label: partner.name }));
-    costAllocationFieldConfig.providerIds.options = providers.map(provider => ({ id: provider.id, label: provider.name }));
+    costAllocationFieldConfig.productIds.options = products.map((product) => ({ id: product.id, label: product.name }));
+    costAllocationFieldConfig.employeeIds.options = employees.map((employee) => ({ id: employee.id, label: employee.name }));
+    costAllocationFieldConfig.projectIds.options = projects.map((project) => ({ id: project.id, label: project.name }));
+    costAllocationFieldConfig.partnerIds.options = partners.map((partner) => ({ id: partner.id, label: partner.name }));
+    costAllocationFieldConfig.providerIds.options = providers.map((provider) => ({ id: provider.id, label: provider.name }));
   }, [products, employees, projects, partners, providers]);
 
-  const handleChange = event => {
+  const handleChange = (event) => {
     const { name, value } = event.target;
-    setAllocationData(prevData => ({
+    setAllocationData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
@@ -580,7 +692,7 @@ function CostAllocationModal({ open, onClose, onSubmit, initialData, organizatio
         </Typography>
         <Box sx={{ flexGrow: 1 }}>
           <Grid container spacing={2}>
-            {Object.keys(costAllocationFieldConfig).map(field => (
+            {Object.keys(costAllocationFieldConfig).map((field) => (
               <Grid item xs={12} sm={6} md={4} key={field}>
                 {costAllocationFieldConfig[field].type === 'select' ? (
                   <FormControl fullWidth>
@@ -590,21 +702,20 @@ function CostAllocationModal({ open, onClose, onSubmit, initialData, organizatio
                       value={allocationData[field] || ''}
                       onChange={handleChange}
                       multiple={costAllocationFieldConfig[field].multiple || false}
-                      renderValue={selected => {
+                      renderValue={(selected) => {
                         if (costAllocationFieldConfig[field].multiple) {
                           return selected
-                            .map(id => {
-                              const option = costAllocationFieldConfig[field].options?.find(opt => opt.id === id);
+                            .map((id) => {
+                              const option = costAllocationFieldConfig[field].options?.find((opt) => opt.id === id);
                               return option ? option.label : '';
                             })
                             .join(', ');
                         }
-                        const option = costAllocationFieldConfig[field].options?.find(opt => opt.id === selected);
+                        const option = costAllocationFieldConfig[field].options?.find((opt) => opt.id === selected);
                         return option ? option.label : '';
                       }}
                     >
-                      {costAllocationFieldConfig[field].options &&
-                        Array.isArray(costAllocationFieldConfig[field].options)
+                      {costAllocationFieldConfig[field].options && Array.isArray(costAllocationFieldConfig[field].options)
                         ? costAllocationFieldConfig[field].options.map((option, optionIndex) => (
                           <MenuItem key={option.id + '-' + optionIndex} value={option.id}>
                             {costAllocationFieldConfig[field].multiple && (
@@ -644,9 +755,10 @@ function CostAllocationModal({ open, onClose, onSubmit, initialData, organizatio
   );
 }
 
-const createEmptyAllocationData = organizationId => {
+const createEmptyAllocationData = (organizationId) => {
   return Object.keys(costAllocationFieldConfig).reduce((acc, field) => {
     acc[field] = costAllocationFieldConfig[field].multiple ? [] : '';
     return acc;
   }, { organizationId });
 };
+
