@@ -136,7 +136,7 @@ export const entityName = 'Invoices';
 
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
-export const fetchItems = () => fetchDocuments('invoices', organizationId);
-export const addItem = (item) => addDocument('invoices', item, organizationId);
-export const updateItem = (id, item) => updateDocument('invoices', id, item);
-export const deleteItem = (id) => deleteDocument('invoices', id);
+export const fetchItems = () => fetchDocuments(organizationId, 'invoices');
+export const addItem = (item) => addDocument(organizationId, 'invoices', item);
+export const updateItem = (id, item) => updateDocument(organizationId, 'invoices', id, item);
+export const deleteItem = (id) => deleteDocument(organizationId, 'invoices', id);
