@@ -18,6 +18,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import GanttChart from './components/GanttChart';
 import Projects from './components/Projects';
 import Providers from './components/Providers';
+import Products from './components/Products';
 import CostAllocation from './components/CostAllocation';
 import ProductPrototypes from './components/ProductPrototypes';
 import Partners from './components/Partners';
@@ -168,13 +169,32 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          
+           <Route
+            path="/products"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Products />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />  
           <Route
             path="/providers"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
                   <Providers />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cost-allocation/:id"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                    <CostAllocation />
                 </Dashboard>
               </ProtectedRoute>
             }

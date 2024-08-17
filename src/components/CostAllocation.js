@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
   Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container, FormControlLabel, Switch,
   FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText
 } from '@mui/material';
+
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
@@ -15,160 +17,12 @@ import { fetchEmployees } from '../utils/employeesFirebaseHelpers';
 import { fetchProjects } from '../utils/projectsFirebaseHelpers';
 import { fetchPartners } from '../utils/partnersFirebaseHelpers';
 import { fetchProviders } from '../utils/providersFirebaseHelpers';
-import { addCostAllocation, fetchCostAllocations } from '../utils/costAllocationFirebaseHelpers';
-import { updateCostAllocation } from '../utils/costAllocationFirebaseHelpers';
-import { deleteCostAllocation } from '../utils/costAllocationFirebaseHelpers';
+import { addCostAllocation, fetchCostAllocations, updateCostAllocation, deleteCostAllocation } from '../utils/costAllocationFirebaseHelpers';
 
+import { useParams } from 'react-router-dom';
 
-function CostAllocationModal({ open, onClose, onSubmit, initialData }) {
-  const [allocationData, setAllocationData] = useState(
-    initialData || { cost: '', description: '', productIds: [], employeeIds: [], projectIds: [], partnerIds: [], providerIds: [] }
-  );
-
-  const [products, setProducts] = useState([]);
-  const [employees, setEmployees] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [partners, setPartners] = useState([]);
-  const [providers, setProviders] = useState([]);
-
-  useEffect(() => {
-
-    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-
-    async function fetchData() {
-      setProducts(await fetchProducts());
-      setEmployees(await fetchEmployees());
-      setProjects(await fetchProjects());
-      setPartners(await fetchPartners());
-      setProviders(await fetchProviders(organizationId));
-    }
-    fetchData();
-    setAllocationData(initialData || { cost: '', description: '', productIds: [], employeeIds: [], projectIds: [], partnerIds: [], providerIds: [] });
-  }, [initialData]);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setAllocationData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = () => {
-    onSubmit(allocationData);
-  };
-
-  return (
-    <Modal open={open} onClose={onClose}>
-      <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
-        <Typography variant="h6" component="h2">
-          {initialData ? 'Edit Cost Allocation' : 'Add Cost Allocation'}
-        </Typography>
-        <TextField label="Cost" name="cost" type="number" fullWidth margin="normal" value={allocationData.cost} onChange={handleChange} />
-        <TextField label="Description" name="description" fullWidth margin="normal" value={allocationData.description} onChange={handleChange} />
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Products</InputLabel>
-          <Select
-            name="productIds"
-            multiple
-            value={allocationData.productIds}
-            onChange={handleChange}
-            renderValue={(selected) => selected.map(id => products.find(p => p.id === id)?.name).join(', ')}
-          >
-            {products.map((product) => (
-              <MenuItem key={product.id} value={product.id}>
-                <Checkbox checked={allocationData.productIds.includes(product.id)} />
-                <ListItemText primary={product.name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Employees</InputLabel>
-          <Select
-            name="employeeIds"
-            multiple
-            value={allocationData.employeeIds}
-            onChange={handleChange}
-            renderValue={(selected) => selected.map(id => employees.find(e => e.id === id)?.name).join(', ')}
-          >
-            {employees.map((employee) => (
-              <MenuItem key={employee.id} value={employee.id}>
-                <Checkbox checked={allocationData.employeeIds.includes(employee.id)} />
-                <ListItemText primary={employee.name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Projects</InputLabel>
-          <Select
-            name="projectIds"
-            multiple
-            value={allocationData.projectIds}
-            onChange={handleChange}
-            renderValue={(selected) => selected.map(id => projects.find(p => p.id === id)?.name).join(', ')}
-          >
-            {projects.map((project) => (
-              <MenuItem key={project.id} value={project.id}>
-                <Checkbox checked={allocationData.projectIds.includes(project.id)} />
-                <ListItemText primary={project.name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Partners</InputLabel>
-          <Select
-            name="partnerIds"
-            multiple
-            value={allocationData.partnerIds}
-            onChange={handleChange}
-            renderValue={(selected) => selected.map(id => partners.find(p => p.id === id)?.name).join(', ')}
-          >
-            {partners.map((partner) => (
-              <MenuItem key={partner.id} value={partner.id}>
-                <Checkbox checked={allocationData.partnerIds.includes(partner.id)} />
-                <ListItemText primary={partner.name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Providers</InputLabel>
-          <Select
-            name="providerIds"
-            multiple
-            value={allocationData.providerIds}
-            onChange={handleChange}
-            renderValue={(selected) => selected.map(id => providers.find(p => p.id === id)?.name).join(', ')}
-          >
-            {providers.map((provider) => (
-              <MenuItem key={provider.id} value={provider.id}>
-                <Checkbox checked={allocationData.providerIds.includes(provider.id)} />
-                <ListItemText primary={provider.name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}>
-            {initialData ? 'Update' : 'Add'}
-          </Button>
-        </Box>
-      </Box>
-    </Modal>
-  );
-}
-
-export default function CashFlowAndCostAllocation() {
+export default function CostAllocation() {
+  const { id } = useParams(); // Get the optional id from the URL
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('cost');
   const [selected, setSelected] = useState([]);
@@ -176,17 +30,35 @@ export default function CashFlowAndCostAllocation() {
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [costAllocations, setCostAllocations] = useState([]);
+  const [filteredAllocations, setFilteredAllocations] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentAllocation, setCurrentAllocation] = useState(null);
 
   useEffect(() => {
+    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+
     const fetchData = async () => {
-      const allocations = await fetchCostAllocations();
+      const allocations = await fetchCostAllocations(organizationId);
       setCostAllocations(allocations || []);
+
+      // If an ID is provided in the URL, filter the cost allocations
+      if (id) {
+        const filtered = allocations.filter(
+          (allocation) =>
+            allocation.productIds.includes(id) ||
+            allocation.employeeIds.includes(id) ||
+            allocation.projectIds.includes(id) ||
+            allocation.partnerIds.includes(id) ||
+            allocation.providerIds.includes(id)
+        );
+        setFilteredAllocations(filtered);
+      } else {
+        setFilteredAllocations(allocations);
+      }
     };
 
     fetchData();
-  }, []);
+  }, [id]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -196,7 +68,7 @@ export default function CashFlowAndCostAllocation() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = costAllocations.map((n) => n.id);
+      const newSelected = filteredAllocations.map((n) => n.id);
       setSelected(newSelected);
       return;
     }
@@ -228,7 +100,7 @@ export default function CashFlowAndCostAllocation() {
   };
 
   const handleEditAllocation = () => {
-    const allocationToEdit = costAllocations.find((allocation) => allocation.id === selected[0]);
+    const allocationToEdit = filteredAllocations.find((allocation) => allocation.id === selected[0]);
     setCurrentAllocation(allocationToEdit);
     setModalOpen(true);
   };
@@ -237,8 +109,23 @@ export default function CashFlowAndCostAllocation() {
     try {
       await Promise.all(selected.map((id) => deleteCostAllocation(id)));
       setSelected([]);
-      const allocations = await fetchCostAllocations();
+      const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+      const allocations = await fetchCostAllocations(organizationId);
       setCostAllocations(allocations || []);
+
+      if (id) {
+        const filtered = allocations.filter(
+          (allocation) =>
+            allocation.productIds.includes(id) ||
+            allocation.employeeIds.includes(id) ||
+            allocation.projectIds.includes(id) ||
+            allocation.partnerIds.includes(id) ||
+            allocation.providerIds.includes(id)
+        );
+        setFilteredAllocations(filtered);
+      } else {
+        setFilteredAllocations(allocations);
+      }
     } catch (error) {
       console.error('Error deleting allocations:', error);
     }
@@ -246,13 +133,29 @@ export default function CashFlowAndCostAllocation() {
 
   const handleModalSubmit = async (allocationData) => {
     try {
+      const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
       if (currentAllocation) {
         await updateCostAllocation(currentAllocation.id, allocationData);
       } else {
-        await addCostAllocation(allocationData);
+        await addCostAllocation(allocationData, organizationId);
       }
-      const allocations = await fetchCostAllocations();
-      setCostAllocations(allocations || []);      setModalOpen(false);
+      const allocations = await fetchCostAllocations(organizationId);
+      setCostAllocations(allocations || []);
+
+      if (id) {
+        const filtered = allocations.filter(
+          (allocation) =>
+            allocation.productIds.includes(id) ||
+            allocation.employeeIds.includes(id) ||
+            allocation.projectIds.includes(id) ||
+            allocation.partnerIds.includes(id) ||
+            allocation.providerIds.includes(id)
+        );
+        setFilteredAllocations(filtered);
+      } else {
+        setFilteredAllocations(allocations);
+      }
+      setModalOpen(false);
     } catch (error) {
       console.error('Error saving allocation:', error);
     }
@@ -273,15 +176,15 @@ export default function CashFlowAndCostAllocation() {
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - costAllocations.length) : 0;
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredAllocations.length) : 0;
 
   const visibleRows = React.useMemo(
     () =>
-      stableSort(costAllocations, getComparator(order, orderBy)).slice(
+      stableSort(filteredAllocations, getComparator(order, orderBy)).slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [order, orderBy, page, rowsPerPage, costAllocations]
+    [order, orderBy, page, rowsPerPage, filteredAllocations]
   );
 
   return (
@@ -302,7 +205,7 @@ export default function CashFlowAndCostAllocation() {
                 orderBy={orderBy}
                 onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
-                rowCount={costAllocations.length}
+                rowCount={filteredAllocations.length}
               />
               <TableBody>
                 {visibleRows.map((row, index) => {
@@ -350,7 +253,7 @@ export default function CashFlowAndCostAllocation() {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={costAllocations.length}
+            count={filteredAllocations.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -368,6 +271,7 @@ export default function CashFlowAndCostAllocation() {
     </Container>
   );
 }
+
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -495,5 +399,153 @@ function EnhancedTableToolbar(props) {
         </Tooltip>
       )}
     </Toolbar>
+  );
+}
+
+
+function CostAllocationModal({ open, onClose, onSubmit, initialData }) {
+  const [allocationData, setAllocationData] = useState(
+    initialData || { cost: '', description: '', productIds: [], employeeIds: [], projectIds: [], partnerIds: [], providerIds: [] }
+  );
+
+  const [products, setProducts] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [partners, setPartners] = useState([]);
+  const [providers, setProviders] = useState([]);
+
+  useEffect(() => {
+    const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+
+    async function fetchData() {
+      setProducts(await fetchProducts());
+      setEmployees(await fetchEmployees());
+      setProjects(await fetchProjects());
+      setPartners(await fetchPartners(organizationId));
+      setProviders(await fetchProviders(organizationId));
+    }
+    fetchData();
+    setAllocationData(initialData || { cost: '', description: '', productIds: [], employeeIds: [], projectIds: [], partnerIds: [], providerIds: [] });
+  }, [initialData]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setAllocationData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = () => {
+    onSubmit(allocationData);
+  };
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+        <Typography variant="h6" component="h2">
+          {initialData ? 'Edit Cost Allocation' : 'Add Cost Allocation'}
+        </Typography>
+        <TextField label="Cost" name="cost" type="number" fullWidth margin="normal" value={allocationData.cost} onChange={handleChange} />
+        <TextField label="Description" name="description" fullWidth margin="normal" value={allocationData.description} onChange={handleChange} />
+
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Products</InputLabel>
+          <Select
+            name="productIds"
+            multiple
+            value={allocationData.productIds}
+            onChange={handleChange}
+            renderValue={(selected) => selected.map(id => products.find(p => p.id === id)?.name).join(', ')}
+          >
+            {products.map((product) => (
+              <MenuItem key={product.id} value={product.id}>
+                <Checkbox checked={allocationData.productIds.includes(product.id)} />
+                <ListItemText primary={product.name} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Employees</InputLabel>
+          <Select
+            name="employeeIds"
+            multiple
+            value={allocationData.employeeIds}
+            onChange={handleChange}
+            renderValue={(selected) => selected.map(id => employees.find(e => e.id === id)?.name).join(', ')}
+          >
+            {employees.map((employee) => (
+              <MenuItem key={employee.id} value={employee.id}>
+                <Checkbox checked={allocationData.employeeIds.includes(employee.id)} />
+                <ListItemText primary={employee.name} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Projects</InputLabel>
+          <Select
+            name="projectIds"
+            multiple
+            value={allocationData.projectIds}
+            onChange={handleChange}
+            renderValue={(selected) => selected.map(id => projects.find(p => p.id === id)?.name).join(', ')}
+          >
+            {projects.map((project) => (
+              <MenuItem key={project.id} value={project.id}>
+                <Checkbox checked={allocationData.projectIds.includes(project.id)} />
+                <ListItemText primary={project.name} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Partners</InputLabel>
+          <Select
+            name="partnerIds"
+            multiple
+            value={allocationData.partnerIds}
+            onChange={handleChange}
+            renderValue={(selected) => selected.map(id => partners.find(p => p.id === id)?.name).join(', ')}
+          >
+            {partners.map((partner) => (
+              <MenuItem key={partner.id} value={partner.id}>
+                <Checkbox checked={allocationData.partnerIds.includes(partner.id)} />
+                <ListItemText primary={partner.name} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Providers</InputLabel>
+          <Select
+            name="providerIds"
+            multiple
+            value={allocationData.providerIds}
+            onChange={handleChange}
+            renderValue={(selected) => selected.map(id => providers.find(p => p.id === id)?.name).join(', ')}
+          >
+            {providers.map((provider) => (
+              <MenuItem key={provider.id} value={provider.id}>
+                <Checkbox checked={allocationData.providerIds.includes(provider.id)} />
+                <ListItemText primary={provider.name} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
+          <Button variant="contained" onClick={handleSubmit}>
+            {initialData ? 'Update' : 'Add'}
+          </Button>
+        </Box>
+      </Box>
+    </Modal>
   );
 }

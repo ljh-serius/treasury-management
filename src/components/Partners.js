@@ -3,16 +3,19 @@ import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
   Checkbox as MUICheckbox, FormControlLabel,
   Toolbar, Typography, Paper, IconButton, Tooltip, Modal, TextField, Button, Container, Switch, 
+  Link,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import { fetchPartners, addPartner, updatePartner, deletePartner } from '../utils/partnersFirebaseHelpers';
+import { fetchCostAllocations } from '../utils/costAllocationFirebaseHelpers';
 
 const headCells = [
   { id: 'name', numeric: false, disablePadding: true, label: 'Partner Name' },
   { id: 'service', numeric: false, disablePadding: false, label: 'Service' },
+  { id: 'costAllocationLink', numeric: false, disablePadding: false, label: 'Cost Allocation' },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -38,7 +41,7 @@ function stableSort(array, comparator) {
 }
 
 function EnhancedTableHead(props) {
-  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, showWorkUnits } = props;
+  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -175,14 +178,7 @@ function PartnerModal({ open, onClose, onSubmit, initialData, organizationId }) 
         </Typography>
         <TextField label="Name" name="name" fullWidth margin="normal" value={partnerData.name} onChange={handleChange} />
         <TextField label="Service" name="service" fullWidth margin="normal" value={partnerData.service} onChange={handleChange} />
-        <TextField label="Contact Name" name="contactName" fullWidth margin="normal" value={partnerData.contactName} onChange={handleChange} />
-        <TextField label="Contact Email" name="contactEmail" fullWidth margin="normal" value={partnerData.contactEmail} onChange={handleChange} />
-        <TextField label="Contact Phone" name="contactPhone" fullWidth margin="normal" value={partnerData.contactPhone} onChange={handleChange} />
-        <TextField label="Address" name="address" fullWidth margin="normal" value={partnerData.address} onChange={handleChange} />
-        <TextField label="Website" name="website" fullWidth margin="normal" value={partnerData.website} onChange={handleChange} />
-        <TextField label="Industry" name="industry" fullWidth margin="normal" value={partnerData.industry} onChange={handleChange} />
-        <TextField label="Agreement Date" name="agreementDate" fullWidth margin="normal" value={partnerData.agreementDate} onChange={handleChange} />
-        <TextField label="Status" name="status" fullWidth margin="normal" value={partnerData.status} onChange={handleChange} />
+        {/* Add additional fields for contactName, contactEmail, etc. as needed */}
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
           <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
           <Button variant="contained" onClick={handleSubmit}>
@@ -203,17 +199,21 @@ export default function Partners() {
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [partners, setPartners] = useState([]);
+  const [costAllocations, setCostAllocations] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentPartner, setCurrentPartner] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const partnersData = await fetchPartners();
+      const partnersData = await fetchPartners(organizationId);
       setPartners(partnersData);
+
+      const costAllocationsData = await fetchCostAllocations(organizationId);
+      setCostAllocations(costAllocationsData);
     };
 
     fetchData();
-  }, []);
+  }, [organizationId]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -264,7 +264,7 @@ export default function Partners() {
     try {
       await Promise.all(selected.map((id) => deletePartner(id)));
       setSelected([]);
-      const partnersData = await fetchPartners();
+      const partnersData = await fetchPartners(organizationId);
       setPartners(partnersData);
     } catch (error) {
       console.error('Error deleting partners:', error);
@@ -278,7 +278,7 @@ export default function Partners() {
       } else {
         await addPartner({ ...partnerData, organizationId });
       }
-      const partnersData = await fetchPartners();
+      const partnersData = await fetchPartners(organizationId);
       setPartners(partnersData);
       setModalOpen(false);
     } catch (error) {
@@ -302,6 +302,11 @@ export default function Partners() {
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - partners.length) : 0;
+
+  const getCostAllocationLink = (partnerId) => {
+    const allocation = costAllocations.find(allocation => allocation.partnerIds.includes(partnerId));
+    return allocation ? `#/cost-allocation/${allocation.id}` : null;
+  };
 
   const visibleRows = React.useMemo(
     () =>
@@ -336,6 +341,7 @@ export default function Partners() {
                 {visibleRows.map((row, index) => {
                   const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${index}`;
+                  const costAllocationLink = getCostAllocationLink(row.id);
 
                   return (
                     <TableRow
@@ -359,14 +365,15 @@ export default function Partners() {
                         {row.name}
                       </TableCell>
                       <TableCell align="left">{row.service}</TableCell>
-                      <TableCell align="left">{row.contactName}</TableCell>
-                      <TableCell align="left">{row.contactEmail}</TableCell>
-                      <TableCell align="left">{row.contactPhone}</TableCell>
-                      <TableCell align="left">{row.address}</TableCell>
-                      <TableCell align="left">{row.website}</TableCell>
-                      <TableCell align="left">{row.industry}</TableCell>
-                      <TableCell align="left">{row.agreementDate}</TableCell>
-                      <TableCell align="left">{row.status}</TableCell>
+                      <TableCell align="left">
+                        {costAllocationLink ? (
+                          <Link href={costAllocationLink} underline="none">
+                            View Cost Allocation
+                          </Link>
+                        ) : (
+                          'No Allocation'
+                        )}
+                      </TableCell>
                     </TableRow>
                   );
                 })}

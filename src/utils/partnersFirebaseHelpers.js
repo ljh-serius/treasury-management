@@ -1,26 +1,50 @@
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { db } from './firebaseConfig'; // Assuming you have a Firebase config file
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
 
-// Fetch all partners from the 'partners' collection
-export const fetchPartners = async () => {
-  const querySnapshot = await getDocs(collection(db, 'partners'));
-  const partnersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  return partnersData;
+// Function to fetch partners specific to an organization
+export const fetchPartners = async (organizationId) => {
+  try {
+    const partnersCollection = collection(db, 'partners');
+    const q = query(partnersCollection, where('organizationId', '==', organizationId));
+    const partnersSnapshot = await getDocs(q);
+    const partnersList = partnersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return partnersList;
+  } catch (error) {
+    console.error('Error fetching partners:', error);
+    return [];
+  }
 };
 
-// Add a new partner to the 'partners' collection
+// Function to add a new partner linked to an organization
 export const addPartner = async (partnerData) => {
-  await addDoc(collection(db, 'partners'), partnerData);
+  try {
+    const partnersCollection = collection(db, 'partners');
+    const docRef = await addDoc(partnersCollection, partnerData);
+    return docRef.id; // Return the ID of the newly created document
+  } catch (error) {
+    console.error('Error adding partner:', error);
+    throw new Error('Could not add partner');
+  }
 };
 
-// Update an existing partner in the 'partners' collection
-export const updatePartner = async (id, partnerData) => {
-  const partnerRef = doc(db, 'partners', id);
-  await updateDoc(partnerRef, partnerData);
+// Function to update an existing partner
+export const updatePartner = async (partnerId, partnerData) => {
+  try {
+    const partnerDoc = doc(db, 'partners', partnerId);
+    await updateDoc(partnerDoc, partnerData);
+  } catch (error) {
+    console.error('Error updating partner:', error);
+    throw new Error('Could not update partner');
+  }
 };
 
-// Delete a partner from the 'partners' collection
-export const deletePartner = async (id) => {
-  const partnerRef = doc(db, 'partners', id);
-  await deleteDoc(partnerRef);
+// Function to delete a partner
+export const deletePartner = async (partnerId) => {
+  try {
+    const partnerDoc = doc(db, 'partners', partnerId);
+    await deleteDoc(partnerDoc);
+  } catch (error) {
+    console.error('Error deleting partner:', error);
+    throw new Error('Could not delete partner');
+  }
 };
