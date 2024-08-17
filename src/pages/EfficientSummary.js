@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Container, Box, CircularProgress, Typography } from '@mui/material';
+import { Container, Box, CircularProgress, Typography, FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, OutlinedInput, Button } from '@mui/material';
 import { faker } from '@faker-js/faker';
 
-// Updated function to generate more invoices using faker.js
 const fetchInvoices = async () => {
   const stores = ["Store A", "Store B", "Store C"];
   const categories = ["Utilities", "Rent", "Salaries", "Supplies", "Maintenance"];
@@ -170,6 +169,13 @@ function transformGroupedData(groupedData) {
 const InvoicesPage = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filteredRows, setFilteredRows] = useState([]);
+  const [filters, setFilters] = useState({
+    stores: [],
+    years: [],
+    invoiceTypes: [],
+    categories: [],
+  });
 
   useEffect(() => {
     const loadInvoices = async () => {
@@ -178,6 +184,7 @@ const InvoicesPage = () => {
         const groupedData = groupInvoicesByStoreYearMonth(data);
         const transformedData = transformGroupedData(groupedData);
         setInvoices(transformedData);
+        setFilteredRows(transformedData);
       } catch (error) {
         console.error("Failed to fetch invoices:", error);
       } finally {
@@ -187,6 +194,26 @@ const InvoicesPage = () => {
 
     loadInvoices();
   }, []);
+
+  const handleFilterChange = (event) => {
+    const { name, value } = event.target;
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [name]: value,
+    }));
+  };
+
+  const applyFilters = () => {
+    const filteredData = invoices.filter(row => {
+      const matchStore = filters.stores.length === 0 || filters.stores.includes(row.store);
+      const matchYear = filters.years.length === 0 || filters.years.includes(row.year);
+      const matchInvoiceType = filters.invoiceTypes.length === 0 || filters.invoiceTypes.includes(row.invoiceType) || row.invoiceType === ''; // Always show total rows
+      const matchCategory = filters.categories.length === 0 || filters.categories.includes(row.category) || ['Total Revenues', 'Total Expenses'].includes(row.category); // Always show total rows
+      return matchStore && matchYear && matchInvoiceType && matchCategory;
+    });
+
+    setFilteredRows(filteredData);
+  };
 
   const columns = [
     { field: 'store', headerName: 'Store', width: 150 },
@@ -209,6 +236,11 @@ const InvoicesPage = () => {
     { field: 'December', headerName: 'December', width: 100, type: 'number' },
   ];
 
+  const uniqueStores = [...new Set(invoices.map(row => row.store))];
+  const uniqueYears = [...new Set(invoices.map(row => row.year))];
+  const uniqueInvoiceTypes = [...new Set(invoices.map(row => row.invoiceType).filter(type => type !== ''))];
+  const uniqueCategories = [...new Set(invoices.map(row => row.category).filter(category => category !== 'Total Revenues' && category !== 'Total Expenses'))];
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -229,9 +261,87 @@ const InvoicesPage = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 5 }}>
+      <Box sx={{ mb: 3 }}>
+        <FormControl sx={{ m: 1, width: 200 }}>
+          <InputLabel>Store</InputLabel>
+          <Select
+            multiple
+            name="stores"
+            value={filters.stores}
+            onChange={handleFilterChange}
+            input={<OutlinedInput label="Store" />}
+            renderValue={(selected) => selected.join(', ')}
+          >
+            {uniqueStores.map((store) => (
+              <MenuItem key={store} value={store}>
+                <Checkbox checked={filters.stores.indexOf(store) > -1} />
+                <ListItemText primary={store} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl sx={{ m: 1, width: 200 }}>
+          <InputLabel>Year</InputLabel>
+          <Select
+            multiple
+            name="years"
+            value={filters.years}
+            onChange={handleFilterChange}
+            input={<OutlinedInput label="Year" />}
+            renderValue={(selected) => selected.join(', ')}
+          >
+            {uniqueYears.map((year) => (
+              <MenuItem key={year} value={year}>
+                <Checkbox checked={filters.years.indexOf(year) > -1} />
+                <ListItemText primary={year} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl sx={{ m: 1, width: 200 }}>
+          <InputLabel>Invoice Type</InputLabel>
+          <Select
+            multiple
+            name="invoiceTypes"
+            value={filters.invoiceTypes}
+            onChange={handleFilterChange}
+            input={<OutlinedInput label="Invoice Type" />}
+            renderValue={(selected) => selected.join(', ')}
+          >
+            {uniqueInvoiceTypes.map((invoiceType) => (
+              <MenuItem key={invoiceType} value={invoiceType}>
+                <Checkbox checked={filters.invoiceTypes.indexOf(invoiceType) > -1} />
+                <ListItemText primary={invoiceType} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl sx={{ m: 1, width: 200 }}>
+          <InputLabel>Category</InputLabel>
+          <Select
+            multiple
+            name="categories"
+            value={filters.categories}
+            onChange={handleFilterChange}
+            input={<OutlinedInput label="Category" />}
+            renderValue={(selected) => selected.join(', ')}
+          >
+            {uniqueCategories.map((category) => (
+              <MenuItem key={category} value={category}>
+                <Checkbox checked={filters.categories.indexOf(category) > -1} />
+                <ListItemText primary={category} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Button variant="contained" color="primary" onClick={applyFilters} sx={{ m: 1 }}>
+          Apply Filters
+        </Button>
+      </Box>
+
       <Box sx={{ height: 600, width: '100%' }}>
         <DataGrid
-          rows={invoices}
+          rows={filteredRows}
           columns={columns}
           pageSize={10}
           rowsPerPageOptions={[10, 20, 50]}
