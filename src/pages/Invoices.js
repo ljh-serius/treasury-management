@@ -10,17 +10,26 @@ import {
   headCells
 } from '../components/BaseManagementComponent/InvoicesConfig';
 
-function InvoicesManagement() {
+import InvoicesAnalysis from './Analysis/Invoices'
+
+function InvoicesManagement({showAnalytics}) {
   return (
-    <BaseManagementComponent
-      fieldConfig={fieldsConfig}
-      entityName={entityName}
-      fetchItems={fetchItems}
-      addItem={addItem}
-      updateItem={updateItem}
-      deleteItem={deleteItem}
-      headCells={headCells} // Pass the dynamically generated head cells
-    />
+    <>
+      {
+        showAnalytics ?
+        ( <InvoicesAnalysis fetchInvoices={fetchItems} /> ) : (
+            <BaseManagementComponent
+            fieldConfig={fieldsConfig}
+            entityName={entityName}
+            fetchItems={fetchItems}
+            addItem={addItem}
+            updateItem={updateItem}
+            deleteItem={deleteItem}
+            headCells={headCells}
+          />
+        )
+      }
+    </>
   );
 }
 
