@@ -147,32 +147,55 @@ function EnhancedTableToolbar(props) {
   );
 }
 
+
 function ProviderModal({ open, onClose, onSubmit, initialData, organizationId }) {
-  const [providerData, setProviderData] = useState(
-    initialData || {
-      name: '',
-      taxId: '',
-      address: '',
-      contactEmail: '',
-      contactPhone: '',
-      companyType: '',
-      country: '',
-      state: '',
-      zipCode: '',
-      website: '',
-      industry: '',
-      establishedDate: '',
-      contractValue: '',
-      paymentTerms: '',
-      bankAccount: '',
-      swiftCode: '',
-      accountManager: '',
-      servicesProvided: '',
-      preferredContactMethod: '',
-      rating: '',
-      organizationId: organizationId,
-    }
-  );
+  // Extend the providerData with 20 fields
+  const [providerData, setProviderData] = useState({
+    name: '',
+    taxId: '',
+    address: '',
+    contactEmail: '',
+    contactPhone: '',
+    companyType: '',
+    country: '',
+    state: '',
+    zipCode: '',
+    website: '',
+    industry: '',
+    establishedDate: '',
+    contractValue: '',
+    paymentTerms: '',
+    bankAccount: '',
+    swiftCode: '',
+    accountManager: '',
+    servicesProvided: '',
+    preferredContactMethod: '',
+    rating: '',
+    regulatoryCompliance: '',       // New fields
+    businessRegistrationNumber: '',
+    additionalContactName: '',
+    additionalContactEmail: '',
+    additionalContactPhone: '',
+    businessHours: '',
+    emergencyContactName: '',
+    emergencyContactPhone: '',
+    customerSupportEmail: '',
+    customerSupportPhone: '',
+    supportHours: '',
+    tradeLicenseNumber: '',
+    vatNumber: '',
+    businessInsurance: '',
+    legalEntity: '',
+    keyPersonnel: '',
+    socialMediaLinks: '',
+    annualRevenue: '',
+    numberOfEmployees: '',
+    headquartersLocation: '',
+    branchOffices: '',
+    certifications: '',
+    environmentalPolicy: '',
+    organizationId: organizationId,
+  });
 
   useEffect(() => {
     setProviderData(initialData || {
@@ -196,15 +219,38 @@ function ProviderModal({ open, onClose, onSubmit, initialData, organizationId })
       servicesProvided: '',
       preferredContactMethod: '',
       rating: '',
+      regulatoryCompliance: '',
+      businessRegistrationNumber: '',
+      additionalContactName: '',
+      additionalContactEmail: '',
+      additionalContactPhone: '',
+      businessHours: '',
+      emergencyContactName: '',
+      emergencyContactPhone: '',
+      customerSupportEmail: '',
+      customerSupportPhone: '',
+      supportHours: '',
+      tradeLicenseNumber: '',
+      vatNumber: '',
+      businessInsurance: '',
+      legalEntity: '',
+      keyPersonnel: '',
+      socialMediaLinks: '',
+      annualRevenue: '',
+      numberOfEmployees: '',
+      headquartersLocation: '',
+      branchOffices: '',
+      certifications: '',
+      environmentalPolicy: '',
       organizationId: organizationId,
     });
   }, [initialData, organizationId]);
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    const { name, value, type, checked } = event.target;
     setProviderData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -214,21 +260,27 @@ function ProviderModal({ open, onClose, onSubmit, initialData, organizationId })
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={{ 
-        position: 'absolute', 
-        top: '50%', 
-        left: '50%', 
-        transform: 'translate(-50%, -50%)', 
-        width: 1000,  // Increased width for the modal
-        bgcolor: 'background.paper', 
-        border: '2px solid #000', 
-        boxShadow: 24, 
-        p: 4 
-      }}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '80%',
+          maxWidth: 1200,
+          height: '80%',
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          boxShadow: 24,
+          p: 4,
+          overflowY: 'auto',
+        }}
+      >
         <Typography variant="h6" component="h2">
           {initialData ? 'Edit Provider' : 'Add Provider'}
         </Typography>
         <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {/* Existing fields */}
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField label="Provider Name" name="name" fullWidth value={providerData.name} onChange={handleChange} />
             <TextField label="Tax ID" name="taxId" fullWidth value={providerData.taxId} onChange={handleChange} />
@@ -263,12 +315,50 @@ function ProviderModal({ open, onClose, onSubmit, initialData, organizationId })
             <TextField label="Preferred Contact Method" name="preferredContactMethod" fullWidth value={providerData.preferredContactMethod} onChange={handleChange} />
             <TextField label="Rating" name="rating" type="number" fullWidth value={providerData.rating} onChange={handleChange} />
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button variant="contained" onClick={handleSubmit}>
-              {initialData ? 'Update' : 'Add'}
-            </Button>
+
+          {/* New fields */}
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Regulatory Compliance" name="regulatoryCompliance" fullWidth value={providerData.regulatoryCompliance} onChange={handleChange} />
+            <TextField label="Business Registration Number" name="businessRegistrationNumber" fullWidth value={providerData.businessRegistrationNumber} onChange={handleChange} />
+            <TextField label="Additional Contact Name" name="additionalContactName" fullWidth value={providerData.additionalContactName} onChange={handleChange} />
           </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Additional Contact Email" name="additionalContactEmail" fullWidth value={providerData.additionalContactEmail} onChange={handleChange} />
+            <TextField label="Additional Contact Phone" name="additionalContactPhone" fullWidth value={providerData.additionalContactPhone} onChange={handleChange} />
+            <TextField label="Business Hours" name="businessHours" fullWidth value={providerData.businessHours} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Emergency Contact Name" name="emergencyContactName" fullWidth value={providerData.emergencyContactName} onChange={handleChange} />
+            <TextField label="Emergency Contact Phone" name="emergencyContactPhone" fullWidth value={providerData.emergencyContactPhone} onChange={handleChange} />
+            <TextField label="Customer Support Email" name="customerSupportEmail" fullWidth value={providerData.customerSupportEmail} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Customer Support Phone" name="customerSupportPhone" fullWidth value={providerData.customerSupportPhone} onChange={handleChange} />
+            <TextField label="Support Hours" name="supportHours" fullWidth value={providerData.supportHours} onChange={handleChange} />
+            <TextField label="Trade License Number" name="tradeLicenseNumber" fullWidth value={providerData.tradeLicenseNumber} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="VAT Number" name="vatNumber" fullWidth value={providerData.vatNumber} onChange={handleChange} />
+            <TextField label="Business Insurance" name="businessInsurance" fullWidth value={providerData.businessInsurance} onChange={handleChange} />
+            <TextField label="Legal Entity" name="legalEntity" fullWidth value={providerData.legalEntity} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Key Personnel" name="keyPersonnel" fullWidth value={providerData.keyPersonnel} onChange={handleChange} />
+            <TextField label="Social Media Links" name="socialMediaLinks" fullWidth value={providerData.socialMediaLinks} onChange={handleChange} />
+            <TextField label="Annual Revenue" name="annualRevenue" fullWidth value={providerData.annualRevenue} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Number of Employees" name="numberOfEmployees" fullWidth value={providerData.numberOfEmployees} onChange={handleChange} />
+            <TextField label="Headquarters Location" name="headquartersLocation" fullWidth value={providerData.headquartersLocation} onChange={handleChange} />
+            <TextField label="Branch Offices" name="branchOffices" fullWidth value={providerData.branchOffices} onChange={handleChange} />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField label="Certifications" name="certifications" fullWidth value={providerData.certifications} onChange={handleChange} />
+            <TextField label="Environmental Policy" name="environmentalPolicy" fullWidth value={providerData.environmentalPolicy} onChange={handleChange} />
+          </Box>
+          <Button variant="contained" color="primary" onClick={handleSubmit}>
+            {initialData ? 'Update Provider' : 'Add Provider'}
+          </Button>
         </Box>
       </Box>
     </Modal>
