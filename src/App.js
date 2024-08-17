@@ -8,7 +8,7 @@ import Blog from './pages/Blog';
 import Article from './pages/Article';
 import ProtectedRoute from './components/ProtectedRoute';
 import { auth } from './utils/firebaseConfig';
-import ProductsAndServices from './pages/ProductsAndServices';
+import Invoices from './pages/Invoices';
 import SummaryComponent from './components/SummaryComponent';
 import OrganizationRegistration from './components/OrganizationRegistration';
 import ParametersManagement from './pages/ParametersManagement';
@@ -94,11 +94,11 @@ const App = () => {
             }
           />
           <Route
-            path="/products-and-services"
+            path="/Invoices"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                  <ProductsAndServices />
+                  <Invoices />
                 </Dashboard>
               </ProtectedRoute>
             }

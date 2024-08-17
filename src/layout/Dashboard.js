@@ -223,12 +223,12 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Cost Allocation</Typography>} />
           </ListItemButton>
         </ListItem>
-        <ListItem key="products-and-services" disablePadding>
-          <ListItemButton component={Link} to="/products-and-services">
+        <ListItem key="invoices" disablePadding>
+          <ListItemButton component={Link} to="/invoices">
             <ListItemIcon>
               <ViewListIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Products and Services</Typography>} />
+            <ListItemText primary={<Typography variant="body1">Invoices</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem key="product-prototypes" disablePadding>

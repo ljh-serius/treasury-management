@@ -1,4 +1,4 @@
-import { collection, collectionGroup, getDocs, addDoc, getDoc, setDoc, updateDoc, doc, deleteDoc, query, where } from "firebase/firestore";
+import { collection, getDocs, addDoc, getDoc, setDoc, updateDoc, doc, deleteDoc, query, where } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 import { v4 as uuidv4 } from 'uuid';
 
