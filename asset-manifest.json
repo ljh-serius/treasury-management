@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/static/css/main.a1b139c0.css",
-    "main.js": "/static/js/main.9717c583.js",
+    "main.js": "/static/js/main.5a1ce2cc.js",
     "static/js/453.15b74628.chunk.js": "/static/js/453.15b74628.chunk.js",
     "static/media/vault-insight-logo.png": "/static/media/vault-insight-logo.969982c3d0f66fd9bba6.png",
     "index.html": "/index.html",
     "main.a1b139c0.css.map": "/static/css/main.a1b139c0.css.map",
-    "main.9717c583.js.map": "/static/js/main.9717c583.js.map",
+    "main.5a1ce2cc.js.map": "/static/js/main.5a1ce2cc.js.map",
     "453.15b74628.chunk.js.map": "/static/js/453.15b74628.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.a1b139c0.css",
-    "static/js/main.9717c583.js"
+    "static/js/main.5a1ce2cc.js"
   ]
 }
