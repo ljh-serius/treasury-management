@@ -46,6 +46,7 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
+
 function EmployeeModal({ open, onClose, onSubmit, initialData, organizationId }) {
   const [employeeData, setEmployeeData] = useState(
     initialData || {
@@ -59,6 +60,30 @@ function EmployeeModal({ open, onClose, onSubmit, initialData, organizationId })
       status: 'Active',
       manager: '',
       location: '',
+      // New fields
+      address: '',
+      dateOfBirth: '',
+      gender: '',
+      maritalStatus: '',
+      nationality: '',
+      emergencyContactName: '',
+      emergencyContactPhone: '',
+      bankAccountNumber: '',
+      socialSecurityNumber: '',
+      taxId: '',
+      jobTitle: '',
+      employmentType: '',
+      workSchedule: '',
+      yearsOfExperience: '',
+      highestEducation: '',
+      certifications: '',
+      languagesSpoken: '',
+      skills: '',
+      performanceRating: '',
+      probationEndDate: '',
+      healthInsuranceProvider: '',
+      healthInsuranceNumber: '',
+      additionalNotes: '',
       organizationId: organizationId,
     }
   );
@@ -75,6 +100,29 @@ function EmployeeModal({ open, onClose, onSubmit, initialData, organizationId })
       status: 'Active',
       manager: '',
       location: '',
+      address: '',
+      dateOfBirth: '',
+      gender: '',
+      maritalStatus: '',
+      nationality: '',
+      emergencyContactName: '',
+      emergencyContactPhone: '',
+      bankAccountNumber: '',
+      socialSecurityNumber: '',
+      taxId: '',
+      jobTitle: '',
+      employmentType: '',
+      workSchedule: '',
+      yearsOfExperience: '',
+      highestEducation: '',
+      certifications: '',
+      languagesSpoken: '',
+      skills: '',
+      performanceRating: '',
+      probationEndDate: '',
+      healthInsuranceProvider: '',
+      healthInsuranceNumber: '',
+      additionalNotes: '',
       organizationId: organizationId,
     });
   }, [initialData, organizationId]);
@@ -93,20 +141,66 @@ function EmployeeModal({ open, onClose, onSubmit, initialData, organizationId })
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '80%',
+          maxWidth: 1200,
+          height: '80%',
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          boxShadow: 24,
+          p: 4,
+          overflowY: 'auto',
+        }}
+      >  
         <Typography variant="h6" component="h2">
           {initialData ? 'Edit Employee' : 'Add Employee'}
         </Typography>
-        <TextField label="Name" name="name" fullWidth margin="normal" value={employeeData.name} onChange={handleChange} />
-        <TextField label="Position" name="position" fullWidth margin="normal" value={employeeData.position} onChange={handleChange} />
-        <TextField label="Email" name="email" fullWidth margin="normal" value={employeeData.email} onChange={handleChange} />
-        <TextField label="Phone" name="phone" fullWidth margin="normal" value={employeeData.phone} onChange={handleChange} />
-        <TextField label="Department" name="department" fullWidth margin="normal" value={employeeData.department} onChange={handleChange} />
-        <TextField label="Hire Date" name="hireDate" type="date" fullWidth margin="normal" value={employeeData.hireDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
-        <TextField label="Salary" name="salary" type="number" fullWidth margin="normal" value={employeeData.salary} onChange={handleChange} />
-        <TextField label="Status" name="status" fullWidth margin="normal" value={employeeData.status} onChange={handleChange} />
-        <TextField label="Manager" name="manager" fullWidth margin="normal" value={employeeData.manager} onChange={handleChange} />
-        <TextField label="Location" name="location" fullWidth margin="normal" value={employeeData.location} onChange={handleChange} />
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 2,
+          }}
+        >              <TextField label="Name" name="name" fullWidth margin="normal" value={employeeData.name} onChange={handleChange} />
+          <TextField label="Position" name="position" fullWidth margin="normal" value={employeeData.position} onChange={handleChange} />
+          <TextField label="Email" name="email" fullWidth margin="normal" value={employeeData.email} onChange={handleChange} />
+          <TextField label="Phone" name="phone" fullWidth margin="normal" value={employeeData.phone} onChange={handleChange} />
+          <TextField label="Department" name="department" fullWidth margin="normal" value={employeeData.department} onChange={handleChange} />
+          <TextField label="Hire Date" name="hireDate" type="date" fullWidth margin="normal" value={employeeData.hireDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+          <TextField label="Salary" name="salary" type="number" fullWidth margin="normal" value={employeeData.salary} onChange={handleChange} />
+          <TextField label="Status" name="status" fullWidth margin="normal" value={employeeData.status} onChange={handleChange} />
+          <TextField label="Manager" name="manager" fullWidth margin="normal" value={employeeData.manager} onChange={handleChange} />
+          <TextField label="Location" name="location" fullWidth margin="normal" value={employeeData.location} onChange={handleChange} />
+          {/* New fields */}
+          <TextField label="Address" name="address" fullWidth margin="normal" value={employeeData.address} onChange={handleChange} />
+          <TextField label="Date of Birth" name="dateOfBirth" type="date" fullWidth margin="normal" value={employeeData.dateOfBirth} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+          <TextField label="Gender" name="gender" fullWidth margin="normal" value={employeeData.gender} onChange={handleChange} />
+          <TextField label="Marital Status" name="maritalStatus" fullWidth margin="normal" value={employeeData.maritalStatus} onChange={handleChange} />
+          <TextField label="Nationality" name="nationality" fullWidth margin="normal" value={employeeData.nationality} onChange={handleChange} />
+          <TextField label="Emergency Contact Name" name="emergencyContactName" fullWidth margin="normal" value={employeeData.emergencyContactName} onChange={handleChange} />
+          <TextField label="Emergency Contact Phone" name="emergencyContactPhone" fullWidth margin="normal" value={employeeData.emergencyContactPhone} onChange={handleChange} />
+          <TextField label="Bank Account Number" name="bankAccountNumber" fullWidth margin="normal" value={employeeData.bankAccountNumber} onChange={handleChange} />
+          <TextField label="Social Security Number" name="socialSecurityNumber" fullWidth margin="normal" value={employeeData.socialSecurityNumber} onChange={handleChange} />
+          <TextField label="Tax ID" name="taxId" fullWidth margin="normal" value={employeeData.taxId} onChange={handleChange} />
+          <TextField label="Job Title" name="jobTitle" fullWidth margin="normal" value={employeeData.jobTitle} onChange={handleChange} />
+          <TextField label="Employment Type" name="employmentType" fullWidth margin="normal" value={employeeData.employmentType} onChange={handleChange} />
+          <TextField label="Work Schedule" name="workSchedule" fullWidth margin="normal" value={employeeData.workSchedule} onChange={handleChange} />
+          <TextField label="Years of Experience" name="yearsOfExperience" fullWidth margin="normal" value={employeeData.yearsOfExperience} onChange={handleChange} />
+          <TextField label="Highest Education" name="highestEducation" fullWidth margin="normal" value={employeeData.highestEducation} onChange={handleChange} />
+          <TextField label="Certifications" name="certifications" fullWidth margin="normal" value={employeeData.certifications} onChange={handleChange} />
+          <TextField label="Languages Spoken" name="languagesSpoken" fullWidth margin="normal" value={employeeData.languagesSpoken} onChange={handleChange} />
+          <TextField label="Skills" name="skills" fullWidth margin="normal" value={employeeData.skills} onChange={handleChange} />
+          <TextField label="Performance Rating" name="performanceRating" fullWidth margin="normal" value={employeeData.performanceRating} onChange={handleChange} />
+          <TextField label="Probation End Date" name="probationEndDate" type="date" fullWidth margin="normal" value={employeeData.probationEndDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+          <TextField label="Health Insurance Provider" name="healthInsuranceProvider" fullWidth margin="normal" value={employeeData.healthInsuranceProvider} onChange={handleChange} />
+          <TextField label="Health Insurance Number" name="healthInsuranceNumber" fullWidth margin="normal" value={employeeData.healthInsuranceNumber} onChange={handleChange} />
+          <TextField label="Additional Notes" name="additionalNotes" fullWidth margin="normal" multiline rows={4} value={employeeData.additionalNotes} onChange={handleChange} />
+        </Box>
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
           <Button onClick={onClose} sx={{ mr: 1 }}>Cancel</Button>
           <Button variant="contained" onClick={handleSubmit}>
