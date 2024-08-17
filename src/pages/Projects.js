@@ -8,7 +8,7 @@ import {
   updateItem,
   deleteItem,
   headCells
-} from '../components/ProjectsConfig';
+} from '../components/BaseManagementComponent/ProjectsConfig';
 
 function ProjectsManagement() {
   return (

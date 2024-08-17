@@ -8,7 +8,7 @@ import {
   updateItem,
   deleteItem,
   headCells
-} from '../components/PartnersConfig';
+} from '../components/BaseManagementComponent/PartnersConfig';
 
 function PartnersManagement() {
   return (

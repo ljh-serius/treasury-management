@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../utils/firebaseConfig';
+import { db } from '../../utils/firebaseConfig';
 import { Container, TextField, Button, Box, Grid, CircularProgress, Alert } from '@mui/material';
 
-const OrganizationManagement = () => {
+const Organization = () => {
   const [organization, setOrganization] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -163,4 +163,4 @@ const OrganizationManagement = () => {
   );
 };
 
-export default OrganizationManagement;
+export default Organization;

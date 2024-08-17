@@ -1,6 +1,6 @@
 import {
   fetchDocuments, addDocument, updateDocument, deleteDocument
-} from '../utils/firebaseCrudHelpers';
+} from '../../utils/firebaseCrudHelpers';
 
 export const fieldsConfig = {
   name: { label: 'Provider Name', type: 'text', faker: 'company.name' },

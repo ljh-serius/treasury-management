@@ -1,6 +1,6 @@
 import {
   fetchDocuments, addDocument, updateDocument, deleteDocument
-} from '../utils/firebaseCrudHelpers';
+} from '../../utils/firebaseCrudHelpers';
 
 export const fieldsConfig = {
   name: { label: 'Name', type: 'text', faker: 'name.fullName' },
@@ -43,7 +43,7 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
   label: fieldsConfig[key].label,
 }));
 
-export const entityName = 'Employee';
+export const entityName = 'Employees';
 
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 

@@ -8,7 +8,7 @@ import {
   updateItem,
   deleteItem,
   headCells
-} from '../components/ProductsConfig';
+} from '../components/BaseManagementComponent/ProductsConfig';
 
 function ProductsManagement() {
   return (

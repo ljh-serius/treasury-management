@@ -1,6 +1,6 @@
 import {
     fetchDocuments, addDocument, updateDocument, deleteDocument
-} from '../utils/firebaseCrudHelpers';
+} from '../../utils/firebaseCrudHelpers';
 
 export const fieldsConfig = {
     cost: { label: 'Cost', type: 'number', faker: 'finance.amount' },

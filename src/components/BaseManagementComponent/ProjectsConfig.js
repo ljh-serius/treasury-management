@@ -1,6 +1,6 @@
 import {
   fetchDocuments, addDocument, updateDocument, deleteDocument
-} from '../utils/firebaseCrudHelpers';
+} from '../../utils/firebaseCrudHelpers';
 
 export const fieldsConfig = {
   name: { label: 'Project Name', type: 'text', faker: 'commerce.productName' },

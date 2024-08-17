@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { addEntityToOrganization, fetchEntities, updateEntity, deleteEntity } from '../utils/firebaseHelpers';
+import { addEntityToOrganization, fetchEntities, updateEntity, deleteEntity } from '../../utils/firebaseHelpers';
 import {
   Container, Typography, TextField, Button, Box, Grid, Alert, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, CircularProgress, Divider, InputAdornment, useTheme
 } from '@mui/material';
 import { Delete, Edit, Search } from '@mui/icons-material';
 
-const EntityManagement = () => {
+const Entities = () => {
   const [entities, setEntities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
@@ -213,4 +213,4 @@ const EntityManagement = () => {
   );
 };
 
-export default EntityManagement;
+export default Entities;

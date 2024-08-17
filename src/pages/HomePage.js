@@ -12,8 +12,7 @@ import StarsIcon from '@mui/icons-material/Stars';
 import BusinessIcon from '@mui/icons-material/Business';
 import ContactSupportIcon from '@mui/icons-material/ContactSupport';
 import VerifiedIcon from '@mui/icons-material/Verified';
-import LoginDialog from '../components/LoginDialog';
-import RegisterDialog from '../components/RegisterDialog';
+import LoginDialog from '../components/Authentication/LoginDialog';
 import logo from '../vault-insight-logo.png';
 
 const HomePage = () => {
@@ -270,7 +269,6 @@ const HomePage = () => {
       </Box>
 
       <LoginDialog open={loginOpen} onClose={handleLoginClose} />
-      <RegisterDialog open={registerOpen} onClose={handleRegisterClose} />
     </Box>
   );
 };

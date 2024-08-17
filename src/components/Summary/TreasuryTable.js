@@ -4,8 +4,8 @@ import { DataGrid, GridToolbar, GridToolbarContainer, GridToolbarExport } from '
 import {
   monthNames, calculateMonthlyTreasury, calculateAccumulatedTreasury,
   prepareChartData, prepareCumulativeTreasuryData, prepareMonthlyTreasuryData, calculateTotals
-} from '../utils/transactionHelpers';
-import TreasuryChart from './TreasuryChart'; // Import your chart component
+} from '../../utils/transactionHelpers';
+import TreasuryChart from '../Analytics/TreasuryChart'; // Import your chart component
 
 const calculateTotal = (type, index, transactions) => {
   const transaction = {...transactions[type][index]};

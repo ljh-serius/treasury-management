@@ -8,7 +8,7 @@ import {
   updateItem,
   deleteItem,
   headCells
-} from '../components/EmployeesConfig';
+} from '../components/BaseManagementComponent/EmployeesConfig';
 
 function EmployeesManagement() {
   return (

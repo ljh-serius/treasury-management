@@ -166,7 +166,7 @@ function transformGroupedData(groupedData) {
   return rows;
 }
 
-const InvoicesPage = () => {
+const Treasury = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filteredRows, setFilteredRows] = useState([]);
@@ -260,8 +260,8 @@ const InvoicesPage = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 5 }}>
-      <Box sx={{ mb: 3 }}>
+    <Container maxWidth="xl" sx={{ mt: 5}}>
+      <Box sx={{ mb: 3, width: '100%'}}>
         <FormControl sx={{ m: 1, width: 200 }}>
           <InputLabel>Store</InputLabel>
           <Select
@@ -353,4 +353,4 @@ const InvoicesPage = () => {
   );
 };
 
-export default InvoicesPage;
+export default Treasury;

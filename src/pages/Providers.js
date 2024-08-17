@@ -8,7 +8,7 @@ import {
   updateItem,
   deleteItem,
   headCells
-} from '../components/ProvidersConfig';
+} from '../components/BaseManagementComponent/ProvidersConfig';
 
 function ProvidersManagement() {
   return (

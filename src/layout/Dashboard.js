@@ -25,8 +25,6 @@ import {
 } from '../utils/firebaseHelpers';
 import { translate } from '../utils/translate';
 import { useTranslation } from '../utils/TranslationProvider';
-import BookIcon from '@mui/icons-material/Book';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import WorkIcon from '@mui/icons-material/Work';
 import StorefrontIcon from '@mui/icons-material/Storefront';
@@ -35,14 +33,12 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import BuildIcon from '@mui/icons-material/Build';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import SearchIcon from '@mui/icons-material/Search';
 import ShieldIcon from '@mui/icons-material/Shield';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
-import TreeView from '../components/TreeView'; // Assuming you have this component
-import TreasuryTable from '../components/TreasuryTable'; // Adjust the path as necessary
+import TreasuryTable from '../components/Summary/TreasuryTable'; // Adjust the path as necessary
 
 
 const Dashboard = ({ children }) => {
@@ -146,33 +142,12 @@ const Dashboard = ({ children }) => {
       <Toolbar />
       <Divider />
       <List>
-        <ListItem key="generate-summaries" disablePadding>
-          <ListItemButton component={Link} to="/generate-summaries">
+        <ListItem key="treasury" disablePadding>
+          <ListItemButton component={Link} to="/summary">
             <ListItemIcon>
               <SummarizeIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Generate Summaries</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="books" disablePadding>
-          <ListItemButton component={Link} to="/books">
-            <ListItemIcon>
-              <BookIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Transaction Books</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <Divider />
-        <TreeView data={summaries || {}} entities={entities || []} onSelectSummary={onSelectSummaryTreeView}></TreeView>
-      </List>
-      <Divider />
-      <List>
-      <ListItem key="try" disablePadding>
-          <ListItemButton component={Link} to="/try">
-            <ListItemIcon>
-              <WorkIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Try</Typography>} />
+            <ListItemText primary={<Typography variant="body1">Treasury</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem key="projects" disablePadding>
@@ -215,28 +190,12 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Employees</Typography>} />
           </ListItemButton>
         </ListItem>
-        <ListItem key="analytics" disablePadding>
-          <ListItemButton component={Link} to="/analytics">
-            <ListItemIcon>
-              <BarChartIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Analytics</Typography>} />
-          </ListItemButton>
-        </ListItem>
         <ListItem key="invoices" disablePadding>
           <ListItemButton component={Link} to="/invoices">
             <ListItemIcon>
               <ViewListIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
             <ListItemText primary={<Typography variant="body1">Invoices</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="invoices-check" disablePadding>
-          <ListItemButton component={Link} to="/invoices-check">
-            <ListItemIcon>
-              <ViewListIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Invoices Check</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem key="costs" disablePadding>
@@ -247,20 +206,12 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Costs</Typography>} />
           </ListItemButton>
         </ListItem>
-        <ListItem key="risk-management" disablePadding>
-          <ListItemButton component={Link} to="/risk-management">
+        <ListItem key="risks" disablePadding>
+          <ListItemButton component={Link} to="/risks">
             <ListItemIcon>
               <ShieldIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Risk Management</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="product-prototypes" disablePadding>
-          <ListItemButton component={Link} to="/product-prototypes">
-            <ListItemIcon>
-              <BuildIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Product Prototypes</Typography>} />
+            <ListItemText primary={<Typography variant="body1">Risks</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem key="gantt-chart" disablePadding>
@@ -271,12 +222,20 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Gantt Chart</Typography>} />
           </ListItemButton>
         </ListItem>
+        <ListItem key="analytics" disablePadding>
+          <ListItemButton component={Link} to="/analytics">
+            <ListItemIcon>
+              <BarChartIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Analytics</Typography>} />
+          </ListItemButton>
+        </ListItem>
         <ListItem key="manage-parameters" disablePadding>
-          <ListItemButton component={Link} to="/manage-parameters">
+          <ListItemButton component={Link} to="/parameters">
             <ListItemIcon>
               <SettingsIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Manage Parameters</Typography>} />
+            <ListItemText primary={<Typography variant="body1">Parameters</Typography>} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>

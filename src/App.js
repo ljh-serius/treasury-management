@@ -6,12 +6,10 @@ import Analytics from './pages/Analytics';
 import HomePage from './pages/HomePage';
 import Blog from './pages/Blog';
 import Article from './pages/Article';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './components/Partials/ProtectedRoute';
 import { auth } from './utils/firebaseConfig';
-import Invoices from './pages/Invoices';
-import SummaryComponent from './components/SummaryComponent';
-import OrganizationRegistration from './components/OrganizationRegistration';
-import ParametersManagement from './pages/ParametersManagement';
+import OrganizationRegistration from './components/Authentication/OrganizationRegistration';
+import Parameters from './pages/Parameters';
 import { TranslationProvider } from './utils/TranslationProvider';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
@@ -20,13 +18,11 @@ import Projects from './pages/Projects';
 import Providers from './pages/Providers';
 import Products from './pages/Products';
 import Costs from './pages/Costs';
-import ProductPrototypes from './pages/ProductPrototypes';
 import Partners from './pages/Partners';
-import RiskManagement from './pages/RiskManagement';
+import Risks from './pages/Risks';
 import Employees from './pages/Employees';
-import TreasuryTable from './components/TreasuryTable';
-import EfficientSummary from './pages/EfficientSummary';
-import InvoicesCheck from './pages/InvoicesCheck'
+import Treasury from './pages/Treasury';
+import Invoices from './pages/Invoices'
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
 
 if (!process.env.REACT_APP_STRIPE_PUBLIC_KEY) {
@@ -64,21 +60,11 @@ const App = () => {
             element={<HomePage />}
           />
           <Route
-            path="/books"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <TreasuryTable />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/summary"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                  <SummaryComponent />
+                  <Treasury />
                 </Dashboard>
               </ProtectedRoute>
             }
@@ -93,27 +79,6 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          
-          <Route
-            path="/try"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <EfficientSummary />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/invoices-check"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <InvoicesCheck />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
           <Route
             path="/invoices"
             element={
@@ -124,16 +89,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route
-              path="/manage-parameters"
-              element={
-                <ProtectedRoute user={user}>
-                  <Dashboard>
-                    <ParametersManagement />
-                  </Dashboard>
-                </ProtectedRoute>
-              }
-            />
+
           <Route
             path="/blog"
             element={
@@ -220,16 +176,6 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-           <Route
-            path="/invoices"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                    <Invoices />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
           <Route
             path="/costs/:id"
             element={
@@ -251,21 +197,21 @@ const App = () => {
             }
           />
           <Route
-            path="/risk-management"
+            path="/risks"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                  <RiskManagement />
+                  <Risks />
                 </Dashboard>
               </ProtectedRoute>
             }
           />
           <Route
-            path="/product-prototypes"
+            path="/parameters"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                  <ProductPrototypes />
+                  <Parameters />
                 </Dashboard>
               </ProtectedRoute>
             }

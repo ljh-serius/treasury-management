@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db } from '../utils/firebaseConfig';
+import { auth, db } from '../../utils/firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, collection, getDocs, deleteDoc, query, where } from 'firebase/firestore';
 import {
   Container, Typography, TextField, Button, Box, Grid, Alert, Paper, MenuItem, Select, FormControl, InputLabel, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, CircularProgress, Divider, InputAdornment, useTheme
 } from '@mui/material';
 import { Delete, Edit, Search } from '@mui/icons-material';
-import { addUser } from '../utils/firebaseHelpers';
+import { addUser } from '../../utils/firebaseHelpers';
 
-const ManageUsers = () => {
+const Users = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -322,4 +322,4 @@ const ManageUsers = () => {
   );
 };
 
-export default ManageUsers;
+export default Users;
