@@ -23,6 +23,8 @@ import Risks from './pages/Risks';
 import Employees from './pages/Employees';
 import Treasury from './pages/Treasury';
 import Invoices from './pages/Invoices'
+import Entities from './pages/Entities'
+
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
 
 if (!process.env.REACT_APP_STRIPE_PUBLIC_KEY) {
@@ -202,6 +204,16 @@ const App = () => {
               <ProtectedRoute user={user}>
                 <Dashboard>
                   <Risks />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/entities"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Entities />
                 </Dashboard>
               </ProtectedRoute>
             }

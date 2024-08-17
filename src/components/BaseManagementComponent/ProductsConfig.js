@@ -219,7 +219,7 @@ export const entityName = 'Products';
 
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
-export const fetchItems = () => fetchDocuments('products', organizationId);
-export const addItem = (item) => addDocument('products', item, organizationId);
-export const updateItem = (id, item) => updateDocument('products', id, item);
-export const deleteItem = (id) => deleteDocument('products', id);
+export const fetchItems = () => fetchDocuments(organizationId, 'products');
+export const addItem = (item) => addDocument(organizationId, 'products', item);
+export const updateItem = (id, item) => updateDocument(organizationId, 'products', id, item);
+export const deleteItem = (id) => deleteDocument(organizationId, 'products', id);

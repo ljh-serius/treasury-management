@@ -213,7 +213,7 @@ const Dashboard = ({ children }) => {
           </ListItemButton>
         </ListItem>
         <Divider />
-        <ListItem key="manage-parameters" disablePadding>
+        <ListItem key="parameters" disablePadding>
           <ListItemButton component={Link} to="/parameters">
             <ListItemIcon>
               <SettingsIcon style={{ fontSize: '1.6rem' }} />
@@ -221,6 +221,15 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Parameters</Typography>} />
           </ListItemButton>
         </ListItem>
+        <ListItem key="entities" disablePadding>
+          <ListItemButton component={Link} to="/entities">
+            <ListItemIcon>
+              <TimelineIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Entities</Typography>} />
+          </ListItemButton>
+        </ListItem>
+        <Divider />
         <Divider />
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout}>
