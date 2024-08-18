@@ -86,7 +86,7 @@ function BaseTableHead({ headCells, order, orderBy, onRequestSort, onSelectAllCl
   );
 }
 
-function BaseTableToolbar({ numSelected, onAdd, onDelete, onEdit }) {
+function BaseTableToolbar({ numSelected, onAdd, onDelete, onEdit, entityName}) {
   return (
     <Toolbar
       sx={{
@@ -103,7 +103,7 @@ function BaseTableToolbar({ numSelected, onAdd, onDelete, onEdit }) {
         </Typography>
       ) : (
         <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-          Items
+          { entityName }
         </Typography>
       )}
       {numSelected === 1 ? (
@@ -605,6 +605,7 @@ export default function BaseTableComponent({
             onAdd={handleAddItem}
             onDelete={handleDeleteItems}
             onEdit={handleEditItem}
+            entityName={entityName}
           />
           <Button onClick={generateRandomRow} variant="contained" color="secondary" sx={{ margin: 2 }}>
             Generate Random Row

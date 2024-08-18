@@ -5,19 +5,24 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { Container, Typography, TextField, Button, Box, Grid, Alert, Paper, AppBar, Toolbar } from '@mui/material';
 import { createOrganization, addUser } from '../../utils/authHelpers';
+import { useNavigate } from 'react-router-dom';
+import ConfirmationModal from './ConfirmationModal'; // Import the confirmation modal component
 
 const OrganizationRegistration = () => {
   const [orgName, setOrgName] = useState('');
-  const [firstName, setFirstName] = useState('');  // Added state for first name
-  const [lastName, setLastName] = useState('');  // Added state for last name
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [domain, setDomain] = useState('');
   const [numUsers, setNumUsers] = useState(1);
   const [numStores, setNumStores] = useState(1);
   const [error, setError] = useState(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false); // State for confirmation modal
+
   const stripe = useStripe();
   const elements = useElements();
+  const navigate = useNavigate();
 
   const userPrice = 50;
   const storePrice = 100;
@@ -26,18 +31,16 @@ const OrganizationRegistration = () => {
 
   const handlePayment = async () => {
     try {
-      // Fetch the client secret from the Firebase function
       const response = await fetch('https://us-central1-vault-insight.cloudfunctions.net/createPaymentIntent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount: totalPrice, currency: 'usd' }), // Amount in USD cents
+        body: JSON.stringify({ amount: totalPrice, currency: 'usd' }),
       });
 
       const { clientSecret } = await response.json();
 
-      // Confirm the payment with Stripe using the client secret
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: elements.getElement(CardElement),
@@ -50,11 +53,11 @@ const OrganizationRegistration = () => {
       if (result.error) {
         console.error(result.error.message);
         setError(`Payment failed: ${result.error.message}`);
-        return false; // Payment failed
+        return false;
       } else {
         if (result.paymentIntent.status === 'succeeded') {
           console.log('Payment succeeded!');
-          return true; // Payment succeeded
+          return true;
         }
       }
     } catch (error) {
@@ -69,7 +72,6 @@ const OrganizationRegistration = () => {
     setError(null);
 
     try {
-      // Check if the organization name already exists in Firestore
       const q = query(collection(db, 'organizations'), where('name', '==', orgName));
       const querySnapshot = await getDocs(q);
 
@@ -78,24 +80,29 @@ const OrganizationRegistration = () => {
         return;
       }
 
-      // Handle payment before creating user
       const paymentSuccess = await handlePayment();
       if (!paymentSuccess) {
-        return; // Stop registration if payment fails
+        return;
       }
 
-      // Register the organization as a user in Firebase Auth
       const organizationCredentials = await createUserWithEmailAndPassword(auth, email, password);
       const organization = organizationCredentials.user;
     
       const { tenantId, organizationId } = await createOrganization(orgName, domain, email, numUsers, numStores, totalPrice, organization.uid);
 
-      addUser(organization.uid, firstName, lastName, email, 'admin', organizationId, null)
+      await addUser(organization.uid, firstName, lastName, email, 'admin', organizationId, null);
 
-      } catch (error) {
+      setConfirmationOpen(true); // Open the confirmation modal
+
+    } catch (error) {
       console.error('Error registering organization:', error);
       setError('An error occurred during registration. Please try again.');
     }
+  };
+
+  const handleConfirm = () => {
+    setConfirmationOpen(false); // Close the modal
+    navigate('/'); // Redirect to the homepage
   };
 
   return (
@@ -224,8 +231,10 @@ const OrganizationRegistration = () => {
           </Button>
         </form>
       </Paper>
+      <ConfirmationModal open={confirmationOpen} onClose={handleConfirm} onConfirm={handleConfirm} />
     </Container>
   );
 };
+
 
 export default OrganizationRegistration;
