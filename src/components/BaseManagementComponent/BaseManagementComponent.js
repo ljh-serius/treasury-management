@@ -371,6 +371,8 @@ export default function BaseTableComponent({
   const [currentItem, setCurrentItem] = useState(null);
   const [loading, setLoading] = useState(false);  // Add loading state
 
+  const [formData, setFormData] = useState({});  // Add formData state
+
   useEffect(() => {
     setRefreshedFieldsConfig(fieldConfig);
   }, [fieldConfig]);
@@ -400,6 +402,29 @@ export default function BaseTableComponent({
 
     setFilteredItems(filteredData);
   }, [filters, items]);
+
+  // Event listeners for key presses
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === '+') {
+        event.preventDefault();
+        handleAddItem();
+      } else if (event.key === '-' && selected.length > 0) {
+        event.preventDefault();
+        confirmDelete();
+      } else if (event.key === 'Enter' && modalOpen) {
+        event.preventDefault();
+        handleModalSubmit(formData);  // Pass formData here
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selected, modalOpen, currentItem, formData]);  // Add formData to dependencies
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -437,13 +462,21 @@ export default function BaseTableComponent({
 
   const handleAddItem = () => {
     setCurrentItem(null);
+    setFormData({});  // Reset formData
     setModalOpen(true);
   };
 
   const handleEditItem = () => {
     const itemToEdit = filteredItems.find((item) => item.id === selected[0]);
     setCurrentItem(itemToEdit);
+    setFormData(itemToEdit);  // Set formData to itemToEdit
     setModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (window.confirm("Are you sure you want to delete the selected items?")) {
+      handleDeleteItems();
+    }
   };
 
   const handleDeleteItems = async () => {
@@ -526,7 +559,6 @@ export default function BaseTableComponent({
     setDense(event.target.checked);
   };
 
-  
   const getRandomElementId = (arr) => {
     if (!Array.isArray(arr) || arr.length === 0) return null;
     const randomIndex = Math.floor(Math.random() * arr.length);
@@ -603,7 +635,7 @@ export default function BaseTableComponent({
           <BaseTableToolbar
             numSelected={selected.length}
             onAdd={handleAddItem}
-            onDelete={handleDeleteItems}
+            onDelete={confirmDelete} // Use confirmDelete for deletion
             onEdit={handleEditItem}
             entityName={entityName}
           />
@@ -720,6 +752,7 @@ export default function BaseTableComponent({
           onSubmit={handleModalSubmit}
           initialData={currentItem}
           fieldConfig={refreshedFieldsConfig}
+          setFormData={setFormData}  // Add setFormData prop
         />
 
         {/* Backdrop and Spinner */}

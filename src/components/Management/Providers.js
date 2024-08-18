@@ -170,8 +170,16 @@ export async function fetchItemsBySelectValue(selectMenu, value) {
     return await fetchDocumentsBySelectValue(organizationId, 'providers', selectMenu, value);
 }
 
-export const addItem = (item) => addDocument(organizationId, 'providers', item);
-export const updateItem = (id, item) => updateDocument(organizationId, 'providers', id, item);
+export const addItem = (item) => {
+    console.log(organizationId);
+    console.log(item);
+    addDocument(organizationId, 'providers', item);
+}
+
+export const updateItem = (id, item) => 
+    {
+    updateDocument(organizationId, 'providers', id, item);
+}
 export const deleteItem = (id) => deleteDocument(organizationId, 'providers', id);
 
 export async function fetchItemById(id) {

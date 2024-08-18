@@ -70,6 +70,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 const routesSequence = [
+  "/summary",
   "/management/clients",
   "/management/partners",
   "/management/providers",
@@ -80,6 +81,8 @@ const routesSequence = [
   "/management/projects",
   "/management/invoices",
   "/management/products",
+  "/gantt-chart",
+  "/management/entities",
 ];
 
 const Dashboard = ({ children }) => {
@@ -138,7 +141,7 @@ const Dashboard = ({ children }) => {
     }
   };
 
-  // Add event listeners for TAB and SHIFT + TAB
+  // Add event listeners for TAB, SHIFT + TAB, and Control + Enter
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Tab') {
@@ -151,6 +154,10 @@ const Dashboard = ({ children }) => {
           event.preventDefault(); // Prevent the default tabbing behavior
           handleNextAnalysis();
         }
+      } else if (event.key === 'Enter' && event.ctrlKey) {
+        // Control + Enter to navigate to /summary
+        event.preventDefault();
+        navigate('/summary');
       }
     };
 
@@ -160,7 +167,7 @@ const Dashboard = ({ children }) => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [location.pathname]); // Dependency array to ensure the correct route is used
+  }, [location.pathname, navigate]); // Dependency array to ensure the correct route is used
 
   return (
     <Box sx={{ display: 'flex' }}>
