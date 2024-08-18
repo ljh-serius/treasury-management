@@ -3,6 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
+import { Container } from '@mui/material';
 
 function ClientsAnalysis({ fetchItems }) {
   const [clientsData, setClientsData] = useState([]);
@@ -57,7 +58,7 @@ function ClientsAnalysis({ fetchItems }) {
   };
 
   return (
-    <div>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <h2>Clients Dashboard</h2>
       <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
         <CircularProgress color="inherit" />
@@ -82,7 +83,7 @@ function ClientsAnalysis({ fetchItems }) {
           <HighchartsReact highcharts={Highcharts} options={clientsStatusChartOptions} />
         </>
       )}
-    </div>
+    </Container>
   );
 }
 

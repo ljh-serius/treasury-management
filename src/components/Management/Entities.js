@@ -4,7 +4,8 @@ import {
     updateDocument,
     deleteDocument,
     fetchDocumentsBySelectValue,
-    fetchDocumentsByFieldValue
+    fetchDocumentsByFieldValue,
+    fetchDocumentById
 } from '../../utils/firebaseCrudHelpers';
 
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
@@ -21,9 +22,9 @@ const getEntitiesOptions = async (types) => {
   });
 }
 
-console.log("fetched items", await getEntitiesOptions(['store']))
-
 export const fieldsConfig = {
+  entityId: { label: 'Cost ID', type: 'text', faker: 'datatype.uuid' },
+  entityName: { label: 'Cost Name', type: 'text', faker: 'name.fullName' },
   name: { label: 'name', type: 'text', faker: 'company.name' },
   type: {
     label: 'Type',
@@ -152,3 +153,8 @@ export async function fetchItems() {
 export const addItem = (item) => addDocument(organizationId, 'entities', item);
 export const updateItem = (id, item) => updateDocument(organizationId, 'entities', id, item);
 export const deleteItem = (id) => deleteDocument(organizationId, 'entities', id);
+
+  
+export async function fetchItemById(id) {
+  return await fetchDocumentById(organizationId, 'entities', id);
+}

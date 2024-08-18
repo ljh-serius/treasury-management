@@ -5,6 +5,7 @@ import {
   deleteDocument,
   fetchDocumentsBySelectValue,
   fetchDocumentsByFieldValue,
+  fetchDocumentById
 } from '../../utils/firebaseCrudHelpers';
 
 import { fetchItemsByField as fetchEmployeesByField } from './Employees';
@@ -129,3 +130,7 @@ export const deleteItem = (id) => deleteDocument(organizationId, 'campaigns', id
 
 
 
+
+export async function fetchItemById(id) {
+  return await fetchDocumentById(organizationId, 'campaigns', id);
+}

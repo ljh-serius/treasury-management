@@ -1,9 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import {
+    Card,
+    CardContent,
+    Typography,
+    Grid,
+    CircularProgress,
+    Divider,
+    Chip,
+    Container,
+    Box,
+} from '@mui/material';
 
 const Visualizer = () => {
-    const { entity, id } = useParams(); // Get entity and id from the URL
-    const componentName = entity.charAt(0).toLocaleUpperCase() + entity.slice(1);
+    const { entity, id } = useParams();
+    const componentName = entity.charAt(0).toUpperCase() + entity.slice(1);
     const [itemData, setItemData] = useState(null);
     const [config, setConfig] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -11,9 +22,8 @@ const Visualizer = () => {
     useEffect(() => {
         const loadConfigAndData = async () => {
             try {
-                // Dynamically import the config file based on the entity
                 const configModule = await import(`../components/Management/${componentName}`);
-                setConfig(configModule); // Assume each config exports `fieldsConfig`
+                setConfig(configModule);
             } catch (error) {
                 console.error("Error loading configuration:", error);
             }
@@ -37,48 +47,81 @@ const Visualizer = () => {
         };
 
         fetchData();
-    }, [config, entity, id]);
+    }, [config, id]);
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <CircularProgress />;
 
-    console.log("Config", config)
-
-    if (!config || !itemData) return <p>Invalid entity name or configuration file not found.</p>;
+    if (!config || !itemData) return <Typography variant="h6">Invalid entity name or configuration file not found.</Typography>;
 
     return (
-        <div>
-            {Object.keys(config.fieldsConfig).map((fieldKey) => {
-                const field = config.fieldsConfig[fieldKey];
-                const value = itemData[fieldKey];
+        <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+            <Card sx={{ width: '100%', mt: 4, boxShadow: 3 }}>
+                <CardContent>
+                    <Typography variant="h4" gutterBottom>
+                        {entity.charAt(0).toUpperCase() + entity.slice(1)} Details
+                    </Typography>
+                    <Divider sx={{ mb: 2 }} />
+                    <Grid container spacing={2}>
+                        {Object.keys(config.fieldsConfig).map((fieldKey) => {
+                            const field = config.fieldsConfig[fieldKey];
+                            const value = itemData[fieldKey];
 
-                return (
-                    <div key={fieldKey} style={{ marginBottom: '10px' }}>
-                        <strong>{field.label}:</strong> {renderField(value, field)}
-                    </div>
-                );
-            })}
-        </div>
+                            return (
+                                <Grid item xs={12} sm={6} key={fieldKey}>
+                                    <Typography variant="subtitle2" color="textSecondary">
+                                        {field.label}:
+                                    </Typography>
+                                    {renderField(value, field)}
+                                </Grid>
+                            );
+                        })}
+                    </Grid>
+                </CardContent>
+            </Card>
+        </Container>
     );
 };
 
+export default Visualizer;
+
 function renderField(value, fieldConfig) {
     if (fieldConfig.type === 'select' && Array.isArray(fieldConfig.options)) {
-        const optionLabels = Array.isArray(value)
-            ? value.map(val => fieldConfig.options.find(opt => opt.id === val)?.label).join(', ')
-            : fieldConfig.options.find(opt => opt.id === value)?.label;
-
-        return optionLabels || 'N/A';
+        if (Array.isArray(value)) {
+            return (
+                <Box display="flex" flexWrap="wrap" mt={1}>
+                    {value.map(val => {
+                        const optionLabel = fieldConfig.options.find(opt => opt.id === val)?.label;
+                        return optionLabel ? (
+                            <Chip
+                                key={val}
+                                label={optionLabel}
+                                color="primary"
+                                variant="outlined"
+                                style={{ margin: '4px' }}
+                            />
+                        ) : null;
+                    })}
+                </Box>
+            );
+        } else {
+            const optionLabel = fieldConfig.options.find(opt => opt.id === value)?.label;
+            return (
+                <Box mt={1}>
+                    {optionLabel ? (
+                        <Chip label={optionLabel} color="primary" variant="outlined" />
+                    ) : 'N/A'}
+                </Box>
+            );
+        }
     }
 
     if (fieldConfig.type === 'date') {
-        return new Date(value).toLocaleDateString();
+        return <Typography variant="body1">{new Date(value).toLocaleDateString()}</Typography>;
     }
 
     if (fieldConfig.type === 'checkbox') {
-        return value ? 'Yes' : 'No';
+        return <Typography variant="body1">{value ? 'Yes' : 'No'}</Typography>;
     }
 
-    return value || 'N/A';
+    return <Typography variant="body1">{value || 'N/A'}</Typography>;
 }
-
-export default Visualizer;

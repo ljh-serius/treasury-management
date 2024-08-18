@@ -5,13 +5,13 @@ import {
     updateDocument,
     deleteDocument,
     fetchDocumentsBySelectValue,
-    fetchDocumentsByFieldValue
+    fetchDocumentsByFieldValue,
+    fetchDocumentById
 } from '../../utils/firebaseCrudHelpers';
 
 import { fetchItemsByField as fetchEmployeesByField } from './Employees';
 import { fetchItems as fetchEmployees } from './Employees';
-import { fetchItemsBySelectValue as fetchPartnersBySelectValue } from './Partners';
-// Part
+
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
 const managers = (await fetchEmployeesByField('position', 'manager')).map((manager) => {
@@ -21,17 +21,16 @@ const managers = (await fetchEmployeesByField('position', 'manager')).map((manag
     }
 })
 
-
 const employees = (await fetchEmployees()).map((manager) => {
     return {
-      id: manager.id,
-      label: manager.name
+        id: manager.id,
+        label: manager.name
     }
-  })
-  
+})
 
 export const fieldsConfig = {
-    name: { label: 'Project Name', type: 'text', faker: 'commerce.productName' },
+    projectId: { label: 'Invoice ID', type: 'text', faker: 'datatype.uuid' },
+    projectName: { label: 'Project Name', type: 'text', faker: 'commerce.productName' },
     description: { label: 'Description', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraphs' },
     startDate: { label: 'Start Date', type: 'date', faker: 'date.past' },
     endDate: { label: 'End Date', type: 'date', faker: 'date.future' },
@@ -218,5 +217,6 @@ export async function fetchItems() {
 export const updateItem = (id, item) => updateDocument(organizationId, 'projects', id, item);
 export const deleteItem = (id) => deleteDocument(organizationId, 'projects', id);
 
-
-
+export async function fetchItemById(id) {
+    return await fetchDocumentById(organizationId, 'projects', id);
+}

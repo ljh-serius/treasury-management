@@ -4,7 +4,8 @@ import {
     updateDocument,
     deleteDocument,
     fetchDocumentsBySelectValue,
-    fetchDocumentsByFieldValue
+    fetchDocumentsByFieldValue,
+    fetchDocumentById
 } from '../../utils/firebaseCrudHelpers';
 
 import industries from '../../data/industries';
@@ -13,7 +14,8 @@ import paymentMethods from '../../data/payment-methods';
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
 export const fieldsConfig = {
-    name: { label: 'Partner Name', type: 'text', faker: 'company.name' },
+    partnerId: { label: 'Partner ID', type: 'text', faker: 'datatype.uuid' },
+    partnerName: { label: 'Partner Name', type: 'text', faker: 'company.name' },
     service: {
       label: 'Service',
       type: 'select',
@@ -213,4 +215,8 @@ export const fieldsConfig = {
   export const addItem = (item) => addDocument(organizationId, 'partners', item);
   export const updateItem = (id, item) => updateDocument(organizationId, 'partners', id, item);
   export const deleteItem = (id) => deleteDocument(organizationId, 'partners', id);
+  
+  export async function fetchItemById(id) {
+    return await fetchDocumentById(organizationId, 'partners', id);
+}
   

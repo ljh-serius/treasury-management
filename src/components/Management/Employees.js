@@ -4,7 +4,8 @@ import {
     updateDocument,
     deleteDocument,
     fetchDocumentsBySelectValue,
-    fetchDocumentsByFieldValue
+    fetchDocumentsByFieldValue,
+    fetchDocumentById
 } from '../../utils/firebaseCrudHelpers';
 
 import languages from '../../data/languages';
@@ -229,4 +230,7 @@ export const addItem = (item) => addDocument(organizationId, 'employees', item);
 export const updateItem = (employeeId, item) => updateDocument(organizationId, 'employees', employeeId, item);
 export const deleteItem = (employeeId) => deleteDocument(organizationId, 'employees', employeeId);
 
-
+export async function fetchItemById(id) {
+    return await fetchDocumentById(organizationId, 'costs', id);
+}
+  

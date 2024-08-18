@@ -73,7 +73,7 @@ const App = () => {
             }
           />
           <Route
-            path="/unit/:entity/:id"
+            path="/units/:entity/:id"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>

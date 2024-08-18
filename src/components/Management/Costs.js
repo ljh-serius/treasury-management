@@ -4,7 +4,8 @@ import {
     updateDocument,
     deleteDocument,
     fetchDocumentsBySelectValue,
-    fetchDocumentsByFieldValue
+    fetchDocumentsByFieldValue,
+    fetchDocumentById
 } from '../../utils/firebaseCrudHelpers';
 
 // import { fetchProducts } from '../BaseManagementComponent/FieldsConfig';
@@ -54,6 +55,8 @@ const providersOptions = (await fetchProviders()).map((provider) => {
 })
 
 export const fieldsConfig = {
+    costId: { label: 'Cost ID', type: 'text', faker: 'datatype.uuid' },
+    costName: { label: 'Cost Name', type: 'text', faker: 'company.name' },
     cost: { label: 'Cost', type: 'number', faker: 'finance.amount' },
     description: { label: 'Description', type: 'text', faker: 'lorem.sentence' },
     productIds: {
@@ -210,3 +213,7 @@ export const addItem = (item) => addDocument(organizationId, 'costs', item);
 export const updateItem = (costId, item) => updateDocument(organizationId, 'costs', costId, item);
 export const deleteItem = (costId) => deleteDocument(organizationId, 'costs', costId);
 
+export async function fetchItemById(id) {
+    return await fetchDocumentById(organizationId, 'costs', id);
+}
+  

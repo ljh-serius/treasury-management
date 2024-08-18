@@ -8,7 +8,8 @@ import {
     updateDocument,
     deleteDocument,
     fetchDocumentsBySelectValue,
-    fetchDocumentsByFieldValue
+    fetchDocumentsByFieldValue,
+    fetchDocumentById
 } from '../../utils/firebaseCrudHelpers';
 
 import { fetchItems as fetchProviders } from './Providers';
@@ -23,7 +24,8 @@ const providersOptions = (await fetchProviders()).map((provider) => {
 })
 
 export const fieldsConfig = {
-    name: { label: 'Name', type: 'text', faker: 'commerce.productName' },
+    productId: { label: 'Invoice ID', type: 'text', faker: 'datatype.uuid' },
+    productName:{ label: 'Name', type: 'text', faker: 'commerce.productName' },
     description: { label: 'Description', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraphs' },
     price: { label: 'Price', type: 'number', faker: 'commerce.price' },
     sku: { label: 'SKU', type: 'text', faker: 'datatype.uuid' },
@@ -245,4 +247,7 @@ export const fieldsConfig = {
   
   
   
+  export async function fetchItemById(id) {
+    return await fetchDocumentById(organizationId, 'products', id);
+}
   
