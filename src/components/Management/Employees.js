@@ -46,7 +46,8 @@ const healthInsurances = (await fetchPartnersBySelectValue('servicesProvided', '
 console.log(' fetchPartnersBySelectValue', healthInsurances)
 
 export const fieldsConfig = {
-    name: { label: 'Name', type: 'text', faker: 'name.fullName' },
+    employeeId: { label: 'Cost ID', type: 'text', faker: 'datatype.uuid' },
+    employeeName: { label: 'Cost Name', type: 'text', faker: 'name.fullName' },
     position: {
         label: 'Position',
         type: 'select',
@@ -231,6 +232,6 @@ export const updateItem = (employeeId, item) => updateDocument(organizationId, '
 export const deleteItem = (employeeId) => deleteDocument(organizationId, 'employees', employeeId);
 
 export async function fetchItemById(id) {
-    return await fetchDocumentById(organizationId, 'costs', id);
+    return await fetchDocumentById(organizationId, 'employees', id);
 }
   

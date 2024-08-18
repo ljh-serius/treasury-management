@@ -5,7 +5,8 @@ import {
   Typography,
   IconButton,
   Button,
-  Drawer
+  Drawer,
+  Container,
 } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 import MuiAppBar from '@mui/material/AppBar';
@@ -15,6 +16,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../utils/firebaseConfig';
 import { translate } from '../utils/translate';
 import { useTranslation } from '../contexts/TranslationProvider';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -67,10 +69,28 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
+const routesSequence = [
+  "/management/clients",
+  "/management/partners",
+  "/management/providers",
+  "/management/employees",
+  "/management/costs",
+  "/management/risks",
+  "/management/campaigns",
+  "/management/projects",
+  "/management/invoices",
+  "/management/products",
+  "/management/entities",
+];
+
 const Dashboard = ({ children }) => {
   const theme = useTheme();
   const { language, toggleLanguage } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const [open, setOpen] = useState(true);
+  const [currentAnalysisPage, setCurrentAnalysisPage] = useState(0);
 
   const [showAnalytics, setShowAnalytics] = useState(() => {
     const saved = localStorage.getItem('showAnalytics');
@@ -80,7 +100,6 @@ const Dashboard = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('showAnalytics', JSON.stringify(showAnalytics));
   }, [showAnalytics]);
-
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -100,14 +119,31 @@ const Dashboard = ({ children }) => {
   };
 
   const toggleShowAnalytics = () => {
-    setShowAnalytics(prev => !prev);
+    setShowAnalytics((prev) => !prev);
+    setCurrentAnalysisPage(0); // Reset to the first page whenever toggling between data and analysis
+  };
+
+  const handleNextAnalysis = () => {
+    const currentIndex = routesSequence.indexOf(location.pathname);
+    if (currentIndex !== -1) {
+      const nextIndex = (currentIndex + 1) % routesSequence.length; // Circular navigation
+      navigate(routesSequence[nextIndex]);
+    }
+  };
+
+  const handlePreviousAnalysis = () => {
+    const currentIndex = routesSequence.indexOf(location.pathname);
+    if (currentIndex !== -1) {
+      const prevIndex = (currentIndex - 1 + routesSequence.length) % routesSequence.length; // Circular navigation
+      navigate(routesSequence[prevIndex]);
+    }
   };
 
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar position="fixed" open={open}>
-        <Toolbar>
+        <Toolbar >
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -120,22 +156,46 @@ const Dashboard = ({ children }) => {
           <Typography variant="h6" noWrap component="div">
             Dashboard
           </Typography>
-          <Button
-            variant="outlined"
-            color="inherit"
-            onClick={toggleShowAnalytics}
-            sx={{ ml: 'auto', fontSize: '0.8rem' }}
+          <Container 
+            sx={{ display: 'flex', justifyContent:"end",  mr: 0 }}
           >
-            {showAnalytics ? translate("Show Data", language) : translate("Show Analysis", language)}
-          </Button>
-          <Button
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={toggleShowAnalytics}
+              sx={{ mr: 2 }}
+            >
+              {showAnalytics ? translate("Show Data", language) : translate("Show Analysis", language)}
+            </Button>
+            {showAnalytics && 
+              <>
+                <Button
+                  sx={{ mr: 2 }}
+                  variant="outlined"
+                  color="inherit"
+                  onClick={handlePreviousAnalysis}
+                >
+                  Previous
+                </Button>
+                <Button
+                  sx={{ mr: 2 }}
+                  variant="outlined"
+                  color="inherit"
+                  onClick={handleNextAnalysis}
+                >
+                  Next
+                </Button>
+              </>
+            }
+             <Button
             variant="outlined"
             color="inherit"
             onClick={toggleLanguage}
-            sx={{ ml: 2, fontSize: '0.8rem' }}
           >
             {translate("Switch Language", language)}
-          </Button>
+            </Button>
+
+          </Container>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -151,17 +211,17 @@ const Dashboard = ({ children }) => {
         anchor="left"
         open={open}
       >
-              <DrawerHeader>
-        <IconButton onClick={handleDrawerClose}>
-          {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-        </IconButton>
-      </DrawerHeader>
-        <DrawerDashboard setShowAnalytics={setShowAnalytics}></DrawerDashboard>
+        <DrawerHeader>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        </DrawerHeader>
+        <DrawerDashboard setShowAnalytics={setShowAnalytics} setCurrentAnalysisPage={setCurrentAnalysisPage} />
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
         <Box>
-          {React.cloneElement(children, { showAnalytics })}
+          {React.cloneElement(children, { showAnalytics, currentAnalysisPage })}
         </Box>
       </Main>
     </Box>
