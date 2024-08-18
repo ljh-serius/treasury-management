@@ -52,3 +52,41 @@ export const login = async (email, password) => {
     // Handle errors (e.g., show error messages to the user)
   }
 };
+
+// Function to add a user to the root `users` collection in Firestore
+export const addUser = async (userId, firstName, lastName, email, role = 'admin', organizationId, entityId) => {
+  const userRef = doc(db, 'users', userId);
+  
+  const userData = {
+    firstName,
+    lastName,
+    email,
+    role,
+    organizationId,
+    createdAt: new Date(),
+    entityId: entityId
+  };
+
+  await setDoc(userRef, userData);
+};
+
+
+// Function to create an organization in Firebase
+export const createOrganization = async (orgName, customDomain, email, numUsers, numStores, price) => {
+  const tenantId = uuidv4();
+  const orgDocRef = doc(collection(db, "organizations"));
+
+  const organizationData = {
+    name: orgName,
+    domain: customDomain,
+    email: email,
+    numUsers: numUsers,
+    numStores: numStores,
+    price: price,
+    tenant_id: tenantId,
+  };
+
+  await setDoc(orgDocRef, organizationData);
+  return { tenantId, organizationId: orgDocRef.id };
+};
+

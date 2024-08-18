@@ -23,7 +23,7 @@ import { Link } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../utils/firebaseConfig';
 import { translate } from '../utils/translate';
-import { useTranslation } from '../utils/TranslationProvider';
+import { useTranslation } from '../contexts/TranslationProvider';
 
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import WorkIcon from '@mui/icons-material/Work';

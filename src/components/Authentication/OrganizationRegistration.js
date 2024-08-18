@@ -4,7 +4,7 @@ import { auth, db } from '../../utils/firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { Container, Typography, TextField, Button, Box, Grid, Alert, Paper, AppBar, Toolbar } from '@mui/material';
-import { createOrganization, addUser } from '../../utils/firebaseHelpers';
+import { createOrganization, addUser } from '../../utils/authHelpers';
 
 const OrganizationRegistration = () => {
   const [orgName, setOrgName] = useState('');

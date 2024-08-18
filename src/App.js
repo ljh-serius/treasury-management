@@ -9,8 +9,7 @@ import Article from './pages/Article';
 import ProtectedRoute from './components/Partials/ProtectedRoute';
 import { auth } from './utils/firebaseConfig';
 import OrganizationRegistration from './components/Authentication/OrganizationRegistration';
-import Parameters from './pages/Parameters';
-import { TranslationProvider } from './utils/TranslationProvider';
+import { TranslationProvider } from './contexts/TranslationProvider';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import GanttChart from './pages/GanttChart';
@@ -126,17 +125,6 @@ const App = () => {
             }
           />
           { /* Configuration */}
-    
-          <Route
-            path="/parameters"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Parameters />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
         </Routes>
       </TranslationProvider>
     </Elements>

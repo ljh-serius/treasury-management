@@ -31,7 +31,7 @@ import {
   fetchEntities
 } from '../utils/firebaseHelpers';
 import { translate } from '../utils/translate';
-import { useTranslation } from '../utils/TranslationProvider';
+import { useTranslation } from '../contexts/TranslationProvider';
 
 // Initialize the heatmap module
 heatmap(Highcharts);
