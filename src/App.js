@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import Dashboard from './layout/Dashboard';
-import Analytics from './pages/Analytics';
 import HomePage from './pages/HomePage';
 import Blog from './pages/Blog';
 import Article from './pages/Article';
@@ -108,18 +107,6 @@ const App = () => {
               <ProtectedRoute user={user}>
                 <Dashboard>
                   <GanttChart />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-
-          { /* Analytics */}
-          <Route
-            path="/analytics"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Analytics />
                 </Dashboard>
               </ProtectedRoute>
             }

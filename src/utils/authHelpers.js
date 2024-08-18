@@ -1,6 +1,7 @@
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection} from 'firebase/firestore';
 import { auth, db } from './firebaseConfig'; // Assuming you have firebaseConfig
+import { v4 as uuidv4 } from 'uuid';
 
 export const login = async (email, password) => {
   try {
@@ -69,7 +70,6 @@ export const addUser = async (userId, firstName, lastName, email, role = 'admin'
 
   await setDoc(userRef, userData);
 };
-
 
 // Function to create an organization in Firebase
 export const createOrganization = async (orgName, customDomain, email, numUsers, numStores, price) => {
