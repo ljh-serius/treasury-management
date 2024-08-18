@@ -1,5 +1,5 @@
 import { db } from './firebaseConfig'; // Assuming you have a Firebase config file
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 
 // Function to fetch documents specific to an organization from a subcollection
 export const fetchDocuments = async (organizationId, subcollectionName) => {
@@ -48,3 +48,40 @@ export const deleteDocument = async (organizationId, subcollectionName, document
     throw new Error(`Could not delete document from ${subcollectionName}`);
   }
 };
+
+
+export const fetchDocumentsBySelectValue = async (organizationId, relativeCollection, foreignKey, foreignValue) => {
+  try {
+    const subcollectionRef = collection(db, 'organizations', organizationId, relativeCollection);
+    
+    // Create a query against the collection
+    const q = query(subcollectionRef, where(foreignKey, 'array-contains', foreignValue));
+    
+    // Execute the query and get the documents
+    const snapshot = await getDocs(q);
+    const documentsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return documentsList;
+  } catch (error) {
+    console.error(`Error fetching documents from ${relativeCollection}:`, error);
+    return [];
+  }
+}
+
+export const fetchDocumentsByFieldValue = async (organizationId, relativeCollection, fieldName, fieldValue) => {
+  try {
+    const subcollectionRef = collection(db, 'organizations', organizationId, relativeCollection);
+    
+    // Create a query against the collection
+    const q = query(subcollectionRef, where(fieldName, '==', fieldValue));
+    
+    // Execute the query and get the documents
+    const snapshot = await getDocs(q);
+    const documentsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return documentsList;
+  } catch (error) {
+    console.error(`Error fetching documents from ${relativeCollection}:`, error);
+    return [];
+  }
+}

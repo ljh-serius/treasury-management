@@ -2,6 +2,48 @@ import {
     fetchDocuments, addDocument, updateDocument, deleteDocument
 } from '../../utils/firebaseCrudHelpers';
 
+import { fetchItems as fetchProducts } from './ProductsConfig';
+import { fetchEmployees } from './EmployeesConfig';
+import { fetchItems as fetchProjects } from './ProjectsConfig';
+import { fetchItems as fetchPartners } from './PartnersConfig';
+import { fetchItems as fetchProviders } from './ProvidersConfig';
+
+const productsOptions = (await fetchProducts()).map((product) => {
+    return {
+        id: product.id,
+        label: product.name
+    }
+})
+
+console.log("PRODUCTS OPTIONS ", productsOptions)
+const employeesOptions = (await fetchEmployees()).map((employee) => {
+    return {
+        id: employee.id,
+        label: employee.name
+    }
+})
+
+const projectsOptions = (await fetchProjects()).map((project) => {
+    return {
+        id: project.id,
+        label: project.name
+    }
+})
+
+const partnersOptions = (await fetchPartners()).map((partner) => {
+    return {
+        id: partner.id,
+        label: partner.name
+    }
+})
+
+const providersOptions = (await fetchProviders()).map((provider) => {
+    return {
+        id: provider.id,
+        label: provider.name
+    }
+})
+
 export const fieldsConfig = {
     riskId: { label: 'Risk ID', type: 'text', faker: 'datatype.uuid' },
     riskName: { label: 'Risk Name', type: 'text', faker: 'lorem.words' },
@@ -76,59 +118,45 @@ export const fieldsConfig = {
         ],
         faker: 'random.arrayElement'
     },
-    relatedProjects: {
-        label: 'Related Projects',
+    productIds: {
+        label: 'Cost for Products',
+        link: '/products',
         type: 'select',
-        options: [],
+        options: productsOptions,
         multiple: true,
         faker: 'random.arrayElements'
     },
-    relatedProducts: {
-        label: 'Related Products',
+    employeeIds: {
+        label: 'Cost for Employees',
+        link: '/employees',
         type: 'select',
-        options: [],
+        options: employeesOptions,
         multiple: true,
         faker: 'random.arrayElements'
     },
-    relatedPartners: {
-        label: 'Related Partners',
+    projectIds: {
+        label: 'Cost for Projects',
+        link: '/projects',
         type: 'select',
-        options: [],
+        options: projectsOptions,
         multiple: true,
         faker: 'random.arrayElements'
     },
-    relatedProviders: {
-        label: 'Related Providers',
+    partnerIds: {
+        label: 'Cost for Partners',
+        link: '/partners',
         type: 'select',
-        options: [],
+        link: true,
+        options: partnersOptions,
         multiple: true,
         faker: 'random.arrayElements'
     },
-    relatedEmployees: {
-        label: 'Related Employees',
+    providerIds: {
+        link: '/providers',
+        label: 'Cost for Providers',
         type: 'select',
-        options: [],
-        multiple: true,
-        faker: 'random.arrayElements'
-    },
-    relatedDepartments: {
-        label: 'Related Departments',
-        type: 'select',
-        options: [],
-        multiple: true,
-        faker: 'random.arrayElements'
-    },
-    relatedGovernments: {
-        label: 'Related Governments',
-        type: 'select',
-        options: [],
-        multiple: true,
-        faker: 'random.arrayElements'
-    },
-    relatedMarkets: {
-        label: 'Related Markets',
-        type: 'select',
-        options: [],
+        link: true,
+        options: providersOptions,
         multiple: true,
         faker: 'random.arrayElements'
     },

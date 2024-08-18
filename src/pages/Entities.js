@@ -1,14 +1,14 @@
 import React from 'react';
 import BaseManagementComponent from '../components/BaseManagementComponent/BaseManagementComponent';
 import {
-  fieldsConfig,
-  entityName,
-  fetchItems,
-  addItem,
-  updateItem,
-  deleteItem,
-  headCells
-} from '../components/BaseManagementComponent/EntitiesConfig';
+  entitiesFieldsConfig,
+  entitiesName,
+  fetchEntities,
+  addEntity,
+  updateEntity,
+  deleteEntity,
+  entitiesHeadCells
+} from '../components/BaseManagementComponent/FieldsConfig';
 
 import EntitiesAnalysis from './Analysis/Entities'
 
@@ -17,15 +17,15 @@ function EntitiesManagement({showAnalytics}) {
     <>
       {
         showAnalytics ?
-        ( <EntitiesAnalysis fetchEntities={fetchItems} /> ) : (
+        ( <EntitiesAnalysis fetchEntities={fetchEntities} /> ) : (
             <BaseManagementComponent
-            fieldConfig={fieldsConfig}
-            entityName={entityName}
-            fetchItems={fetchItems}
-            addItem={addItem}
-            updateItem={updateItem}
-            deleteItem={deleteItem}
-            headCells={headCells}
+            fieldConfig={entitiesFieldsConfig}
+            entityName={entitiesName}
+            fetchItems={fetchEntities}
+            addItem={addEntity}
+            updateItem={updateEntity}
+            deleteItem={deleteEntity}
+            headCells={entitiesHeadCells}
           />
         )
       }

@@ -1,14 +1,14 @@
 import React from 'react';
 import BaseManagementComponent from '../components/BaseManagementComponent/BaseManagementComponent';
 import {
-  fieldsConfig,
-  entityName,
-  fetchItems,
-  addItem,
-  updateItem,
-  deleteItem,
-  headCells
-} from '../components/BaseManagementComponent/InvoicesConfig';
+  providersFieldsConfig,
+  providersEntityName,
+  fetchProviders,
+  addProvider,
+  updateProvider,
+  deleteProvider,
+  providersHeadCells
+} from '../components/BaseManagementComponent/FieldsConfig';
 
 import ProvidersAnalysis from './Analysis/Providers'
 
@@ -17,15 +17,15 @@ function ProvidersManagement({showAnalytics}) {
     <>
       {
         showAnalytics ?
-        ( <ProvidersAnalysis fetchProviders={fetchItems} /> ) : (
+        ( <ProvidersAnalysis fetchProviders={fetchProviders} /> ) : (
             <BaseManagementComponent
-            fieldConfig={fieldsConfig}
-            entityName={entityName}
-            fetchItems={fetchItems}
-            addItem={addItem}
-            updateItem={updateItem}
-            deleteItem={deleteItem}
-            headCells={headCells}
+            fieldConfig={providersFieldsConfig}
+            entityName={providersEntityName}
+            fetchItems={fetchProviders}
+            addItem={addProvider}
+            updateItem={updateProvider}
+            deleteItem={deleteProvider}
+            headCells={providersHeadCells}
           />
         )
       }

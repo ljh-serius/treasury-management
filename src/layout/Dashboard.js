@@ -178,6 +178,7 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Invoices</Typography>} />
           </ListItemButton>
         </ListItem>
+        <Divider />
         <ListItem key="costs" disablePadding>
           <ListItemButton component={Link} to="/costs">
             <ListItemIcon>

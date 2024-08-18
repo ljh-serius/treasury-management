@@ -1,14 +1,14 @@
 import React from 'react';
 import BaseManagementComponent from '../components/BaseManagementComponent/BaseManagementComponent';
 import {
-  fieldsConfig,
-  entityName,
-  fetchItems,
-  addItem,
-  updateItem,
-  deleteItem,
-  headCells
-} from '../components/BaseManagementComponent/ProjectsConfig';
+  projectFieldsConfig,
+  projectsEntityName,
+  fetchProjects,
+  addProject,
+  updateProject,
+  deleteProject,
+  productsHeadCells
+} from '../components/BaseManagementComponent/FieldsConfig';
 
 import ProjectsAnalysis from './Analysis/Projects'
 
@@ -17,15 +17,15 @@ function ProjectsManagement({showAnalytics}) {
     <>
       {
         showAnalytics ?
-        ( <ProjectsAnalysis fetchProjects={fetchItems} /> ) : (
+        ( <ProjectsAnalysis fetchProjects={fetchProjects} /> ) : (
             <BaseManagementComponent
-            fieldConfig={fieldsConfig}
-            entityName={entityName}
-            fetchItems={fetchItems}
-            addItem={addItem}
-            updateItem={updateItem}
-            deleteItem={deleteItem}
-            headCells={headCells}
+            fieldConfig={projectFieldsConfig}
+            entityName={projectsEntityName}
+            fetchItems={fetchProjects}
+            addItem={addProject}
+            updateItem={updateProject}
+            deleteItem={deleteProject}
+            headCells={productsHeadCells}
           />
         )
       }

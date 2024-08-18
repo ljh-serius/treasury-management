@@ -1,14 +1,14 @@
 import React from 'react';
 import BaseManagementComponent from '../components/BaseManagementComponent/BaseManagementComponent';
 import {
-  fieldsConfig,
-  entityName,
-  fetchItems,
-  addItem,
-  updateItem,
-  deleteItem,
-  headCells
-} from '../components/BaseManagementComponent/ProductsConfig';
+  productsFieldsConfig,
+  productEntityName,
+  fetchProducts,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+  productsHeadCells
+} from '../components/BaseManagementComponent/FieldsConfig';
 
 import ProductsAnalysis from './Analysis/Products'
 
@@ -17,15 +17,15 @@ function ProductsManagement({showAnalytics}) {
     <>
       {
         showAnalytics ?
-        ( <ProductsAnalysis fetchProducts={fetchItems} /> ) : (
+        ( <ProductsAnalysis fetchProducts={fetchProducts} /> ) : (
             <BaseManagementComponent
-            fieldConfig={fieldsConfig}
-            entityName={entityName}
-            fetchItems={fetchItems}
-            addItem={addItem}
-            updateItem={updateItem}
-            deleteItem={deleteItem}
-            headCells={headCells}
+            fieldConfig={productsFieldsConfig}
+            entityName={productEntityName}
+            fetchItems={fetchProducts}
+            addItem={addProduct}
+            updateItem={updateProduct}
+            deleteItem={deleteProduct}
+            headCells={productsHeadCells}
           />
         )
       }

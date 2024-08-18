@@ -1,14 +1,14 @@
 import React from 'react';
 import BaseManagementComponent from '../components/BaseManagementComponent/BaseManagementComponent';
 import {
-  fieldsConfig,
-  entityName,
-  fetchItems,
-  addItem,
-  updateItem,
-  deleteItem,
-  headCells
-} from '../components/BaseManagementComponent/InvoicesConfig';
+  invoiceFieldsConfig,
+  invoicesEntityName,
+  fetchInvoices,
+  addInvoice,
+  updateInvoice,
+  deleteInvoice,
+  invoiceHeadCells
+} from '../components/BaseManagementComponent/FieldsConfig';
 
 import InvoicesAnalysis from './Analysis/Invoices'
 
@@ -17,15 +17,15 @@ function InvoicesManagement({showAnalytics}) {
     <>
       {
         showAnalytics ?
-        ( <InvoicesAnalysis fetchInvoices={fetchItems} /> ) : (
+        ( <InvoicesAnalysis fetchInvoices={fetchInvoices} /> ) : (
             <BaseManagementComponent
-            fieldConfig={fieldsConfig}
-            entityName={entityName}
-            fetchItems={fetchItems}
-            addItem={addItem}
-            updateItem={updateItem}
-            deleteItem={deleteItem}
-            headCells={headCells}
+            fieldConfig={invoiceFieldsConfig}
+            entityName={invoicesEntityName}
+            fetchItems={fetchInvoices}
+            addItem={addInvoice}
+            updateItem={updateInvoice}
+            deleteItem={deleteInvoice}
+            headCells={invoiceHeadCells}
           />
         )
       }

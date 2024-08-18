@@ -1,14 +1,14 @@
 import React from 'react';
 import BaseManagementComponent from '../components/BaseManagementComponent/BaseManagementComponent';
 import {
-  fieldsConfig,
-  entityName,
-  fetchItems,
-  addItem,
-  updateItem,
-  deleteItem,
-  headCells
-} from '../components/BaseManagementComponent/RisksConfig';
+  risksFieldsConfig,
+  risksEntityName,
+  fetchRisks,
+  updateRisk,
+  deleteRisk,
+  risksHeadCells,
+  addRisk
+} from '../components/BaseManagementComponent/FieldsConfig';
 
 import RisksAnalysis from './Analysis/Risks'
 
@@ -16,15 +16,15 @@ function RisksManagement({showAnalytics}) {
   return (
     <>
       {
-        showAnalytics ? ( <RisksAnalysis fetchRisks={fetchItems} /> ) : (
+        showAnalytics ? ( <RisksAnalysis fetchRisks={fetchRisks} /> ) : (
           <BaseManagementComponent
-          fieldConfig={fieldsConfig}
-          entityName={entityName}
-          fetchItems={fetchItems}
-          addItem={addItem}
-          updateItem={updateItem}
-          deleteItem={deleteItem}
-          headCells={headCells}
+          fieldConfig={risksFieldsConfig}
+          entityName={risksEntityName}
+          fetchItems={fetchRisks}
+          addItem={addRisk}
+          updateItem={updateRisk}
+          deleteItem={deleteRisk}
+          headCells={risksHeadCells}
         />
         )
       }

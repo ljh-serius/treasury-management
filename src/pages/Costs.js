@@ -1,14 +1,14 @@
 import React from 'react';
 import BaseManagementComponent from '../components/BaseManagementComponent/BaseManagementComponent';
 import {
-  fieldsConfig,
-  entityName,
-  fetchItems,
-  addItem,
-  updateItem,
-  deleteItem,
-  headCells
-} from '../components/BaseManagementComponent/CostsConfig';
+  costsFieldsConfig,
+  costsEntityName,
+  fetchCosts,
+  addCost,
+  updateCost,
+  deleteCost,
+  costsHeadCells,
+} from '../components/BaseManagementComponent/FieldsConfig';
 
 import CostsAnalysis from './Analysis/Costs'
 
@@ -17,15 +17,15 @@ function CostsManagement({showAnalytics}) {
     <>
       {
         showAnalytics ?
-        ( <CostsAnalysis fetchCosts={fetchItems} /> ) : (
+        ( <CostsAnalysis fetchCosts={fetchCosts} /> ) : (
             <BaseManagementComponent
-              fieldConfig={fieldsConfig}
-              entityName={entityName}
-              fetchItems={fetchItems}
-              addItem={addItem}
-              updateItem={updateItem}
-              deleteItem={deleteItem}
-              headCells={headCells}
+              fieldConfig={costsFieldsConfig}
+              entityName={costsEntityName}
+              fetchItems={fetchCosts}
+              addItem={addCost}
+              updateItem={updateCost}
+              deleteItem={deleteCost}
+              headCells={costsHeadCells}
             />
         )
       }
