@@ -369,9 +369,9 @@ export default function BaseTableComponent({
   const [filters, setFilters] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-  const [loading, setLoading] = useState(false);  // Add loading state
+  const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState({});  // Add formData state
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
     setRefreshedFieldsConfig(fieldConfig);
@@ -379,10 +379,10 @@ export default function BaseTableComponent({
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true); // Start loading
+      setLoading(true);
       const data = await fetchItems();
       setItems(data);
-      setLoading(false); // Stop loading
+      setLoading(false);
     };
 
     fetchData();
@@ -405,26 +405,36 @@ export default function BaseTableComponent({
 
   // Event listeners for key presses
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === '+') {
-        event.preventDefault();
-        handleAddItem();
-      } else if (event.key === '-' && selected.length > 0) {
-        event.preventDefault();
-        confirmDelete();
-      } else if (event.key === 'Enter' && modalOpen) {
-        event.preventDefault();
-        handleModalSubmit(formData);  // Pass formData here
-      }
-    };
-
+    const handleKeyDown = async (event) => {
+      if (event.shiftKey) {
+        if (event.key === '+') {
+          event.preventDefault();
+          handleAddItem();
+        } else if (event.key === 'Backspace') {
+            event.preventDefault();
+            restoreItem();
+            console.log("RESTOED ITEm")
+        } else if (event.key === 'Delete') {
+            event.preventDefault();
+            confirmDelete();
+        } else if (event.key === 'Enter' && modalOpen) {
+          event.preventDefault();
+          handleModalSubmit(formData);
+        }
+      };
+    }
+    
     window.addEventListener('keydown', handleKeyDown);
 
     // Cleanup event listener on component unmount
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selected, modalOpen, currentItem, formData]);  // Add formData to dependencies
+  }, [selected, modalOpen, currentItem, formData]);
+
+  const storeItemInLocalStorage = (item) => {
+    localStorage.setItem('lastDeletedOrUpdatedItem', JSON.stringify(item));
+  };
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -462,14 +472,14 @@ export default function BaseTableComponent({
 
   const handleAddItem = () => {
     setCurrentItem(null);
-    setFormData({});  // Reset formData
+    setFormData({});
     setModalOpen(true);
   };
 
   const handleEditItem = () => {
     const itemToEdit = filteredItems.find((item) => item.id === selected[0]);
     setCurrentItem(itemToEdit);
-    setFormData(itemToEdit);  // Set formData to itemToEdit
+    setFormData(itemToEdit);
     setModalOpen(true);
   };
 
@@ -481,56 +491,70 @@ export default function BaseTableComponent({
 
   const handleDeleteItems = async () => {
     try {
-      setLoading(true); // Start loading
-      await Promise.all(selected.map((id) => deleteItem(id)));
+      setLoading(true);
+      for (const id of selected) {
+        const itemToDelete = items.find((item) => item.id === id);
+        storeItemInLocalStorage(itemToDelete); // Store item before deletion
+        await deleteItem(id); // Ensure this function deletes the item from the backend or state
+      }
       setSelected([]);
-      refreshFieldsConfig();
-      const data = await fetchItems();
-      setItems(data);
+      const data = await fetchItems(); // Refetch items from the backend to ensure the deleted items are no longer there
+      setItems(data); // Update the items in the state with the latest data
     } catch (error) {
       console.error(`Error deleting ${entityName}:`, error);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
-
-  const refreshFieldsConfig = async () => {
-    try {
-      const updatedConfig = await Promise.all(
-        Object.keys(refreshedFieldsConfig).map(async (key) => {
-          const field = refreshedFieldsConfig[key];
-
-          if (field.refreshOptions) {
-            const newOptions = await field.refreshOptions();
-            return {
-              [key]: {
-                ...field,
-                options: newOptions.map((option) => ({
-                  id: option.id,
-                  label: option.name || option.label,
-                })),
-              },
-            };
-          } else {
-            return { [key]: field };
+  
+  const restoreItem = async () => {
+    const lastItem = JSON.parse(localStorage.getItem('lastDeletedOrUpdatedItem'));
+    if (lastItem) {
+      try {
+        setLoading(true);
+  
+        // Attempt to update the item first
+        await updateItem(lastItem.id, lastItem);
+  
+        console.log(`Item with ID ${lastItem.id} was successfully updated.`);
+        
+      } catch (error) {
+        console.log("error in message ", error.message)
+        // If the error indicates that the document was not found, try to add it instead
+        if (error.message.includes("Could not update document in partners")) {
+          console.log(`Item with ID ${lastItem.id} not found. Adding it instead.`);
+          try {
+            await addItem(lastItem);
+            console.log(`Item with ID ${lastItem.id} was successfully added.`);
+          } catch (addError) {
+            console.error(`Failed to add item with ID ${lastItem.id}:`, addError);
           }
-        })
-      );
-
-      setRefreshedFieldsConfig((prevConfig) => {
-        return updatedConfig.reduce((acc, curr) => {
-          return { ...acc, ...curr };
-        }, { ...prevConfig });
-      });
-    } catch (error) {
-      console.error('Error refreshing fields config:', error);
+        } else {
+          // If it's a different error, log it
+          console.error(`Failed to update item with ID ${lastItem.id}:`, error);
+        }
+      } finally {
+        // Refetch items to update the local state
+        try {
+          const data = await fetchItems();
+          setItems(data);
+        } catch (fetchError) {
+          console.error(`Error fetching items after restore:`, fetchError);
+        } finally {
+          setLoading(false);
+          localStorage.removeItem('lastDeletedOrUpdatedItem'); // Clean up local storage after restoring
+        }
+      }
+    } else {
+      alert("No item to restore.");
     }
   };
-
+  
   const handleModalSubmit = async (itemData) => {
     try {
-      setLoading(true); // Start loading
+      setLoading(true);
       if (currentItem) {
+        storeItemInLocalStorage(currentItem); // Store item before update
         await updateItem(currentItem.id, itemData);
       } else {
         await addItem(itemData);
@@ -542,9 +566,10 @@ export default function BaseTableComponent({
     } catch (error) {
       console.error(`Error saving ${entityName}:`, error);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
+
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -580,10 +605,44 @@ export default function BaseTableComponent({
     return Array.from(result);
   };
 
+  
+
+  const refreshFieldsConfig = async () => {
+    try {
+      const updatedConfig = await Promise.all(
+        Object.keys(refreshedFieldsConfig).map(async (key) => {
+          const field = refreshedFieldsConfig[key];
+
+          if (field.refreshOptions) {
+            const newOptions = await field.refreshOptions();
+            return {
+              [key]: {
+                ...field,
+                options: newOptions.map((option) => ({
+                  id: option.id,
+                  label: option.name || option.label,
+                })),
+              },
+            };
+          } else {
+            return { [key]: field };
+          }
+        })
+      );
+
+      setRefreshedFieldsConfig((prevConfig) => {
+        return updatedConfig.reduce((acc, curr) => {
+          return { ...acc, ...curr };
+        }, { ...prevConfig });
+      });
+    } catch (error) {
+      console.error('Error refreshing fields config:', error);
+    }
+  };
 
   const generateRandomRow = async () => {
     try {
-      await refreshFieldsConfig(); // Ensure the fields are refreshed first.
+      await refreshFieldsConfig();
       const newRow = Object.keys(refreshedFieldsConfig).reduce((acc, key) => {
         const field = refreshedFieldsConfig[key];
         let value;
@@ -635,7 +694,7 @@ export default function BaseTableComponent({
           <BaseTableToolbar
             numSelected={selected.length}
             onAdd={handleAddItem}
-            onDelete={confirmDelete} // Use confirmDelete for deletion
+            onDelete={confirmDelete}
             onEdit={handleEditItem}
             entityName={entityName}
           />
@@ -752,7 +811,7 @@ export default function BaseTableComponent({
           onSubmit={handleModalSubmit}
           initialData={currentItem}
           fieldConfig={refreshedFieldsConfig}
-          setFormData={setFormData}  // Add setFormData prop
+          setFormData={setFormData}
         />
 
         {/* Backdrop and Spinner */}

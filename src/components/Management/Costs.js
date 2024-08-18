@@ -206,7 +206,7 @@ export const costsHeadCells = Object.keys(fieldsConfig).map(key => ({
     label: fieldsConfig[key].label,
 }));
 
-export const entityName = 'Items';
+export const entityName = 'Costs';
 
 export const fetchItems = () => fetchDocuments(organizationId, 'costs');
 export const addItem = (item) => addDocument(organizationId, 'costs', item);
