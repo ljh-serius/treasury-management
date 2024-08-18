@@ -17,7 +17,7 @@ function CompaginsManagement({showAnalytics}) {
     <>
       {
         showAnalytics ?
-        ( <CampaignsAnalysis fetchCompagins={fetchCampaigns} /> ) : (
+        ( <CampaignsAnalysis fetchCampaigns={fetchCampaigns} /> ) : (
             <BaseManagementComponent
             fieldConfig={campaignFieldsConfig}
             entityName={campaignsEntityName}

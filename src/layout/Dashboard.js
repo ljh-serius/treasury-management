@@ -130,38 +130,13 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Treasury</Typography>} />
           </ListItemButton>
         </ListItem>
-        <ListItem key="projects" disablePadding>
-          <ListItemButton component={Link} to="/projects">
-            <ListItemIcon>
-              <WorkIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Projects</Typography>} />
+        <Divider />
+        <ListItem key="people-and-relationships" disablePadding>
+          <ListItemButton>
+            <ListItemText primary={<Typography variant="body1">People and Relationships</Typography>} />
           </ListItemButton>
         </ListItem>
-        <ListItem key="providers" disablePadding>
-          <ListItemButton component={Link} to="/providers">
-            <ListItemIcon>
-              <StorefrontIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Providers</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="partners" disablePadding>
-          <ListItemButton component={Link} to="/partners">
-            <ListItemIcon>
-              <GroupIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Partners</Typography>} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key="products" disablePadding>
-          <ListItemButton component={Link} to="/products">
-            <ListItemIcon>
-              <InventoryIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Products</Typography>} />
-          </ListItemButton>
-        </ListItem>
+        <Divider />
         <ListItem key="employees" disablePadding>
           <ListItemButton component={Link} to="/employees">
             <ListItemIcon>
@@ -178,20 +153,27 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Clients</Typography>} />
           </ListItemButton>
         </ListItem>
-        <ListItem key="campaigns" disablePadding>
-          <ListItemButton component={Link} to="/campaigns">
+        <ListItem key="partners" disablePadding>
+          <ListItemButton component={Link} to="/partners">
             <ListItemIcon>
-              <PeopleAltIcon style={{ fontSize: '1.6rem' }} />
+              <GroupIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Campaigns</Typography>} />
+            <ListItemText primary={<Typography variant="body1">Partners</Typography>} />
           </ListItemButton>
         </ListItem>
-        <ListItem key="invoices" disablePadding>
-          <ListItemButton component={Link} to="/invoices">
+        <ListItem key="providers" disablePadding>
+          <ListItemButton component={Link} to="/providers">
             <ListItemIcon>
-              <ReceiptIcon style={{ fontSize: '1.6rem' }} />
+              <StorefrontIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Invoices</Typography>} />
+            <ListItemText primary={<Typography variant="body1">Providers</Typography>} />
+          </ListItemButton>
+        </ListItem>
+
+        <Divider />
+        <ListItem key="operations" disablePadding>
+          <ListItemButton>
+            <ListItemText primary={<Typography variant="body1">Operations</Typography>} />
           </ListItemButton>
         </ListItem>
         <Divider />
@@ -209,6 +191,44 @@ const Dashboard = ({ children }) => {
               <SecurityIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
             <ListItemText primary={<Typography variant="body1">Risks</Typography>} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key="campaigns" disablePadding>
+          <ListItemButton component={Link} to="/campaigns">
+            <ListItemIcon>
+              <PeopleAltIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Campaigns</Typography>} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key="projects" disablePadding>
+          <ListItemButton component={Link} to="/projects">
+            <ListItemIcon>
+              <WorkIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Projects</Typography>} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key="invoices" disablePadding>
+          <ListItemButton component={Link} to="/invoices">
+            <ListItemIcon>
+              <ReceiptIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Invoices</Typography>} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key="products" disablePadding>
+          <ListItemButton component={Link} to="/products">
+            <ListItemIcon>
+              <InventoryIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Products</Typography>} />
+          </ListItemButton>
+        </ListItem>
+        <Divider />
+        <ListItem key="documents" disablePadding>
+          <ListItemButton>
+            <ListItemText primary={<Typography variant="body1">Documents</Typography>} />
           </ListItemButton>
         </ListItem>
         <Divider />
