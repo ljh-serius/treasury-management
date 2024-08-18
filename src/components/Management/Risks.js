@@ -152,7 +152,6 @@ export const fieldsConfig = {
       label: 'Risk for Partners',
       link: '/partners',
       type: 'select',
-      link: true,
       options: partnersOptions,
       multiple: true,
       faker: 'random.arrayElements'
@@ -161,7 +160,6 @@ export const fieldsConfig = {
       link: '/providers',
       label: 'Risk for Providers',
       type: 'select',
-      link: true,
       options: providersOptions,
       multiple: true,
       faker: 'random.arrayElements'

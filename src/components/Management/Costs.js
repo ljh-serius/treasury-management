@@ -84,7 +84,6 @@ export const fieldsConfig = {
         label: 'Cost for Partners',
         link: '/partners',
         type: 'select',
-        link: true,
         options: partnersOptions,
         multiple: true,
         faker: 'random.arrayElements'
@@ -93,7 +92,6 @@ export const fieldsConfig = {
         link: '/providers',
         label: 'Cost for Providers',
         type: 'select',
-        link: true,
         options: providersOptions,
         multiple: true,
         faker: 'random.arrayElements'

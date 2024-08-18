@@ -129,7 +129,6 @@ const Dashboard = ({ children }) => {
           {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
         </IconButton>
       </DrawerHeader>
-      <Divider />
       <List>
         <Divider />
         <ListItem key="treasury" disablePadding>
