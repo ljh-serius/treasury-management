@@ -159,15 +159,7 @@ const Dashboard = ({ children }) => {
           <Container 
             sx={{ display: 'flex', justifyContent:"end",  mr: 0 }}
           >
-            <Button
-              variant="outlined"
-              color="inherit"
-              onClick={toggleShowAnalytics}
-              sx={{ mr: 2 }}
-            >
-              {showAnalytics ? translate("Show Data", language) : translate("Show Analysis", language)}
-            </Button>
-            {showAnalytics && 
+             {showAnalytics && 
               <>
                 <Button
                   sx={{ mr: 2 }}
@@ -187,6 +179,14 @@ const Dashboard = ({ children }) => {
                 </Button>
               </>
             }
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={toggleShowAnalytics}
+              sx={{ mr: 2 }}
+            >
+              {showAnalytics ? translate("Show Data", language) : translate("Show Analysis", language)}
+            </Button>
              <Button
             variant="outlined"
             color="inherit"
