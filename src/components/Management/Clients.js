@@ -24,8 +24,6 @@ const projectsOptions = (await fetchProjects()).map((project) => {
   }
 })
 
-console.log("RUNNIN 1111", projectsOptions)
-// clients
 export const fieldsConfig = {
   clientId: { label: 'Client ID', type: 'text', faker: 'datatype.uuid' },
   clientName: { label: 'Client Name', type: 'text', faker: 'company.name' },
@@ -203,7 +201,7 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
   label: fieldsConfig[key].label,
 }));
 
-export const entityName = 'Items';
+export const entityName = 'Clients';
 
 export async function fetchItems() {
   return await fetchDocuments(organizationId, 'clients');

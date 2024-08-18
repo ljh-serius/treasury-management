@@ -27,14 +27,12 @@ const managers = (await fetchItemsByField('position', 'manager')).map((manager) 
     }
 })
 
-const employees = []
-
-// (await fetchItems()).map((manager) => {
-//     return {
-//         id: manager.id,
-//         label: manager.name
-//     }
-// })
+const employees = (await fetchItems()).map((manager) => {
+    return {
+        id: manager.id,
+        label: manager.name
+    }
+})
 
 const healthInsurances = (await fetchPartnersBySelectValue('servicesProvided', 'health_insurance')).map((partner) => {
     return {
@@ -42,8 +40,6 @@ const healthInsurances = (await fetchPartnersBySelectValue('servicesProvided', '
         label: partner.name
     }
 })
-
-console.log(' fetchPartnersBySelectValue', healthInsurances)
 
 export const fieldsConfig = {
     employeeId: { label: 'Cost ID', type: 'text', faker: 'datatype.uuid' },
@@ -214,7 +210,7 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
     label: fieldsConfig[key].label,
 }));
 
-export const entityName = 'Items';
+export const entityName = 'Employees';
 
 export function fetchItems() {
     return fetchDocuments(organizationId, 'employees');

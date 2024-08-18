@@ -80,7 +80,6 @@ const routesSequence = [
   "/management/projects",
   "/management/invoices",
   "/management/products",
-  "/management/entities",
 ];
 
 const Dashboard = ({ children }) => {
@@ -139,6 +138,30 @@ const Dashboard = ({ children }) => {
     }
   };
 
+  // Add event listeners for TAB and SHIFT + TAB
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Tab') {
+        if (event.shiftKey) {
+          // SHIFT + TAB for Previous
+          event.preventDefault(); // Prevent the default tabbing behavior
+          handlePreviousAnalysis();
+        } else {
+          // TAB for Next
+          event.preventDefault(); // Prevent the default tabbing behavior
+          handleNextAnalysis();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [location.pathname]); // Dependency array to ensure the correct route is used
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -159,7 +182,15 @@ const Dashboard = ({ children }) => {
           <Container 
             sx={{ display: 'flex', justifyContent:"end",  mr: 0 }}
           >
-             {showAnalytics && 
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={toggleShowAnalytics}
+              sx={{ mr: 2 }}
+            >
+              {showAnalytics ? translate("Show Data", language) : translate("Show Analysis", language)}
+            </Button>
+            {showAnalytics && 
               <>
                 <Button
                   sx={{ mr: 2 }}
@@ -179,14 +210,6 @@ const Dashboard = ({ children }) => {
                 </Button>
               </>
             }
-            <Button
-              variant="outlined"
-              color="inherit"
-              onClick={toggleShowAnalytics}
-              sx={{ mr: 2 }}
-            >
-              {showAnalytics ? translate("Show Data", language) : translate("Show Analysis", language)}
-            </Button>
              <Button
             variant="outlined"
             color="inherit"

@@ -117,7 +117,7 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
   label: fieldsConfig[key].label,
 }));
 
-export const entityName = 'Marketing CAmap';
+export const entityName = 'Marketing Campaigns';
 
 export async function fetchItems() {
   return await fetchDocuments(organizationId, 'campaigns');
