@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
 
-export default function InvoiceAnalysisDashboard({ fetchInvoices }) {
+export default function InvoiceAnalysisDashboard({ fetchItems }) {
   const [invoicesData, setInvoicesData] = useState([]);
   const [invoiceTypeDistribution, setInvoiceTypeDistribution] = useState([]);
   const [invoiceCategoryDistribution, setInvoiceCategoryDistribution] = useState([]);
@@ -15,13 +15,13 @@ export default function InvoiceAnalysisDashboard({ fetchInvoices }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchInvoices();
+      const data = await fetchItems();
       setInvoicesData(data);
       processInvoiceData(data);
     };
 
     fetchData();
-  }, [fetchInvoices]);
+  }, [fetchItems]);
   
 
   const processInvoiceData = (data) => {

@@ -69,35 +69,50 @@ export const fieldsConfig = {
     type: 'select',
     options: await getEntitiesOptions(['store']), // Populated with relevant parent entities
     multiple: true,
-    faker: 'random.arrayElement'
+    faker: 'random.arrayElement',
+    refreshOptions: async () => {
+      return await getEntitiesOptions(['store']);
+    }
   },
   agencyId: {
     label: 'Parent Entity ID',
     type: 'select',
     options: await getEntitiesOptions(['agency']), // Populated with relevant parent entities
     multiple: true,
-    faker: 'random.arrayElement'
+    faker: 'random.arrayElement',
+    refreshOptions: async () => {
+      return await getEntitiesOptions(['agency']);
+    }
   },
   departmentId: {
     label: 'Parent Entity ID',
     type: 'select',
     options: await getEntitiesOptions(['department']), // Populated with relevant parent entities
     multiple: true,
-    faker: 'random.arrayElement'
+    faker: 'random.arrayElement',
+    refreshOptions: async () => {
+      return await getEntitiesOptions(['department']);
+    }
   },
   serviceId: {
     label: 'Parent Entity ID',
     type: 'select',
     options: await getEntitiesOptions(['service']), // Populated with relevant parent entities
     multiple: true,
-    faker: 'random.arrayElement'
+    faker: 'random.arrayElement',
+    refreshOptions: async () => {
+      return await getEntitiesOptions(['service']);
+    }
   },
   orgnizationId: {
     label: 'Parent Entity ID',
     type: 'select',
     options: await getEntitiesOptions(['organization']), // Populated with relevant parent entities
     multiple: true,
-    faker: 'random.arrayElement'
+    faker: 'random.arrayElement',
+    refreshOptions: async () => {
+      return await getEntitiesOptions(['organization']);
+    }
   },
   locationId: { label: 'Location ID', type: 'text', faker: 'datatype.uuid' },
   regionId: { label: 'Region ID', type: 'text', faker: 'datatype.uuid' },

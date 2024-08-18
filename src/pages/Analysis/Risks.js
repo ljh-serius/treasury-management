@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
 
-export default function ExtendedRiskAnalysisDashboard({ fetchRisks }) {
+export default function ExtendedRiskAnalysisDashboard({ fetchItems }) {
   const [risksData, setRisksData] = useState([]);
   const [riskSeverityDistribution, setRiskSeverityDistribution] = useState([]);
   const [riskTypeDistribution, setRiskTypeDistribution] = useState([]);
@@ -16,13 +16,13 @@ export default function ExtendedRiskAnalysisDashboard({ fetchRisks }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchRisks();
+      const data = await fetchItems();
       setRisksData(data);
       processRiskData(data);
     };
 
     fetchData();
-  }, [fetchRisks]);
+  }, [fetchItems]);
 
   const processRiskData = (data) => {
     // Risk Severity Distribution

@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Grid, Card, CardContent, Typography, Container, Box } from '@mui/material';
 
-const EntitiesAnalysis = ({ fetchEntities }) => {
+const EntitiesAnalysis = ({ fetchItems }) => {
     const [entitiesData, setEntitiesData] = useState([]);
     const [statusDistribution, setStatusDistribution] = useState([]);
     const [typeDistribution, setTypeDistribution] = useState([]);
@@ -13,13 +13,13 @@ const EntitiesAnalysis = ({ fetchEntities }) => {
 
     useEffect(() => {
         async function loadData() {
-            const entities = await fetchEntities();
+            const entities = await fetchItems();
             setEntitiesData(entities);
             analyzeData(entities);
         }
 
         loadData();
-    }, [fetchEntities]);
+    }, [fetchItems]);
 
     const analyzeData = (entities) => {
         // Calculate distribution by status

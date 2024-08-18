@@ -23,7 +23,6 @@ export const fieldsConfig = {
     website: { label: 'Website', type: 'url', faker: 'internet.url' },
     industry: { 
         label: 'Industry',
-        multiple: true,
         type: 'select',
         multiple: true,
         options: industries,

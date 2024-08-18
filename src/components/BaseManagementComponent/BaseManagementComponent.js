@@ -449,24 +449,37 @@ export default function BaseTableComponent({
       console.error(`Error deleting ${entityName}:`, error);
     }
   };
-
-  const refreshFieldsConfig = async () => {
-    try {
-      // Assume that `parentId` is a field that needs to refresh its options
-      const newOptions = await refreshedFieldsConfig['parentId'].refreshOptions();
   
-      // Update the fieldConfig with new options
-      setRefreshedFieldsConfig((prevConfig) => {
-        return {
-          ...prevConfig,
-          'parentId': {
-            ...prevConfig['parentId'],
-            options: newOptions.map((option) => ({
-              id: option.id,
-              label: option.name || option.label // Use 'name' or 'label' property as the label
-            }))
+  const refreshFieldsConfig = async () => {
+
+    try {
+      const updatedConfig = await Promise.all(
+        Object.keys(refreshedFieldsConfig).map(async (key) => {
+          const field = refreshedFieldsConfig[key];
+          
+          if (field.refreshOptions) {
+            const newOptions = await field.refreshOptions();
+            return {
+              [key]: {
+                ...field,
+                options: newOptions.map((option) => ({
+                  id: option.id,
+                  label: option.name || option.label,
+                })),
+              },
+            };
+          } else {
+            // Return the field as is if no refreshOptions function exists
+            return { [key]: field };
           }
-        };
+        })
+      );
+  
+      // Merge the updated fields into the refreshedFieldsConfig state
+      setRefreshedFieldsConfig((prevConfig) => {
+        return updatedConfig.reduce((acc, curr) => {
+          return { ...acc, ...curr };
+        }, { ...prevConfig });
       });
     } catch (error) {
       console.error('Error refreshing fields config:', error);
@@ -488,71 +501,62 @@ export default function BaseTableComponent({
       console.error(`Error saving ${entityName}:`, error);
     }
   };
-  
-  const generateRandomRow = async () => {
+ 
     const getRandomElementId = (arr) => {
       if (!Array.isArray(arr) || arr.length === 0) return null;
       const randomIndex = Math.floor(Math.random() * arr.length);
       const element = arr[randomIndex];
       return element && element.id ? element.id : null;
     };
-  
     const getMultipleRandomElementIds = (arr) => {
       if (!Array.isArray(arr) || arr.length === 0) return [];
       const randomCount = Math.floor(Math.random() * arr.length) + 1;
       let result = new Set();
-    
+  
       while (result.size < randomCount) {
-        const randomElement = getRandomElementId(arr);
-        result.add(randomElement);
-      }
-    
-      console.log("RESULT ", Array.from(result));
-      return Array.from(result);
-    };
-
-    const newRow = Object.keys(refreshedFieldsConfig).reduce((acc, key) => {
-      const field = refreshedFieldsConfig[key];
-      let value;
-  
-      if (field.faker) {
-        const fakerPath = field.faker.split('.');
-        if (fakerPath[0] === 'random' && field.type === 'select' && field.multiple) {
-          value = getMultipleRandomElementIds(field.options);
-        } else if (fakerPath[0] === 'random' && field.type === 'select') {
-          value = getRandomElementId(field.options);
-        } else {
-          value = fakerPath.reduce((acc, method) => acc[method], faker);
-  
-          // Handle different types of date generation
-          if (field.faker === 'date.past') {
-            value = new Date(value(10, 0)).toISOString(); // Past date within the last 10 years
-          } else if (field.faker === 'date.future') {
-            value = new Date(value(10, 1)).toISOString(); // Future date within the next 10 years
-          } else if (field.faker === 'date.recent') {
-            const sixMonthsAgo = new Date();
-            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-            value = new Date(value(sixMonthsAgo)).toISOString(); // Date within the last 6 months
-          } else {
-            value = typeof value === 'function' ? value() : value;
+          const randomElement = getRandomElementId(arr);
+          if (randomElement) {
+              result.add(randomElement);
           }
-        }
-      } else {
-        value = field.type === 'number' ? faker.datatype.number() : faker.lorem.word();
       }
   
-      acc[key] = value;
-      return acc;
-    }, {});
-  
-    try {
-      await addItem(newRow);
-      const data = await fetchItems();
-      setItems(data);
-    } catch (error) {
-      console.error(`Error generating and saving random ${entityName}:`, error);
-    }
+      return Array.from(result);
   };
+  
+    
+  const generateRandomRow = async () => {
+    try {
+        await refreshFieldsConfig(); // Ensure the fields are refreshed first.
+        const newRow = Object.keys(refreshedFieldsConfig).reduce((acc, key) => {
+            const field = refreshedFieldsConfig[key];
+            let value;
+            if (field.faker) {
+                const fakerPath = field.faker.split('.');
+                value = fakerPath.reduce((acc, method) => acc[method], faker);
+                if (field.type === 'select' && field.multiple) {
+                    value = getMultipleRandomElementIds(field.options);
+                } else if (field.type === 'select') {
+                    value = getRandomElementId(field.options);
+                } else if (field.faker.includes('date')) {
+                    value = new Date(value()).toISOString();
+                } else {
+                    value = typeof value === 'function' ? value() : value;
+                }
+            } else {
+                value = field.type === 'number' ? faker.datatype.number() : faker.lorem.word();
+            }
+            acc[key] = value;
+            return acc;
+        }, {});
+
+        await addItem(newRow);
+        const data = await fetchItems();
+        setItems(data);
+    } catch (error) {
+        console.error(`Error generating and saving random ${entityName}:`, error);
+    }
+};
+
   
   
   const handleChangePage = (event, newPage) => {
