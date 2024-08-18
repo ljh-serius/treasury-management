@@ -23,6 +23,8 @@ import Risks from './pages/Risks';
 import Employees from './pages/Employees';
 import Treasury from './pages/Treasury';
 import Invoices from './pages/Invoices'
+import Clients from './pages/Clients'
+import Campaigns from './pages/Campaigns'
 import Entities from './pages/Entities'
 
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
@@ -71,16 +73,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/analytics"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Analytics />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
+          { /* Documents */}
           <Route
             path="/invoices"
             element={
@@ -91,7 +84,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-
+          { /* Blog and documentation */}
           <Route
             path="/blog"
             element={
@@ -112,22 +105,24 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          { /* Authentication */}
           <Route
             path="/registration"
             element={
               <OrganizationRegistration />
             }
           />
+          { /* People and Relationships */ }
           <Route
-            path="/projects"
+            path="/clients"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                  <Projects />
+                  <Clients />
                 </Dashboard>
               </ProtectedRoute>
             }
-          />
+          />  
           <Route
             path="/employees"
             element={
@@ -138,6 +133,38 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/providers"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Providers />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partners"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Partners />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          { /* Products and Services Management */}
+          <Route
+            path="/projects"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Projects />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/gantt-chart"
             element={
@@ -158,22 +185,13 @@ const App = () => {
               </ProtectedRoute>
             }
           />  
+          { /* Operations */}
           <Route
-            path="/providers"
+            path="/campaigns"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                  <Providers />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/partners"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Partners />
+                  <Campaigns />
                 </Dashboard>
               </ProtectedRoute>
             }
@@ -197,7 +215,7 @@ const App = () => {
                 </Dashboard>
               </ProtectedRoute>
             }
-          />
+           />  
           <Route
             path="/risks"
             element={
@@ -208,6 +226,18 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          { /* Analytics */}
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Analytics />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          { /* Configuration */}
           <Route
             path="/entities"
             element={

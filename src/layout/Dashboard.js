@@ -170,6 +170,22 @@ const Dashboard = ({ children }) => {
             <ListItemText primary={<Typography variant="body1">Employees</Typography>} />
           </ListItemButton>
         </ListItem>
+        <ListItem key="clients" disablePadding>
+          <ListItemButton component={Link} to="/clients">
+            <ListItemIcon>
+              <PeopleAltIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Clients</Typography>} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key="campaigns" disablePadding>
+          <ListItemButton component={Link} to="/campaigns">
+            <ListItemIcon>
+              <PeopleAltIcon style={{ fontSize: '1.6rem' }} />
+            </ListItemIcon>
+            <ListItemText primary={<Typography variant="body1">Campaigns</Typography>} />
+          </ListItemButton>
+        </ListItem>
         <ListItem key="invoices" disablePadding>
           <ListItemButton component={Link} to="/invoices">
             <ListItemIcon>

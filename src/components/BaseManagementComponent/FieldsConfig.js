@@ -7,6 +7,9 @@ import {
   fetchDocumentsByFieldValue
 } from '../../utils/firebaseCrudHelpers';
 
+
+import languages from '../../utils/languages';
+
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
 const productsOptions = (await fetchProducts()).map((product) => {
@@ -239,6 +242,7 @@ export const partnersFieldsConfig = {
       { id: 'channel', label: 'Channel' },
       { id: 'technology', label: 'Technology' },
       { id: 'alliance', label: 'Alliance' },
+      { id: 'health_inssurance', label: 'Health Insurance' },
     ],
     faker: 'random.arrayElement',
   },
@@ -247,6 +251,16 @@ export const partnersFieldsConfig = {
   contactPhone: { label: 'Contact Phone', type: 'tel', faker: 'phone.imei' },
   address: { label: 'Address', type: 'text', faker: 'address.streetAddress' },
   website: { label: 'Website', type: 'url', faker: 'internet.url' },
+  servicesProvided: {
+    label: 'Services Provided',
+    type: 'select',
+    multiple: true,
+    options: [
+      { id: 'health_insurance', label: 'Health Insurance' },
+      { id: 'software_development', label: 'Software Development' },
+    ],
+    faker: 'random.arrayElement',
+  },
   industry: { 
     label: 'Industry', 
     type: 'select',
@@ -409,6 +423,11 @@ export const partnersEntityName = 'Partners';
 export async function fetchPartners() {
   return await fetchDocuments(organizationId, 'partners');
 }
+
+export async function fetchPartnersBySelectValue(selectMenu, value) {
+  return await fetchDocumentsBySelectValue(organizationId, 'partners', selectMenu, value);
+}
+
 export const addPartner = (item) => addDocument(organizationId, 'partners', item);
 export const updatePartner = (id, item) => updateDocument(organizationId, 'partners', id, item);
 export const deletePartner = (id) => deleteDocument(organizationId, 'partners', id);
@@ -434,9 +453,21 @@ const managers = (await fetchEmployeesByField('position', 'manager')).map((manag
   }
 })
 
-console.log("TEST ", (await fetchEmployeesByField('position', 'manager')))
+const employees = (await fetchEmployees()).map((manager) => {
+  return {
+      id: manager.id,
+      label: manager.name
+  }
+})
 
-console.log("Managers ", managers)
+const healthInsurances = (await fetchPartnersBySelectValue('servicesProvided', 'health_insurance')).map((partner) => {
+  return {
+      id: partner.id,
+      label: partner.name
+  }
+})
+
+console.log(' fetchPartnersBySelectValue', healthInsurances) 
 
 export const employeesFieldsConfig = {
   name: { label: 'Name', type: 'text', faker: 'name.fullName' },
@@ -569,18 +600,20 @@ export const employeesFieldsConfig = {
     faker: 'random.arrayElement',
   },
   certifications: { label: 'Certifications', type: 'text', faker: 'random.words' },
-  languagesSpoken: { label: 'Languages Spoken', type: 'text', faker: 'random.words' },
+  languagesSpoken: {
+    label: 'Languages Spoken',
+    type: 'select',
+    multiple: true,
+    options: languages,
+    faker: 'random.arrayElement',
+  },
   skills: { label: 'Skills', type: 'text', faker: 'random.words' },
   performanceRating: { label: 'Performance Rating', type: 'number', faker: 'datatype.number' },
   probationEndDate: { label: 'Probation End Date', type: 'date', faker: 'date.future' },
   healthInsuranceProvider: {
     label: 'Health Insurance Provider',
     type: 'select',
-    options: [
-      { id: 'provider_a', label: 'Provider A' },
-      { id: 'provider_b', label: 'Provider B' },
-      { id: 'provider_c', label: 'Provider C' },
-    ],
+    options: healthInsurances,
     faker: 'random.arrayElement',
   },
   healthInsuranceNumber: { label: 'Health Insurance Number', type: 'text', faker: 'finance.account' },
@@ -969,7 +1002,16 @@ export const providersFieldsConfig = {
   bankAccount: { label: 'Bank Account', type: 'text', faker: 'finance.account' },
   swiftCode: { label: 'SWIFT Code', type: 'text', faker: 'finance.bic' },
   accountManager: { label: 'Account Manager', type: 'text', faker: 'name.fullName' },
-  servicesProvided: { label: 'Services Provided', type: 'text', faker: 'lorem.words' },
+  servicesProvided: {
+    label: 'Services Provided',
+    type: 'select',
+    multiple: true,
+    options: [
+      { id: 'health_insurance', label: 'Health Insurance' },
+      { id: 'software_development', label: 'Software Development' },
+    ],
+    faker: 'random.arrayElement',
+  },
   preferredContactMethod: {
     label: 'Preferred Contact Method',
     type: 'select',
@@ -1052,6 +1094,13 @@ export const providersEntityName = 'Providers';
 export async function fetchProviders() {
   return await fetchDocuments(organizationId, 'providers');
 }
+
+
+export async function fetchProvidersBySelectValue(selectMenu, value) {
+  return await fetchDocumentsBySelectValue(organizationId, 'providers', selectMenu, value);
+}
+
+
 export const addProvider = (item) => addDocument(organizationId, 'providers', item);
 export const updateProvider = (id, item) => updateDocument(organizationId, 'providers', id, item);
 export const deleteProvider = (id) => deleteDocument(organizationId, 'providers', id);
@@ -1078,13 +1127,13 @@ export const projectFieldsConfig = {
   managerName: { 
     label: 'Manager Name', 
     type: 'select',
-    options: [],
+    options: managers,
     faker: 'random.arrayElement',
   },
   teamMembers: { 
     label: 'Team Members',
     type: 'select',
-    options: [],
+    options: employees,
     multiple: true,
     faker: 'random.arrayElement',
   },
@@ -1249,6 +1298,180 @@ export const deleteProject = (id) => deleteDocument(organizationId, 'projects', 
 
 
 
+
+
+
+
+
+
+
+
+
+// clients
+export const clientFieldsConfig = {
+  clientId: { label: 'Client ID', type: 'text', faker: 'datatype.uuid' },
+  clientName: { label: 'Client Name', type: 'text', faker: 'company.name' },
+  contactPerson: { label: 'Contact Person', type: 'text', faker: 'name.fullName' },
+  email: { label: 'Email', type: 'email', faker: 'internet.email' },
+  phoneNumber: { label: 'Phone Number', type: 'text', faker: 'phone.imei' },
+  address: { label: 'Address', type: 'text', faker: 'address.streetAddress' },
+  city: { label: 'City', type: 'text', faker: 'address.city' },
+  state: { label: 'State', type: 'text', faker: 'address.state' },
+  country: { label: 'Country', type: 'select', options: [], faker: 'address.country' },
+  zipCode: { label: 'ZIP Code', type: 'text', faker: 'address.zipCode' },
+  industry: { label: 'Industry', type: 'select', options: [], faker: 'company.bs' },
+  website: { label: 'Website', type: 'text', faker: 'internet.url' },
+  companySize: { label: 'Company Size', type: 'select', options: [], faker: 'random.arrayElement' },
+  clientStatus: { 
+    label: 'Status', 
+    type: 'select', 
+    options: [
+      { id: 'active', label: 'Active' },
+      { id: 'inactive', label: 'Inactive' },
+      { id: 'prospect', label: 'Prospect' },
+    ],
+    faker: 'random.arrayElement',
+  },
+  annualRevenue: { label: 'Annual Revenue', type: 'number', faker: 'finance.amount' },
+  numberOfEmployees: { label: 'Number of Employees', type: 'number', faker: 'datatype.number' },
+  preferredContactMethod: { 
+    label: 'Preferred Contact Method', 
+    type: 'select', 
+    options: [
+      { id: 'email', label: 'Email' },
+      { id: 'phone', label: 'Phone' },
+      { id: 'in_person', label: 'In Person' },
+    ],
+    faker: 'random.arrayElement',
+  },
+  timeZone: { label: 'Time Zone', type: 'text', faker: 'address.timeZone' },
+  currency: { label: 'Preferred Currency', type: 'select', options: [], faker: 'finance.currencyCode' },
+  paymentTerms: { 
+    label: 'Payment Terms', 
+    type: 'select', 
+    options: [
+      { id: 'net_30', label: 'Net 30' },
+      { id: 'net_60', label: 'Net 60' },
+      { id: 'net_90', label: 'Net 90' },
+    ],
+    faker: 'random.arrayElement',
+  },
+  taxId: { label: 'Tax ID', type: 'text', faker: 'datatype.uuid' },
+  contractStartDate: { label: 'Contract Start Date', type: 'date', faker: 'date.past' },
+  contractEndDate: { label: 'Contract End Date', type: 'date', faker: 'date.future' },
+  clientSegment: { 
+    label: 'Client Segment', 
+    type: 'select', 
+    options: [
+      { id: 'enterprise', label: 'Enterprise' },
+      { id: 'mid_market', label: 'Mid-Market' },
+      { id: 'smb', label: 'SMB' },
+    ],
+    faker: 'random.arrayElement',
+  },
+  accountManager: { 
+    label: 'Account Manager', 
+    type: 'select', 
+    options: [],
+    faker: 'random.arrayElement',
+  },
+  clientType: { 
+    label: 'Client Type', 
+    type: 'select', 
+    options: [
+      { id: 'direct', label: 'Direct' },
+      { id: 'reseller', label: 'Reseller' },
+      { id: 'partner', label: 'Partner' },
+    ],
+    faker: 'random.arrayElement',
+  },
+  preferredLanguage: { label: 'Preferred Language', type: 'select', options: languages, faker: 'random.arrayElement' },
+  socialMediaLinks: { label: 'Social Media Links', type: 'text', faker: 'internet.url' },
+  businessModel: { 
+    label: 'Business Model', 
+    type: 'select', 
+    options: [
+      { id: 'b2b', label: 'B2B' },
+      { id: 'b2c', label: 'B2C' },
+      { id: 'd2c', label: 'D2C' },
+    ],
+    faker: 'random.arrayElement',
+  },
+  communicationPreferences: { 
+    label: 'Communication Preferences', 
+    type: 'select', 
+    options: [
+      { id: 'email', label: 'Email' },
+      { id: 'phone', label: 'Phone' },
+      { id: 'sms', label: 'SMS' },
+    ],
+    multiple: true,
+    faker: 'random.arrayElement',
+  },
+  projectCount: { label: 'Number of Projects', type: 'number', faker: 'datatype.number' },
+  currentProjects: { 
+    label: 'Current Projects', 
+    type: 'select', 
+    options: [],
+    multiple: true,
+    faker: 'random.arrayElement',
+  },
+  clientRating: { label: 'Client Rating', type: 'number', faker: 'datatype.number' },
+  preferredBillingCycle: { 
+    label: 'Preferred Billing Cycle', 
+    type: 'select', 
+    options: [
+      { id: 'monthly', label: 'Monthly' },
+      { id: 'quarterly', label: 'Quarterly' },
+      { id: 'annually', label: 'Annually' },
+    ],
+    faker: 'random.arrayElement',
+  },
+  SLAAgreement: { label: 'SLA Agreement', type: 'text', faker: 'lorem.sentence' },
+  discountRate: { label: 'Discount Rate (%)', type: 'number', faker: 'datatype.number' },
+  referralSource: { label: 'Referral Source', type: 'text', faker: 'company.name' },
+  notes: { label: 'Notes', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraphs' },
+  invoicingEmail: { label: 'Invoicing Email', type: 'email', faker: 'internet.email' },
+  creditLimit: { label: 'Credit Limit', type: 'number', faker: 'finance.amount' },
+  preferredShippingMethod: { 
+    label: 'Preferred Shipping Method', 
+    type: 'select', 
+    options: [
+      { id: 'ground', label: 'Ground' },
+      { id: 'air', label: 'Air' },
+      { id: 'sea', label: 'Sea' },
+    ],
+    faker: 'random.arrayElement',
+  },
+  onboardingStatus: { 
+    label: 'Onboarding Status', 
+    type: 'select', 
+    options: [
+      { id: 'not_started', label: 'Not Started' },
+      { id: 'in_progress', label: 'In Progress' },
+      { id: 'completed', label: 'Completed' },
+    ],
+    faker: 'random.arrayElement',
+  },
+  renewalDate: { label: 'Renewal Date', type: 'date', faker: 'date.future' },
+  lastContactDate: { label: 'Last Contact Date', type: 'date', faker: 'date.recent' },
+  satisfactionScore: { label: 'Satisfaction Score', type: 'number', faker: 'datatype.number' },
+};
+
+export const clientsHeadCells = Object.keys(clientFieldsConfig).map(key => ({
+  id: key,
+  label: clientFieldsConfig[key].label,
+}));
+
+export const clientsEntityName = 'Clients';
+
+export async function fetchClients() {
+  return await fetchDocuments(organizationId, 'clients');
+}
+
+export const addClient = (item) => addDocument(organizationId, 'clients', item);
+export const updateClient = (id, item) => updateDocument(organizationId, 'clients', id, item);
+export const deleteClient = (id) => deleteDocument(organizationId, 'clients', id);
 
 
 
@@ -1773,3 +1996,129 @@ export const fetchRisks = () => fetchDocuments(organizationId, 'risks');
 export const addRisk = (item) => addDocument(organizationId, 'risks', item);
 export const updateRisk = (id, item) => updateDocument(organizationId, 'risks', id, item);
 export const deleteRisk = (id) => deleteDocument(organizationId, 'risks', id);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Campaigns
+
+
+export const campaignFieldsConfig = {
+  campaignId: { label: 'Campaign ID', type: 'text', faker: 'datatype.uuid' },
+  campaignName: { label: 'Campaign Name', type: 'text', faker: 'commerce.productName' },
+  description: { label: 'Description', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraphs' },
+  startDate: { label: 'Start Date', type: 'date', faker: 'date.past' },
+  endDate: { label: 'End Date', type: 'date', faker: 'date.future' },
+  status: {
+    label: 'Status',
+    type: 'select',
+    options: [
+      { id: 'planned', label: 'Planned' },
+      { id: 'active', label: 'Active' },
+      { id: 'completed', label: 'Completed' },
+      { id: 'on_hold', label: 'On Hold' },
+      { id: 'cancelled', label: 'Cancelled' },
+    ],
+    faker: 'random.arrayElement',
+  },
+  targetAudience: { label: 'Target Audience', type: 'text', faker: 'lorem.words' },
+  budget: { label: 'Budget', type: 'number', faker: 'finance.amount' },
+  actualSpend: { label: 'Actual Spend', type: 'number', faker: 'finance.amount' },
+  roi: { label: 'ROI (%)', type: 'number', faker: 'datatype.float' },
+  marketingChannel: {
+    label: 'Marketing Channel',
+    type: 'select',
+    options: [
+      { id: 'email', label: 'Email' },
+      { id: 'social_media', label: 'Social Media' },
+      { id: 'seo', label: 'SEO' },
+      { id: 'ppc', label: 'PPC' },
+      { id: 'content', label: 'Content Marketing' },
+    ],
+    faker: 'random.arrayElement',
+  },
+  campaignManager: { 
+    label: 'Campaign Manager', 
+    type: 'select',
+    options: managers,
+    faker: 'random.arrayElement',
+  },
+  objectives: { label: 'Objectives', type: 'text', multiline: true, rows: 4, faker: 'lorem.sentences' },
+  KPIs: { label: 'KPIs', type: 'text', faker: 'lorem.words' },
+  contentStrategy: { label: 'Content Strategy', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraphs' },
+  creativeAssets: { label: 'Creative Assets', type: 'text', faker: 'lorem.words' },
+  callToAction: { label: 'Call to Action', type: 'text', faker: 'lorem.words' },
+  landingPage: { label: 'Landing Page URL', type: 'text', faker: 'internet.url' },
+  emailTemplate: { label: 'Email Template', type: 'text', faker: 'lorem.words' },
+  socialMediaPosts: { label: 'Social Media Posts', type: 'text', multiline: true, rows: 4, faker: 'lorem.sentences' },
+  ppcKeywords: { label: 'PPC Keywords', type: 'text', faker: 'lorem.words' },
+  seoKeywords: { label: 'SEO Keywords', type: 'text', faker: 'lorem.words' },
+  targetLocations: { label: 'Target Locations', type: 'text', faker: 'address.city' },
+  targetAgeGroup: { 
+    label: 'Target Age Group', 
+    type: 'select', 
+    options: [
+      { id: '18_24', label: '18-24' },
+      { id: '25_34', label: '25-34' },
+      { id: '35_44', label: '35-44' },
+      { id: '45_54', label: '45-54' },
+      { id: '55_64', label: '55-64' },
+      { id: '65_plus', label: '65+' },
+    ],
+    faker: 'random.arrayElement',
+  },
+  demographics: { label: 'Demographics', type: 'text', faker: 'lorem.words' },
+  competitors: { label: 'Competitors', type: 'text', faker: 'company.name' },
+  marketResearch: { label: 'Market Research', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraphs' },
+  conversionRate: { label: 'Conversion Rate (%)', type: 'number', faker: 'datatype.float' },
+  clickThroughRate: { label: 'Click-Through Rate (%)', type: 'number', faker: 'datatype.float' },
+  openRate: { label: 'Open Rate (%)', type: 'number', faker: 'datatype.float' },
+  bounceRate: { label: 'Bounce Rate (%)', type: 'number', faker: 'datatype.float' },
+  leadGeneration: { label: 'Lead Generation', type: 'number', faker: 'datatype.number' },
+  customerAcquisitionCost: { label: 'Customer Acquisition Cost', type: 'number', faker: 'finance.amount' },
+  salesGenerated: { label: 'Sales Generated', type: 'number', faker: 'finance.amount' },
+  leadNurturing: { label: 'Lead Nurturing Strategy', type: 'text', multiline: true, rows: 4, faker: 'lorem.sentences' },
+  remarketingStrategy: { label: 'Remarketing Strategy', type: 'text', multiline: true, rows: 4, faker: 'lorem.sentences' },
+  emailOpenRate: { label: 'Email Open Rate (%)', type: 'number', faker: 'datatype.float' },
+  smsClickRate: { label: 'SMS Click Rate (%)', type: 'number', faker: 'datatype.float' },
+  adSpend: { label: 'Ad Spend', type: 'number', faker: 'finance.amount' },
+  impressions: { label: 'Impressions', type: 'number', faker: 'datatype.number' },
+  engagements: { label: 'Engagements', type: 'number', faker: 'datatype.number' },
+  shares: { label: 'Shares', type: 'number', faker: 'datatype.number' },
+  likes: { label: 'Likes', type: 'number', faker: 'datatype.number' },
+  comments: { label: 'Comments', type: 'number', faker: 'datatype.number' },
+  brandAwarenessScore: { label: 'Brand Awareness Score', type: 'number', faker: 'datatype.float' },
+  sentimentAnalysis: { label: 'Sentiment Analysis', type: 'text', faker: 'lorem.sentences' },
+  userGeneratedContent: { label: 'User Generated Content', type: 'text', faker: 'lorem.words' },
+  partnerships: { label: 'Partnerships', type: 'text', faker: 'company.name' },
+  influencers: { label: 'Influencers', type: 'text', faker: 'name.fullName' },
+  lastUpdated: { label: 'Last Updated', type: 'date', faker: 'date.recent' },
+};
+
+export const campaignsHeadCells = Object.keys(campaignFieldsConfig).map(key => ({
+  id: key,
+  label: campaignFieldsConfig[key].label,
+}));
+
+export const campaignsEntityName = 'Marketing Campaigns';
+
+export async function fetchCampaigns() {
+  return await fetchDocuments(organizationId, 'campaigns');
+}
+
+export const addCampaign = (item) => addDocument(organizationId, 'campaigns', item);
+export const updateCampaign = (id, item) => updateDocument(organizationId, 'campaigns', id, item);
+export const deleteCampaign = (id) => deleteDocument(organizationId, 'campaigns', id);
