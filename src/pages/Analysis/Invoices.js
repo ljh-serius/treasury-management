@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
 export default function InvoiceAnalysisDashboard({ fetchItems }) {
   const [invoicesData, setInvoicesData] = useState([]);
@@ -12,17 +14,19 @@ export default function InvoiceAnalysisDashboard({ fetchItems }) {
   const [topVendors, setTopVendors] = useState([]);
   const [totalIssuedValue, setTotalIssuedValue] = useState(0);
   const [totalReceivedValue, setTotalReceivedValue] = useState(0);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true); // Start loading
       const data = await fetchItems();
       setInvoicesData(data);
       processInvoiceData(data);
+      setLoading(false); // Stop loading
     };
 
     fetchData();
   }, [fetchItems]);
-  
 
   const processInvoiceData = (data) => {
     // Invoice Type Distribution
@@ -171,9 +175,11 @@ export default function InvoiceAnalysisDashboard({ fetchItems }) {
     ],
   };
 
-
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
           Invoice Analysis Dashboard

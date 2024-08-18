@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Grid, Card, CardContent, Typography, Container, Box } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
 const EntitiesAnalysis = ({ fetchItems }) => {
     const [entitiesData, setEntitiesData] = useState([]);
@@ -10,12 +12,15 @@ const EntitiesAnalysis = ({ fetchItems }) => {
     const [regionDistribution, setRegionDistribution] = useState([]);
     const [entitiesByManager, setEntitiesByManager] = useState([]);
     const [entitiesOverTime, setEntitiesOverTime] = useState([]);
+    const [loading, setLoading] = useState(true); // Add loading state
 
     useEffect(() => {
         async function loadData() {
+            setLoading(true); // Start loading
             const entities = await fetchItems();
             setEntitiesData(entities);
             analyzeData(entities);
+            setLoading(false); // Stop loading
         }
 
         loadData();
@@ -199,6 +204,9 @@ const EntitiesAnalysis = ({ fetchItems }) => {
 
     return (
         <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+            <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+                <CircularProgress color="inherit" />
+            </Backdrop>
             <Box sx={{ padding: 4 }}>
                 <Grid container spacing={3}>
                     {/* Status Distribution Chart */}

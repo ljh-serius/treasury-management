@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
-export default function CostAnalysisDashboard({ fetchCosts }) {
+export default function CostAnalysisDashboard({ fetchItems }) {
   const [costsData, setCostsData] = useState([]);
   const [departmentDistribution, setDepartmentDistribution] = useState([]);
   const [allocationTypeDistribution, setAllocationTypeDistribution] = useState([]);
@@ -12,20 +14,23 @@ export default function CostAnalysisDashboard({ fetchCosts }) {
   const [totalCost, setTotalCost] = useState(0);
   const [averageCost, setAverageCost] = useState(0);
   const [topCosts, setTopCosts] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchCosts();
+      setLoading(true); // Start loading
+      const data = await fetchItems();
       if (data && data.length > 0) {
         setCostsData(data);
         processCostData(data);
       } else {
         console.log("No cost data available.");
       }
+      setLoading(false); // Stop loading
     };
 
     fetchData();
-  }, [fetchCosts]);
+  }, [fetchItems]);
 
   const processCostData = (data) => {
     if (!data || data.length === 0) {
@@ -174,6 +179,9 @@ export default function CostAnalysisDashboard({ fetchCosts }) {
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
           Cost Analysis Dashboard

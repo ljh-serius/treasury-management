@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Container, Backdrop, CircularProgress } from '@mui/material';
 
-export default function ProviderAnalysisDashboard({ fetchProviders }) {
+export default function ProviderAnalysisDashboard({ fetchItems }) {
   const [providersData, setProvidersData] = useState([]);
   const [countryDistribution, setCountryDistribution] = useState([]);
   const [industryDistribution, setIndustryDistribution] = useState([]);
@@ -13,20 +13,23 @@ export default function ProviderAnalysisDashboard({ fetchProviders }) {
   const [totalAnnualRevenue, setTotalAnnualRevenue] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
   const [topProviders, setTopProviders] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchProviders();
+      setLoading(true); // Start loading
+      const data = await fetchItems();
       if (data && data.length > 0) {
         setProvidersData(data);
         processProviderData(data);
       } else {
         console.log("No provider data available.");
       }
+      setLoading(false); // Stop loading
     };
 
     fetchData();
-  }, [fetchProviders]);
+  }, [fetchItems]);
 
   const processProviderData = (data) => {
     if (!data || data.length === 0) {
@@ -183,6 +186,9 @@ export default function ProviderAnalysisDashboard({ fetchProviders }) {
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
           Provider Analysis Dashboard

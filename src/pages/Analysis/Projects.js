@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Container, Backdrop, CircularProgress } from '@mui/material';
 
-export default function ProjectAnalysisDashboard({ fetchProjects }) {
+export default function ProjectAnalysisDashboard({ fetchItems }) {
   const [projectsData, setProjectsData] = useState([]);
   const [statusDistribution, setStatusDistribution] = useState([]);
   const [progressData, setProgressData] = useState([]);
@@ -14,20 +14,23 @@ export default function ProjectAnalysisDashboard({ fetchProjects }) {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [averageProgress, setAverageProgress] = useState(0);
   const [topProjects, setTopProjects] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchProjects();
+      setLoading(true); // Start loading
+      const data = await fetchItems();
       if (data && data.length > 0) {
         setProjectsData(data);
         processProjectData(data);
       } else {
         console.log("No project data available.");
       }
+      setLoading(false); // Stop loading
     };
 
     fetchData();
-  }, [fetchProjects]);
+  }, [fetchItems]);
 
   const processProjectData = (data) => {
     if (!data || data.length === 0) {
@@ -181,6 +184,9 @@ export default function ProjectAnalysisDashboard({ fetchProjects }) {
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
           Project Analysis Dashboard

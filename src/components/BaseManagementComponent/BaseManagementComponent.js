@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel,
   Toolbar, Typography, Paper, Checkbox as MUICheckbox, IconButton, Tooltip, Modal, TextField, Button, Container,
-  FormControlLabel, Switch, Grid, FormControl, InputLabel, Select, MenuItem, Chip, Stack, Autocomplete
+  FormControlLabel, Switch, Grid, FormControl, InputLabel, Select, MenuItem, Chip, Stack, Autocomplete, Backdrop,
+  CircularProgress
 } from '@mui/material';
 
 import { alpha } from '@mui/material/styles';
@@ -202,8 +203,8 @@ function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
                     getOptionLabel={(option) => option.label}
                     value={fieldConfig[field].multiple
                       ? fieldConfig[field].options.filter((option) =>
-                          formData[field] ? formData[field].includes(option.id) : false
-                        )
+                        formData[field] ? formData[field].includes(option.id) : false
+                      )
                       : fieldConfig[field].options.find((option) => option.id === formData[field]) || null}
                     onChange={(event, value) => handleAutocompleteChange(event, value, field)}
                     renderInput={(params) => (
@@ -354,7 +355,7 @@ export default function BaseTableComponent({
   updateItem,
   deleteItem,
   fieldConfig,
-  entityName
+  entityName,
 }) {
   const [refreshedFieldsConfig, setRefreshedFieldsConfig] = useState(fieldConfig);
   const [order, setOrder] = useState('asc');
@@ -368,11 +369,18 @@ export default function BaseTableComponent({
   const [filters, setFilters] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
+  const [loading, setLoading] = useState(false);  // Add loading state
+
+  useEffect(() => {
+    setRefreshedFieldsConfig(fieldConfig);
+  }, [fieldConfig]);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true); // Start loading
       const data = await fetchItems();
       setItems(data);
+      setLoading(false); // Stop loading
     };
 
     fetchData();
@@ -440,6 +448,7 @@ export default function BaseTableComponent({
 
   const handleDeleteItems = async () => {
     try {
+      setLoading(true); // Start loading
       await Promise.all(selected.map((id) => deleteItem(id)));
       setSelected([]);
       refreshFieldsConfig();
@@ -447,16 +456,17 @@ export default function BaseTableComponent({
       setItems(data);
     } catch (error) {
       console.error(`Error deleting ${entityName}:`, error);
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
-  
-  const refreshFieldsConfig = async () => {
 
+  const refreshFieldsConfig = async () => {
     try {
       const updatedConfig = await Promise.all(
         Object.keys(refreshedFieldsConfig).map(async (key) => {
           const field = refreshedFieldsConfig[key];
-          
+
           if (field.refreshOptions) {
             const newOptions = await field.refreshOptions();
             return {
@@ -469,13 +479,11 @@ export default function BaseTableComponent({
               },
             };
           } else {
-            // Return the field as is if no refreshOptions function exists
             return { [key]: field };
           }
         })
       );
-  
-      // Merge the updated fields into the refreshedFieldsConfig state
+
       setRefreshedFieldsConfig((prevConfig) => {
         return updatedConfig.reduce((acc, curr) => {
           return { ...acc, ...curr };
@@ -485,9 +493,10 @@ export default function BaseTableComponent({
       console.error('Error refreshing fields config:', error);
     }
   };
-  
+
   const handleModalSubmit = async (itemData) => {
     try {
+      setLoading(true); // Start loading
       if (currentItem) {
         await updateItem(currentItem.id, itemData);
       } else {
@@ -499,66 +508,11 @@ export default function BaseTableComponent({
       refreshFieldsConfig();
     } catch (error) {
       console.error(`Error saving ${entityName}:`, error);
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
- 
-    const getRandomElementId = (arr) => {
-      if (!Array.isArray(arr) || arr.length === 0) return null;
-      const randomIndex = Math.floor(Math.random() * arr.length);
-      const element = arr[randomIndex];
-      return element && element.id ? element.id : null;
-    };
-    const getMultipleRandomElementIds = (arr) => {
-      if (!Array.isArray(arr) || arr.length === 0) return [];
-      const randomCount = Math.floor(Math.random() * arr.length) + 1;
-      let result = new Set();
-  
-      while (result.size < randomCount) {
-          const randomElement = getRandomElementId(arr);
-          if (randomElement) {
-              result.add(randomElement);
-          }
-      }
-  
-      return Array.from(result);
-  };
-  
-    
-  const generateRandomRow = async () => {
-    try {
-        await refreshFieldsConfig(); // Ensure the fields are refreshed first.
-        const newRow = Object.keys(refreshedFieldsConfig).reduce((acc, key) => {
-            const field = refreshedFieldsConfig[key];
-            let value;
-            if (field.faker) {
-                const fakerPath = field.faker.split('.');
-                value = fakerPath.reduce((acc, method) => acc[method], faker);
-                if (field.type === 'select' && field.multiple) {
-                    value = getMultipleRandomElementIds(field.options);
-                } else if (field.type === 'select') {
-                    value = getRandomElementId(field.options);
-                } else if (field.faker.includes('date')) {
-                    value = new Date(value()).toISOString();
-                } else {
-                    value = typeof value === 'function' ? value() : value;
-                }
-            } else {
-                value = field.type === 'number' ? faker.datatype.number() : faker.lorem.word();
-            }
-            acc[key] = value;
-            return acc;
-        }, {});
 
-        await addItem(newRow);
-        const data = await fetchItems();
-        setItems(data);
-    } catch (error) {
-        console.error(`Error generating and saving random ${entityName}:`, error);
-    }
-};
-
-  
-  
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -570,6 +524,62 @@ export default function BaseTableComponent({
 
   const handleChangeDense = (event) => {
     setDense(event.target.checked);
+  };
+
+  
+  const getRandomElementId = (arr) => {
+    if (!Array.isArray(arr) || arr.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * arr.length);
+    const element = arr[randomIndex];
+    return element && element.id ? element.id : null;
+  };
+  const getMultipleRandomElementIds = (arr) => {
+    if (!Array.isArray(arr) || arr.length === 0) return [];
+    const randomCount = Math.floor(Math.random() * arr.length) + 1;
+    let result = new Set();
+
+    while (result.size < randomCount) {
+      const randomElement = getRandomElementId(arr);
+      if (randomElement) {
+        result.add(randomElement);
+      }
+    }
+
+    return Array.from(result);
+  };
+
+
+  const generateRandomRow = async () => {
+    try {
+      await refreshFieldsConfig(); // Ensure the fields are refreshed first.
+      const newRow = Object.keys(refreshedFieldsConfig).reduce((acc, key) => {
+        const field = refreshedFieldsConfig[key];
+        let value;
+        if (field.faker) {
+          const fakerPath = field.faker.split('.');
+          value = fakerPath.reduce((acc, method) => acc[method], faker);
+          if (field.type === 'select' && field.multiple) {
+            value = getMultipleRandomElementIds(field.options);
+          } else if (field.type === 'select') {
+            value = getRandomElementId(field.options);
+          } else if (field.faker.includes('date')) {
+            value = new Date(value()).toISOString();
+          } else {
+            value = typeof value === 'function' ? value() : value;
+          }
+        } else {
+          value = field.type === 'number' ? faker.datatype.number() : faker.lorem.word();
+        }
+        acc[key] = value;
+        return acc;
+      }, {});
+
+      await addItem(newRow);
+      const data = await fetchItems();
+      setItems(data);
+    } catch (error) {
+      console.error(`Error generating and saving random ${entityName}:`, error);
+    }
   };
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
@@ -587,7 +597,7 @@ export default function BaseTableComponent({
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
-      <Box sx={{ maxWidth: '80vw' }}>
+      <Box sx={{ maxWidth: '80vw', position: 'relative' }}>
         <FilterManager filters={filters} setFilters={setFilters} fieldConfig={refreshedFieldsConfig} />
         <Paper sx={{ width: '100%', mb: 2 }}>
           <BaseTableToolbar
@@ -602,7 +612,7 @@ export default function BaseTableComponent({
           <TableContainer>
             <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={dense ? 'small' : 'medium'}>
               <BaseTableHead
-                headCells={Object.keys(refreshedFieldsConfig).map(key => ({
+                headCells={Object.keys(refreshedFieldsConfig).map((key) => ({
                   id: key,
                   label: refreshedFieldsConfig[key].label,
                 }))}
@@ -636,12 +646,15 @@ export default function BaseTableComponent({
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
+
                       {Object.keys(refreshedFieldsConfig).map((field) => {
                         const cellValue = row[field];
                         const isTextField = refreshedFieldsConfig[field].type === 'text';
                         const isCheckboxField = refreshedFieldsConfig[field].type === 'checkbox';
-                        const isMultipleSelectField = refreshedFieldsConfig[field].type === 'select' && refreshedFieldsConfig[field].multiple === true;
+                        const isMultipleSelectField =
+                          refreshedFieldsConfig[field].type === 'select' && refreshedFieldsConfig[field].multiple === true;
                         const link = refreshedFieldsConfig[field].link;
+
                         let displayValue;
 
                         if (isTextField) {
@@ -649,26 +662,28 @@ export default function BaseTableComponent({
                         } else if (isCheckboxField) {
                           displayValue = cellValue ? 'True' : 'False';
                         } else if (isMultipleSelectField) {
-                          if(link){
-                            displayValue = cellValue ? cellValue.map((element) => {
-                              return (
-                                <div key={element}>
-                                  <Link to={`${link}/${element}`} onClick={(e) => e.stopPropagation()}>
-                                    {element}
-                                  </Link>
-                                </div>
-                              )
-                            }) : null;
+                          if (link) {
+                            displayValue = cellValue
+                              ? cellValue.map((element) => {
+                                  return (
+                                    <div key={element}>
+                                      <Link to={`${link}/${element}`} onClick={(e) => e.stopPropagation()}>
+                                        {element}
+                                      </Link>
+                                    </div>
+                                  );
+                                })
+                              : null;
                           } else {
                             displayValue = cellValue;
                           }
-                        }else {
+                        } else {
                           displayValue = cellValue !== undefined && cellValue !== null ? cellValue.toString() : 'N/A';
                         }
 
                         return (
                           <TableCell key={field} align={refreshedFieldsConfig[field].numeric ? 'right' : 'left'}>
-                            { displayValue ? displayValue : '--' }
+                            {displayValue ? displayValue : '--'}
                           </TableCell>
                         );
                       })}
@@ -685,7 +700,6 @@ export default function BaseTableComponent({
                   </TableRow>
                 )}
               </TableBody>
-
             </Table>
           </TableContainer>
           <TablePagination
@@ -706,8 +720,15 @@ export default function BaseTableComponent({
           initialData={currentItem}
           fieldConfig={refreshedFieldsConfig}
         />
+
+        {/* Backdrop and Spinner */}
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
       </Box>
     </Container>
   );
 }
-

@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
-export default function EmployeeAnalysisDashboard({ fetchEmployees }) {
+export default function EmployeeAnalysisDashboard({ fetchItems }) {
   const [employeesData, setEmployeesData] = useState([]);
   const [departmentDistribution, setDepartmentDistribution] = useState([]);
   const [locationDistribution, setLocationDistribution] = useState([]);
@@ -12,20 +14,23 @@ export default function EmployeeAnalysisDashboard({ fetchEmployees }) {
   const [averageSalary, setAverageSalary] = useState(0);
   const [averageExperience, setAverageExperience] = useState(0);
   const [topPerformers, setTopPerformers] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchEmployees();
+      setLoading(true); // Start loading
+      const data = await fetchItems();
       if (data && data.length > 0) {
         setEmployeesData(data);
         processEmployeeData(data);
       } else {
         console.log("No employee data available.");
       }
+      setLoading(false); // Stop loading
     };
 
     fetchData();
-  }, [fetchEmployees]);
+  }, [fetchItems]);
 
   const processEmployeeData = (data) => {
     if (!data || data.length === 0) {
@@ -179,6 +184,9 @@ export default function EmployeeAnalysisDashboard({ fetchEmployees }) {
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
           Employee Analysis Dashboard

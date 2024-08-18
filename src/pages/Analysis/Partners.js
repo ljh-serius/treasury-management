@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
-export default function PartnerAnalysisDashboard({ fetchPartners }) {
+export default function PartnerAnalysisDashboard({ fetchItems }) {
   const [partnersData, setPartnersData] = useState([]);
   const [industryDistribution, setIndustryDistribution] = useState([]);
   const [regionDistribution, setRegionDistribution] = useState([]);
@@ -12,20 +14,23 @@ export default function PartnerAnalysisDashboard({ fetchPartners }) {
   const [totalContractValue, setTotalContractValue] = useState(0);
   const [averageContractValue, setAverageContractValue] = useState(0);
   const [topPartners, setTopPartners] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchPartners();
+      setLoading(true); // Start loading
+      const data = await fetchItems();
       if (data && data.length > 0) {
         setPartnersData(data);
         processPartnerData(data);
       } else {
         console.log("No partner data available.");
       }
+      setLoading(false); // Stop loading
     };
 
     fetchData();
-  }, [fetchPartners]);
+  }, [fetchItems]);
 
   const processPartnerData = (data) => {
     if (!data || data.length === 0) {
@@ -174,6 +179,9 @@ export default function PartnerAnalysisDashboard({ fetchPartners }) {
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
           Partner Analysis Dashboard

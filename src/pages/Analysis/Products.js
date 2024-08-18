@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
-export default function ProductAnalysisDashboard({ fetchProducts }) {
+export default function ProductAnalysisDashboard({ fetchItems }) {
   const [productsData, setProductsData] = useState([]);
   const [categoryDistribution, setCategoryDistribution] = useState([]);
   const [supplierDistribution, setSupplierDistribution] = useState([]);
@@ -12,16 +14,19 @@ export default function ProductAnalysisDashboard({ fetchProducts }) {
   const [overallStockLevel, setOverallStockLevel] = useState(0);
   const [totalInventoryValue, setTotalInventoryValue] = useState(0);
   const [topProducts, setTopProducts] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchProducts();
+      setLoading(true); // Start loading
+      const data = await fetchItems();
       setProductsData(data);
       processProductData(data);
+      setLoading(false); // Stop loading
     };
 
     fetchData();
-  }, [fetchProducts]);
+  }, [fetchItems]);
 
   const processProductData = (data) => {
     // Category Distribution
@@ -185,6 +190,9 @@ export default function ProductAnalysisDashboard({ fetchProducts }) {
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
           Product Analysis Dashboard

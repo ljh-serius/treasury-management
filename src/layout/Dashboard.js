@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   CssBaseline,
@@ -89,9 +89,18 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 const Dashboard = ({ children }) => {
   const theme = useTheme();
   const { language, toggleLanguage } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [open, setOpen] = useState(true);
 
+  const [showAnalytics, setShowAnalytics] = useState(() => {
+    const saved = localStorage.getItem('showAnalytics');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('showAnalytics', JSON.stringify(showAnalytics));
+  }, [showAnalytics]);
+  
+  
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -110,7 +119,7 @@ const Dashboard = ({ children }) => {
   };
 
   const toggleShowAnalytics = () => {
-    setShowAnalytics(!showAnalytics);
+    setShowAnalytics(prev => !prev);
   };
 
   const drawer = (

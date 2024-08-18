@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Container, Backdrop, CircularProgress } from '@mui/material';
 
 export default function ExtendedRiskAnalysisDashboard({ fetchItems }) {
   const [risksData, setRisksData] = useState([]);
@@ -13,12 +13,15 @@ export default function ExtendedRiskAnalysisDashboard({ fetchItems }) {
   const [overallRiskLevel, setOverallRiskLevel] = useState('Safe');
   const [totalFinancialImpact, setTotalFinancialImpact] = useState(0);
   const [topRisks, setTopRisks] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true); // Start loading
       const data = await fetchItems();
       setRisksData(data);
       processRiskData(data);
+      setLoading(false); // Stop loading
     };
 
     fetchData();
@@ -185,6 +188,9 @@ export default function ExtendedRiskAnalysisDashboard({ fetchItems }) {
 
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
           Risk Analysis Dashboard
