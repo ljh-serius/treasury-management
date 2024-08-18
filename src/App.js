@@ -14,18 +14,8 @@ import { TranslationProvider } from './utils/TranslationProvider';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import GanttChart from './pages/GanttChart';
-import Projects from './pages/Projects';
-import Providers from './pages/Providers';
-import Products from './pages/Products';
-import Costs from './pages/Costs';
-import Partners from './pages/Partners';
-import Risks from './pages/Risks';
-import Employees from './pages/Employees';
 import Treasury from './pages/Treasury';
-import Invoices from './pages/Invoices'
-import Clients from './pages/Clients'
-import Campaigns from './pages/Campaigns'
-import Entities from './pages/Entities'
+import Management from './pages/Management'
 
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
 
@@ -73,13 +63,12 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          { /* Documents */}
           <Route
-            path="/invoices"
+            path="/management/:entity"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>
-                  <Invoices />
+                  <Management />
                 </Dashboard>
               </ProtectedRoute>
             }
@@ -112,58 +101,7 @@ const App = () => {
               <OrganizationRegistration />
             }
           />
-          { /* People and Relationships */ }
-          <Route
-            path="/clients"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Clients />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />  
-          <Route
-            path="/employees"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Employees />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/providers"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Providers />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/partners"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Partners />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          { /* Products and Services Management */}
-          <Route
-            path="/projects"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Projects />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
+ 
 
           <Route
             path="/gantt-chart"
@@ -175,57 +113,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-           <Route
-            path="/products"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Products />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />  
-          { /* Operations */}
-          <Route
-            path="/campaigns"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Campaigns />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/costs/:id"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                    <Costs />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/costs"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                    <Costs />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-           />  
-          <Route
-            path="/risks"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Risks />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
+
           { /* Analytics */}
           <Route
             path="/analytics"
@@ -238,16 +126,7 @@ const App = () => {
             }
           />
           { /* Configuration */}
-          <Route
-            path="/entities"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Entities />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
+    
           <Route
             path="/parameters"
             element={

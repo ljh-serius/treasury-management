@@ -1,49 +1,50 @@
 import {
-  fetchDocuments, 
-  addDocument, 
-  updateDocument, 
-  deleteDocument, 
-  fetchDocumentsBySelectValue, 
+  fetchDocuments,
+  addDocument,
+  updateDocument,
+  deleteDocument,
+  fetchDocumentsBySelectValue,
   fetchDocumentsByFieldValue
 } from '../../utils/firebaseCrudHelpers';
 
-
-import languages from '../../utils/languages';
+import languages from '../../data/languages';
+import nationalities from '../../data/nationalities';
+import skills from '../../data/skills';
 
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
 const productsOptions = (await fetchProducts()).map((product) => {
   return {
-      id: product.id,
-      label: product.name
+    id: product.id,
+    label: product.name
   }
 })
 
 const employeesOptions = (await fetchEmployees()).map((employee) => {
   return {
-      id: employee.id,
-      label: employee.name
+    id: employee.id,
+    label: employee.name
   }
 })
 
 const projectsOptions = (await fetchProjects()).map((project) => {
   return {
-      id: project.id,
-      label: project.name
+    id: project.id,
+    label: project.name
   }
 })
 
 const partnersOptions = (await fetchPartners()).map((partner) => {
   return {
-      id: partner.id,
-      label: partner.name
+    id: partner.id,
+    label: partner.name
   }
 })
 
 const providersOptions = (await fetchProviders()).map((provider) => {
   return {
-      id: provider.id,
-      label: provider.name
+    id: provider.id,
+    label: provider.name
   }
 })
 
@@ -52,87 +53,87 @@ export const costsFieldsConfig = {
   cost: { label: 'Cost', type: 'number', faker: 'finance.amount' },
   description: { label: 'Description', type: 'text', faker: 'lorem.sentence' },
   productIds: {
-      label: 'Cost for Products',
-      link: '/products',
-      type: 'select',
-      options: productsOptions,
-      multiple: true,
-      faker: 'random.arrayElements'
+    label: 'Cost for Products',
+    link: '/products',
+    type: 'select',
+    options: productsOptions,
+    multiple: true,
+    faker: 'random.arrayElements'
   },
   employeeIds: {
-      label: 'Cost for Employees',
-      link: '/employees',
-      type: 'select',
-      options: employeesOptions,
-      multiple: true,
-      faker: 'random.arrayElements'
+    label: 'Cost for Employees',
+    link: '/employees',
+    type: 'select',
+    options: employeesOptions,
+    multiple: true,
+    faker: 'random.arrayElements'
   },
   projectIds: {
-      label: 'Cost for Projects',
-      link: '/projects',
-      type: 'select',
-      options: projectsOptions,
-      multiple: true,
-      faker: 'random.arrayElements'
+    label: 'Cost for Projects',
+    link: '/projects',
+    type: 'select',
+    options: projectsOptions,
+    multiple: true,
+    faker: 'random.arrayElements'
   },
   partnerIds: {
-      label: 'Cost for Partners',
-      link: '/partners',
-      type: 'select',
-      link: true,
-      options: partnersOptions,
-      multiple: true,
-      faker: 'random.arrayElements'
+    label: 'Cost for Partners',
+    link: '/partners',
+    type: 'select',
+    link: true,
+    options: partnersOptions,
+    multiple: true,
+    faker: 'random.arrayElements'
   },
   providerIds: {
-      link: '/providers',
-      label: 'Cost for Providers',
-      type: 'select',
-      link: true,
-      options: providersOptions,
-      multiple: true,
-      faker: 'random.arrayElements'
+    link: '/providers',
+    label: 'Cost for Providers',
+    type: 'select',
+    link: true,
+    options: providersOptions,
+    multiple: true,
+    faker: 'random.arrayElements'
   },
   allocationDate: { label: 'Allocation Date', type: 'date', faker: 'date.past' },
   allocationType: {
-      label: 'Allocation Type',
-      type: 'select',
-      options: [
-          { id: '1', label: 'Type 1' },
-          { id: '2', label: 'Type 2' },
-          { id: '3', label: 'Type 3' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Allocation Type',
+    type: 'select',
+    options: [
+      { id: '1', label: 'Type 1' },
+      { id: '2', label: 'Type 2' },
+      { id: '3', label: 'Type 3' }
+    ],
+    faker: 'random.arrayElement'
   },
   notes: { label: 'Notes', type: 'text', faker: 'lorem.paragraph' },
   department: {
-      label: 'Department',
-      type: 'select',
-      options: [
-          { id: 'finance', label: 'Finance' },
-          { id: 'hr', label: 'Human Resources' },
-          { id: 'it', label: 'IT' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Department',
+    type: 'select',
+    options: [
+      { id: 'finance', label: 'Finance' },
+      { id: 'hr', label: 'Human Resources' },
+      { id: 'it', label: 'IT' }
+    ],
+    faker: 'random.arrayElement'
   },
   priority: {
-      label: 'Priority',
-      type: 'select',
-      options: [
-          { id: 'high', label: 'High' },
-          { id: 'medium', label: 'Medium' },
-          { id: 'low', label: 'Low' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Priority',
+    type: 'select',
+    options: [
+      { id: 'high', label: 'High' },
+      { id: 'medium', label: 'Medium' },
+      { id: 'low', label: 'Low' }
+    ],
+    faker: 'random.arrayElement'
   },
   status: {
-      label: 'Status',
-      type: 'select',
-      options: [
-          { id: 'active', label: 'Active' },
-          { id: 'inactive', label: 'Inactive' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Status',
+    type: 'select',
+    options: [
+      { id: 'active', label: 'Active' },
+      { id: 'inactive', label: 'Inactive' }
+    ],
+    faker: 'random.arrayElement'
   },
   duration: { label: 'Duration', type: 'number', faker: 'datatype.number' },
   currency: { label: 'Currency', type: 'text', faker: 'finance.currencyCode' },
@@ -143,37 +144,37 @@ export const costsFieldsConfig = {
   budgetCode: { label: 'Budget Code', type: 'text', faker: 'finance.bic' },
   financialYear: { label: 'Financial Year', type: 'number', faker: 'date.past' },
   quarter: {
-      label: 'Quarter',
-      type: 'select',
-      options: [
-          { id: 'q1', label: 'Q1' },
-          { id: 'q2', label: 'Q2' },
-          { id: 'q3', label: 'Q3' },
-          { id: 'q4', label: 'Q4' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Quarter',
+    type: 'select',
+    options: [
+      { id: 'q1', label: 'Q1' },
+      { id: 'q2', label: 'Q2' },
+      { id: 'q3', label: 'Q3' },
+      { id: 'q4', label: 'Q4' }
+    ],
+    faker: 'random.arrayElement'
   },
   allocationMethod: { label: 'Allocation Method', type: 'text', faker: 'lorem.word' },
   roiEstimate: { label: 'ROI Estimate', type: 'number', faker: 'datatype.float' },
   taxImplications: { label: 'Tax Implications', type: 'text', faker: 'lorem.sentence' },
   capexOrOpex: {
-      label: 'Capex/Opex',
-      type: 'select',
-      options: [
-          { id: 'capex', label: 'Capex' },
-          { id: 'opex', label: 'Opex' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Capex/Opex',
+    type: 'select',
+    options: [
+      { id: 'capex', label: 'Capex' },
+      { id: 'opex', label: 'Opex' }
+    ],
+    faker: 'random.arrayElement'
   },
   riskAssessment: { label: 'Risk Assessment', type: 'text', faker: 'lorem.sentence' },
   complianceStatus: {
-      label: 'Compliance Status',
-      type: 'select',
-      options: [
-          { id: 'compliant', label: 'Compliant' },
-          { id: 'non_compliant', label: 'Non-compliant' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Compliance Status',
+    type: 'select',
+    options: [
+      { id: 'compliant', label: 'Compliant' },
+      { id: 'non_compliant', label: 'Non-compliant' }
+    ],
+    faker: 'random.arrayElement'
   },
   paymentTerms: { label: 'Payment Terms', type: 'text', faker: 'finance.transactionType' },
   invoiceNumber: { label: 'Invoice Number', type: 'text', faker: 'finance.account' },
@@ -184,14 +185,14 @@ export const costsFieldsConfig = {
   exchangeRate: { label: 'Exchange Rate', type: 'number', faker: 'datatype.float' },
   costAllocationFactor: { label: 'Cost Allocation Factor', type: 'number', faker: 'datatype.float' },
   approvalStatus: {
-      label: 'Approval Status',
-      type: 'select',
-      options: [
-          { id: 'pending', label: 'Pending' },
-          { id: 'approved', label: 'Approved' },
-          { id: 'rejected', label: 'Rejected' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Approval Status',
+    type: 'select',
+    options: [
+      { id: 'pending', label: 'Pending' },
+      { id: 'approved', label: 'Approved' },
+      { id: 'rejected', label: 'Rejected' }
+    ],
+    faker: 'random.arrayElement'
   },
   auditTrail: { label: 'Audit Trail', type: 'text', faker: 'lorem.paragraphs' },
 };
@@ -222,8 +223,8 @@ export const deleteCost = (costId) => deleteDocument(organizationId, 'costs', co
 
 export const partnersFieldsConfig = {
   name: { label: 'Partner Name', type: 'text', faker: 'company.name' },
-  service: { 
-    label: 'Service', 
+  service: {
+    label: 'Service',
     type: 'select',
     options: [
       { id: 'consulting', label: 'Consulting' },
@@ -234,8 +235,8 @@ export const partnersFieldsConfig = {
     ],
     faker: 'random.arrayElement',
   },
-  partnerType: { 
-    label: 'Partner Type', 
+  partnerType: {
+    label: 'Partner Type',
     type: 'select',
     options: [
       { id: 'strategic', label: 'Strategic' },
@@ -261,8 +262,8 @@ export const partnersFieldsConfig = {
     ],
     faker: 'random.arrayElement',
   },
-  industry: { 
-    label: 'Industry', 
+  industry: {
+    label: 'Industry',
     type: 'select',
     options: [
       { id: 'finance', label: 'Finance' },
@@ -278,8 +279,8 @@ export const partnersFieldsConfig = {
   startDate: { label: 'Start Date', type: 'date', faker: 'date.past' },
   endDate: { label: 'End Date', type: 'date', faker: 'date.future' },
   renewalDate: { label: 'Renewal Date', type: 'date', faker: 'date.future' },
-  riskLevel: { 
-    label: 'Risk Level', 
+  riskLevel: {
+    label: 'Risk Level',
     type: 'select',
     options: [
       { id: 'low', label: 'Low' },
@@ -289,8 +290,8 @@ export const partnersFieldsConfig = {
     ],
     faker: 'random.arrayElement',
   },
-  region: { 
-    label: 'Region', 
+  region: {
+    label: 'Region',
     type: 'select',
     options: [
       { id: 'north_america', label: 'North America' },
@@ -301,8 +302,8 @@ export const partnersFieldsConfig = {
     ],
     faker: 'random.arrayElement',
   },
-  paymentTerms: { 
-    label: 'Payment Terms', 
+  paymentTerms: {
+    label: 'Payment Terms',
     type: 'select',
     options: [
       { id: 'net_30', label: 'Net 30' },
@@ -312,8 +313,8 @@ export const partnersFieldsConfig = {
     ],
     faker: 'random.arrayElement',
   },
-  complianceStatus: { 
-    label: 'Compliance Status', 
+  complianceStatus: {
+    label: 'Compliance Status',
     type: 'select',
     options: [
       { id: 'compliant', label: 'Compliant' },
@@ -324,8 +325,8 @@ export const partnersFieldsConfig = {
   },
   notes: { label: 'Notes', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraph' },
   vendorCode: { label: 'Vendor Code', type: 'text', faker: 'datatype.uuid' },
-  billingCycle: { 
-    label: 'Billing Cycle', 
+  billingCycle: {
+    label: 'Billing Cycle',
     type: 'select',
     options: [
       { id: 'monthly', label: 'Monthly' },
@@ -335,8 +336,8 @@ export const partnersFieldsConfig = {
     faker: 'random.arrayElement',
   },
   sla: { label: 'Service Level Agreement (SLA)', type: 'text', faker: 'lorem.sentence' },
-  paymentMethod: { 
-    label: 'Payment Method', 
+  paymentMethod: {
+    label: 'Payment Method',
     type: 'select',
     options: [
       { id: 'bank_transfer', label: 'Bank Transfer' },
@@ -347,8 +348,8 @@ export const partnersFieldsConfig = {
     faker: 'random.arrayElement',
   },
   discountRate: { label: 'Discount Rate', type: 'number', faker: 'datatype.float' },
-  preferredCurrency: { 
-    label: 'Preferred Currency', 
+  preferredCurrency: {
+    label: 'Preferred Currency',
     type: 'select',
     options: [
       { id: 'usd', label: 'USD' },
@@ -363,8 +364,8 @@ export const partnersFieldsConfig = {
   supportEmail: { label: 'Support Email', type: 'email', faker: 'internet.email' },
   supportPhone: { label: 'Support Phone', type: 'tel', faker: 'phone.imei' },
   accountManager: { label: 'Account Manager', type: 'text', faker: 'name.fullName' },
-  partnerRating: { 
-    label: 'Partner Rating', 
+  partnerRating: {
+    label: 'Partner Rating',
     type: 'select',
     options: [
       { id: 'excellent', label: 'Excellent' },
@@ -378,8 +379,8 @@ export const partnersFieldsConfig = {
   partnershipEndDate: { label: 'Partnership End Date', type: 'date', faker: 'date.future' },
   numberOfEmployees: { label: 'Number of Employees', type: 'number', faker: 'datatype.number' },
   annualRevenue: { label: 'Annual Revenue', type: 'number', faker: 'finance.amount' },
-  partnershipLevel: { 
-    label: 'Partnership Level', 
+  partnershipLevel: {
+    label: 'Partnership Level',
     type: 'select',
     options: [
       { id: 'bronze', label: 'Bronze' },
@@ -389,8 +390,8 @@ export const partnersFieldsConfig = {
     ],
     faker: 'random.arrayElement',
   },
-  preferredLanguage: { 
-    label: 'Preferred Language', 
+  preferredLanguage: {
+    label: 'Preferred Language',
     type: 'select',
     options: [
       { id: 'english', label: 'English' },
@@ -401,8 +402,8 @@ export const partnersFieldsConfig = {
     multiple: false,
     faker: 'random.arrayElement',
   },
-  taxExemptionStatus: { 
-    label: 'Tax Exemption Status', 
+  taxExemptionStatus: {
+    label: 'Tax Exemption Status',
     type: 'select',
     options: [
       { id: 'exempt', label: 'Exempt' },
@@ -438,36 +439,36 @@ export const deletePartner = (id) => deleteDocument(organizationId, 'partners', 
 
 
 
- // employees
+// employees
 const costs = (await fetchCosts()).map((cost) => {
   return {
-      id: cost.id,
-      label: cost.name
+    id: cost.id,
+    label: cost.name
   }
 })
 
 const managers = (await fetchEmployeesByField('position', 'manager')).map((manager) => {
   return {
-      id: manager.id,
-      label: manager.name
+    id: manager.id,
+    label: manager.name
   }
 })
 
 const employees = (await fetchEmployees()).map((manager) => {
   return {
-      id: manager.id,
-      label: manager.name
+    id: manager.id,
+    label: manager.name
   }
 })
 
 const healthInsurances = (await fetchPartnersBySelectValue('servicesProvided', 'health_insurance')).map((partner) => {
   return {
-      id: partner.id,
-      label: partner.name
+    id: partner.id,
+    label: partner.name
   }
 })
 
-console.log(' fetchPartnersBySelectValue', healthInsurances) 
+console.log(' fetchPartnersBySelectValue', healthInsurances)
 
 export const employeesFieldsConfig = {
   name: { label: 'Name', type: 'text', faker: 'name.fullName' },
@@ -518,8 +519,8 @@ export const employeesFieldsConfig = {
     ],
     faker: 'random.arrayElement',
   },
-  manager: { 
-    id: 'Manager', 
+  manager: {
+    id: 'Manager',
     label: 'Manager',
     type: 'select',
     options: managers,
@@ -559,7 +560,13 @@ export const employeesFieldsConfig = {
     ],
     faker: 'random.arrayElement',
   },
-  nationality: { label: 'Nationality', type: 'text', faker: 'address.country' },
+  nationality: {
+    label: 'Nationality',
+    multiple: true,
+    type: 'select',
+    options: nationalities,
+    faker: 'random.arrayElement',
+  },
   emergencyContactName: { label: 'Emergency Contact Name', type: 'text', faker: 'name.fullName' },
   emergencyContactPhone: { label: 'Emergency Contact Phone', type: 'text', faker: 'phone.imei' },
   bankAccountNumber: { label: 'Bank Account Number', type: 'text', faker: 'finance.account' },
@@ -607,7 +614,13 @@ export const employeesFieldsConfig = {
     options: languages,
     faker: 'random.arrayElement',
   },
-  skills: { label: 'Skills', type: 'text', faker: 'random.words' },
+  skills: {
+    label: 'Skills',
+    type: 'select',
+    multiple: true,
+    options: skills,
+    faker: 'random.arrayElement'
+  },
   performanceRating: { label: 'Performance Rating', type: 'number', faker: 'datatype.number' },
   probationEndDate: { label: 'Probation End Date', type: 'date', faker: 'date.future' },
   healthInsuranceProvider: {
@@ -632,11 +645,11 @@ export function fetchEmployees() {
 }
 export async function fetchEmployeesBySelectOption(selectMenu, value) {
   return await fetchDocumentsBySelectValue(organizationId, 'employees', selectMenu, value);
-} 
+}
 
 export async function fetchEmployeesByField(fieldName, fieldValue) {
   return await fetchDocumentsByFieldValue(organizationId, 'employees', fieldName, fieldValue);
-} 
+}
 
 export const addEmployee = (item) => addDocument(organizationId, 'employees', item);
 export const updateEmployee = (employeeId, item) => updateDocument(organizationId, 'employees', employeeId, item);
@@ -664,97 +677,97 @@ export const addEntity = (item) => addDocument(organizationId, 'entities', item)
 export const updateEntity = (id, item) => updateDocument(organizationId, 'entities', id, item);
 export const deleteEntity = (id) => deleteDocument(organizationId, 'entities', id);
 
-const getEntitiesOptions = async (types) =>  {
+const getEntitiesOptions = async (types) => {
   return (await fetchEntities()).filter((entity) => {
-      return types.includes(entity.type);
+    return types.includes(entity.type);
   }).map((entity) => {
-      return {
-          id: entity.id,
-          label: entity.name
-      }
+    return {
+      id: entity.id,
+      label: entity.name
+    }
   });
 }
 
 export const entitiesFieldsConfig = {
   name: { label: 'name', type: 'text', faker: 'company.name' },
   type: {
-      label: 'Manager ID',
-      type: 'select',
-      options: [
-          {
-              id: 'store',
-              label: 'Store'
-          },
-          {
-              id: 'agency',
-              label: 'Agency'
-          },
-          {
-              id: 'department',
-              label: 'Department'
-          },
-          {
-              id: 'service',
-              label: 'Service'
-          },
-      ],
-      multiple: false,
-      faker: 'random.arrayElement'
+    label: 'Manager ID',
+    type: 'select',
+    options: [
+      {
+        id: 'store',
+        label: 'Store'
+      },
+      {
+        id: 'agency',
+        label: 'Agency'
+      },
+      {
+        id: 'department',
+        label: 'Department'
+      },
+      {
+        id: 'service',
+        label: 'Service'
+      },
+    ],
+    multiple: false,
+    faker: 'random.arrayElement'
   },
   entityId: { label: 'Entity ID', type: 'text', faker: 'datatype.uuid' },
   parentId: {
-      label: 'Parent Entity ID',
-      type: 'select',
-      options: await getEntitiesOptions(['store', 'agency', 'department', 'service']), // Populated with relevant parent entities
-      multiple: true,
-      faker: 'random.arrayElement'
+    label: 'Parent Entity ID',
+    type: 'select',
+    options: await getEntitiesOptions(['store', 'agency', 'department', 'service']), // Populated with relevant parent entities
+    multiple: true,
+    faker: 'random.arrayElement'
   },
-  storeId:  {
-      label: 'Parent Entity ID',
-      type: 'select',
-      options: await getEntitiesOptions(['store']), // Populated with relevant parent entities
-      multiple: true,
-      faker: 'random.arrayElement'
+  storeId: {
+    label: 'Parent Entity ID',
+    type: 'select',
+    options: await getEntitiesOptions(['store']), // Populated with relevant parent entities
+    multiple: true,
+    faker: 'random.arrayElement'
   },
-  agencyId:  {
-      label: 'Parent Entity ID',
-      type: 'select',
-      options: await getEntitiesOptions(['agency']), // Populated with relevant parent entities
-      multiple: true,
-      faker: 'random.arrayElement'
+  agencyId: {
+    label: 'Parent Entity ID',
+    type: 'select',
+    options: await getEntitiesOptions(['agency']), // Populated with relevant parent entities
+    multiple: true,
+    faker: 'random.arrayElement'
   },
   departmentId: {
-      label: 'Parent Entity ID',
-      type: 'select',
-      options: await getEntitiesOptions(['department']), // Populated with relevant parent entities
-      multiple: true,
-      faker: 'random.arrayElement'
+    label: 'Parent Entity ID',
+    type: 'select',
+    options: await getEntitiesOptions(['department']), // Populated with relevant parent entities
+    multiple: true,
+    faker: 'random.arrayElement'
   },
   serviceId: {
-      label: 'Parent Entity ID',
-      type: 'select',
-      options: await getEntitiesOptions(['service']), // Populated with relevant parent entities
-      multiple: true,
-      faker: 'random.arrayElement'
+    label: 'Parent Entity ID',
+    type: 'select',
+    options: await getEntitiesOptions(['service']), // Populated with relevant parent entities
+    multiple: true,
+    faker: 'random.arrayElement'
   },
   locationId: { label: 'Location ID', type: 'text', faker: 'datatype.uuid' },
   regionId: { label: 'Region ID', type: 'text', faker: 'datatype.uuid' },
   countryId: { label: 'Country ID', type: 'text', faker: 'address.countryCode' },
   managerId: {
-      label: 'Manager ID',
-      type: 'select',
-      options: [], // Populated with relevant managers
-      multiple: false,
-      faker: 'random.arrayElement'
+    label: 'Manager ID',
+    type: 'select',
+    options: [], // Populated with relevant managers
+    multiple: false,
+    faker: 'random.arrayElement'
   },
   status: {
-      label: 'Status',
-      type: 'select',
-      options: [
-          { id: 'active', label: 'Active' },
-          { id: 'inactive', label: 'Inactive' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Status',
+    type: 'select',
+    options: [
+      { id: 'active', label: 'Active' },
+      { id: 'inactive', label: 'Inactive' }
+    ],
+    faker: 'random.arrayElement'
   },
   creationDate: { label: 'Creation Date', type: 'date', faker: 'date.past' },
   modifiedDate: { label: 'Modified Date', type: 'date', faker: 'date.recent' },
@@ -797,29 +810,29 @@ export const invoiceFieldsConfig = {
   endDate: { label: 'End Date', type: 'date', faker: 'date.future' },
   renewalDate: { label: 'Renewal Date', type: 'date', faker: 'date.future' },
   riskLevel: {
-      label: 'Risk Level',
-      type: 'select',
-      options: [
-          { id: 'low', label: 'Low' },
-          { id: 'medium', label: 'Medium' },
-          { id: 'high', label: 'High' },
-          { id: 'critical', label: 'Critical' },
-      ],
-      multiple: false,
-      faker: 'random.arrayElement',
+    label: 'Risk Level',
+    type: 'select',
+    options: [
+      { id: 'low', label: 'Low' },
+      { id: 'medium', label: 'Medium' },
+      { id: 'high', label: 'High' },
+      { id: 'critical', label: 'Critical' },
+    ],
+    multiple: false,
+    faker: 'random.arrayElement',
   },
   region: { label: 'Region', type: 'text', faker: 'address.state' },
   paymentTerms: { label: 'Payment Terms', type: 'text', faker: 'finance.transactionType' },
   complianceStatus: {
-      label: 'Compliance Status',
-      type: 'select',
-      options: [
-          { id: 'compliant', label: 'Compliant' },
-          { id: 'non_compliant', label: 'Non-compliant' },
-          { id: 'pending', label: 'Pending' },
-      ],
-      multiple: false,
-      faker: 'random.arrayElement',
+    label: 'Compliance Status',
+    type: 'select',
+    options: [
+      { id: 'compliant', label: 'Compliant' },
+      { id: 'non_compliant', label: 'Non-compliant' },
+      { id: 'pending', label: 'Pending' },
+    ],
+    multiple: false,
+    faker: 'random.arrayElement',
   },
   notes: { label: 'Notes', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraph' },
   vendorCode: { label: 'Vendor Code', type: 'text', faker: 'datatype.uuid' },
@@ -840,69 +853,69 @@ export const invoiceFieldsConfig = {
   annualRevenue: { label: 'Annual Revenue', type: 'number', faker: 'finance.amount' },
   partnershipLevel: { label: 'Partnership Level', type: 'text', faker: 'random.word' },
   preferredLanguage: {
-      label: 'Preferred Language',
-      type: 'select',
-      options: [
-          { id: "english", label: "English" },
-          { id: "french", label: "Français" }
-      ],
-      multiple: false,
-      faker: 'random.arrayElement'
+    label: 'Preferred Language',
+    type: 'select',
+    options: [
+      { id: "english", label: "English" },
+      { id: "french", label: "Français" }
+    ],
+    multiple: false,
+    faker: 'random.arrayElement'
   },
   taxExemptionStatus: { label: 'Tax Exemption Status', type: 'text', faker: 'random.word' },
 
   // New Fields for Invoices
   invoiceType: {
-      label: 'Invoice Type',
-      type: 'select',
-      options: [
-          { id: 'issued', label: 'Issued' },
-          { id: 'received', label: 'Received' }
-      ],
-      multiple: false,
-      faker: 'random.arrayElement',
+    label: 'Invoice Type',
+    type: 'select',
+    options: [
+      { id: 'issued', label: 'Issued' },
+      { id: 'received', label: 'Received' }
+    ],
+    multiple: false,
+    faker: 'random.arrayElement',
   },
   invoiceCategory: {
-      label: 'Invoice Category',
-      type: 'select',
-      options: [
-          { id: 'goods', label: 'Goods' },
-          { id: 'services', label: 'Services' },
-          { id: 'consulting', label: 'Consulting' },
-          { id: 'maintenance', label: 'Maintenance' },
-          { id: 'software', label: 'Software' },
-          { id: 'subscription', label: 'Subscription' },
-          { id: 'licensing', label: 'Licensing' },
-          { id: 'training', label: 'Training' },
-          { id: 'rent', label: 'Rent' },
-          { id: 'utilities', label: 'Utilities' },
-          { id: 'marketing', label: 'Marketing' },
-          { id: 'logistics', label: 'Logistics' },
-          { id: 'travel', label: 'Travel' },
-          { id: 'legal', label: 'Legal' },
-          { id: 'insurance', label: 'Insurance' },
-          { id: 'taxes', label: 'Taxes' },
-          { id: 'equipment', label: 'Equipment' },
-          { id: 'raw_materials', label: 'Raw Materials' },
-          { id: 'advertising', label: 'Advertising' },
-          { id: 'research', label: 'Research & Development' }
-      ],
-      multiple: false,
-      faker: 'random.arrayElement',
+    label: 'Invoice Category',
+    type: 'select',
+    options: [
+      { id: 'goods', label: 'Goods' },
+      { id: 'services', label: 'Services' },
+      { id: 'consulting', label: 'Consulting' },
+      { id: 'maintenance', label: 'Maintenance' },
+      { id: 'software', label: 'Software' },
+      { id: 'subscription', label: 'Subscription' },
+      { id: 'licensing', label: 'Licensing' },
+      { id: 'training', label: 'Training' },
+      { id: 'rent', label: 'Rent' },
+      { id: 'utilities', label: 'Utilities' },
+      { id: 'marketing', label: 'Marketing' },
+      { id: 'logistics', label: 'Logistics' },
+      { id: 'travel', label: 'Travel' },
+      { id: 'legal', label: 'Legal' },
+      { id: 'insurance', label: 'Insurance' },
+      { id: 'taxes', label: 'Taxes' },
+      { id: 'equipment', label: 'Equipment' },
+      { id: 'raw_materials', label: 'Raw Materials' },
+      { id: 'advertising', label: 'Advertising' },
+      { id: 'research', label: 'Research & Development' }
+    ],
+    multiple: false,
+    faker: 'random.arrayElement',
   },
   issuedAt: { label: 'Issued At', type: 'date', faker: 'date.past' },
   receivedAt: { label: 'Received At', type: 'date', faker: 'date.past' },
 
   // Necessary fields when invoice comes from a provider
   providerDetails: {
-      label: 'Provider Details',
-      type: 'text',
-      faker: 'company.name',
+    label: 'Provider Details',
+    type: 'text',
+    faker: 'company.name',
   },
   providerInvoiceNumber: {
-      label: 'Provider Invoice Number',
-      type: 'text',
-      faker: 'datatype.uuid',
+    label: 'Provider Invoice Number',
+    type: 'text',
+    faker: 'datatype.uuid',
   },
 };
 
@@ -1124,13 +1137,13 @@ export const projectFieldsConfig = {
     ],
     faker: 'random.arrayElement',
   },
-  managerName: { 
-    label: 'Manager Name', 
+  managerName: {
+    label: 'Manager Name',
     type: 'select',
     options: managers,
     faker: 'random.arrayElement',
   },
-  teamMembers: { 
+  teamMembers: {
     label: 'Team Members',
     type: 'select',
     options: employees,
@@ -1180,8 +1193,8 @@ export const projectFieldsConfig = {
     faker: 'random.arrayElement',
   },
   progress: { label: 'Progress (%)', type: 'number', faker: 'datatype.number' },
-  risks: { 
-    label: 'Risks Identified', 
+  risks: {
+    label: 'Risks Identified',
     type: 'select',
     link: '/risks',
     options: [
@@ -1292,188 +1305,9 @@ export const projectsEntityName = 'Projects';
 
 export async function fetchProjects() {
   return await fetchDocuments(organizationId, 'projects');
-}export const addProject = (item) => addDocument(organizationId, 'projects', item);
+} export const addProject = (item) => addDocument(organizationId, 'projects', item);
 export const updateProject = (id, item) => updateDocument(organizationId, 'projects', id, item);
 export const deleteProject = (id) => deleteDocument(organizationId, 'projects', id);
-
-
-
-
-
-
-
-
-
-
-
-
-// clients
-export const clientFieldsConfig = {
-  clientId: { label: 'Client ID', type: 'text', faker: 'datatype.uuid' },
-  clientName: { label: 'Client Name', type: 'text', faker: 'company.name' },
-  contactPerson: { label: 'Contact Person', type: 'text', faker: 'name.fullName' },
-  email: { label: 'Email', type: 'email', faker: 'internet.email' },
-  phoneNumber: { label: 'Phone Number', type: 'text', faker: 'phone.imei' },
-  address: { label: 'Address', type: 'text', faker: 'address.streetAddress' },
-  city: { label: 'City', type: 'text', faker: 'address.city' },
-  state: { label: 'State', type: 'text', faker: 'address.state' },
-  country: { label: 'Country', type: 'select', options: [], faker: 'address.country' },
-  zipCode: { label: 'ZIP Code', type: 'text', faker: 'address.zipCode' },
-  industry: { label: 'Industry', type: 'select', options: [], faker: 'company.bs' },
-  website: { label: 'Website', type: 'text', faker: 'internet.url' },
-  companySize: { label: 'Company Size', type: 'select', options: [], faker: 'random.arrayElement' },
-  clientStatus: { 
-    label: 'Status', 
-    type: 'select', 
-    options: [
-      { id: 'active', label: 'Active' },
-      { id: 'inactive', label: 'Inactive' },
-      { id: 'prospect', label: 'Prospect' },
-    ],
-    faker: 'random.arrayElement',
-  },
-  annualRevenue: { label: 'Annual Revenue', type: 'number', faker: 'finance.amount' },
-  numberOfEmployees: { label: 'Number of Employees', type: 'number', faker: 'datatype.number' },
-  preferredContactMethod: { 
-    label: 'Preferred Contact Method', 
-    type: 'select', 
-    options: [
-      { id: 'email', label: 'Email' },
-      { id: 'phone', label: 'Phone' },
-      { id: 'in_person', label: 'In Person' },
-    ],
-    faker: 'random.arrayElement',
-  },
-  timeZone: { label: 'Time Zone', type: 'text', faker: 'address.timeZone' },
-  currency: { label: 'Preferred Currency', type: 'select', options: [], faker: 'finance.currencyCode' },
-  paymentTerms: { 
-    label: 'Payment Terms', 
-    type: 'select', 
-    options: [
-      { id: 'net_30', label: 'Net 30' },
-      { id: 'net_60', label: 'Net 60' },
-      { id: 'net_90', label: 'Net 90' },
-    ],
-    faker: 'random.arrayElement',
-  },
-  taxId: { label: 'Tax ID', type: 'text', faker: 'datatype.uuid' },
-  contractStartDate: { label: 'Contract Start Date', type: 'date', faker: 'date.past' },
-  contractEndDate: { label: 'Contract End Date', type: 'date', faker: 'date.future' },
-  clientSegment: { 
-    label: 'Client Segment', 
-    type: 'select', 
-    options: [
-      { id: 'enterprise', label: 'Enterprise' },
-      { id: 'mid_market', label: 'Mid-Market' },
-      { id: 'smb', label: 'SMB' },
-    ],
-    faker: 'random.arrayElement',
-  },
-  accountManager: { 
-    label: 'Account Manager', 
-    type: 'select', 
-    options: [],
-    faker: 'random.arrayElement',
-  },
-  clientType: { 
-    label: 'Client Type', 
-    type: 'select', 
-    options: [
-      { id: 'direct', label: 'Direct' },
-      { id: 'reseller', label: 'Reseller' },
-      { id: 'partner', label: 'Partner' },
-    ],
-    faker: 'random.arrayElement',
-  },
-  preferredLanguage: { label: 'Preferred Language', type: 'select', options: languages, faker: 'random.arrayElement' },
-  socialMediaLinks: { label: 'Social Media Links', type: 'text', faker: 'internet.url' },
-  businessModel: { 
-    label: 'Business Model', 
-    type: 'select', 
-    options: [
-      { id: 'b2b', label: 'B2B' },
-      { id: 'b2c', label: 'B2C' },
-      { id: 'd2c', label: 'D2C' },
-    ],
-    faker: 'random.arrayElement',
-  },
-  communicationPreferences: { 
-    label: 'Communication Preferences', 
-    type: 'select', 
-    options: [
-      { id: 'email', label: 'Email' },
-      { id: 'phone', label: 'Phone' },
-      { id: 'sms', label: 'SMS' },
-    ],
-    multiple: true,
-    faker: 'random.arrayElement',
-  },
-  projectCount: { label: 'Number of Projects', type: 'number', faker: 'datatype.number' },
-  currentProjects: { 
-    label: 'Current Projects', 
-    type: 'select', 
-    options: [],
-    multiple: true,
-    faker: 'random.arrayElement',
-  },
-  clientRating: { label: 'Client Rating', type: 'number', faker: 'datatype.number' },
-  preferredBillingCycle: { 
-    label: 'Preferred Billing Cycle', 
-    type: 'select', 
-    options: [
-      { id: 'monthly', label: 'Monthly' },
-      { id: 'quarterly', label: 'Quarterly' },
-      { id: 'annually', label: 'Annually' },
-    ],
-    faker: 'random.arrayElement',
-  },
-  SLAAgreement: { label: 'SLA Agreement', type: 'text', faker: 'lorem.sentence' },
-  discountRate: { label: 'Discount Rate (%)', type: 'number', faker: 'datatype.number' },
-  referralSource: { label: 'Referral Source', type: 'text', faker: 'company.name' },
-  notes: { label: 'Notes', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraphs' },
-  invoicingEmail: { label: 'Invoicing Email', type: 'email', faker: 'internet.email' },
-  creditLimit: { label: 'Credit Limit', type: 'number', faker: 'finance.amount' },
-  preferredShippingMethod: { 
-    label: 'Preferred Shipping Method', 
-    type: 'select', 
-    options: [
-      { id: 'ground', label: 'Ground' },
-      { id: 'air', label: 'Air' },
-      { id: 'sea', label: 'Sea' },
-    ],
-    faker: 'random.arrayElement',
-  },
-  onboardingStatus: { 
-    label: 'Onboarding Status', 
-    type: 'select', 
-    options: [
-      { id: 'not_started', label: 'Not Started' },
-      { id: 'in_progress', label: 'In Progress' },
-      { id: 'completed', label: 'Completed' },
-    ],
-    faker: 'random.arrayElement',
-  },
-  renewalDate: { label: 'Renewal Date', type: 'date', faker: 'date.future' },
-  lastContactDate: { label: 'Last Contact Date', type: 'date', faker: 'date.recent' },
-  satisfactionScore: { label: 'Satisfaction Score', type: 'number', faker: 'datatype.number' },
-};
-
-export const clientsHeadCells = Object.keys(clientFieldsConfig).map(key => ({
-  id: key,
-  label: clientFieldsConfig[key].label,
-}));
-
-export const clientsEntityName = 'Clients';
-
-export async function fetchClients() {
-  return await fetchDocuments(organizationId, 'clients');
-}
-
-export const addClient = (item) => addDocument(organizationId, 'clients', item);
-export const updateClient = (id, item) => updateDocument(organizationId, 'clients', id, item);
-export const deleteClient = (id) => deleteDocument(organizationId, 'clients', id);
-
-
 
 
 
@@ -1597,7 +1431,7 @@ export const productsFieldsConfig = {
   },
   shelfLife: { label: 'Shelf Life', type: 'text', faker: 'lorem.words' },
   certification: { label: 'Certification', type: 'text', faker: 'lorem.words' },
-  recyclable: { 
+  recyclable: {
     label: 'Recyclable',
     type: 'select',
     options: [
@@ -1606,7 +1440,7 @@ export const productsFieldsConfig = {
     ],
     faker: 'random.arrayElement',
   },
-  hazardousMaterial:  {
+  hazardousMaterial: {
     label: 'Returnable',
     type: 'select',
     options: [
@@ -1666,7 +1500,7 @@ export const productsFieldsConfig = {
   productManual: { label: 'Product Manual', type: 'text', faker: 'lorem.paragraph' },
   videoTutorialLink: { label: 'Video Tutorial Link', type: 'text', faker: 'internet.url' },
   warrantyDetails: { label: 'Warranty Details', type: 'text', faker: 'lorem.paragraph' },
-  customizable: { 
+  customizable: {
     label: 'Customizable',
     type: 'select',
     options: [
@@ -1713,7 +1547,7 @@ export const productEntityName = 'Products';
 
 export async function fetchProducts() {
   return await fetchDocuments(organizationId, 'products');
-} 
+}
 export const addProduct = (item) => addDocument(organizationId, 'products', item);
 export const updateProduct = (id, item) => updateDocument(organizationId, 'products', id, item);
 export const deleteProduct = (id) => deleteDocument(organizationId, 'products', id);
@@ -1732,150 +1566,150 @@ export const risksFieldsConfig = {
   riskName: { label: 'Risk Name', type: 'text', faker: 'lorem.words' },
   description: { label: 'Description', type: 'text', faker: 'lorem.paragraph' },
   riskType: {
-      label: 'Risk Type',
-      type: 'select',
-      options: [
-          { id: 'financial', label: 'Financial' },
-          { id: 'operational', label: 'Operational' },
-          { id: 'compliance', label: 'Compliance' },
-          { id: 'strategic', label: 'Strategic' },
-          { id: 'market', label: 'Market' },
-          { id: 'reputational', label: 'Reputational' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Risk Type',
+    type: 'select',
+    options: [
+      { id: 'financial', label: 'Financial' },
+      { id: 'operational', label: 'Operational' },
+      { id: 'compliance', label: 'Compliance' },
+      { id: 'strategic', label: 'Strategic' },
+      { id: 'market', label: 'Market' },
+      { id: 'reputational', label: 'Reputational' }
+    ],
+    faker: 'random.arrayElement'
   },
   severity: {
-      label: 'Severity',
-      type: 'select',
-      options: [
-          { id: 'low', label: 'Low' },
-          { id: 'medium', label: 'Medium' },
-          { id: 'high', label: 'High' },
-          { id: 'critical', label: 'Critical' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Severity',
+    type: 'select',
+    options: [
+      { id: 'low', label: 'Low' },
+      { id: 'medium', label: 'Medium' },
+      { id: 'high', label: 'High' },
+      { id: 'critical', label: 'Critical' }
+    ],
+    faker: 'random.arrayElement'
   },
   likelihood: {
-      label: 'Likelihood',
-      type: 'select',
-      options: [
-          { id: 'rare', label: 'Rare' },
-          { id: 'unlikely', label: 'Unlikely' },
-          { id: 'possible', label: 'Possible' },
-          { id: 'likely', label: 'Likely' },
-          { id: 'almost_certain', label: 'Almost Certain' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Likelihood',
+    type: 'select',
+    options: [
+      { id: 'rare', label: 'Rare' },
+      { id: 'unlikely', label: 'Unlikely' },
+      { id: 'possible', label: 'Possible' },
+      { id: 'likely', label: 'Likely' },
+      { id: 'almost_certain', label: 'Almost Certain' }
+    ],
+    faker: 'random.arrayElement'
   },
   impact: {
-      label: 'Impact',
-      type: 'select',
-      options: [
-          { id: 'low', label: 'Low' },
-          { id: 'moderate', label: 'Moderate' },
-          { id: 'high', label: 'High' },
-          { id: 'extreme', label: 'Extreme' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Impact',
+    type: 'select',
+    options: [
+      { id: 'low', label: 'Low' },
+      { id: 'moderate', label: 'Moderate' },
+      { id: 'high', label: 'High' },
+      { id: 'extreme', label: 'Extreme' }
+    ],
+    faker: 'random.arrayElement'
   },
   detection: {
-      label: 'Detection',
-      type: 'select',
-      options: [
-          { id: 'high', label: 'High' },
-          { id: 'medium', label: 'Medium' },
-          { id: 'low', label: 'Low' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Detection',
+    type: 'select',
+    options: [
+      { id: 'high', label: 'High' },
+      { id: 'medium', label: 'Medium' },
+      { id: 'low', label: 'Low' }
+    ],
+    faker: 'random.arrayElement'
   },
   owner: { label: 'Risk Owner', type: 'text', faker: 'name.fullName' },
   department: {
-      label: 'Department',
-      type: 'select',
-      options: [
-          { id: 'finance', label: 'Finance' },
-          { id: 'hr', label: 'Human Resources' },
-          { id: 'it', label: 'IT' },
-          { id: 'legal', label: 'Legal' },
-          { id: 'operations', label: 'Operations' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Department',
+    type: 'select',
+    options: [
+      { id: 'finance', label: 'Finance' },
+      { id: 'hr', label: 'Human Resources' },
+      { id: 'it', label: 'IT' },
+      { id: 'legal', label: 'Legal' },
+      { id: 'operations', label: 'Operations' }
+    ],
+    faker: 'random.arrayElement'
   },
   productIds: {
-      label: 'Cost for Products',
-      link: '/products',
-      type: 'select',
-      options: productsOptions,
-      multiple: true,
-      faker: 'random.arrayElements'
+    label: 'Cost for Products',
+    link: '/products',
+    type: 'select',
+    options: productsOptions,
+    multiple: true,
+    faker: 'random.arrayElements'
   },
   employeeIds: {
-      label: 'Cost for Employees',
-      link: '/employees',
-      type: 'select',
-      options: employeesOptions,
-      multiple: true,
-      faker: 'random.arrayElements'
+    label: 'Cost for Employees',
+    link: '/employees',
+    type: 'select',
+    options: employeesOptions,
+    multiple: true,
+    faker: 'random.arrayElements'
   },
   projectIds: {
-      label: 'Cost for Projects',
-      link: '/projects',
-      type: 'select',
-      options: projectsOptions,
-      multiple: true,
-      faker: 'random.arrayElements'
+    label: 'Cost for Projects',
+    link: '/projects',
+    type: 'select',
+    options: projectsOptions,
+    multiple: true,
+    faker: 'random.arrayElements'
   },
   partnerIds: {
-      label: 'Cost for Partners',
-      link: '/partners',
-      type: 'select',
-      link: true,
-      options: partnersOptions,
-      multiple: true,
-      faker: 'random.arrayElements'
+    label: 'Cost for Partners',
+    link: '/partners',
+    type: 'select',
+    link: true,
+    options: partnersOptions,
+    multiple: true,
+    faker: 'random.arrayElements'
   },
   providerIds: {
-      link: '/providers',
-      label: 'Cost for Providers',
-      type: 'select',
-      link: true,
-      options: providersOptions,
-      multiple: true,
-      faker: 'random.arrayElements'
+    link: '/providers',
+    label: 'Cost for Providers',
+    type: 'select',
+    link: true,
+    options: providersOptions,
+    multiple: true,
+    faker: 'random.arrayElements'
   },
   riskCategory: {
-      label: 'Risk Category',
-      type: 'select',
-      options: [
-          { id: 'internal', label: 'Internal' },
-          { id: 'external', label: 'External' },
-          { id: 'regulatory', label: 'Regulatory' },
-          { id: 'environmental', label: 'Environmental' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Risk Category',
+    type: 'select',
+    options: [
+      { id: 'internal', label: 'Internal' },
+      { id: 'external', label: 'External' },
+      { id: 'regulatory', label: 'Regulatory' },
+      { id: 'environmental', label: 'Environmental' }
+    ],
+    faker: 'random.arrayElement'
   },
   mitigationPlan: { label: 'Mitigation Plan', type: 'text', faker: 'lorem.paragraph' },
   contingencyPlan: { label: 'Contingency Plan', type: 'text', faker: 'lorem.paragraph' },
   responseStrategy: {
-      label: 'Response Strategy',
-      type: 'select',
-      options: [
-          { id: 'avoid', label: 'Avoid' },
-          { id: 'mitigate', label: 'Mitigate' },
-          { id: 'transfer', label: 'Transfer' },
-          { id: 'accept', label: 'Accept' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Response Strategy',
+    type: 'select',
+    options: [
+      { id: 'avoid', label: 'Avoid' },
+      { id: 'mitigate', label: 'Mitigate' },
+      { id: 'transfer', label: 'Transfer' },
+      { id: 'accept', label: 'Accept' }
+    ],
+    faker: 'random.arrayElement'
   },
   riskAppetite: {
-      label: 'Risk Appetite',
-      type: 'select',
-      options: [
-          { id: 'low', label: 'Low' },
-          { id: 'medium', label: 'Medium' },
-          { id: 'high', label: 'High' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Risk Appetite',
+    type: 'select',
+    options: [
+      { id: 'low', label: 'Low' },
+      { id: 'medium', label: 'Medium' },
+      { id: 'high', label: 'High' }
+    ],
+    faker: 'random.arrayElement'
   },
   financialImpact: { label: 'Financial Impact', type: 'number', faker: 'finance.amount' },
   reputationalImpact: { label: 'Reputational Impact', type: 'text', faker: 'lorem.sentence' },
@@ -1884,100 +1718,100 @@ export const risksFieldsConfig = {
   lastAssessmentDate: { label: 'Last Assessment Date', type: 'date', faker: 'date.past' },
   nextReviewDate: { label: 'Next Review Date', type: 'date', faker: 'date.future' },
   escalationLevel: {
-      label: 'Escalation Level',
-      type: 'select',
-      options: [
-          { id: 'low', label: 'Low' },
-          { id: 'medium', label: 'Medium' },
-          { id: 'high', label: 'High' },
-          { id: 'urgent', label: 'Urgent' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Escalation Level',
+    type: 'select',
+    options: [
+      { id: 'low', label: 'Low' },
+      { id: 'medium', label: 'Medium' },
+      { id: 'high', label: 'High' },
+      { id: 'urgent', label: 'Urgent' }
+    ],
+    faker: 'random.arrayElement'
   },
   relatedRegulations: {
-      label: 'Related Regulations',
-      type: 'select',
-      options: [],
-      multiple: true,
-      faker: 'random.arrayElements'
+    label: 'Related Regulations',
+    type: 'select',
+    options: [],
+    multiple: true,
+    faker: 'random.arrayElements'
   },
   auditStatus: {
-      label: 'Audit Status',
-      type: 'select',
-      options: [
-          { id: 'not_started', label: 'Not Started' },
-          { id: 'in_progress', label: 'In Progress' },
-          { id: 'completed', label: 'Completed' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Audit Status',
+    type: 'select',
+    options: [
+      { id: 'not_started', label: 'Not Started' },
+      { id: 'in_progress', label: 'In Progress' },
+      { id: 'completed', label: 'Completed' }
+    ],
+    faker: 'random.arrayElement'
   },
   auditDate: { label: 'Audit Date', type: 'date', faker: 'date.past' },
   auditor: { label: 'Auditor', type: 'text', faker: 'name.fullName' },
   auditFindings: { label: 'Audit Findings', type: 'text', faker: 'lorem.paragraph' },
   complianceStatus: {
-      label: 'Compliance Status',
-      type: 'select',
-      options: [
-          { id: 'compliant', label: 'Compliant' },
-          { id: 'non_compliant', label: 'Non-compliant' },
-          { id: 'pending', label: 'Pending' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Compliance Status',
+    type: 'select',
+    options: [
+      { id: 'compliant', label: 'Compliant' },
+      { id: 'non_compliant', label: 'Non-compliant' },
+      { id: 'pending', label: 'Pending' }
+    ],
+    faker: 'random.arrayElement'
   },
   controlEffectiveness: {
-      label: 'Control Effectiveness',
-      type: 'select',
-      options: [
-          { id: 'effective', label: 'Effective' },
-          { id: 'partially_effective', label: 'Partially Effective' },
-          { id: 'ineffective', label: 'Ineffective' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Control Effectiveness',
+    type: 'select',
+    options: [
+      { id: 'effective', label: 'Effective' },
+      { id: 'partially_effective', label: 'Partially Effective' },
+      { id: 'ineffective', label: 'Ineffective' }
+    ],
+    faker: 'random.arrayElement'
   },
   costOfMitigation: { label: 'Cost of Mitigation', type: 'number', faker: 'finance.amount' },
   riskOwnerContact: { label: 'Risk Owner Contact', type: 'text', faker: 'phone.imei' },
   escalationContact: { label: 'Escalation Contact', type: 'text', faker: 'phone.imei' },
   residualRisk: {
-      label: 'Residual Risk',
-      type: 'select',
-      options: [
-          { id: 'low', label: 'Low' },
-          { id: 'medium', label: 'Medium' },
-          { id: 'high', label: 'High' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Residual Risk',
+    type: 'select',
+    options: [
+      { id: 'low', label: 'Low' },
+      { id: 'medium', label: 'Medium' },
+      { id: 'high', label: 'High' }
+    ],
+    faker: 'random.arrayElement'
   },
   riskStatus: {
-      label: 'Risk Status',
-      type: 'select',
-      options: [
-          { id: 'open', label: 'Open' },
-          { id: 'closed', label: 'Closed' },
-          { id: 'under_review', label: 'Under Review' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Risk Status',
+    type: 'select',
+    options: [
+      { id: 'open', label: 'Open' },
+      { id: 'closed', label: 'Closed' },
+      { id: 'under_review', label: 'Under Review' }
+    ],
+    faker: 'random.arrayElement'
   },
   riskExposure: {
-      label: 'Risk Exposure',
-      type: 'select',
-      options: [
-          { id: 'low', label: 'Low' },
-          { id: 'moderate', label: 'Moderate' },
-          { id: 'high', label: 'High' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Risk Exposure',
+    type: 'select',
+    options: [
+      { id: 'low', label: 'Low' },
+      { id: 'moderate', label: 'Moderate' },
+      { id: 'high', label: 'High' }
+    ],
+    faker: 'random.arrayElement'
   },
   scenarioAnalysis: { label: 'Scenario Analysis', type: 'text', faker: 'lorem.paragraphs' },
   riskScore: { label: 'Risk Score', type: 'number', faker: 'datatype.number' },
   reviewFrequency: {
-      label: 'Review Frequency',
-      type: 'select',
-      options: [
-          { id: 'monthly', label: 'Monthly' },
-          { id: 'quarterly', label: 'Quarterly' },
-          { id: 'annually', label: 'Annually' }
-      ],
-      faker: 'random.arrayElement'
+    label: 'Review Frequency',
+    type: 'select',
+    options: [
+      { id: 'monthly', label: 'Monthly' },
+      { id: 'quarterly', label: 'Quarterly' },
+      { id: 'annually', label: 'Annually' }
+    ],
+    faker: 'random.arrayElement'
   },
   createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
   createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
@@ -2050,8 +1884,8 @@ export const campaignFieldsConfig = {
     ],
     faker: 'random.arrayElement',
   },
-  campaignManager: { 
-    label: 'Campaign Manager', 
+  campaignManager: {
+    label: 'Campaign Manager',
     type: 'select',
     options: managers,
     faker: 'random.arrayElement',
@@ -2067,9 +1901,9 @@ export const campaignFieldsConfig = {
   ppcKeywords: { label: 'PPC Keywords', type: 'text', faker: 'lorem.words' },
   seoKeywords: { label: 'SEO Keywords', type: 'text', faker: 'lorem.words' },
   targetLocations: { label: 'Target Locations', type: 'text', faker: 'address.city' },
-  targetAgeGroup: { 
-    label: 'Target Age Group', 
-    type: 'select', 
+  targetAgeGroup: {
+    label: 'Target Age Group',
+    type: 'select',
     options: [
       { id: '18_24', label: '18-24' },
       { id: '25_34', label: '25-34' },
@@ -2122,3 +1956,130 @@ export async function fetchCampaigns() {
 export const addCampaign = (item) => addDocument(organizationId, 'campaigns', item);
 export const updateCampaign = (id, item) => updateDocument(organizationId, 'campaigns', id, item);
 export const deleteCampaign = (id) => deleteDocument(organizationId, 'campaigns', id);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// teams
+
+// Teams
+
+export const fetchTeams = () => fetchDocuments(organizationId, 'teams');
+export const addTeam = (item) => addDocument(organizationId, 'teams', item);
+export const updateTeam = (id, item) => updateDocument(organizationId, 'teams', id, item);
+export const deleteTeam = (id) => deleteDocument(organizationId, 'teams', id);
+
+const getTeamsOptions = async (types) => {
+  return (await fetchTeams()).filter((team) => {
+    return types.includes(team.type);
+  }).map((team) => {
+    return {
+      id: team.id,
+      label: team.name
+    }
+  });
+}
+
+export const teamsFieldsConfig = {
+  name: { label: 'Name', type: 'text', faker: 'company.name' },
+  type: {
+    label: 'Team Type',
+    type: 'select',
+    options: [
+      {
+        id: 'project',
+        label: 'Project'
+      },
+      {
+        id: 'department',
+        label: 'Department'
+      },
+      {
+        id: 'service',
+        label: 'Service'
+      },
+      {
+        id: 'taskforce',
+        label: 'Taskforce'
+      },
+    ],
+    multiple: false,
+    faker: 'random.arrayElement'
+  },
+  teamId: { label: 'Team ID', type: 'text', faker: 'datatype.uuid' },
+  parentId: {
+    label: 'Parent Team ID',
+    type: 'select',
+    options: await getTeamsOptions(['project', 'department', 'service', 'taskforce']), // Populated with relevant parent teams
+    multiple: true,
+    faker: 'random.arrayElement'
+  },
+  projectId: {
+    label: 'Parent Project ID',
+    type: 'select',
+    options: await getTeamsOptions(['project']), // Populated with relevant parent teams
+    multiple: true,
+    faker: 'random.arrayElement'
+  },
+  departmentId: {
+    label: 'Parent Department ID',
+    type: 'select',
+    options: await getTeamsOptions(['department']), // Populated with relevant parent teams
+    multiple: true,
+    faker: 'random.arrayElement'
+  },
+  serviceId: {
+    label: 'Parent Service ID',
+    type: 'select',
+    options: await getTeamsOptions(['service']), // Populated with relevant parent teams
+    multiple: true,
+    faker: 'random.arrayElement'
+  },
+  locationId: { label: 'Location ID', type: 'text', faker: 'datatype.uuid' },
+  regionId: { label: 'Region ID', type: 'text', faker: 'datatype.uuid' },
+  countryId: { label: 'Country ID', type: 'text', faker: 'address.countryCode' },
+  managerId: {
+    label: 'Manager ID',
+    type: 'select',
+    options: [], // Populated with relevant managers
+    multiple: false,
+    faker: 'random.arrayElement'
+  },
+  status: {
+    label: 'Status',
+    type: 'select',
+    options: [
+      { id: 'active', label: 'Active' },
+      { id: 'inactive', label: 'Inactive' }
+    ],
+    faker: 'random.arrayElement'
+  },
+  creationDate: { label: 'Creation Date', type: 'date', faker: 'date.past' },
+  modifiedDate: { label: 'Modified Date', type: 'date', faker: 'date.recent' },
+  notes: { label: 'Notes', type: 'text', faker: 'lorem.paragraph' },
+};
+
+export const teamsHeadCells = Object.keys(teamsFieldsConfig).map(key => ({
+  id: key,
+  label: teamsFieldsConfig[key].label,
+}));
+
+export const teamsName = 'Teams';

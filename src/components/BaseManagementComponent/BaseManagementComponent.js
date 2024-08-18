@@ -131,7 +131,6 @@ function BaseTableToolbar({ numSelected, onAdd, onDelete, onEdit }) {
   );
 }
 
-
 function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
   const [formData, setFormData] = useState(
     initialData || Object.keys(fieldConfig).reduce((acc, field) => {
@@ -160,7 +159,7 @@ function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
   const handleAutocompleteChange = (event, value, field) => {
     setFormData((prevData) => ({
       ...prevData,
-      [field]: fieldConfig[field].multiple ? value.map((v) => v.id) : value?.id || '',
+      [field]: fieldConfig[field].multiple ? (value ? value.map((v) => v.id) : []) : (value ? value.id : ''),
     }));
   };
 
@@ -203,13 +202,11 @@ function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
                     multiple={fieldConfig[field].multiple}
                     options={fieldConfig[field].options}
                     getOptionLabel={(option) => option.label}
-                    value={
-                      fieldConfig[field].multiple
-                        ? fieldConfig[field].options.filter((option) =>
-                            formData[field].includes(option.id)
-                          )
-                        : fieldConfig[field].options.find((option) => option.id === formData[field]) || null
-                    }
+                    value={fieldConfig[field].multiple
+                      ? fieldConfig[field].options.filter((option) =>
+                          formData[field] ? formData[field].includes(option.id) : false
+                        )
+                      : fieldConfig[field].options.find((option) => option.id === formData[field]) || null}
                     onChange={(event, value) => handleAutocompleteChange(event, value, field)}
                     renderInput={(params) => (
                       <TextField
@@ -628,8 +625,10 @@ const logit = (field) => {
                         } else if (isCheckboxField) {
                           displayValue = cellValue ? 'True' : 'False';
                         } else if (isMultipleSelectField) {
+
+                          console.log("ROW ", [row, cellValue, field])
                           if(link){
-                            displayValue = cellValue.map((element) => {
+                            displayValue = cellValue ? cellValue.map((element) => {
                               return (
                                 <div key={element}>
                                   <Link to={`${link}/${element}`} onClick={(e) => e.stopPropagation()}>
@@ -637,7 +636,7 @@ const logit = (field) => {
                                   </Link>
                                 </div>
                               )
-                            })
+                            }) : null;
                           } else {
                             displayValue = cellValue;
                           }
@@ -647,7 +646,7 @@ const logit = (field) => {
 
                         return (
                           <TableCell key={field} align={fieldConfig[field].numeric ? 'right' : 'left'}>
-                            {displayValue}
+                            { displayValue ? displayValue : '--' }
                           </TableCell>
                         );
                       })}

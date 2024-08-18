@@ -122,6 +122,7 @@ const Dashboard = ({ children }) => {
       </DrawerHeader>
       <Divider />
       <List>
+        <Divider />
         <ListItem key="treasury" disablePadding>
           <ListItemButton component={Link} to="/summary">
             <ListItemIcon>
@@ -137,24 +138,17 @@ const Dashboard = ({ children }) => {
           </ListItemButton>
         </ListItem>
         <Divider />
-        <ListItem key="employees" disablePadding>
-          <ListItemButton component={Link} to="/employees">
-            <ListItemIcon>
-              <PeopleAltIcon style={{ fontSize: '1.6rem' }} />
-            </ListItemIcon>
-            <ListItemText primary={<Typography variant="body1">Employees</Typography>} />
-          </ListItemButton>
-        </ListItem>
         <ListItem key="clients" disablePadding>
-          <ListItemButton component={Link} to="/clients">
+          <ListItemButton component={Link} to="/management/clients">
             <ListItemIcon>
-              <PeopleAltIcon style={{ fontSize: '1.6rem' }} />
+              <SummarizeIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
             <ListItemText primary={<Typography variant="body1">Clients</Typography>} />
           </ListItemButton>
         </ListItem>
+
         <ListItem key="partners" disablePadding>
-          <ListItemButton component={Link} to="/partners">
+          <ListItemButton component={Link} to="/management/partners">
             <ListItemIcon>
               <GroupIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
@@ -162,7 +156,7 @@ const Dashboard = ({ children }) => {
           </ListItemButton>
         </ListItem>
         <ListItem key="providers" disablePadding>
-          <ListItemButton component={Link} to="/providers">
+          <ListItemButton component={Link} to="/management/providers">
             <ListItemIcon>
               <StorefrontIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
@@ -178,7 +172,7 @@ const Dashboard = ({ children }) => {
         </ListItem>
         <Divider />
         <ListItem key="costs" disablePadding>
-          <ListItemButton component={Link} to="/costs">
+          <ListItemButton component={Link} to="/management/costs">
             <ListItemIcon>
               <MonetizationOnIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
@@ -186,7 +180,7 @@ const Dashboard = ({ children }) => {
           </ListItemButton>
         </ListItem>
         <ListItem key="risks" disablePadding>
-          <ListItemButton component={Link} to="/risks">
+          <ListItemButton component={Link} to="/management/risks">
             <ListItemIcon>
               <SecurityIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
@@ -194,7 +188,7 @@ const Dashboard = ({ children }) => {
           </ListItemButton>
         </ListItem>
         <ListItem key="campaigns" disablePadding>
-          <ListItemButton component={Link} to="/campaigns">
+          <ListItemButton component={Link} to="/management/campaigns">
             <ListItemIcon>
               <PeopleAltIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
@@ -202,7 +196,7 @@ const Dashboard = ({ children }) => {
           </ListItemButton>
         </ListItem>
         <ListItem key="projects" disablePadding>
-          <ListItemButton component={Link} to="/projects">
+          <ListItemButton component={Link} to="/management/projects">
             <ListItemIcon>
               <WorkIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
@@ -210,7 +204,7 @@ const Dashboard = ({ children }) => {
           </ListItemButton>
         </ListItem>
         <ListItem key="invoices" disablePadding>
-          <ListItemButton component={Link} to="/invoices">
+          <ListItemButton component={Link} to="/management/invoices">
             <ListItemIcon>
               <ReceiptIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
@@ -218,7 +212,7 @@ const Dashboard = ({ children }) => {
           </ListItemButton>
         </ListItem>
         <ListItem key="products" disablePadding>
-          <ListItemButton component={Link} to="/products">
+          <ListItemButton component={Link} to="/management/products">
             <ListItemIcon>
               <InventoryIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
@@ -259,7 +253,7 @@ const Dashboard = ({ children }) => {
           </ListItemButton>
         </ListItem>
         <ListItem key="entities" disablePadding>
-          <ListItemButton component={Link} to="/entities">
+          <ListItemButton component={Link} to="/management/entities">
             <ListItemIcon>
               <TimelineIcon style={{ fontSize: '1.6rem' }} />
             </ListItemIcon>
