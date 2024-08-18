@@ -15,7 +15,6 @@ const productsOptions = (await fetchProducts()).map((product) => {
     }
 })
 
-console.log("PRODUCTS OPTIONS ", productsOptions)
 const employeesOptions = (await fetchEmployees()).map((employee) => {
     return {
         id: employee.id,

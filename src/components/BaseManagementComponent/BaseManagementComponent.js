@@ -15,9 +15,6 @@ import { faker } from '@faker-js/faker';
 
 import { Link } from 'react-router-dom';
 
-function getRandomArbitraryInteger(min, max) {
-  return Math.floor(Math.random() * (max - min) + min);
-}
 
 const truncateText = (text, wordLimit) => {
   const words = text.split(' ');
@@ -473,6 +470,7 @@ export default function BaseTableComponent({
     };
   
     const getMultipleRandomElementIds = (arr) => {
+      console.log("ARRRRRRRRRRRRR", arr)
       if (!Array.isArray(arr) || arr.length === 0) return [];
       const randomCount = Math.floor(Math.random() * arr.length) + 1;
       let result = new Set();
@@ -485,6 +483,8 @@ export default function BaseTableComponent({
       console.log("RESULT ", Array.from(result));
       return Array.from(result);
     };
+
+    console.log("FIEEEEEEEEEEEELDS CONFIG ", fieldConfig)
     
     const newRow = Object.keys(fieldConfig).reduce((acc, key) => {
       const field = fieldConfig[key];
@@ -520,6 +520,7 @@ export default function BaseTableComponent({
       return acc;
     }, {});
   
+    console.log(newRow)
     try {
       await addItem(newRow);
       const data = await fetchItems();

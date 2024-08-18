@@ -42,6 +42,10 @@ export const fieldsConfig = {
         id: 'service',
         label: 'Service'
       },
+      {
+        id: 'orginzation',
+        label: 'Orgnization'
+      },
     ],
     multiple: false,
     faker: 'random.arrayElement'
@@ -50,7 +54,7 @@ export const fieldsConfig = {
   parentId: {
     label: 'Parent Entity ID',
     type: 'select',
-    options: await getEntitiesOptions(['store', 'agency', 'department', 'service']), // Populated with relevant parent entities
+    options: await getEntitiesOptions(['store', 'agency', 'department', 'service', 'orginization']), // Populated with relevant parent entities
     multiple: true,
     faker: 'random.arrayElement'
   },
@@ -79,6 +83,13 @@ export const fieldsConfig = {
     label: 'Parent Entity ID',
     type: 'select',
     options: await getEntitiesOptions(['service']), // Populated with relevant parent entities
+    multiple: true,
+    faker: 'random.arrayElement'
+  },
+  orgnizationId: {
+    label: 'Parent Entity ID',
+    type: 'select',
+    options: await getEntitiesOptions(['orgnization']), // Populated with relevant parent entities
     multiple: true,
     faker: 'random.arrayElement'
   },

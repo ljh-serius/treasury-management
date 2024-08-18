@@ -9,8 +9,21 @@ import {
 
 import languages from '../../data/languages';
 import nationalities from '../../data/nationalities';
+import industries from '../../data/industries';
+import countries from '../../data/countries';
+
+import { fetchItems as fetchProjects } from './Projects';
+
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
+const projectsOptions = (await fetchProjects()).map((project) => {
+    return {
+      id: project.id,
+      label: project.name
+    }
+})
+
+console.log("RUNNIN 1111", projectsOptions)
 // clients
 export const fieldsConfig = {
     clientId: { label: 'Client ID', type: 'text', faker: 'datatype.uuid' },
@@ -21,7 +34,13 @@ export const fieldsConfig = {
     address: { label: 'Address', type: 'text', faker: 'address.streetAddress' },
     city: { label: 'City', type: 'text', faker: 'address.city' },
     state: { label: 'State', type: 'text', faker: 'address.state' },
-    country: { label: 'Country', type: 'select', options: [], faker: 'address.country' },
+    country: { 
+        label: 'Country',
+        type: 'select',
+        multiple: true,
+        options: countries,
+        faker: 'random.arrayElement'
+    },
     zipCode: { label: 'ZIP Code', type: 'text', faker: 'address.zipCode' },
     nationality: {
       label: 'Nationality',
@@ -31,7 +50,14 @@ export const fieldsConfig = {
       options: nationalities,
       faker: 'random.arrayElement',
     },
-    industry: { label: 'Industry', type: 'select', options: [], faker: 'company.bs' },
+    industry: { 
+        label: 'Industry',
+        multiple: true,
+        type: 'select',
+        multiple: true,
+        options: industries,
+        faker: 'random.arrayElement',
+    },
     website: { label: 'Website', type: 'text', faker: 'internet.url' },
     companySize: { label: 'Company Size', type: 'select', options: [], faker: 'random.arrayElement' },
     clientStatus: {
@@ -124,7 +150,7 @@ export const fieldsConfig = {
     currentProjects: {
       label: 'Current Projects',
       type: 'select',
-      options: [],
+      options: projectsOptions,
       multiple: true,
       faker: 'random.arrayElement',
     },
