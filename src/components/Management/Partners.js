@@ -7,7 +7,9 @@ import {
     fetchDocumentsByFieldValue
 } from '../../utils/firebaseCrudHelpers';
 
-// partners
+import industries from '../../data/industries';
+import paymentMethods from '../../data/payment-methods';
+
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
 export const fieldsConfig = {
@@ -54,13 +56,8 @@ export const fieldsConfig = {
     industry: {
       label: 'Industry',
       type: 'select',
-      options: [
-        { id: 'finance', label: 'Finance' },
-        { id: 'technology', label: 'Technology' },
-        { id: 'healthcare', label: 'Healthcare' },
-        { id: 'retail', label: 'Retail' },
-        { id: 'education', label: 'Education' },
-      ],
+      multiple: true,
+      options: industries,
       faker: 'random.arrayElement',
     },
     agreementDate: { label: 'Agreement Date', type: 'date', faker: 'date.past' },
@@ -128,12 +125,8 @@ export const fieldsConfig = {
     paymentMethod: {
       label: 'Payment Method',
       type: 'select',
-      options: [
-        { id: 'bank_transfer', label: 'Bank Transfer' },
-        { id: 'credit_card', label: 'Credit Card' },
-        { id: 'paypal', label: 'PayPal' },
-        { id: 'crypto', label: 'Cryptocurrency' },
-      ],
+      multiple: true,
+      options: paymentMethods,
       faker: 'random.arrayElement',
     },
     discountRate: { label: 'Discount Rate', type: 'number', faker: 'datatype.float' },

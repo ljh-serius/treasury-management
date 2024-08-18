@@ -468,11 +468,11 @@ export default function BaseTableComponent({
       const element = arr[randomIndex];
       return element && element.id ? element.id : null;
     };
-  
+
     const getMultipleRandomElementIds = (arr) => {
-      console.log("ARRRRRRRRRRRRR", arr)
       if (!Array.isArray(arr) || arr.length === 0) return [];
-      const randomCount = Math.floor(Math.random() * arr.length) + 1;
+      
+      const randomCount = Math.min(Math.floor(Math.random() * arr.length) + 1, 5); // Cap the count at 5
       let result = new Set();
     
       while (result.size < randomCount) {
@@ -484,8 +484,6 @@ export default function BaseTableComponent({
       return Array.from(result);
     };
 
-    console.log("FIEEEEEEEEEEEELDS CONFIG ", fieldConfig)
-    
     const newRow = Object.keys(fieldConfig).reduce((acc, key) => {
       const field = fieldConfig[key];
       let value;
@@ -626,8 +624,6 @@ const logit = (field) => {
                         } else if (isCheckboxField) {
                           displayValue = cellValue ? 'True' : 'False';
                         } else if (isMultipleSelectField) {
-
-                          console.log("ROW ", [row, cellValue, field])
                           if(link){
                             displayValue = cellValue ? cellValue.map((element) => {
                               return (

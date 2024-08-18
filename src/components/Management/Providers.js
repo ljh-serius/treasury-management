@@ -6,6 +6,10 @@ import {
     fetchDocumentsBySelectValue,
     fetchDocumentsByFieldValue
 } from '../../utils/firebaseCrudHelpers';
+
+import countries from '../../data/countries';
+import { YoutubeSearchedFor } from '@mui/icons-material';
+
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
 export const fieldsConfig = {
@@ -28,13 +32,8 @@ export const fieldsConfig = {
     country: {
         label: 'Country',
         type: 'select',
-        options: [
-            { id: 'us', label: 'United States' },
-            { id: 'ca', label: 'Canada' },
-            { id: 'uk', label: 'United Kingdom' },
-            { id: 'au', label: 'Australia' },
-            { id: 'in', label: 'India' },
-        ],
+        multiple: true,
+        options: countries,
         faker: 'random.arrayElement',
     },
     state: { label: 'State/Province', type: 'text', faker: 'address.state' },
@@ -135,7 +134,13 @@ export const fieldsConfig = {
     socialMediaLinks: { label: 'Social Media Links', type: 'text', faker: 'internet.url' },
     annualRevenue: { label: 'Annual Revenue', type: 'number', faker: 'finance.amount' },
     numberOfEmployees: { label: 'Number of Employees', type: 'number', faker: 'datatype.number' },
-    headquartersLocation: { label: 'Headquarters Location', type: 'text', faker: 'address.city' },
+    headquartersLocation: { 
+        label: 'Headquarters Location',
+        type: 'select',
+        multiple: true,
+        options: countries,
+        faker: 'random.arrayElement'
+    },
     branchOffices: { label: 'Branch Offices', type: 'text', faker: 'address.streetAddress' },
     certifications: { label: 'Certifications', type: 'text', faker: 'lorem.words' },
     environmentalPolicy: {
