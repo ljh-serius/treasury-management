@@ -11,9 +11,16 @@ import {
     fetchDocumentsByFieldValue
 } from '../../utils/firebaseCrudHelpers';
 
+import { fetchItems as fetchProviders } from './Providers';
+
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
-// products
+const providersOptions = (await fetchProviders()).map((provider) => {
+    return {
+        id: provider.id,
+        label: provider.name
+    }
+})
 
 export const fieldsConfig = {
     name: { label: 'Name', type: 'text', faker: 'commerce.productName' },
@@ -35,11 +42,9 @@ export const fieldsConfig = {
     supplier: {
       label: 'Supplier',
       type: 'select',
-      options: [
-        { id: 'supplierA', label: 'Supplier A' },
-        { id: 'supplierB', label: 'Supplier B' },
-        { id: 'supplierC', label: 'Supplier C' },
-      ],
+      link: '/supplier',
+      multiple: true,
+      options: providersOptions,
       faker: 'random.arrayElement',
     },
     stock: { label: 'Stock Quantity', type: 'number', faker: 'datatype.number' },

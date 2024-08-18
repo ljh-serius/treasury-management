@@ -125,7 +125,7 @@ export const fieldsConfig = {
       faker: 'random.arrayElement'
     },
     productIds: {
-      label: 'Cost for Products',
+      label: 'Risk for Products',
       link: '/products',
       type: 'select',
       options: productsOptions,
@@ -133,7 +133,7 @@ export const fieldsConfig = {
       faker: 'random.arrayElements'
     },
     employeeIds: {
-      label: 'Cost for Employees',
+      label: 'Risk for Employees',
       link: '/employees',
       type: 'select',
       options: employeesOptions,
@@ -141,7 +141,7 @@ export const fieldsConfig = {
       faker: 'random.arrayElements'
     },
     projectIds: {
-      label: 'Cost for Projects',
+      label: 'Risk for Projects',
       link: '/projects',
       type: 'select',
       options: projectsOptions,
@@ -149,7 +149,7 @@ export const fieldsConfig = {
       faker: 'random.arrayElements'
     },
     partnerIds: {
-      label: 'Cost for Partners',
+      label: 'Risk for Partners',
       link: '/partners',
       type: 'select',
       link: true,
@@ -159,7 +159,7 @@ export const fieldsConfig = {
     },
     providerIds: {
       link: '/providers',
-      label: 'Cost for Providers',
+      label: 'Risk for Providers',
       type: 'select',
       link: true,
       options: providersOptions,

@@ -10,18 +10,13 @@ import {
 import languages from '../../data/languages';
 import nationalities from '../../data/nationalities';
 import skills from '../../data/skills';
+
+import { fetchItemsBySelectValue as fetchPartnersBySelectValue } from './Partners';
+
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
 // employees
 const costs = []
-
-// (await fetchCosts()).map((cost) => {
-//     return {
-//         id: cost.id,
-//         label: cost.name
-//     }
-// })
-
 
 
 const managers = (await fetchItemsByField('position', 'manager')).map((manager) => {
@@ -40,14 +35,12 @@ const employees = []
 //     }
 // })
 
-const healthInsurances = []
-
-// (await fetchPartnersBySelectValue('servicesProvided', 'health_insurance')).map((partner) => {
-//     return {
-//         id: partner.id,
-//         label: partner.name
-//     }
-// })
+const healthInsurances = (await fetchPartnersBySelectValue('servicesProvided', 'health_insurance')).map((partner) => {
+    return {
+        id: partner.id,
+        label: partner.name
+    }
+})
 
 console.log(' fetchPartnersBySelectValue', healthInsurances)
 

@@ -347,6 +347,17 @@ function FilterManager({ filters, setFilters, fieldConfig }) {
   );
 }
 
+const refreshFieldConfigOptions = async (fieldConfig) => {
+  const newFieldConfig = { ...fieldConfig };
+  for (const field in newFieldConfig) {
+    if (newFieldConfig[field].refreshOptions) {
+      const updatedOptions = await newFieldConfig[field].refreshOptions();
+      newFieldConfig[field].options = updatedOptions;
+    }
+  }
+  return newFieldConfig;
+};
+
 export default function BaseTableComponent({
   fetchItems,
   addItem,
@@ -366,6 +377,7 @@ export default function BaseTableComponent({
   const [filters, setFilters] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
+  const [refreshedFieldConfig, setRefreshedFieldConfig] = useState(fieldConfig);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -424,12 +436,16 @@ export default function BaseTableComponent({
     setSelected(newSelected);
   };
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
+    const updatedFieldConfig = await refreshFieldConfigOptions(fieldConfig);
+    setRefreshedFieldConfig(updatedFieldConfig);
     setCurrentItem(null);
     setModalOpen(true);
   };
 
-  const handleEditItem = () => {
+  const handleEditItem = async () => {
+    const updatedFieldConfig = await refreshFieldConfigOptions(fieldConfig);
+    setRefreshedFieldConfig(updatedFieldConfig);
     const itemToEdit = filteredItems.find((item) => item.id === selected[0]);
     setCurrentItem(itemToEdit);
     setModalOpen(true);
@@ -444,6 +460,8 @@ export default function BaseTableComponent({
     } catch (error) {
       console.error(`Error deleting ${entityName}:`, error);
     }
+    const updatedFieldConfig = await refreshFieldConfigOptions(fieldConfig);
+    setRefreshedFieldConfig(updatedFieldConfig);
   };
 
   const handleModalSubmit = async (itemData) => {
@@ -459,8 +477,10 @@ export default function BaseTableComponent({
     } catch (error) {
       console.error(`Error saving ${entityName}:`, error);
     }
+    const updatedFieldConfig = await refreshFieldConfigOptions(fieldConfig);
+    setRefreshedFieldConfig(updatedFieldConfig);
   };
-  
+
   const generateRandomRow = async () => {
     const getRandomElementId = (arr) => {
       if (!Array.isArray(arr) || arr.length === 0) return null;
@@ -468,11 +488,10 @@ export default function BaseTableComponent({
       const element = arr[randomIndex];
       return element && element.id ? element.id : null;
     };
-
+  
     const getMultipleRandomElementIds = (arr) => {
       if (!Array.isArray(arr) || arr.length === 0) return [];
-      
-      const randomCount = Math.min(Math.floor(Math.random() * arr.length) + 1, 5); // Cap the count at 5
+      const randomCount = Math.floor(Math.random() * arr.length) + 1;
       let result = new Set();
     
       while (result.size < randomCount) {
@@ -480,7 +499,6 @@ export default function BaseTableComponent({
         result.add(randomElement);
       }
     
-      console.log("RESULT ", Array.from(result));
       return Array.from(result);
     };
 
@@ -518,7 +536,6 @@ export default function BaseTableComponent({
       return acc;
     }, {});
   
-    console.log(newRow)
     try {
       await addItem(newRow);
       const data = await fetchItems();
@@ -526,9 +543,10 @@ export default function BaseTableComponent({
     } catch (error) {
       console.error(`Error generating and saving random ${entityName}:`, error);
     }
+    const updatedFieldConfig = await refreshFieldConfigOptions(fieldConfig);
+    setRefreshedFieldConfig(updatedFieldConfig);
   };
-  
-  
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -555,14 +573,10 @@ export default function BaseTableComponent({
     [order, orderBy, page, rowsPerPage, filteredItems]
   );
 
-const logit = (field) => {
-  console.log("fdqskjfs ", field)
-}
-
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Box sx={{ maxWidth: '80vw' }}>
-        <FilterManager filters={filters} setFilters={setFilters} fieldConfig={fieldConfig} />
+        <FilterManager filters={filters} setFilters={setFilters} fieldConfig={refreshedFieldConfig} />
         <Paper sx={{ width: '100%', mb: 2 }}>
           <BaseTableToolbar
             numSelected={selected.length}
@@ -576,9 +590,9 @@ const logit = (field) => {
           <TableContainer>
             <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={dense ? 'small' : 'medium'}>
               <BaseTableHead
-                headCells={Object.keys(fieldConfig).map(key => ({
+                headCells={Object.keys(refreshedFieldConfig).map(key => ({
                   id: key,
-                  label: fieldConfig[key].label,
+                  label: refreshedFieldConfig[key].label,
                 }))}
                 order={order}
                 orderBy={orderBy}
@@ -589,7 +603,6 @@ const logit = (field) => {
               />
               <TableBody>
                 {visibleRows.map((row, index) => {
-                  console.log("visible row", row.id)
                   const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -611,12 +624,12 @@ const logit = (field) => {
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      {Object.keys(fieldConfig).map((field) => {
+                      {Object.keys(refreshedFieldConfig).map((field) => {
                         const cellValue = row[field];
-                        const isTextField = fieldConfig[field].type === 'text';
-                        const isCheckboxField = fieldConfig[field].type === 'checkbox';
-                        const isMultipleSelectField = fieldConfig[field].type === 'select' && fieldConfig[field].multiple === true;
-                        const link = fieldConfig[field].link;
+                        const isTextField = refreshedFieldConfig[field].type === 'text';
+                        const isCheckboxField = refreshedFieldConfig[field].type === 'checkbox';
+                        const isMultipleSelectField = refreshedFieldConfig[field].type === 'select' && refreshedFieldConfig[field].multiple === true;
+                        const link = refreshedFieldConfig[field].link;
                         let displayValue;
 
                         if (isTextField) {
@@ -642,7 +655,7 @@ const logit = (field) => {
                         }
 
                         return (
-                          <TableCell key={field} align={fieldConfig[field].numeric ? 'right' : 'left'}>
+                          <TableCell key={field} align={refreshedFieldConfig[field].numeric ? 'right' : 'left'}>
                             { displayValue ? displayValue : '--' }
                           </TableCell>
                         );
@@ -656,11 +669,10 @@ const logit = (field) => {
                       height: (dense ? 33 : 53) * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={Object.keys(fieldConfig).length + 2} />
+                    <TableCell colSpan={Object.keys(refreshedFieldConfig).length + 2} />
                   </TableRow>
                 )}
               </TableBody>
-
             </Table>
           </TableContainer>
           <TablePagination
@@ -679,10 +691,9 @@ const logit = (field) => {
           onClose={() => setModalOpen(false)}
           onSubmit={handleModalSubmit}
           initialData={currentItem}
-          fieldConfig={fieldConfig}
+          fieldConfig={refreshedFieldConfig}
         />
       </Box>
     </Container>
   );
 }
-

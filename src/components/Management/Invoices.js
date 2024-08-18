@@ -8,6 +8,8 @@ import {
     fetchDocumentsByFieldValue
 } from '../../utils/firebaseCrudHelpers';
 
+import industries from '../../data/industries';
+
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
 export const fieldsConfig = {
@@ -19,7 +21,14 @@ export const fieldsConfig = {
     contactPhone: { label: 'Contact Phone', type: 'tel', faker: 'phone.imei' },
     address: { label: 'Address', type: 'text', faker: 'address.streetAddress' },
     website: { label: 'Website', type: 'url', faker: 'internet.url' },
-    industry: { label: 'Industry', type: 'text', faker: 'company.bs' },
+    industry: { 
+        label: 'Industry',
+        multiple: true,
+        type: 'select',
+        multiple: true,
+        options: industries,
+        faker: 'random.arrayElement',
+    },
     agreementDate: { label: 'Agreement Date', type: 'date', faker: 'date.past' },
     contractValue: { label: 'Contract Value', type: 'number', faker: 'finance.amount' },
     startDate: { label: 'Start Date', type: 'date', faker: 'date.past' },

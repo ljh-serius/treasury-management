@@ -10,7 +10,7 @@ import {
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
 const getEntitiesOptions = async (types) => {
-  return (await fetchEntities()).filter((entity) => {
+  return (await fetchItems()).filter((entity) => {
     return types.includes(entity.type);
   }).map((entity) => {
     return {
@@ -20,10 +20,12 @@ const getEntitiesOptions = async (types) => {
   });
 }
 
+console.log("fetched items", await getEntitiesOptions(['store']))
+
 export const fieldsConfig = {
   name: { label: 'name', type: 'text', faker: 'company.name' },
   type: {
-    label: 'Manager ID',
+    label: 'Type',
     type: 'select',
     options: [
       {
@@ -56,7 +58,10 @@ export const fieldsConfig = {
     type: 'select',
     options: await getEntitiesOptions(['store', 'agency', 'department', 'service', 'orginization']), // Populated with relevant parent entities
     multiple: true,
-    faker: 'random.arrayElement'
+    faker: 'random.arrayElement',
+    refreshOptions: async () => {
+        return await getEntitiesOptions(['store', 'agency', 'department', 'service', 'organization']);
+    }
   },
   storeId: {
     label: 'Parent Entity ID',
@@ -124,7 +129,10 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
 
 export const entityName = 'Entities';
 
-export const fetchEntities = () => fetchDocuments(organizationId, 'entities');
-export const addEntity = (item) => addDocument(organizationId, 'entities', item);
-export const updateEntity = (id, item) => updateDocument(organizationId, 'entities', id, item);
-export const deleteEntity = (id) => deleteDocument(organizationId, 'entities', id);
+export async function fetchItems() {
+    return await fetchDocuments(organizationId, 'entities');
+}
+
+export const addItem = (item) => addDocument(organizationId, 'entities', item);
+export const udpateItem = (id, item) => updateDocument(organizationId, 'entities', id, item);
+export const deleteItem = (id) => deleteDocument(organizationId, 'entities', id);
