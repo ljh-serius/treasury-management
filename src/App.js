@@ -14,6 +14,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import GanttChart from './pages/GanttChart';
 import Treasury from './pages/Treasury';
 import Management from './pages/Management'
+import Visualizer from './pages/UnitVisualizer'
 
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
 
@@ -67,6 +68,16 @@ const App = () => {
               <ProtectedRoute user={user}>
                 <Dashboard>
                   <Management />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/unit/:entity/:id"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Visualizer />
                 </Dashboard>
               </ProtectedRoute>
             }

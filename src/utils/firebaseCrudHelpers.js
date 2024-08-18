@@ -1,5 +1,5 @@
 import { db } from './firebaseConfig'; // Assuming you have a Firebase config file
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, getDoc } from 'firebase/firestore';
 
 // Function to fetch documents specific to an organization from a subcollection
 export const fetchDocuments = async (organizationId, subcollectionName) => {
@@ -85,3 +85,26 @@ export const fetchDocumentsByFieldValue = async (organizationId, relativeCollect
     return [];
   }
 }
+export const fetchDocumentById = async (organizationId, subcollectionName, documentId) => {
+  console.log("Fetching document with ID:", documentId);
+  console.log("In subcollection:", subcollectionName);
+  console.log("Under organization ID:", organizationId);
+
+  try {
+    const docRef = doc(db, 'organizations', organizationId, subcollectionName, documentId);
+    console.log("Document Reference:", docRef.path); // Log the path being queried
+
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      console.log("Document data:", docSnap.data()); // Log the retrieved data
+      return { id: docSnap.id, ...docSnap.data() };
+    } else {
+      console.error(`No document found with ID ${documentId} in ${subcollectionName}`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error fetching document with ID ${documentId} from ${subcollectionName}:`, error);
+    return null;
+  }
+};
