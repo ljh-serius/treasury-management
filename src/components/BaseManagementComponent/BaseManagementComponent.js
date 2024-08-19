@@ -25,6 +25,7 @@ const truncateText = (text, wordLimit) => {
 };
 
 const getDateFormatyyyyMMdd = (dateString) => {
+  console.log("Date string ", dateString)
   const [year, month, day] = dateString.split('T')[0].split('-');
   const formattedDate = `${year}-${month}-${day}`;
   return formattedDate;
@@ -139,11 +140,23 @@ function BaseTableToolbar({ numSelected, onAdd, onDelete, onEdit, entityName}) {
 function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
   // Lazy initialization of formData
   const [formData, setFormData] = useState(() => 
-    initialData || Object.keys(fieldConfig).reduce((acc, field) => {
-      acc[field] = fieldConfig[field].multiple ? [] : '';
+    Object.keys(fieldConfig).reduce((acc, field) => {
+      acc[field] = initialData && initialData[field] !== undefined ? initialData[field] : (fieldConfig[field].multiple ? [] : '');
       return acc;
     }, {})
   );
+
+  // Update formData when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setFormData((prevData) => 
+        Object.keys(fieldConfig).reduce((acc, field) => {
+          acc[field] = initialData[field] !== undefined ? initialData[field] : prevData[field];
+          return acc;
+        }, {})
+      );
+    }
+  }, [initialData, fieldConfig]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -173,10 +186,30 @@ function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
 
   const handleSubmit = () => {
     onSubmit(formData);
+
+    // Reset formData to its initial state after submission
+    setFormData(() => 
+      Object.keys(fieldConfig).reduce((acc, field) => {
+        acc[field] = initialData && initialData[field] !== undefined ? initialData[field] : (fieldConfig[field].multiple ? [] : '');
+        return acc;
+      }, {})
+    );
+  };
+
+  const handleClose = () => {
+    // Clear the form data on close
+    setFormData(() => 
+      Object.keys(fieldConfig).reduce((acc, field) => {
+        acc[field] = fieldConfig[field].multiple ? [] : '';
+        return acc;
+      }, {})
+    );
+
+    onClose();
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={handleClose}>
       <Box
         sx={{
           position: 'absolute',
@@ -197,7 +230,7 @@ function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
           <Typography variant="h6" component="h2">
             {initialData ? 'Edit Item' : 'Add Item'}
           </Typography>
-          <IconButton onClick={onClose}>
+          <IconButton onClick={handleClose}>
             <CloseIcon />
           </IconButton>
         </Box>
@@ -231,7 +264,7 @@ function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
                     label={fieldConfig[field].label}
                     name={field}
                     type={fieldConfig[field].type}
-                    value={fieldConfig[field].type === 'date' ? getDateFormatyyyyMMdd(formData[field]) : formData[field]}
+                    value={fieldConfig[field].type === 'date' ? (formData[field] ? getDateFormatyyyyMMdd(formData[field]) : '') : formData[field]}
                     onChange={handleChange}
                     fullWidth
                     multiline={fieldConfig[field].multiline || false}
@@ -244,7 +277,7 @@ function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
           </Grid>
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={handleClose}>Cancel</Button>
           <Button variant="contained" onClick={handleSubmit}>
             {initialData ? 'Update' : 'Add'}
           </Button>
@@ -423,7 +456,6 @@ export default function BaseTableComponent({
         } else if (event.key === 'Backspace') {
             event.preventDefault();
             restoreItem();
-            console.log("RESTOED ITEm")
         } else if (event.key === 'Delete') {
             event.preventDefault();
             confirmDelete();
@@ -436,7 +468,6 @@ export default function BaseTableComponent({
     
     window.addEventListener('keydown', handleKeyDown);
 
-    // Cleanup event listener on component unmount
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
@@ -516,22 +547,18 @@ export default function BaseTableComponent({
       setLoading(false);
     }
   };
-  
+
   const restoreItem = async () => {
     const lastItem = JSON.parse(localStorage.getItem('lastDeletedOrUpdatedItem'));
     if (lastItem) {
       try {
         setLoading(true);
   
-        // Attempt to update the item first
         await updateItem(lastItem.id, lastItem);
-  
         console.log(`Item with ID ${lastItem.id} was successfully updated.`);
         
       } catch (error) {
-        console.log("error in message ", error.message)
-        // If the error indicates that the document was not found, try to add it instead
-        if (error.message.includes("Could not update document in partners")) {
+        if (error.message.includes("Could not update document in")) {
           console.log(`Item with ID ${lastItem.id} not found. Adding it instead.`);
           try {
             await addItem(lastItem);
@@ -540,11 +567,9 @@ export default function BaseTableComponent({
             console.error(`Failed to add item with ID ${lastItem.id}:`, addError);
           }
         } else {
-          // If it's a different error, log it
           console.error(`Failed to update item with ID ${lastItem.id}:`, error);
         }
       } finally {
-        // Refetch items to update the local state
         try {
           const data = await fetchItems();
           setItems(data);
@@ -559,7 +584,7 @@ export default function BaseTableComponent({
       alert("No item to restore.");
     }
   };
-  
+
   const handleModalSubmit = async (itemData) => {
     try {
       setLoading(true);
@@ -572,14 +597,15 @@ export default function BaseTableComponent({
       const data = await fetchItems();
       setItems(data);
       setModalOpen(false);
-      refreshFieldsConfig();
+      setCurrentItem(null); // Clear currentItem after saving
+      setFormData({}); // Clear formData after saving
+      refreshFieldsConfig(); // Refresh field config after saving
     } catch (error) {
       console.error(`Error saving ${entityName}:`, error);
     } finally {
       setLoading(false);
     }
   };
-
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -600,6 +626,7 @@ export default function BaseTableComponent({
     const element = arr[randomIndex];
     return element && element.id ? element.id : null;
   };
+
   const getMultipleRandomElementIds = (arr) => {
     if (!Array.isArray(arr) || arr.length === 0) return [];
     const randomCount = Math.floor(Math.random() * arr.length) + 1;
@@ -614,8 +641,6 @@ export default function BaseTableComponent({
 
     return Array.from(result);
   };
-
-  
 
   const refreshFieldsConfig = async () => {
     try {
@@ -821,10 +846,8 @@ export default function BaseTableComponent({
           onSubmit={handleModalSubmit}
           initialData={currentItem}
           fieldConfig={refreshedFieldsConfig}
-          setFormData={setFormData}
         />
 
-        {/* Backdrop and Spinner */}
         <Backdrop
           sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
           open={loading}
