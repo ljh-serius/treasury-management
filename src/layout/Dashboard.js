@@ -32,6 +32,7 @@ const drawerWidth = 300;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
+    marginTop: 100,
     flexGrow: 1,
     padding: theme.spacing(3),
     transition: theme.transitions.create('margin', {
@@ -243,7 +244,7 @@ const Dashboard = ({ children }) => {
       </Drawer> */}
         <DrawerDashboard setShowAnalytics={setShowAnalytics} setCurrentAnalysisPage={setCurrentAnalysisPage} />
 
-      <Main open={open}>
+      <Main open={open} sx={{}}>
         <Box>
           {React.cloneElement(children, { showAnalytics, currentAnalysisPage })}
         </Box>
