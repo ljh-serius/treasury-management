@@ -11,8 +11,6 @@ import {
 
 import industries from '../../data/industries';
 
-const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-
 export const fieldsConfig = {
     invoiceId: { label: 'Invoice ID', type: 'text', faker: 'datatype.uuid' },
     invoiceName: { label: 'Invoice Name', type: 'text', faker: 'company.name' },
@@ -152,12 +150,12 @@ export const fieldsConfig = {
   export const entityName = 'Invoices';
   
   
-  export const fetchItems = () => fetchDocuments(organizationId, 'invoices');
-  export const addItem = (item) => addDocument(organizationId, 'invoices', item);
-  export const updateItem = (id, item) => updateDocument(organizationId, 'invoices', id, item);
-  export const deleteItem = (id) => deleteDocument(organizationId, 'invoices', id);
+  export const fetchItems = () => fetchDocuments('invoices');
+  export const addItem = (item) => addDocument('invoices', item);
+  export const updateItem = (id, item) => updateDocument('invoices', id, item);
+  export const deleteItem = (id) => deleteDocument('invoices', id);
   
   export async function fetchItemById(id) {
-    return await fetchDocumentById(organizationId, 'invoices', id);
+    return await fetchDocumentById('invoices', id);
 }
   

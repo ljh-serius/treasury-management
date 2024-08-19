@@ -14,8 +14,6 @@ import { fetchItems as fetchProjects } from './Projects';
 import { fetchItems as fetchProviders } from './Providers';
 import { fetchItems as fetchProducts } from './Products';
 
-const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-
 const productsOptions = (await fetchProducts()).map((product) => {
   return {
     id: product.id,
@@ -313,11 +311,11 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
 
 export const entityName = 'Risks';
 
-export const fetchItems = () => fetchDocuments(organizationId, 'risks');
-export const addItem = (item) => addDocument(organizationId, 'risks', item);
-export const updateItem = (id, item) => updateDocument(organizationId, 'risks', id, item);
-export const deleteItem = (id) => deleteDocument(organizationId, 'risks', id);
+export const fetchItems = () => fetchDocuments('risks');
+export const addItem = (item) => addDocument('risks', item);
+export const updateItem = (id, item) => updateDocument('risks', id, item);
+export const deleteItem = (id) => deleteDocument('risks', id);
 
 export async function fetchItemById(id) {
-  return await fetchDocumentById(organizationId, 'providers', id);
+  return await fetchDocumentById('providers', id);
 }

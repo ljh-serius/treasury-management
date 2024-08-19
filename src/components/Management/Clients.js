@@ -20,10 +20,11 @@ const organizationId = JSON.parse(localStorage.getItem('userData')).organization
 const projectsOptions = (await fetchProjects()).map((project) => {
   return {
     id: project.id,
-    label: project.name
+    label: project.projectName
   }
 })
 
+console.log("Projcts listing ", projectsOptions)
 export const fieldsConfig = {
   clientId: { label: 'Client ID', type: 'text', faker: 'datatype.uuid' },
   clientName: { label: 'Client Name', type: 'text', faker: 'company.name' },
@@ -149,6 +150,7 @@ export const fieldsConfig = {
   currentProjects: {
     label: 'Current Projects',
     type: 'select',
+    link: '/projects',
     options: projectsOptions,
     multiple: true,
     faker: 'random.arrayElement',
@@ -204,15 +206,15 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
 export const entityName = 'Clients';
 
 export async function fetchItems() {
-  return await fetchDocuments(organizationId, 'clients');
+  return await fetchDocuments('clients');
 }
 
-export const addItem = (item) => addDocument(organizationId, 'clients', item);
-export const updateItem = (id, item) => updateDocument(organizationId, 'clients', id, item);
-export const deleteItem = (id) => deleteDocument(organizationId, 'clients', id);
+export const addItem = (item) => addDocument('clients', item);
+export const updateItem = (id, item) => updateDocument('clients', id, item);
+export const deleteItem = (id) => deleteDocument('clients', id);
 
 export async function fetchItemById(id) {
-  return await fetchDocumentById(organizationId, 'clients', id);
+  return await fetchDocumentById('clients', id);
 }
 
 

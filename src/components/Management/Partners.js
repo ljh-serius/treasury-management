@@ -11,8 +11,6 @@ import {
 import industries from '../../data/industries';
 import paymentMethods from '../../data/payment-methods';
 
-const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-
 export const fieldsConfig = {
     partnerId: { label: 'Partner ID', type: 'text', faker: 'datatype.uuid' },
     partnerName: { label: 'Partner Name', type: 'text', faker: 'company.name' },
@@ -205,18 +203,18 @@ export const fieldsConfig = {
   export const entityName = 'Partners';
   
   export async function fetchItems() {
-    return await fetchDocuments(organizationId, 'partners');
+    return await fetchDocuments('partners');
   }
   
   export async function fetchItemsBySelectValue(selectMenu, value) {
-    return await fetchDocumentsBySelectValue(organizationId, 'partners', selectMenu, value);
+    return await fetchDocumentsBySelectValue('partners', selectMenu, value);
   }
   
-  export const addItem = (item) => addDocument(organizationId, 'partners', item);
-  export const updateItem = (id, item) => updateDocument(organizationId, 'partners', id, item);
-  export const deleteItem = (id) => deleteDocument(organizationId, 'partners', id);
+  export const addItem = (item) => addDocument('partners', item);
+  export const updateItem = (id, item) => updateDocument('partners', id, item);
+  export const deleteItem = (id) => deleteDocument('partners', id);
   
   export async function fetchItemById(id) {
-    return await fetchDocumentById(organizationId, 'partners', id);
+    return await fetchDocumentById('partners', id);
 }
   

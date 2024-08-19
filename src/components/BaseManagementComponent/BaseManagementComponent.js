@@ -601,7 +601,7 @@ export default function BaseTableComponent({
       setModalOpen(false);
       setCurrentItem(null); // Clear currentItem after saving
       setFormData({}); // Clear formData after saving
-      refreshFieldsConfig(); // Refresh field config after saving
+      refreshAllFieldOptions(); // Refresh field config after saving
     } catch (error) {
       console.error(`Error saving ${entityName}:`, error);
     } finally {
@@ -644,42 +644,48 @@ export default function BaseTableComponent({
     return Array.from(result);
   };
 
-  const refreshFieldsConfig = async () => {
-    try {
-      const updatedConfig = await Promise.all(
-        Object.keys(refreshedFieldsConfig).map(async (key) => {
-          const field = refreshedFieldsConfig[key];
 
-          if (field.refreshOptions) {
-            const newOptions = await field.refreshOptions();
-            return {
-              [key]: {
-                ...field,
-                options: newOptions.map((option) => ({
-                  id: option.id,
-                  label: option.name || option.label,
-                })),
-              },
-            };
-          } else {
-            return { [key]: field };
-          }
-        })
-      );
+  const refreshAllFieldOptions = async () => {
+    const updatedConfig = {};
 
-      setRefreshedFieldsConfig((prevConfig) => {
-        return updatedConfig.reduce((acc, curr) => {
-          return { ...acc, ...curr };
-        }, { ...prevConfig });
-      });
-    } catch (error) {
-      console.error('Error refreshing fields config:', error);
+    for (const key of Object.keys(refreshedFieldsConfig)) {
+      const field = refreshedFieldsConfig[key];
+
+      if (field.refreshOptions && typeof field.refreshOptions === 'function') {
+        try {
+          const newOptions = await field.refreshOptions();
+          updatedConfig[key] = {
+            ...field,
+            options: newOptions,
+          };
+        } catch (error) {
+          console.error(`Failed to refresh options for ${key}:`, error);
+          // If refresh fails, keep the original options
+          updatedConfig[key] = field;
+        }
+      } else {
+        // If no refreshOptions function, keep the original field config
+        updatedConfig[key] = field;
+      }
     }
+
+    // Update the state with the new configuration
+    setRefreshedFieldsConfig((prevState) => ({
+      ...prevState,
+      ...updatedConfig,
+    }));
   };
+
+
+  useEffect(() => {
+    // Automatically refresh all fields' options when the component mounts
+    refreshAllFieldOptions();
+  }, []);
+
 
   const generateRandomRow = async () => {
     try {
-      await refreshFieldsConfig();
+      await refreshAllFieldOptions();
       const newRow = Object.keys(refreshedFieldsConfig).reduce((acc, key) => {
         const field = refreshedFieldsConfig[key];
         let value;

@@ -12,6 +12,7 @@ function ManagementComponent({ showAnalytics }) {
     useEffect(() => {
         const loadConfig = async () => {
             try {
+                console.log("File to import :", `../components/Management/${capitalizedComponentName}`)
                 const configModule = await import(`../components/Management/${capitalizedComponentName}`);
                 const analysisModule = await import(`./Analysis/${capitalizedComponentName}`);
 

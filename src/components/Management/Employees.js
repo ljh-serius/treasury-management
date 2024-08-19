@@ -13,12 +13,25 @@ import nationalities from '../../data/nationalities';
 import skills from '../../data/skills';
 
 import { fetchItemsBySelectValue as fetchPartnersBySelectValue } from './Partners';
+import { fetchItems as fetchCosts } from './Costs';
 
-const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+export const fetchItems = () => {
+    return fetchDocuments('employees');
+}
 
 // employees
-const costs = []
+const getCostsOptions = async () => {
+    const options = (await fetchCosts()).map((cost) => {
+        return {
+            id: cost.id,
+            label: cost.costName
+        }
+    })
 
+    console.log("Options ", options)
+
+    return options;
+}
 
 const managers = (await fetchItemsByField('position', 'manager')).map((manager) => {
     return {
@@ -37,7 +50,7 @@ const employees = (await fetchItems()).map((manager) => {
 const healthInsurances = (await fetchPartnersBySelectValue('servicesProvided', 'health_insurance')).map((partner) => {
     return {
         id: partner.id,
-        label: partner.name
+        label: partner.partnerName
     }
 })
 
@@ -70,14 +83,6 @@ export const fieldsConfig = {
         ],
         faker: 'random.arrayElement',
     },
-    costsId: {
-        label: 'Costs Allocated',
-        type: 'select',
-        multiple: true,
-        link: '/costs',
-        options: costs,
-        faker: 'random.arrayElement',
-    },
     hireDate: { label: 'Hire Date', type: 'date', faker: 'date.past' },
     salary: { label: 'Salary', type: 'number', faker: 'finance.amount' },
     status: {
@@ -90,6 +95,17 @@ export const fieldsConfig = {
             { id: 'on_leave', label: 'On Leave' },
         ],
         faker: 'random.arrayElement',
+    },
+    costIds: {
+        label: 'Allocated Costs',
+        link: '/costs',
+        type: 'select',
+        options: await getCostsOptions(),
+        multiple: true,
+        faker: 'random.arrayElements',
+        refreshOptions: async () => {
+            return await getCostsOptions();
+        }
     },
     manager: {
         id: 'Manager',
@@ -212,22 +228,19 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
 
 export const entityName = 'Employees';
 
-export function fetchItems() {
-    return fetchDocuments(organizationId, 'employees');
-}
 export async function fetchItemsBySelectOption(selectMenu, value) {
-    return await fetchDocumentsBySelectValue(organizationId, 'employees', selectMenu, value);
+    return await fetchDocumentsBySelectValue('employees', selectMenu, value);
 }
 
 export async function fetchItemsByField(fieldName, fieldValue) {
-    return await fetchDocumentsByFieldValue(organizationId, 'employees', fieldName, fieldValue);
+    return await fetchDocumentsByFieldValue('employees', fieldName, fieldValue);
 }
 
-export const addItem = (item) => addDocument(organizationId, 'employees', item);
-export const updateItem = (employeeId, item) => updateDocument(organizationId, 'employees', employeeId, item);
-export const deleteItem = (employeeId) => deleteDocument(organizationId, 'employees', employeeId);
+export const addItem = (item) => addDocument('employees', item);
+export const updateItem = (employeeId, item) => updateDocument('employees', employeeId, item);
+export const deleteItem = (employeeId) => deleteDocument('employees', employeeId);
 
-export async function fetchItemById(id) {
-    return await fetchDocumentById(organizationId, 'employees', id);
+export const fetchItemById = async (id) => {
+    return await fetchDocumentById('employees', id);
 }
   

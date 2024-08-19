@@ -8,97 +8,11 @@ import {
     fetchDocumentById
 } from '../../utils/firebaseCrudHelpers';
 
-// import { fetchProducts } from '../BaseManagementComponent/FieldsConfig';
-
-import { fetchItems as fetchEmployees } from './Employees';
-import { fetchItems as fetchPartners } from './Partners';
-import { fetchItems as fetchProjects } from './Projects';
-import { fetchItems as fetchProviders } from './Providers';
-import { fetchItems as fetchProducts } from './Products';
-
-const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-
-const productsOptions = (await fetchProducts()).map((product) => {
-    return {
-        id: product.id,
-        label: product.name
-    }
-})
-
-
-const employeesOptions = (await fetchEmployees()).map((employee) => {
-    return {
-        id: employee.id,
-        label: employee.name
-    }
-})
-
-const projectsOptions = (await fetchProjects()).map((project) => {
-    return {
-        id: project.id,
-        label: project.name
-    }
-})
-
-const partnersOptions = (await fetchPartners()).map((partner) => {
-    return {
-        id: partner.id,
-        label: partner.name
-    }
-})
-
-const providersOptions = (await fetchProviders()).map((provider) => {
-    return {
-        id: provider.id,
-        label: provider.name
-    }
-})
-
 export const fieldsConfig = {
     costId: { label: 'Cost ID', type: 'text', faker: 'datatype.uuid' },
     costName: { label: 'Cost Name', type: 'text', faker: 'company.name' },
     cost: { label: 'Cost', type: 'number', faker: 'finance.amount' },
     description: { label: 'Description', type: 'text', faker: 'lorem.sentence' },
-    productIds: {
-        label: 'Cost for Products',
-        link: '/products',
-        type: 'select',
-        options: productsOptions,
-        multiple: true,
-        faker: 'random.arrayElements'
-    },
-    employeeIds: {
-        label: 'Cost for Employees',
-        link: '/employees',
-        type: 'select',
-        options: employeesOptions,
-        multiple: true,
-        faker: 'random.arrayElements'
-    },
-    projectIds: {
-        label: 'Cost for Projects',
-        link: '/projects',
-        type: 'select',
-        options: projectsOptions,
-        multiple: true,
-        faker: 'random.arrayElements'
-    },
-    partnerIds: {
-        label: 'Cost for Partners',
-        link: '/partners',
-        type: 'select',
-        options: partnersOptions,
-        multiple: true,
-        faker: 'random.arrayElements'
-    },
-    providerIds: {
-        link: '/providers',
-        label: 'Cost for Providers',
-        type: 'select',
-        options: providersOptions,
-        multiple: true,
-        faker: 'random.arrayElements'
-    },
     allocationDate: { label: 'Allocation Date', type: 'date', faker: 'date.past' },
     allocationType: {
         label: 'Allocation Type',
@@ -208,12 +122,12 @@ export const costsHeadCells = Object.keys(fieldsConfig).map(key => ({
 
 export const entityName = 'Costs';
 
-export const fetchItems = () => fetchDocuments(organizationId, 'costs');
-export const addItem = (item) => addDocument(organizationId, 'costs', item);
-export const updateItem = (costId, item) => updateDocument(organizationId, 'costs', costId, item);
-export const deleteItem = (costId) => deleteDocument(organizationId, 'costs', costId);
+export const fetchItems = () => fetchDocuments('costs');
+export const addItem = (item) => addDocument('costs', item);
+export const updateItem = (costId, item) => updateDocument('costs', costId, item);
+export const deleteItem = (costId) => deleteDocument('costs', costId);
 
 export async function fetchItemById(id) {
-    return await fetchDocumentById(organizationId, 'costs', id);
+    return await fetchDocumentById('costs', id);
 }
   

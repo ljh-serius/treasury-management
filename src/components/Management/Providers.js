@@ -10,8 +10,6 @@ import {
 
 import countries from '../../data/countries';
 
-const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-
 export const fieldsConfig = {
     providerId: { label: 'Provider ID', type: 'text', faker: 'datatype.uuid' },
     providerName: { label: 'Provider Name', type: 'text', faker: 'company.name' },
@@ -163,22 +161,22 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
 export const entityName = 'Providers';
 
 export async function fetchItems() {
-    return await fetchDocuments(organizationId, 'providers');
+    return await fetchDocuments('providers');
 }
 
 export async function fetchItemsBySelectValue(selectMenu, value) {
-    return await fetchDocumentsBySelectValue(organizationId, 'providers', selectMenu, value);
+    return await fetchDocumentsBySelectValue('providers', selectMenu, value);
 }
 
 export const addItem = (item) => {
-    addDocument(organizationId, 'providers', item);
+    addDocument('providers', item);
 }
 
 export const updateItem = (id, item) => {
-    updateDocument(organizationId, 'providers', id, item);
+    updateDocument('providers', id, item);
 }
-export const deleteItem = (id) => deleteDocument(organizationId, 'providers', id);
+export const deleteItem = (id) => deleteDocument('providers', id);
 
 export async function fetchItemById(id) {
-    return await fetchDocumentById(organizationId, 'providers', id);
+    return await fetchDocumentById('providers', id);
 }

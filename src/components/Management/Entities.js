@@ -8,8 +8,6 @@ import {
     fetchDocumentById
 } from '../../utils/firebaseCrudHelpers';
 
-const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-
 const getEntitiesOptions = async (types) => {
   console.log("launched NOW")
   return (await fetchItems()).filter((entity) => {
@@ -147,14 +145,14 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
 export const entityName = 'Entities';
 
 export async function fetchItems() {
-    return await fetchDocuments(organizationId, 'entities');
+    return await fetchDocuments('entities');
 }
 
-export const addItem = (item) => addDocument(organizationId, 'entities', item);
-export const updateItem = (id, item) => updateDocument(organizationId, 'entities', id, item);
-export const deleteItem = (id) => deleteDocument(organizationId, 'entities', id);
+export const addItem = (item) => addDocument('entities', item);
+export const updateItem = (id, item) => updateDocument('entities', id, item);
+export const deleteItem = (id) => deleteDocument('entities', id);
 
   
 export async function fetchItemById(id) {
-  return await fetchDocumentById(organizationId, 'entities', id);
+  return await fetchDocumentById('entities', id);
 }

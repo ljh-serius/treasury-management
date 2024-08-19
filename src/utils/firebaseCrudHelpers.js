@@ -1,8 +1,10 @@
 import { db } from './firebaseConfig'; // Assuming you have a Firebase config file
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, getDoc } from 'firebase/firestore';
 
+const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
+
 // Function to fetch documents specific to an organization from a subcollection
-export const fetchDocuments = async (organizationId, subcollectionName) => {
+export const fetchDocuments = async(subcollectionName) => {
   try {
     const subcollectionRef = collection(db, 'organizations', organizationId, subcollectionName);
     const snapshot = await getDocs(subcollectionRef);
@@ -15,7 +17,7 @@ export const fetchDocuments = async (organizationId, subcollectionName) => {
 };
 
 // Function to add a new document linked to an organization in a subcollection
-export const addDocument = async (organizationId, subcollectionName, documentData) => {
+export const addDocument = async(subcollectionName, documentData) => {
   try {
     documentData.organizationId = organizationId;
     const subcollectionRef = collection(db, 'organizations', organizationId, subcollectionName);
@@ -28,7 +30,7 @@ export const addDocument = async (organizationId, subcollectionName, documentDat
 };
 
 // Function to update an existing document in a subcollection
-export const updateDocument = async (organizationId, subcollectionName, documentId, documentData) => {
+export const updateDocument = async(subcollectionName, documentId, documentData) => {
   try {
     const docRef = doc(db, 'organizations', organizationId, subcollectionName, documentId);
     await updateDoc(docRef, documentData);
@@ -39,7 +41,7 @@ export const updateDocument = async (organizationId, subcollectionName, document
 };
 
 // Function to delete a document from a subcollection
-export const deleteDocument = async (organizationId, subcollectionName, documentId) => {
+export const deleteDocument = async(subcollectionName, documentId) => {
   try {
     const docRef = doc(db, 'organizations', organizationId, subcollectionName, documentId);
     await deleteDoc(docRef);
@@ -50,7 +52,7 @@ export const deleteDocument = async (organizationId, subcollectionName, document
 };
 
 
-export const fetchDocumentsBySelectValue = async (organizationId, relativeCollection, foreignKey, foreignValue) => {
+export const fetchDocumentsBySelectValue = async(relativeCollection, foreignKey, foreignValue) => {
   try {
     const subcollectionRef = collection(db, 'organizations', organizationId, relativeCollection);
     
@@ -68,7 +70,7 @@ export const fetchDocumentsBySelectValue = async (organizationId, relativeCollec
   }
 }
 
-export const fetchDocumentsByFieldValue = async (organizationId, relativeCollection, fieldName, fieldValue) => {
+export const fetchDocumentsByFieldValue = async(relativeCollection, fieldName, fieldValue) => {
   try {
     const subcollectionRef = collection(db, 'organizations', organizationId, relativeCollection);
     
@@ -85,7 +87,7 @@ export const fetchDocumentsByFieldValue = async (organizationId, relativeCollect
     return [];
   }
 }
-export const fetchDocumentById = async (organizationId, subcollectionName, documentId) => {
+export const fetchDocumentById = async(subcollectionName, documentId) => {
   console.log("Fetching document with ID:", documentId);
   console.log("In subcollection:", subcollectionName);
   console.log("Under organization ID:", organizationId);

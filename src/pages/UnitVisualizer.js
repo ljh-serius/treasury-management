@@ -11,6 +11,7 @@ import {
     Container,
     Box,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 const Visualizer = () => {
     const { entity, id } = useParams();
@@ -92,13 +93,15 @@ function renderField(value, fieldConfig) {
                     {value.map(val => {
                         const optionLabel = fieldConfig.options.find(opt => opt.id === val)?.label;
                         return optionLabel ? (
-                            <Chip
+                            <Link to={`${fieldConfig.link}/${val}`}>
+                                <Chip
                                 key={val}
                                 label={optionLabel}
                                 color="primary"
                                 variant="outlined"
                                 style={{ margin: '4px' }}
                             />
+                         </Link>
                         ) : null;
                     })}
                 </Box>

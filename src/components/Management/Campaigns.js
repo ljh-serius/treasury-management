@@ -17,8 +17,6 @@ const managers = (await fetchEmployeesByField('position', 'manager')).map((manag
   }
 })
 
-const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-
 export const fieldsConfig = {
   campaignId: { label: 'Campaign ID', type: 'text', faker: 'datatype.uuid' },
   campaignName: { label: 'Campaign Name', type: 'text', faker: 'commerce.productName' },
@@ -120,17 +118,17 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
 export const entityName = 'Campaigns';
 
 export async function fetchItems() {
-  return await fetchDocuments(organizationId, 'campaigns');
+  return await fetchDocuments('campaigns');
 }
 
-export const addItem = (item) => addDocument(organizationId, 'campaigns', item);
-export const updateItem = (id, item) => updateDocument(organizationId, 'campaigns', id, item);
-export const deleteItem = (id) => deleteDocument(organizationId, 'campaigns', id);
+export const addItem = (item) => addDocument('campaigns', item);
+export const updateItem = (id, item) => updateDocument('campaigns', id, item);
+export const deleteItem = (id) => deleteDocument('campaigns', id);
 
 
 
 
 
 export async function fetchItemById(id) {
-  return await fetchDocumentById(organizationId, 'campaigns', id);
+  return await fetchDocumentById('campaigns', id);
 }

@@ -14,8 +14,6 @@ import {
 
 import { fetchItems as fetchProviders } from './Providers';
 
-const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
-
 const providersOptions = (await fetchProviders()).map((provider) => {
     return {
         id: provider.id,
@@ -239,15 +237,15 @@ export const fieldsConfig = {
   export const entityName = 'Products';
   
   export async function fetchItems() {
-    return await fetchDocuments(organizationId, 'products');
+    return await fetchDocuments('products');
   }
-  export const addItem = (item) => addDocument(organizationId, 'products', item);
-  export const updateItem = (id, item) => updateDocument(organizationId, 'products', id, item);
-  export const deleteItem = (id) => deleteDocument(organizationId, 'products', id);
+  export const addItem = (item) => addDocument('products', item);
+  export const updateItem = (id, item) => updateDocument('products', id, item);
+  export const deleteItem = (id) => deleteDocument('products', id);
   
   
   
   export async function fetchItemById(id) {
-    return await fetchDocumentById(organizationId, 'products', id);
+    return await fetchDocumentById('products', id);
 }
   
