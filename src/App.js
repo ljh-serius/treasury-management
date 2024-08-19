@@ -15,6 +15,7 @@ import GanttChart from './pages/GanttChart';
 import Treasury from './pages/Treasury';
 import Management from './pages/Management'
 import Visualizer from './pages/UnitVisualizer'
+import BilanComptable from './pages/BilanComptable';
 
 const stripePromise = loadStripe(String(process.env.REACT_APP_STRIPE_PUBLIC_KEY));
 
@@ -58,6 +59,16 @@ const App = () => {
               <ProtectedRoute user={user}>
                 <Dashboard>
                   <Treasury />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bilan-comptable"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <BilanComptable />
                 </Dashboard>
               </ProtectedRoute>
             }

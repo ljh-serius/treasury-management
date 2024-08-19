@@ -20,6 +20,7 @@ import InsightsIcon from '@mui/icons-material/Insights';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 const drawerItems = [
+    { key: "bilan-comptable", label: "Bilan Comptable", icon: <SummarizeIcon style={{ fontSize: '1.6rem' }} />, path: "/bilan-comptable" },
     { key: "treasury", label: "Treasury", icon: <SummarizeIcon style={{ fontSize: '1.6rem' }} />, path: "/summary" },
     { key: "people-and-relationships", label: "People and Relationships", icon: null, seperator: true },
     { key: "clients", label: "Clients", icon: <SummarizeIcon style={{ fontSize: '1.6rem' }} />, path: "/management/clients" },
