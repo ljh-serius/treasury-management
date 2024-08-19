@@ -24,6 +24,12 @@ const truncateText = (text, wordLimit) => {
   return words.slice(0, wordLimit).join(' ') + '...';
 };
 
+const getDateFormatyyyyMMdd = (dateString) => {
+  const [year, month, day] = dateString.split('T')[0].split('-');
+  const formattedDate = `${year}-${month}-${day}`;
+  return formattedDate;
+}
+
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
   if (b[orderBy] > a[orderBy]) return 1;
@@ -131,35 +137,38 @@ function BaseTableToolbar({ numSelected, onAdd, onDelete, onEdit, entityName}) {
 }
 
 function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
-  const [formData, setFormData] = useState(
+  // Lazy initialization of formData
+  const [formData, setFormData] = useState(() => 
     initialData || Object.keys(fieldConfig).reduce((acc, field) => {
       acc[field] = fieldConfig[field].multiple ? [] : '';
       return acc;
     }, {})
   );
 
-  useEffect(() => {
-    setFormData(
-      initialData || Object.keys(fieldConfig).reduce((acc, field) => {
-        acc[field] = fieldConfig[field].multiple ? [] : '';
-        return acc;
-      }, {})
-    );
-  }, [initialData, fieldConfig]);
-
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+    // Only update if the value has changed
+    if (formData[name] !== value) {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   const handleAutocompleteChange = (event, value, field) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [field]: fieldConfig[field].multiple ? (value ? value.map((v) => v.id) : []) : (value ? value.id : ''),
-    }));
+    const newValue = fieldConfig[field].multiple
+      ? (value ? value.map((v) => v.id) : [])
+      : (value ? value.id : '');
+
+    // Only update if the value has changed
+    if (formData[field] !== newValue) {
+      setFormData((prevData) => ({
+        ...prevData,
+        [field]: newValue,
+      }));
+    }
   };
 
   const handleSubmit = () => {
@@ -203,8 +212,8 @@ function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
                     getOptionLabel={(option) => option.label}
                     value={fieldConfig[field].multiple
                       ? fieldConfig[field].options.filter((option) =>
-                        formData[field] ? formData[field].includes(option.id) : false
-                      )
+                          formData[field] ? formData[field].includes(option.id) : false
+                        )
                       : fieldConfig[field].options.find((option) => option.id === formData[field]) || null}
                     onChange={(event, value) => handleAutocompleteChange(event, value, field)}
                     renderInput={(params) => (
@@ -222,7 +231,7 @@ function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
                     label={fieldConfig[field].label}
                     name={field}
                     type={fieldConfig[field].type}
-                    value={formData[field]}
+                    value={fieldConfig[field].type === 'date' ? getDateFormatyyyyMMdd(formData[field]) : formData[field]}
                     onChange={handleChange}
                     fullWidth
                     multiline={fieldConfig[field].multiline || false}
@@ -244,6 +253,7 @@ function BaseModal({ open, onClose, onSubmit, initialData, fieldConfig }) {
     </Modal>
   );
 }
+
 
 function FilterManager({ filters, setFilters, fieldConfig }) {
   const [currentFilter, setCurrentFilter] = useState({ column: '', value: '', active: true });

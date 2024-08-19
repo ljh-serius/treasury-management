@@ -72,16 +72,6 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/units/:entity/:id"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard>
-                  <Visualizer />
-                </Dashboard>
-              </ProtectedRoute>
-            }
-          />
           { /* Blog and documentation */}
           <Route
             path="/blog"
@@ -118,6 +108,16 @@ const App = () => {
               <ProtectedRoute user={user}>
                 <Dashboard>
                   <GanttChart />
+                </Dashboard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/:entity/:id"
+            element={
+              <ProtectedRoute user={user}>
+                <Dashboard>
+                  <Visualizer />
                 </Dashboard>
               </ProtectedRoute>
             }
