@@ -2,8 +2,6 @@
 import React, { useState } from 'react';
 import { ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, IconButton, Divider, List } from '@mui/material';
 import { Link } from 'react-router-dom';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-
 
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -20,7 +18,6 @@ import SecurityIcon from '@mui/icons-material/Security';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import InsightsIcon from '@mui/icons-material/Insights';
 import SettingsIcon from '@mui/icons-material/Settings';
-import LogoutIcon from '@mui/icons-material/Logout';
 
 const drawerItems = [
     { key: "treasury", label: "Treasury", icon: <SummarizeIcon style={{ fontSize: '1.6rem' }} />, path: "/summary" },
@@ -41,6 +38,7 @@ const drawerItems = [
     { key: "analytics", label: "Analytics", icon: <InsightsIcon style={{ fontSize: '1.6rem' }} />, path: "/analytics" },
     { key: "parameters", label: "Parameters", icon: <SettingsIcon style={{ fontSize: '1.6rem' }} />, path: "/parameters" },
     { key: "entities", label: "Entities", icon: <TimelineIcon style={{ fontSize: '1.6rem' }} />, path: "/management/entities" },
+    { key: "reporting", label: "Rapports", icon: <TimelineIcon style={{ fontSize: '1.6rem' }} />, path: "/reporting" },
 ];
 
 export default function DashboardDrawer({ setShowAnalytics }) {
@@ -73,7 +71,6 @@ export default function DashboardDrawer({ setShowAnalytics }) {
                                     component={Link}
                                     to={path}
                                     style={{ pl: 4, pt: 0}}
-
                                     onClick={() => { setShowAnalytics(false); }}
                                 >
                                     {icon && <ListItemIcon>{icon}</ListItemIcon>}
@@ -82,12 +79,15 @@ export default function DashboardDrawer({ setShowAnalytics }) {
                                         primary={<Typography variant="body1">{label}</Typography>}
                                     />
 
+                                    <IconButton size="small" style={{ height: '100%', padding: 10, opacity: hoveredItem === key ? 1 : 0}}>
+                                        <ChevronLeftIcon fontSize="small" />
+                                    </IconButton>
                                     <div
-                                        style={{ height: '100%', borderLeft: '1px solid rgba(0, 0, 0, 0.2)', width: '25%', padding: 4, display: 'flex', justifyContent: 'right', opacity: hoveredItem === key ? 1 : 0}}
+                                        style={{ height: '100%', borderLeft: '1px solid rgba(0, 0, 0, 0.2)', pl: 5, width: '25%', display: 'flex', justifyContent: 'right', opacity: hoveredItem === key ? 1 : 0}}
                                         onClick={(event) => { event.stopPropagation(); setShowAnalytics(true);}}
                                     >
-                                        <IconButton size="small" style={{ height: '100%'}}>
-                                            <ArrowForwardIosIcon fontSize="small" />
+                                        <IconButton size="small" style={{ height: '100%', padding: 10}}>
+                                            <ChevronRightIcon fontSize="small" />
                                         </IconButton>
                                     </div>
                                 </ListItemButton>
