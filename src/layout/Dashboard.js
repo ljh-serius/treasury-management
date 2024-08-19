@@ -235,33 +235,15 @@ const Dashboard = ({ children }) => {
           </Container>
         </Toolbar>
       </AppBar>
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-          },
-        }}
-        variant="persistent"
-        anchor="left"
-        open={open}
-      >
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-          </IconButton>
-        </DrawerHeader>
-        <DrawerDashboard setShowAnalytics={setShowAnalytics} setCurrentAnalysisPage={setCurrentAnalysisPage} />
-        <ListItem key="logout" disablePadding onClick={handleLogout}>
+        {/* <ListItem key="logout" disablePadding onClick={handleLogout}>
             <ListItemButton>
                 <ListItemText primary={<Typography variant="body1">Logout</Typography>} />
             </ListItemButton>
         </ListItem>
-      </Drawer>
+      </Drawer> */}
+        <DrawerDashboard setShowAnalytics={setShowAnalytics} setCurrentAnalysisPage={setCurrentAnalysisPage} />
+
       <Main open={open}>
-        <DrawerHeader />
         <Box>
           {React.cloneElement(children, { showAnalytics, currentAnalysisPage })}
         </Box>

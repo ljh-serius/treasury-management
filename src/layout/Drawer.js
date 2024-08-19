@@ -1,10 +1,19 @@
-
 import React, { useState } from 'react';
-import { ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, IconButton, Divider, List } from '@mui/material';
-import { Link } from 'react-router-dom';
-
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import Collapse from '@mui/material/Collapse';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import WorkIcon from '@mui/icons-material/Work';
@@ -19,85 +28,126 @@ import TimelineIcon from '@mui/icons-material/Timeline';
 import InsightsIcon from '@mui/icons-material/Insights';
 import SettingsIcon from '@mui/icons-material/Settings';
 
+const FireNav = styled(List)(({ theme }) => ({
+  '& .MuiListItemButton-root': {
+    paddingLeft: 24,
+    paddingRight: 24,
+  },
+  '& .MuiListItemIcon-root': {
+    minWidth: 0,
+    marginRight: 16,
+  },
+  '& .MuiSvgIcon-root': {
+    fontSize: 20,
+  },
+}));
+
 const drawerItems = [
-    { key: "bilan-comptable", label: "Bilan Comptable", icon: <SummarizeIcon style={{ fontSize: '1.6rem' }} />, path: "/bilan-comptable" },
-    { key: "treasury", label: "Treasury", icon: <SummarizeIcon style={{ fontSize: '1.6rem' }} />, path: "/summary" },
-    { key: "people-and-relationships", label: "People and Relationships", icon: null, seperator: true },
-    { key: "clients", label: "Clients", icon: <SummarizeIcon style={{ fontSize: '1.6rem' }} />, path: "/management/clients" },
-    { key: "partners", label: "Partners", icon: <GroupIcon style={{ fontSize: '1.6rem' }} />, path: "/management/partners" },
-    { key: "providers", label: "Providers", icon: <StorefrontIcon style={{ fontSize: '1.6rem' }} />, path: "/management/providers" },
-    { key: "employees", label: "Employees", icon: <TimelineIcon style={{ fontSize: '1.6rem' }} />, path: "/management/employees" },
-    { key: "operations", label: "Operations", icon: null, seperator: true },
-    { key: "costs", label: "Costs", icon: <MonetizationOnIcon style={{ fontSize: '1.6rem' }} />, path: "/management/costs" },
-    { key: "risks", label: "Risks", icon: <SecurityIcon style={{ fontSize: '1.6rem' }} />, path: "/management/risks" },
-    { key: "campaigns", label: "Campaigns", icon: <PeopleAltIcon style={{ fontSize: '1.6rem' }} />, path: "/management/campaigns" },
-    { key: "projects", label: "Projects", icon: <WorkIcon style={{ fontSize: '1.6rem' }} />, path: "/management/projects" },
-    { key: "invoices", label: "Invoices", icon: <ReceiptIcon style={{ fontSize: '1.6rem' }} />, path: "/management/invoices" },
-    { key: "products", label: "Products", icon: <InventoryIcon style={{ fontSize: '1.6rem' }} />, path: "/management/products" },
-    { key: "documents", label: "Documents", icon: null, seperator: true },
-    { key: "gantt-chart", label: "Gantt Chart", icon: <TimelineIcon style={{ fontSize: '1.6rem' }} />, path: "/gantt-chart" },
-    { key: "analytics", label: "Analytics", icon: <InsightsIcon style={{ fontSize: '1.6rem' }} />, path: "/analytics" },
-    { key: "parameters", label: "Parameters", icon: <SettingsIcon style={{ fontSize: '1.6rem' }} />, path: "/parameters" },
-    { key: "entities", label: "Entities", icon: <TimelineIcon style={{ fontSize: '1.6rem' }} />, path: "/management/entities" },
-    { key: "reporting", label: "Rapports", icon: <TimelineIcon style={{ fontSize: '1.6rem' }} />, path: "/reporting" },
+  {
+    key: "financial-management",
+    label: "Financial Management",
+    icon: <MonetizationOnIcon />,
+    description: "Manages the company’s financial operations.",
+    children: [
+      {
+        key: "accounts-payable",
+        label: "Accounts Payable",
+        description: "Manages the company's payables.",
+        children: [
+          { key: "vendor-invoices", label: "Vendor Invoices", description: "Records of bills received." },
+          { key: "payment-terms", label: "Payment Terms", description: "Conditions for payments." },
+        ]
+      },
+      {
+        key: "accounts-receivable",
+        label: "Accounts Receivable",
+        description: "Tracks receivables.",
+        children: [
+          { key: "customer-invoices", label: "Customer Invoices", description: "Bills issued to customers." },
+          { key: "credit-management", label: "Credit Management", description: "Managing credit." }
+        ]
+      },
+    ],
+  },
+  // More categories here as needed (Projects, Operations, etc.)
 ];
 
-export default function DashboardDrawer({ setShowAnalytics }) {
-    const [hoveredItem, setHoveredItem] = useState(null);
+export default function DashboardDrawer() {
+  const [openItems, setOpenItems] = useState({});
 
-    return (
-        <div>
-            <List>
-                <Divider />
-                {drawerItems.map(({ key, label, icon, path, seperator }) => (
-                    <React.Fragment key={key}>
-                        {seperator ? (
-                            <>
-                                <Divider />
-                                <ListItem key={key} disablePadding>
-                                    <ListItemButton>
-                                        <ListItemText primary={<Typography variant="body1">{label}</Typography>} />
-                                    </ListItemButton>
-                                </ListItem>
-                                <Divider />
-                            </>
-                        ) : (
-                            <ListItem
-                                disablePadding
-                                style={{ display: 'flex', alignItems: 'center', width: '100%' }}
-                                onMouseEnter={() => setHoveredItem(key)}
-                                onMouseLeave={() => setHoveredItem(null)}
-                            >
-                                <ListItemButton
-                                    component={Link}
-                                    to={path}
-                                    style={{ pl: 4, pt: 0}}
-                                    onClick={() => { setShowAnalytics(false); }}
-                                >
-                                    {icon && <ListItemIcon>{icon}</ListItemIcon>}
-                                    <ListItemText 
-                                        style={{ width: '75%' }}
-                                        primary={<Typography variant="body1">{label}</Typography>}
-                                    />
+  const handleClick = (key) => {
+    setOpenItems((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
-                                    <IconButton size="small" style={{ height: '100%', padding: 10, opacity: hoveredItem === key ? 1 : 0}}>
-                                        <ChevronLeftIcon fontSize="small" />
-                                    </IconButton>
-                                    <div
-                                        style={{ height: '100%', borderLeft: '1px solid rgba(0, 0, 0, 0.2)', pl: 5, width: '25%', display: 'flex', justifyContent: 'right', opacity: hoveredItem === key ? 1 : 0}}
-                                        onClick={(event) => { event.stopPropagation(); setShowAnalytics(true);}}
-                                    >
-                                        <IconButton size="small" style={{ height: '100%', padding: 10}}>
-                                            <ChevronRightIcon fontSize="small" />
-                                        </IconButton>
-                                    </div>
-                                </ListItemButton>
-                            </ListItem>
-                        )
-                        }
-                    </React.Fragment>
-                ))}
-            </List>
-        </div>
-    );
-};
+  const theme = createTheme({
+    palette: {
+      mode: 'dark',
+      primary: { main: 'rgb(102, 157, 246)' },
+      background: { paper: 'rgb(5, 30, 52)' },
+    },
+  });
+
+  return (
+    <ThemeProvider theme={theme}>
+      <Box sx={{ display: 'flex'}}>
+        <Paper elevation={0} sx={{ width: 300 ,  borderRadius: '0px'}}>
+          <FireNav component="nav" disablePadding>
+            <ListItemButton component="a" href="#customized-list">
+              <ListItemIcon sx={{ fontSize: 20 }}>🔥</ListItemIcon>
+              <ListItemText
+                primary="Dashboard"
+                primaryTypographyProps={{
+                  fontSize: 20,
+                  fontWeight: 'medium',
+                  letterSpacing: 0,
+                }}
+              />
+            </ListItemButton>
+            <Divider />
+            {drawerItems.map(({ key, label, icon, description, children }) => (
+              <React.Fragment key={key}>
+                <ListItemButton onClick={() => handleClick(key)}>
+                  <ListItemIcon>{icon}</ListItemIcon>
+                  <ListItemText
+                    primary={label}
+                    primaryTypographyProps={{
+                      fontSize: 15,
+                      fontWeight: 'medium',
+                      lineHeight: '20px',
+                    }}
+                  />
+                  {openItems[key] ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+                <Collapse in={openItems[key]} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    {children.map(({ key: subKey, label: subLabel, children: subChildren }) => (
+                      <React.Fragment key={subKey}>
+                        <ListItemButton sx={{ pl: 4 }} onClick={() => handleClick(subKey)}>
+                          <ListItemText primary={subLabel} />
+                          {subChildren ? (openItems[subKey] ? <ExpandLess /> : <ExpandMore />) : <ChevronRightIcon />}
+                        </ListItemButton>
+                        {subChildren && (
+                          <Collapse in={openItems[subKey]} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                              {subChildren.map(({ key: subSubKey, label: subSubLabel }) => (
+                                <Tooltip title={subSubLabel} placement="right" key={subSubKey}>
+                                  <ListItemButton sx={{ pl: 8 }}>
+                                    <ListItemText primary={subSubLabel} />
+                                  </ListItemButton>
+                                </Tooltip>
+                              ))}
+                            </List>
+                          </Collapse>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </List>
+                </Collapse>
+              </React.Fragment>
+            ))}
+          </FireNav>
+        </Paper>
+      </Box>
+    </ThemeProvider>
+  );
+}
