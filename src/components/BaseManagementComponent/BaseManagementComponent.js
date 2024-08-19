@@ -449,7 +449,7 @@ export default function BaseTableComponent({
   // Event listeners for key presses
   useEffect(() => {
     const handleKeyDown = async (event) => {
-      if (event.shiftKey) {
+      if (event.shiftKey || event.ctrlKey) {
         if (event.key === '+') {
           event.preventDefault();
           handleAddItem();
@@ -459,11 +459,12 @@ export default function BaseTableComponent({
         } else if (event.key === 'Delete') {
             event.preventDefault();
             confirmDelete();
-        } else if (event.key === 'Enter' && modalOpen) {
-          event.preventDefault();
-          handleModalSubmit(formData);
-        }
+            }
       };
+      if(event.key === 'Enter' && modalOpen) {
+        event.preventDefault();
+        handleModalSubmit(formData);
+      }
     }
     
     window.addEventListener('keydown', handleKeyDown);
@@ -472,6 +473,7 @@ export default function BaseTableComponent({
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [selected, modalOpen, currentItem, formData]);
+
 
   const storeItemInLocalStorage = (item) => {
     localStorage.setItem('lastDeletedOrUpdatedItem', JSON.stringify(item));
@@ -721,10 +723,37 @@ export default function BaseTableComponent({
     [order, orderBy, page, rowsPerPage, filteredItems]
   );
 
+  const handleViewItem = () => {
+    if (selected.length === 1) {
+      const id = selected[0];
+      const url = `/#/${entityName.toLowerCase()}/${id}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  // Adding the keyboard shortcut for CTRL + Enter
+  useEffect(() => {
+    const handleKeyDown = async (event) => {
+      if (event.ctrlKey && event.key === 'Enter') {
+        event.preventDefault();
+        handleViewItem();
+      }
+      // Other key events (e.g., for Add, Delete) remain unchanged
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selected]);
+  // Rendering the components
+
+  // Rendering the components
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Box sx={{ maxWidth: '80vw', position: 'relative' }}>
-        <FilterManager filters={filters} setFilters={setFilters} fieldConfig={refreshedFieldsConfig} />
+        <FilterManager filters={filters} setFilters={setFilters} fieldConfig={fieldConfig} />
         <Paper sx={{ width: '100%', mb: 2 }}>
           <BaseTableToolbar
             numSelected={selected.length}
@@ -736,12 +765,21 @@ export default function BaseTableComponent({
           <Button onClick={generateRandomRow} variant="contained" color="secondary" sx={{ margin: 2 }}>
             Generate Random Row
           </Button>
+          <Button
+            onClick={handleViewItem}
+            variant="contained"
+            color="primary"
+            sx={{ margin: 2 }}
+            disabled={selected.length !== 1}  // Disable button if more than one or no item is selected
+          >
+            View Selected
+          </Button>
           <TableContainer>
             <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={dense ? 'small' : 'medium'}>
               <BaseTableHead
-                headCells={Object.keys(refreshedFieldsConfig).map((key) => ({
+                headCells={Object.keys(fieldConfig).map((key) => ({
                   id: key,
-                  label: refreshedFieldsConfig[key].label,
+                  label: fieldConfig[key].label,
                 }))}
                 order={order}
                 orderBy={orderBy}
@@ -774,13 +812,13 @@ export default function BaseTableComponent({
                         />
                       </TableCell>
 
-                      {Object.keys(refreshedFieldsConfig).map((field) => {
+                      {Object.keys(fieldConfig).map((field) => {
                         const cellValue = row[field];
-                        const isTextField = refreshedFieldsConfig[field].type === 'text';
-                        const isCheckboxField = refreshedFieldsConfig[field].type === 'checkbox';
+                        const isTextField = fieldConfig[field].type === 'text';
+                        const isCheckboxField = fieldConfig[field].type === 'checkbox';
                         const isMultipleSelectField =
-                          refreshedFieldsConfig[field].type === 'select' && refreshedFieldsConfig[field].multiple === true;
-                        const link = refreshedFieldsConfig[field].link;
+                          fieldConfig[field].type === 'select' && fieldConfig[field].multiple === true;
+                        const link = fieldConfig[field].link;
 
                         let displayValue;
 
@@ -809,7 +847,7 @@ export default function BaseTableComponent({
                         }
 
                         return (
-                          <TableCell key={field} align={refreshedFieldsConfig[field].numeric ? 'right' : 'left'}>
+                          <TableCell key={field} align={fieldConfig[field].numeric ? 'right' : 'left'}>
                             {displayValue ? displayValue : '--'}
                           </TableCell>
                         );
@@ -823,7 +861,7 @@ export default function BaseTableComponent({
                       height: (dense ? 33 : 53) * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={Object.keys(refreshedFieldsConfig).length + 2} />
+                    <TableCell colSpan={Object.keys(fieldConfig).length + 2} />
                   </TableRow>
                 )}
               </TableBody>
@@ -845,7 +883,7 @@ export default function BaseTableComponent({
           onClose={() => setModalOpen(false)}
           onSubmit={handleModalSubmit}
           initialData={currentItem}
-          fieldConfig={refreshedFieldsConfig}
+          fieldConfig={fieldConfig}
         />
 
         <Backdrop

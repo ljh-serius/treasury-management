@@ -7,6 +7,9 @@ import {
   Button,
   Drawer,
   Container,
+  ListItem,
+  ListItemButton,
+  ListItemText
 } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 import MuiAppBar from '@mui/material/AppBar';
@@ -17,6 +20,8 @@ import { auth } from '../utils/firebaseConfig';
 import { translate } from '../utils/translate';
 import { useTranslation } from '../contexts/TranslationProvider';
 import { useNavigate, useLocation } from 'react-router-dom';
+
+  import LogoutIcon from '@mui/icons-material/Logout';
 
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -144,12 +149,14 @@ const Dashboard = ({ children }) => {
   // Add event listeners for TAB, SHIFT + TAB, and Control + Enter
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === 'Tab') {
-        if (event.shiftKey) {
+
+      console.log(event.key)
+      if (event.ctrlKey || event.shiftKey) {
+        if (event.key == 'ArrowLeft') {
           // SHIFT + TAB for Previous
           event.preventDefault(); // Prevent the default tabbing behavior
           handlePreviousAnalysis();
-        } else {
+        } else if (event.key == 'ArrowRight'){
           // TAB for Next
           event.preventDefault(); // Prevent the default tabbing behavior
           handleNextAnalysis();
@@ -247,6 +254,11 @@ const Dashboard = ({ children }) => {
           </IconButton>
         </DrawerHeader>
         <DrawerDashboard setShowAnalytics={setShowAnalytics} setCurrentAnalysisPage={setCurrentAnalysisPage} />
+        <ListItem key="logout" disablePadding onClick={handleLogout}>
+            <ListItemButton>
+                <ListItemText primary={<Typography variant="body1">Logout</Typography>} />
+            </ListItemButton>
+        </ListItem>
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
