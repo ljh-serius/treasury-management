@@ -1076,7 +1076,7 @@ export default function DashboardDrawer() {
             <ListItemButton component="a" href="#customized-list">
               <ListItemIcon sx={{ fontSize: 20 }}>🔥</ListItemIcon>
               <ListItemText
-                primary="Dashboard"
+                primary="• Dashboard"
                 primaryTypographyProps={{
                   fontSize: 20,
                   fontWeight: 'medium',
@@ -1090,7 +1090,7 @@ export default function DashboardDrawer() {
                 <ListItemButton onClick={() => handleClick(key)}>
                   <ListItemIcon>{icon}</ListItemIcon>
                   <ListItemText
-                    primary={label}
+                    primary={`${label}`}
                     primaryTypographyProps={{
                       fontSize: 15,
                       fontWeight: 'medium',
@@ -1103,8 +1103,8 @@ export default function DashboardDrawer() {
                   <List component="div" disablePadding>
                     {children.map(({ key: subKey, label: subLabel, children: subChildren }) => (
                       <React.Fragment key={subKey}>
-                        <ListItemButton sx={{ pl: 4 }} onClick={() => handleClick(subKey)}>
-                          <ListItemText primary={subLabel} />
+                        <ListItemButton onClick={() => handleClick(subKey)}>
+                          <ListItemText sx={{ pl: 4 }} primary={`• ${subLabel}`} />
                           {subChildren ? (openItems[subKey] ? <ExpandLess /> : <ExpandMore />) : <ChevronRightIcon />}
                         </ListItemButton>
                         {subChildren && (
@@ -1112,8 +1112,8 @@ export default function DashboardDrawer() {
                             <List component="div" disablePadding>
                               {subChildren.map(({ key: subSubKey, label: subSubLabel }) => (
                                 <Tooltip title={subSubLabel} placement="right" key={subSubKey}>
-                                  <ListItemButton sx={{ pl: 8 }}>
-                                    <ListItemText primary={subSubLabel} />
+                                  <ListItemButton>
+                                    <ListItemText sx={{ pl: 6 }} primary={`• ${subSubLabel}`} />
                                   </ListItemButton>
                                 </Tooltip>
                               ))}
@@ -1131,4 +1131,4 @@ export default function DashboardDrawer() {
       </Box>
     </ThemeProvider>
   );
-}
+}  
