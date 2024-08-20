@@ -1,13 +1,3 @@
-import {
-    fetchDocuments,
-    addDocument,
-    updateDocument,
-    deleteDocument,
-    fetchDocumentsBySelectValue,
-    fetchDocumentsByFieldValue,
-    fetchDocumentById
-} from '../../../../utils/firebaseCrudHelpers';
-
 export const fieldsConfig = {
     ledgerId: { label: 'Ledger ID', type: 'text', faker: 'datatype.uuid' },
     vendorName: { label: 'Vendor Name', type: 'text', faker: 'company.name' },
@@ -42,11 +32,4 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
 
 export const entityName = 'Creditors Ledger';
 
-export const fetchItems = () => fetchDocuments('creditors-ledger');
-export const addItem = (item) => addDocument('creditors-ledger', item);
-export const updateItem = (id, item) => updateDocument('creditors-ledger', id, item);
-export const deleteItem = (id) => deleteDocument('creditors-ledger', id);
-
-export async function fetchItemById(id) {
-    return await fetchDocumentById('payment-terms', id);
-}
+export const collectionName = 'creditors-ledger';

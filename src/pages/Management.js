@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BaseManagementComponent from '../components/Management/Base';
+import { helpersWrapper } from '../utils/firebaseCrudHelpers';
 import { useParams } from 'react-router-dom';
 
 const getPath = (path) => {
@@ -19,17 +20,17 @@ function ManagementComponent({ showAnalytics }) {
         const loadConfig = async () => {
             try {
                 console.log("File to import :", `../components/Management${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`)
-                const configModule = await import(`../components/Management/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
+                const { fieldsConfig, entityName, collectionName, headCells} = await import(`../components/Management/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
                 // const analysisModule = await import(`./Analysis/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
-
+                const operations = helpersWrapper(collectionName);
                 setConfig({
-                    fieldsConfig: configModule.fieldsConfig,
-                    entityName: configModule.entityName,
-                    fetchItems: configModule.fetchItems,
-                    addItem: configModule.addItem,
-                    updateItem: configModule.updateItem,
-                    deleteItem: configModule.deleteItem,
-                    headCells: configModule.headCells,
+                    fieldsConfig: fieldsConfig,
+                    entityName: entityName,
+                    fetchItems: operations.fetchItems,
+                    addItem: operations.addItem,
+                    updateItem: operations.updateItem,
+                    deleteItem: operations.deleteItem,
+                    headCells: headCells,
                 });
 
                 // setAnalysisComponent(() => analysisModule.default);

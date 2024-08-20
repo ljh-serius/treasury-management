@@ -139,11 +139,14 @@ export default function BaseTableComponent({
             value = getMultipleRandomElementIds(field.options);
           } else if (field.type === 'select') {
             value = getRandomElementId(field.options);
-          } else if (field.faker.includes('date')) {
+          } else if (field.faker === 'date.month') {
+            const month = new Date(0, Math.floor(Math.random() * 12)).toLocaleString('default', { month: 'long' });
+            value = month.charAt(0).toUpperCase() + month.slice(1);
+          }else if (field.faker.includes('date')) {
             value = new Date(value()).toISOString();
           } else {
             value = typeof value === 'function' ? value() : value;
-          }
+          } 
         } else {
           value = field.type === 'number' ? faker.datatype.number() : faker.lorem.word();
         }

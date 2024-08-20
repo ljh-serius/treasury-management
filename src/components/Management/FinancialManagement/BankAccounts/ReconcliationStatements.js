@@ -1,21 +1,21 @@
 export const fieldsConfig = {
-    creditId: { label: 'Credit ID', type: 'text', faker: 'datatype.uuid' },
-    customerId: { label: 'Customer ID', type: 'text', faker: 'datatype.uuid' },
-    creditLimit: { label: 'Credit Limit', type: 'number', faker: 'finance.amount' },
-    outstandingBalance: { label: 'Outstanding Balance', type: 'number', faker: 'finance.amount' },
+    statementId: { label: 'Statement ID', type: 'text', faker: 'datatype.uuid' },
+    accountId: { label: 'Account ID', type: 'text', faker: 'datatype.uuid' },
+    reconciliationDate: { label: 'Reconciliation Date', type: 'date', faker: 'date.past' },
+    balance: { label: 'Balance', type: 'number', faker: 'finance.amount' },
     currency: {
         label: 'Currency',
         type: 'select',
         options: [],  // Populate with actual currency options
         faker: 'finance.currencyCode',
     },
-    riskLevel: {
-        label: 'Risk Level',
+    status: {
+        label: 'Status',
         type: 'select',
         options: [
-            { id: 'low', label: 'Low' },
-            { id: 'medium', label: 'Medium' },
-            { id: 'high', label: 'High' },
+            { id: 'completed', label: 'Completed' },
+            { id: 'pending', label: 'Pending' },
+            { id: 'discrepancy', label: 'Discrepancy' },
         ],
         faker: 'random.arrayElement',
     },
@@ -32,12 +32,7 @@ export const fieldsConfig = {
     lastModifiedDate: { label: 'Last Modified Date', type: 'date', faker: 'date.recent' },
 };
 
-export const headCells = Object.keys(fieldsConfig).map(key => ({
-    id: key,
-    label: fieldsConfig[key].label,
-}));
+export const entityName = 'Reconcilation Statements';
 
+export const collectionName = 'reconciliation-statements';
 
-export const entityName = 'Credit Management';
-
-export const collectionName = 'credit-management';

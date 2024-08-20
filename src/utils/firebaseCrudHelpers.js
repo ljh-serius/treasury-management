@@ -4,7 +4,7 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, g
 const organizationId = JSON.parse(localStorage.getItem('userData')).organizationId;
 
 // Function to fetch documents specific to an organization from a subcollection
-export const fetchDocuments = async(subcollectionName) => {
+export const fetchDocuments = async (subcollectionName) => {
   try {
     const subcollectionRef = collection(db, 'organizations', organizationId, subcollectionName);
     const snapshot = await getDocs(subcollectionRef);
@@ -17,7 +17,7 @@ export const fetchDocuments = async(subcollectionName) => {
 };
 
 // Function to add a new document linked to an organization in a subcollection
-export const addDocument = async(subcollectionName, documentData) => {
+export const addDocument = async (subcollectionName, documentData) => {
   try {
     documentData.organizationId = organizationId;
     const subcollectionRef = collection(db, 'organizations', organizationId, subcollectionName);
@@ -30,7 +30,7 @@ export const addDocument = async(subcollectionName, documentData) => {
 };
 
 // Function to update an existing document in a subcollection
-export const updateDocument = async(subcollectionName, documentId, documentData) => {
+export const updateDocument = async (subcollectionName, documentId, documentData) => {
   try {
     const docRef = doc(db, 'organizations', organizationId, subcollectionName, documentId);
     await updateDoc(docRef, documentData);
@@ -41,7 +41,7 @@ export const updateDocument = async(subcollectionName, documentId, documentData)
 };
 
 // Function to delete a document from a subcollection
-export const deleteDocument = async(subcollectionName, documentId) => {
+export const deleteDocument = async (subcollectionName, documentId) => {
   try {
     const docRef = doc(db, 'organizations', organizationId, subcollectionName, documentId);
     await deleteDoc(docRef);
@@ -51,14 +51,14 @@ export const deleteDocument = async(subcollectionName, documentId) => {
   }
 };
 
-
-export const fetchDocumentsBySelectValue = async(relativeCollection, foreignKey, foreignValue) => {
+// Function to fetch a document from subcollection that has a value in a property
+export const fetchDocumentsBySelectValue = async (relativeCollection, foreignKey, foreignValue) => {
   try {
     const subcollectionRef = collection(db, 'organizations', organizationId, relativeCollection);
-    
+
     // Create a query against the collection
     const q = query(subcollectionRef, where(foreignKey, 'array-contains', foreignValue));
-    
+
     // Execute the query and get the documents
     const snapshot = await getDocs(q);
     const documentsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -70,13 +70,14 @@ export const fetchDocumentsBySelectValue = async(relativeCollection, foreignKey,
   }
 }
 
-export const fetchDocumentsByFieldValue = async(relativeCollection, fieldName, fieldValue) => {
+// Function to fetch a document from subcollection that has a value in a list property
+export const fetchDocumentsByFieldValue = async (relativeCollection, fieldName, fieldValue) => {
   try {
     const subcollectionRef = collection(db, 'organizations', organizationId, relativeCollection);
-    
+
     // Create a query against the collection
     const q = query(subcollectionRef, where(fieldName, '==', fieldValue));
-    
+
     // Execute the query and get the documents
     const snapshot = await getDocs(q);
     const documentsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -87,7 +88,8 @@ export const fetchDocumentsByFieldValue = async(relativeCollection, fieldName, f
     return [];
   }
 }
-export const fetchDocumentById = async(subcollectionName, documentId) => {
+// Function to fetch a single document from subcollection with an Id
+export const fetchDocumentById = async (subcollectionName, documentId) => {
   console.log("Fetching document with ID:", documentId);
   console.log("In subcollection:", subcollectionName);
   console.log("Under organization ID:", organizationId);
@@ -110,3 +112,20 @@ export const fetchDocumentById = async(subcollectionName, documentId) => {
     return null;
   }
 };
+
+
+export const helpersWrapper = (collection) => {
+  const fetchItems = () => fetchDocuments(collection);
+  const addItem = (item) => addDocument(collection, item);
+  const updateItem = (id, item) => updateDocument(collection, id, item);
+  const deleteItem = (id) => deleteDocument(collection, id);
+  const fetchItemById = (id) => fetchDocumentById(collection, id);
+
+  return {
+    fetchItems,
+    addItem,
+    updateItem,
+    deleteItem,
+    fetchItemById
+  }
+}

@@ -1,24 +1,28 @@
+import {
+    fetchDocuments,
+    addDocument,
+    updateDocument,
+    deleteDocument,
+    fetchDocumentsBySelectValue,
+    fetchDocumentsByFieldValue,
+    fetchDocumentById
+} from '../../../../utils/firebaseCrudHelpers';
+
+import industries from '../../../../data/industries';
+
 export const fieldsConfig = {
-    creditId: { label: 'Credit ID', type: 'text', faker: 'datatype.uuid' },
-    customerId: { label: 'Customer ID', type: 'text', faker: 'datatype.uuid' },
-    creditLimit: { label: 'Credit Limit', type: 'number', faker: 'finance.amount' },
-    outstandingBalance: { label: 'Outstanding Balance', type: 'number', faker: 'finance.amount' },
+    entryId: { label: 'Entry ID', type: 'text', faker: 'datatype.uuid' },
+    accountId: { label: 'Account ID', type: 'text', faker: 'datatype.uuid' },
+    date: { label: 'Date', type: 'date', faker: 'date.past' },
+    debit: { label: 'Debit', type: 'number', faker: 'finance.amount' },
+    credit: { label: 'Credit', type: 'number', faker: 'finance.amount' },
     currency: {
         label: 'Currency',
         type: 'select',
         options: [],  // Populate with actual currency options
         faker: 'finance.currencyCode',
     },
-    riskLevel: {
-        label: 'Risk Level',
-        type: 'select',
-        options: [
-            { id: 'low', label: 'Low' },
-            { id: 'medium', label: 'Medium' },
-            { id: 'high', label: 'High' },
-        ],
-        faker: 'random.arrayElement',
-    },
+    description: { label: 'Description', type: 'text', faker: 'lorem.sentence' },
     tags: {
         label: 'Tags',
         type: 'select',
@@ -37,7 +41,5 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
     label: fieldsConfig[key].label,
 }));
 
-
-export const entityName = 'Credit Management';
-
-export const collectionName = 'credit-management';
+export const entityName = 'Journal Entries';
+export const collectionName = 'journal-entries';

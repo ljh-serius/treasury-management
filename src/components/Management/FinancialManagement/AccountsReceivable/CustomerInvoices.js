@@ -1,15 +1,3 @@
-import {
-  fetchDocuments,
-  addDocument,
-  updateDocument,
-  deleteDocument,
-  fetchDocumentsBySelectValue,
-  fetchDocumentsByFieldValue,
-  fetchDocumentById
-} from '../../../../utils/firebaseCrudHelpers';
-
-import industries from '../../../../data/industries';
-
 export const fieldsConfig = {
   invoiceId: { label: 'Invoice ID', type: 'text', faker: 'datatype.uuid' },
   invoiceName: { label: 'Invoice Name', type: 'text', faker: 'company.name' },
@@ -39,12 +27,5 @@ export const headCells = Object.keys(fieldsConfig).map(key => ({
 
 export const entityName = 'Customer Invoices';
 
-export const fetchItems = () => fetchDocuments('customer-invoices');
-export const addItem = (item) => addDocument('customer-invoices', item);
-export const updateItem = (id, item) => updateDocument('customer-invoices', id, item);
-export const deleteItem = (id) => deleteDocument('customer-invoices', id);
-
-export async function fetchItemById(id) {
-  return await fetchDocumentById('customer-invoices', id);
-}
+export const collectionName = 'customer-invoices';
 
