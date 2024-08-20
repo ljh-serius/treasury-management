@@ -6,9 +6,9 @@ import {
   fetchDocumentsBySelectValue,
   fetchDocumentsByFieldValue,
   fetchDocumentById
-} from '../../utils/firebaseCrudHelpers';
+} from '../../../../utils/firebaseCrudHelpers';
 
-import industries from '../../data/industries';
+import industries from '../../../../data/industries';
 
 export const fieldsConfig = {
   invoiceId: { label: 'Invoice ID', type: 'text', faker: 'datatype.uuid' },

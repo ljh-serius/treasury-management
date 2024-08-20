@@ -72,7 +72,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 const routesSequence = Object.keys(keyToLinkMap).map((link) => keyToLinkMap[link]);
-console.log(routesSequence);
+
 const Dashboard = ({ children }) => {
   const theme = useTheme();
   const { language, toggleLanguage } = useTranslation();

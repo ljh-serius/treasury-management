@@ -20,7 +20,7 @@ function ManagementComponent({ showAnalytics }) {
             try {
                 console.log("File to import :", `../components/Management${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`)
                 const configModule = await import(`../components/Management/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
-                const analysisModule = await import(`./Analysis/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
+                // const analysisModule = await import(`./Analysis/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
 
                 setConfig({
                     fieldsConfig: configModule.fieldsConfig,
@@ -32,7 +32,7 @@ function ManagementComponent({ showAnalytics }) {
                     headCells: configModule.headCells,
                 });
 
-                setAnalysisComponent(() => analysisModule.default);
+                // setAnalysisComponent(() => analysisModule.default);
             } catch (error) {
                 console.error('Error loading modules:', error);
             }
@@ -41,15 +41,16 @@ function ManagementComponent({ showAnalytics }) {
         loadConfig();
     }, [capitalizedComponentName]);
 
-    if (!config || !AnalysisComponent) {
+    // if (!config || !AnalysisComponent) {
+    if (!config) {
         return <div>Loading...</div>;
     }
 
     return (
         <>
-            {showAnalytics ? (
-                <AnalysisComponent fetchItems={config.fetchItems} />
-            ) : (
+            {/* {showAnalytics ? (
+                // <AnalysisComponent fetchItems={config.fetchItems} />
+            ) : ( */}
                 <BaseManagementComponent
                     fieldConfig={config.fieldsConfig}
                     entityName={config.entityName}
@@ -59,7 +60,7 @@ function ManagementComponent({ showAnalytics }) {
                     deleteItem={config.deleteItem}
                     headCells={config.headCells}
                 />
-            )}
+            {/* )} */}
         </>
     );
 }
