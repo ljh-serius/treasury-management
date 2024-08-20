@@ -1093,10 +1093,10 @@ export default function DashboardDrawer() {
           <Paper elevation={0} sx={{ width: 300, borderRadius: '0px', height: '100%', position: 'fixed' }}>
             {/* Fixed Header */}
             <Box sx={{ position: 'fixed', top: 0, width: 'inherit', zIndex: 1, borderBottom: '1px solid #ddd' }}>
-              <ListItemButton component="a" href="#customized-list">
+              <ListItemButton component="a" href="/">
                 <ListItemIcon sx={{ fontSize: 20 }}>🔥</ListItemIcon>
                 <ListItemText
-                  primary="• Dashboard"
+                  primary="Vault Insight"
                   primaryTypographyProps={{
                     fontSize: 20,
                     fontWeight: 'medium',

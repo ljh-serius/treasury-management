@@ -186,9 +186,6 @@ const Dashboard = ({ children }) => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Dashboard
-          </Typography>
           <Container 
             sx={{ display: 'flex', justifyContent:"end",  mr: 0 }}
           >
