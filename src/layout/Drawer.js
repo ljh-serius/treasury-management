@@ -151,6 +151,36 @@ const drawerItems = [
       description: "Manages company operations and assets.",
       children: [
         {
+            key: "product-catalog",
+            label: "Product Catalog",
+            description: "Maintains the list of products offered by the company.",
+            children: [
+              { key: "product-details", label: "Product Details", description: "Information about each product, including name, description, and category." },
+              { key: "product-categories", label: "Product Categories", description: "Classification of products into different categories." },
+              { key: "product-attributes", label: "Product Attributes", description: "Additional attributes like color, size, weight, etc., associated with products." }
+            ]
+        },
+        {
+            key: "pricing-management",
+            label: "Pricing Management",
+            description: "Handles product pricing strategies and updates.",
+            children: [
+              { key: "price-lists", label: "Price Lists", description: "List of prices for all products." },
+              { key: "discounts", label: "Discounts", description: "Special pricing or discounts applied to products." },
+              { key: "promotions", label: "Promotions", description: "Temporary promotional pricing strategies." }
+            ]
+        },
+        {
+            key: "product-lifecycle-management",
+            label: "Product Lifecycle Management",
+            description: "Oversees the lifecycle of products from development to discontinuation.",
+            children: [
+              { key: "new-product-development", label: "New Product Development", description: "Processes involved in bringing a new product to market." },
+              { key: "product-updates", label: "Product Updates", description: "Managing updates and improvements to existing products." },
+              { key: "product-discontinuation", label: "Product Discontinuation", description: "Processes for phasing out products no longer offered by the company." }
+            ]
+        },
+        {
           key: "inventory",
           label: "Inventory",
           description: "Tracks the quantity and value of items that the company holds for sale or production.",
