@@ -12,11 +12,19 @@ export default function BaseTableToolbar({ numSelected, onAdd, onDelete, onEdit,
       </Typography>
       {numSelected > 0 && (
         <>
-          <Tooltip title="Edit">
-            <IconButton onClick={onEdit} disabled={numSelected !== 1}>
-              <EditIcon />
-            </IconButton>
-          </Tooltip>
+          {
+            numSelected !== 1 ? (
+              <IconButton onClick={onEdit} disabled={true}>
+                <EditIcon />
+              </IconButton>
+            ) : (
+              <Tooltip title="Edit">
+                <IconButton onClick={onEdit}>
+                  <EditIcon />
+                </IconButton>
+              </Tooltip>
+            )
+          }
           <Tooltip title="Delete">
             <IconButton onClick={onDelete}>
               <DeleteIcon />
