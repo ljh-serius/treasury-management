@@ -4,24 +4,20 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
 import Collapse from '@mui/material/Collapse';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import { Link } from 'react-router-dom';
 
-import SummarizeIcon from '@mui/icons-material/Summarize';
 import WorkIcon from '@mui/icons-material/Work';
 import StorefrontIcon from '@mui/icons-material/Storefront';
-import GroupIcon from '@mui/icons-material/Group';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import ReceiptIcon from '@mui/icons-material/Receipt';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import SecurityIcon from '@mui/icons-material/Security';
 import TimelineIcon from '@mui/icons-material/Timeline';
@@ -1084,7 +1080,7 @@ const drawerItems = [
   
 const StyledFireNav = styled('div')({
     height: 'calc(100% - 56px)',
-    marginTop: '50px', // Adjust the height to accommodate the fixed header
+    marginTop: '60px', // Adjust the height to accommodate the fixed header
     overflowY: 'auto',
     '&::-webkit-scrollbar': {
       width: '4px',
@@ -1101,6 +1097,12 @@ const StyledFireNav = styled('div')({
     },
   });
   
+  const keyToLinkMap = {
+    dashboard: '/dashboard',
+    reports: '/reports',
+    settings: '/settings',
+    // Add more key-to-link mappings here
+  };
 
 export default function DashboardDrawer() {
   const [openItems, setOpenItems] = useState({});
@@ -1117,74 +1119,81 @@ export default function DashboardDrawer() {
     },
   });
 
-    return (
-      <ThemeProvider theme={theme}>
-        <Box sx={{ display: 'flex' }}>
-          <Paper elevation={0} sx={{ width: 300, borderRadius: '0px', height: '100%', position: 'fixed' }}>
-            {/* Fixed Header */}
-            <Box sx={{ position: 'fixed', top: 0, width: 'inherit', zIndex: 1, borderBottom: '1px solid #ddd' }}>
-              <ListItemButton component="a" href="/">
+  return (
+    <ThemeProvider theme={theme}>
+      <Box sx={{ display: 'flex' }}>
+        <Paper elevation={0} sx={{ width: 300, borderRadius: '0px',  zIndex: 10, height: '100%', position: 'fixed' }}>
+            <Box sx={{ position: 'fixed', top: 0, width: 'inherit', background: 'rgb(5, 30, 52)' , borderBottom: '1px solid #ddd' }}>
+                <ListItemButton component="a" href="/">
                 <ListItemIcon sx={{ fontSize: 20 }}>🔥</ListItemIcon>
                 <ListItemText
-                  primary="Vault Insight"
-                  primaryTypographyProps={{
+                    primary="Vault Insight"
+                    primaryTypographyProps={{
                     fontSize: 20,
                     fontWeight: 'medium',
                     letterSpacing: 0,
-                  }}
+                    }}
                 />
-              </ListItemButton>
-              <Divider />
+                </ListItemButton>
+                <Divider />
             </Box>
-  
-            {/* Scrollable FireNav */}
             <StyledFireNav>
-              <FireNav component="nav" disablePaddings>
-                {drawerItems.map(({ key, label, icon, description, children }) => (
-                  <React.Fragment key={key}>
-                    <ListItemButton onClick={() => handleClick(key)}>
-                      <ListItemIcon>{icon}</ListItemIcon>
-                      <ListItemText
-                        primary={`${label}`}
-                        primaryTypographyProps={{
-                          fontSize: 15,
-                          fontWeight: 'medium',
-                          lineHeight: '20px',
-                        }}
-                      />
-                      {openItems[key] ? <ExpandLess /> : <ExpandMore />}
-                    </ListItemButton>
-                    <Collapse in={openItems[key]} timeout="auto" unmountOnExit>
-                      <List component="div" disablePadding>
-                        {children.map(({ key: subKey, label: subLabel, children: subChildren }) => (
-                          <React.Fragment key={subKey}>
-                            <ListItemButton onClick={() => handleClick(subKey)}>
-                              <ListItemText sx={{ pl: 4 }} primary={`• ${subLabel}`} />
-                              {subChildren ? (openItems[subKey] ? <ExpandLess /> : <ExpandMore />) : <ChevronRightIcon />}
+                <Box > {/* Offset to avoid overlap with fixed header */}
+                    <List component="nav" disablePadding>
+                    {drawerItems.map(({ key, label, icon, description, children }) => (
+                        <React.Fragment key={key}>
+                        <Link to={keyToLinkMap[key] || '#'} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <ListItemButton onClick={() => handleClick(key)}>
+                            <ListItemIcon>{icon}</ListItemIcon>
+                            <ListItemText
+                                primary={`${label}`}
+                                primaryTypographyProps={{
+                                fontSize: 15,
+                                fontWeight: 'medium',
+                                lineHeight: '20px',
+                                }}
+                            />
+                            {children ? (openItems[key] ? <ExpandLess /> : <ExpandMore />) : null}
                             </ListItemButton>
-                            {subChildren && (
-                              <Collapse in={openItems[subKey]} timeout="auto" unmountOnExit>
-                                <List component="div" disablePadding>
-                                  {subChildren.map(({ key: subSubKey, label: subSubLabel, description }) => (
-                                    <ListItemButton key={subSubKey}>
-                                      <Tooltip title={description} placement="right">
-                                        <ListItemText sx={{ pl: 6 }} primary={`• ${subSubLabel}`} />
-                                      </Tooltip>
+                        </Link>
+                        {children && (
+                            <Collapse in={openItems[key]} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                                {children.map(({ key: subKey, label: subLabel, children: subChildren }) => (
+                                <React.Fragment key={subKey}>
+                                    <Link to={keyToLinkMap[subKey] || '#'} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <ListItemButton onClick={() => handleClick(subKey)}>
+                                        <ListItemText sx={{ pl: 4 }} primary={`• ${subLabel}`} />
+                                        {subChildren ? (openItems[subKey] ? <ExpandLess /> : <ExpandMore />) : <ChevronRightIcon />}
                                     </ListItemButton>
-                                  ))}
-                                </List>
-                              </Collapse>
-                            )}
-                          </React.Fragment>
-                        ))}
-                      </List>
-                    </Collapse>
-                  </React.Fragment>
-                ))}
-              </FireNav>
+                                    </Link>
+                                    {subChildren && (
+                                    <Collapse in={openItems[subKey]} timeout="auto" unmountOnExit>
+                                        <List component="div" disablePadding>
+                                        {subChildren.map(({ key: subSubKey, label: subSubLabel, description }) => (
+                                            <Link to={keyToLinkMap[subSubKey] || '#'} key={subSubKey} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                            <ListItemButton>
+                                                <Tooltip title={description} placement="right">
+                                                <ListItemText sx={{ pl: 6 }} primary={`• ${subSubLabel}`} />
+                                                </Tooltip>
+                                            </ListItemButton>
+                                            </Link>
+                                        ))}
+                                        </List>
+                                    </Collapse>
+                                    )}
+                                </React.Fragment>
+                                ))}
+                            </List>
+                            </Collapse>
+                        )}
+                        </React.Fragment>
+                    ))}
+                    </List>
+                </Box>
             </StyledFireNav>
-          </Paper>
-        </Box>
-      </ThemeProvider>
-    );
-  }
+        </Paper>
+      </Box>
+    </ThemeProvider>
+  );
+};

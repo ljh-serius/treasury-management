@@ -236,7 +236,7 @@ const Dashboard = ({ children }) => {
       </Drawer> */}
       <DrawerDashboard setShowAnalytics={setShowAnalytics} setCurrentAnalysisPage={setCurrentAnalysisPage} />
 
-      <Main open={open} sx={{}}>
+      <Main open={open} sx={{ marginLeft: '300px'}}>
         <Box>
           {React.cloneElement(children, { showAnalytics, currentAnalysisPage })}
         </Box>
