@@ -19,7 +19,7 @@ export const fieldsConfig = {
   quantity: { label: 'Quantity', type: 'number', faker: 'datatype.number' },
   unitPrice: { label: 'Unit Price', type: 'number', faker: 'finance.amount' },
   totalAmountExclVAT: { label: 'Total Amount (Excl. VAT)', type: 'number', faker: 'finance.amount' },
-  vatRate: { label: 'VAT Rate', type: 'number', faker: 'finance.vatRate' },
+  vatRate: { label: 'VAT Rate', type: 'number', faker: 'datatype.number' },
   totalAmountInclVAT: { label: 'Total Amount (Incl. VAT)', type: 'number', faker: 'finance.amount' },
   paymentTerms: { label: 'Payment Terms', type: 'text', faker: 'finance.transactionType' },
   preferredCurrency: { label: 'Preferred Currency', type: 'text', faker: 'finance.currencyCode' },

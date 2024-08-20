@@ -29,6 +29,13 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
+const maxWords = 15;
+
+const truncateText = (text) => {
+  const words = text.split(' ');
+  return words.length > maxWords ? words.slice(0, maxWords).join(' ') + '...' : text;
+};
+
 function BaseTable({
   items,
   order,
@@ -128,8 +135,13 @@ function BaseTable({
                   </TableCell>
 
                   {Object.keys(fieldConfig).map((field) => (
-                    <TableCell key={field} align={fieldConfig[field].numeric ? 'right' : 'left'}>
-                      {row[field] ? row[field].toString() : ''}
+                    <TableCell
+                      size="medium"
+                      key={field}
+                      align={fieldConfig[field].numeric ? 'right' : 'left'}
+                      sx={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} // Set maxWidth and text overflow styles
+                    >
+                      {truncateText(row[field] ? row[field].toString() : '')}
                     </TableCell>
                   ))}
                 </TableRow>
