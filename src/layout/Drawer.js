@@ -15,8 +15,9 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Link } from 'react-router-dom';
 
 import { drawerItems } from './drawerItems';
-import { keyToActionMap } from './keyToLinkMap';
+import { keyToActionMap } from './keyToActionMap';
 import { keyToLinkMap } from './keyToLinkMap';
+console.log(Object.keys(keyToActionMap).filter((key) => keyToActionMap[key].includes('fetchItems')))
 
 const FireNav = styled(List)(({ theme }) => ({
     '& .MuiListItemButton-root': {
@@ -51,6 +52,7 @@ const StyledFireNav = styled('div')({
         background: '#555',
     },
 });
+
 
 export default function DashboardDrawer() {
     const [openItems, setOpenItems] = useState({});

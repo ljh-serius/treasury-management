@@ -129,4 +129,3 @@ export const keyToActionMap = {
     "crisis-management": ["fetchItems", "generateCrisisManagementReport", "validateAccordingToISO22301"],
     "business-continuity": ["fetchItems", "generateBusinessContinuityReport", "validateAccordingToISO22301"]
   };
-  

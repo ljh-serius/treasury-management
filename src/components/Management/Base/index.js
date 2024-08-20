@@ -9,10 +9,12 @@ import BaseModal from './BaseModal';
 import { faker } from '@faker-js/faker';
 
 const getRandomElementId = (options) => {
+  if(!options || options.length == 0) return null;
   return options[Math.floor(Math.random() * options.length)].id;
 };
 
 const getMultipleRandomElementIds = (options) => {
+  if(!options || options.length === 0) return []
   const selectedOptions = [];
   const maxSelections = Math.min(3, options.length); // Ensure no more than 3 selections and not more than available options
   const numSelections = Math.floor(Math.random() * maxSelections) + 1; // Random number of selections between 1 and maxSelections
@@ -41,7 +43,7 @@ export default function BaseTableComponent({
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(15);
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [filters, setFilters] = useState([]);

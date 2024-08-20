@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Table, TableBody,Checkbox, TableCell, TableContainer, TablePagination, TableRow, Paper } from '@mui/material';
 
 import BaseTableHead from './BaseTableHead';
@@ -29,11 +29,11 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-const maxWords = 15;
-
 const truncateText = (text) => {
-  const words = text.split(' ');
-  return words.length > maxWords ? words.slice(0, maxWords).join(' ') + '...' : text;
+  if(text.length > 200){
+    return text.slice(0, 200);
+  }
+  return text;
 };
 
 function BaseTable({
@@ -59,6 +59,12 @@ function BaseTable({
     setOrderBy(property);
   };
 
+    // Force a re-render when fieldConfig or items change
+    useEffect(() => {
+      // Trigger a re-render by updating state or by any means necessary
+      // Example: Just logging to ensure the effect is running when fieldConfig or items change
+      console.log("FieldConfig or Items updated", fieldConfig, items);
+    }, [fieldConfig, items]);
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
       const newSelected = items.map((n) => n.id);
@@ -141,7 +147,7 @@ function BaseTable({
                       align={fieldConfig[field].numeric ? 'right' : 'left'}
                       sx={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} // Set maxWidth and text overflow styles
                     >
-                      {truncateText(row[field] ? row[field].toString() : '')}
+                      {row[field]}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -156,7 +162,7 @@ function BaseTable({
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[15, 25, 50]}
         component="div"
         count={items.length}
         rowsPerPage={rowsPerPage}
