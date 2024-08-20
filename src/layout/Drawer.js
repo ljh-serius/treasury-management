@@ -1052,6 +1052,25 @@ const drawerItems = [
     }
   ];
   
+const StyledFireNav = styled('div')({
+    height: 'calc(100% - 56px)',
+    marginTop: '50px', // Adjust the height to accommodate the fixed header
+    overflowY: 'auto',
+    '&::-webkit-scrollbar': {
+      width: '4px',
+    },
+    '&::-webkit-scrollbar-track': {
+      background: '#f1f1f1',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: '#888',
+      borderRadius: '4px',
+    },
+    '&::-webkit-scrollbar-thumb:hover': {
+      background: '#555',
+    },
+  });
+  
 
 export default function DashboardDrawer() {
   const [openItems, setOpenItems] = useState({});
@@ -1068,67 +1087,74 @@ export default function DashboardDrawer() {
     },
   });
 
-  return (
-    <ThemeProvider theme={theme}>
-      <Box sx={{ display: 'flex'}}>
-        <Paper elevation={0} sx={{ width: 300 , height: '100vw',  borderRadius: '0px'}}>
-          <FireNav component="nav" disablePadding>
-            <ListItemButton component="a" href="#customized-list">
-              <ListItemIcon sx={{ fontSize: 20 }}>🔥</ListItemIcon>
-              <ListItemText
-                primary="• Dashboard"
-                primaryTypographyProps={{
-                  fontSize: 20,
-                  fontWeight: 'medium',
-                  letterSpacing: 0,
-                }}
-              />
-            </ListItemButton>
-            <Divider />
-            {drawerItems.map(({ key, label, icon, description, children }) => (
-              <React.Fragment key={key}>
-                <ListItemButton onClick={() => handleClick(key)}>
-                  <ListItemIcon>{icon}</ListItemIcon>
-                  <ListItemText
-                    primary={`${label}`}
-                    primaryTypographyProps={{
-                      fontSize: 15,
-                      fontWeight: 'medium',
-                      lineHeight: '20px',
-                    }}
-                  />
-                  {openItems[key] ? <ExpandLess /> : <ExpandMore />}
-                </ListItemButton>
-                <Collapse in={openItems[key]} timeout="auto" unmountOnExit>
-                  <List component="div" disablePadding>
-                    {children.map(({ key: subKey, label: subLabel, children: subChildren }) => (
-                      <React.Fragment key={subKey}>
-                        <ListItemButton onClick={() => handleClick(subKey)}>
-                          <ListItemText sx={{ pl: 4 }} primary={`• ${subLabel}`} />
-                          {subChildren ? (openItems[subKey] ? <ExpandLess /> : <ExpandMore />) : <ChevronRightIcon />}
-                        </ListItemButton>
-                        {subChildren && (
-                          <Collapse in={openItems[subKey]} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                              {subChildren.map(({ key: subSubKey, label: subSubLabel }) => (
-                                <Tooltip title={subSubLabel} placement="right" key={subSubKey}>
-                                  <ListItemButton>
-                                    <ListItemText sx={{ pl: 6 }} primary={`• ${subSubLabel}`} />
-                                  </ListItemButton>
-                                </Tooltip>
-                              ))}
-                            </List>
-                          </Collapse>
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </List>
-                </Collapse>
-              </React.Fragment>
-            ))}
-          </FireNav>
-        </Paper>
-      </Box>
-    </ThemeProvider>
-  );
-}  
+    return (
+      <ThemeProvider theme={theme}>
+        <Box sx={{ display: 'flex' }}>
+          <Paper elevation={0} sx={{ width: 300, borderRadius: '0px', height: '100%', position: 'fixed' }}>
+            {/* Fixed Header */}
+            <Box sx={{ position: 'fixed', top: 0, width: 'inherit', zIndex: 1, borderBottom: '1px solid #ddd' }}>
+              <ListItemButton component="a" href="#customized-list">
+                <ListItemIcon sx={{ fontSize: 20 }}>🔥</ListItemIcon>
+                <ListItemText
+                  primary="• Dashboard"
+                  primaryTypographyProps={{
+                    fontSize: 20,
+                    fontWeight: 'medium',
+                    letterSpacing: 0,
+                  }}
+                />
+              </ListItemButton>
+              <Divider />
+            </Box>
+  
+            {/* Scrollable FireNav */}
+            <StyledFireNav>
+              <FireNav component="nav" disablePaddings>
+                {drawerItems.map(({ key, label, icon, description, children }) => (
+                  <React.Fragment key={key}>
+                    <ListItemButton onClick={() => handleClick(key)}>
+                      <ListItemIcon>{icon}</ListItemIcon>
+                      <ListItemText
+                        primary={`${label}`}
+                        primaryTypographyProps={{
+                          fontSize: 15,
+                          fontWeight: 'medium',
+                          lineHeight: '20px',
+                        }}
+                      />
+                      {openItems[key] ? <ExpandLess /> : <ExpandMore />}
+                    </ListItemButton>
+                    <Collapse in={openItems[key]} timeout="auto" unmountOnExit>
+                      <List component="div" disablePadding>
+                        {children.map(({ key: subKey, label: subLabel, children: subChildren }) => (
+                          <React.Fragment key={subKey}>
+                            <ListItemButton onClick={() => handleClick(subKey)}>
+                              <ListItemText sx={{ pl: 4 }} primary={`• ${subLabel}`} />
+                              {subChildren ? (openItems[subKey] ? <ExpandLess /> : <ExpandMore />) : <ChevronRightIcon />}
+                            </ListItemButton>
+                            {subChildren && (
+                              <Collapse in={openItems[subKey]} timeout="auto" unmountOnExit>
+                                <List component="div" disablePadding>
+                                  {subChildren.map(({ key: subSubKey, label: subSubLabel, description }) => (
+                                    <ListItemButton key={subSubKey}>
+                                      <Tooltip title={description} placement="right">
+                                        <ListItemText sx={{ pl: 6 }} primary={`• ${subSubLabel}`} />
+                                      </Tooltip>
+                                    </ListItemButton>
+                                  ))}
+                                </List>
+                              </Collapse>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </List>
+                    </Collapse>
+                  </React.Fragment>
+                ))}
+              </FireNav>
+            </StyledFireNav>
+          </Paper>
+        </Box>
+      </ThemeProvider>
+    );
+  }

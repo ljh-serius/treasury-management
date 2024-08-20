@@ -21,11 +21,6 @@ import { translate } from '../utils/translate';
 import { useTranslation } from '../contexts/TranslationProvider';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-  import LogoutIcon from '@mui/icons-material/Logout';
-
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-
 import DrawerDashboard from './Drawer';
 
 const drawerWidth = 300;
@@ -242,7 +237,7 @@ const Dashboard = ({ children }) => {
             </ListItemButton>
         </ListItem>
       </Drawer> */}
-        <DrawerDashboard setShowAnalytics={setShowAnalytics} setCurrentAnalysisPage={setCurrentAnalysisPage} />
+      <DrawerDashboard setShowAnalytics={setShowAnalytics} setCurrentAnalysisPage={setCurrentAnalysisPage} />
 
       <Main open={open} sx={{}}>
         <Box>
