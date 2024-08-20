@@ -74,7 +74,7 @@ const App = () => {
             }
           />
           <Route
-            path="/management/:entity"
+            path="/:module/:subModule/:component"
             element={
               <ProtectedRoute user={user}>
                 <Dashboard>

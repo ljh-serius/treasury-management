@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import BaseManagementComponent from '../components/BaseManagementComponent/BaseManagementComponent';
+import BaseManagementComponent from '../components/Management/Base';
 import { useParams } from 'react-router-dom';
 
+const getPath = (path) => {
+    return path.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+}
+
 function ManagementComponent({ showAnalytics }) {
-    const { entity } = useParams();
-    const capitalizedComponentName = entity.charAt(0).toUpperCase() + entity.slice(1);
+    const { module, subModule, component } = useParams();
+    const capitalizedModuleName = getPath(module);
+    const capitalizedSubModuleName = getPath(subModule);
+    const capitalizedComponentName = getPath(component);
 
     const [config, setConfig] = useState(null);
     const [AnalysisComponent, setAnalysisComponent] = useState(null);
@@ -12,9 +18,9 @@ function ManagementComponent({ showAnalytics }) {
     useEffect(() => {
         const loadConfig = async () => {
             try {
-                console.log("File to import :", `../components/Management/${capitalizedComponentName}`)
-                const configModule = await import(`../components/Management/${capitalizedComponentName}`);
-                const analysisModule = await import(`./Analysis/${capitalizedComponentName}`);
+                console.log("File to import :", `../components/Management${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`)
+                const configModule = await import(`../components/Management/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
+                const analysisModule = await import(`./Analysis/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
 
                 setConfig({
                     fieldsConfig: configModule.fieldsConfig,

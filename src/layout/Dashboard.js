@@ -22,6 +22,7 @@ import { useTranslation } from '../contexts/TranslationProvider';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import DrawerDashboard from './Drawer';
+import { keyToLinkMap } from './keyToLinkMap';
 
 const drawerWidth = 300;
 
@@ -70,22 +71,8 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
-const routesSequence = [
-  "/summary",
-  "/management/clients",
-  "/management/partners",
-  "/management/providers",
-  "/management/employees",
-  "/management/costs",
-  "/management/risks",
-  "/management/campaigns",
-  "/management/projects",
-  "/management/invoices",
-  "/management/products",
-  "/gantt-chart",
-  "/management/entities",
-];
-
+const routesSequence = Object.keys(keyToLinkMap).map((link) => keyToLinkMap[link]);
+console.log(routesSequence);
 const Dashboard = ({ children }) => {
   const theme = useTheme();
   const { language, toggleLanguage } = useTranslation();
