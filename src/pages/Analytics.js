@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { Container } from '@mui/material';
 
 const VisualAnalytics = ({ fetchItems, fieldsConfig }) => {
     const [data, setData] = useState([]);
@@ -39,7 +40,9 @@ const VisualAnalytics = ({ fetchItems, fieldsConfig }) => {
             }
             if (row.category && Array.isArray(row.category)) {
                 row.category.forEach(tag => {
-                    categoryMap[tag] = (categoryMap[tag] || 0) + 1;
+                    if (tag) {
+                        categoryMap[tag] = (categoryMap[tag] || 0) + 1;
+                    }
                 });
             }
         });
@@ -59,7 +62,7 @@ const VisualAnalytics = ({ fetchItems, fieldsConfig }) => {
         const charts = [];
 
         // Category pie chart
-        if (kpiData.categoryDistribution) {
+        if (kpiData.categoryDistribution && Object.keys(kpiData.categoryDistribution).length > 0) {
             const categories = Object.keys(kpiData.categoryDistribution);
             const values = categories.map(key => ({
                 name: key,
@@ -81,7 +84,7 @@ const VisualAnalytics = ({ fetchItems, fieldsConfig }) => {
 
                 rows.forEach(row => {
                     const category = row[field];
-                    if (category) {
+                    if (category !== null && category !== undefined && category !== '') {
                         categoryMap[category] = (categoryMap[category] || 0) + 1;
                     }
                 });
@@ -128,7 +131,7 @@ const VisualAnalytics = ({ fetchItems, fieldsConfig }) => {
     };
 
     return (
-        <div>
+        <Container maxWidth="xl" sx={{ mt: 12, mb: 12 }}>
             {/* KPI Section */}
             <div className="kpi-section">
                 <h2>Key Performance Indicators</h2>
@@ -168,7 +171,7 @@ const VisualAnalytics = ({ fetchItems, fieldsConfig }) => {
                     </div>
                 ))}
             </div>
-        </div>
+        </Container>
     );
 };
 
