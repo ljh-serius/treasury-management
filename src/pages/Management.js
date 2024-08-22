@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import BaseManagementComponent from '../components/Management/Base';
 import { helpersWrapper } from '../utils/firebaseCrudHelpers';
 import { useParams } from 'react-router-dom';
+import VisualAnalytics from './Analytics'
 
 const getPath = (path) => {
     return path.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join('');
@@ -19,7 +20,7 @@ function ManagementComponent({ showAnalytics }) {
     useEffect(() => {
         const loadConfig = async () => {
             try {
-                console.log("File to import :", `../components/Management/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`)
+                // console.log("File to import :", `../components/Management/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`)
                 const { fieldsConfig, entityName, collectionName} = await import(`../components/Management/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
                 // const analysisModule = await import(`./Analysis/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
                 const operations = helpersWrapper(collectionName);
@@ -55,9 +56,9 @@ function ManagementComponent({ showAnalytics }) {
 
     return (
         <>
-            {/* {showAnalytics ? (
-                // <AnalysisComponent fetchItems={config.fetchItems} />
-            ) : ( */}
+            {showAnalytics ? (
+                <VisualAnalytics fetchItems={config.fetchItems} fieldsConfig={config.fieldsConfig} />
+            ) : (
                 <BaseManagementComponent
                     fieldConfig={config.fieldsConfig}
                     entityName={config.entityName}
@@ -67,7 +68,7 @@ function ManagementComponent({ showAnalytics }) {
                     deleteItem={config.deleteItem}
                     headCells={config.headCells}
                 />
-            {/* )} */}
+            )}
         </>
     );
 }

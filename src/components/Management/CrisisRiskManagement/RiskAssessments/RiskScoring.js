@@ -12,6 +12,19 @@ export const fieldsConfig = {
         ],
         faker: 'random.arrayElement',
     },
+    tags: {
+        label: 'Tags',
+        type: 'select',
+        options: [
+            { id: 'urgent', label: 'Urgent' },
+            { id: 'review', label: 'Review' },
+            { id: 'important', label: 'Important' },
+            { id: 'completed', label: 'Completed' },
+            { id: 'follow-up', label: 'Follow-Up' },
+        ],
+        multiple: true,
+        faker: 'random.arrayElement',
+    },
     impactScore: {
         label: 'Impact Score',
         type: 'select',

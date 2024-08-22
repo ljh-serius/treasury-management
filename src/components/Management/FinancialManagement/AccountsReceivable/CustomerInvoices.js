@@ -16,7 +16,20 @@ export const fieldsConfig = {
   contactEmail: { label: 'Contact Email', type: 'email', faker: 'internet.email' },
   contactPhone: { label: 'Contact Phone', type: 'tel', faker: 'phone.imei' },
   dueDate: { label: 'Due Date', type: 'date', faker: 'date.future' },
-  notes: { label: 'Notes', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraph' }
+  notes: { label: 'Notes', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraph' },
+  tags: {
+    label: 'Tags',
+    type: 'select',
+    options: [
+        { id: 'urgent', label: 'Urgent' },
+        { id: 'review', label: 'Review' },
+        { id: 'important', label: 'Important' },
+        { id: 'completed', label: 'Completed' },
+        { id: 'follow-up', label: 'Follow-Up' },
+    ],
+    multiple: true,
+    faker: 'random.arrayElement',
+},
 };
 
 export const headCells = Object.keys(fieldsConfig).map(key => ({

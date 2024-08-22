@@ -5,11 +5,17 @@ export const fieldsConfig = {
     projectedOutflows: { label: 'Projected Outflows', type: 'number', faker: 'finance.amount' },
     netCashFlow: { label: 'Net Cash Flow', type: 'number', faker: 'finance.amount' },
     tags: {
-      label: 'Tags',
-      type: 'select',
-      options: [],  // Populate with actual tags
-      multiple: true,
-      faker: 'lorem.words',
+        label: 'Tags',
+        type: 'select',
+        options: [
+            { id: 'urgent', label: 'Urgent' },
+            { id: 'review', label: 'Review' },
+            { id: 'important', label: 'Important' },
+            { id: 'completed', label: 'Completed' },
+            { id: 'follow-up', label: 'Follow-Up' },
+        ],
+        multiple: true,
+        faker: 'random.arrayElement',
     },
     status: {
       label: 'Status',

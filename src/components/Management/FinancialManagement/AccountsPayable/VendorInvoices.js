@@ -15,7 +15,20 @@ export const fieldsConfig = {
     discountRate: { label: 'Discount Rate', type: 'number', faker: 'datatype.float' },
     vendorCode: { label: 'Vendor Code', type: 'text', faker: 'datatype.uuid' },
     taxExemptionStatus: { label: 'Tax Exemption Status', type: 'text', faker: 'random.word' },
-    notes: { label: 'Notes', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraph' }
+    notes: { label: 'Notes', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraph' },
+    tags: {
+        label: 'Tags',
+        type: 'select',
+        options: [
+            { id: 'urgent', label: 'Urgent' },
+            { id: 'review', label: 'Review' },
+            { id: 'important', label: 'Important' },
+            { id: 'completed', label: 'Completed' },
+            { id: 'follow-up', label: 'Follow-Up' },
+        ],
+        multiple: true,
+        faker: 'random.arrayElement',
+    },
 };
 
 export const headCells = Object.keys(fieldsConfig).map(key => ({

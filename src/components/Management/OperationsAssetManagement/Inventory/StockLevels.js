@@ -6,13 +6,20 @@ export const fieldsConfig = {
     warehouseLocation: { label: 'Warehouse Location', type: 'text', faker: 'address.city' },
     quantity: { label: 'Quantity', type: 'number', faker: 'datatype.number' },
     reorderLevel: { label: 'Reorder Level', type: 'number', faker: 'datatype.number' },
-    tags: {
-        label: 'Tags',
-        type: 'select',
-        options: [],  // Populate with actual tags
-        multiple: true,
-        faker: 'lorem.words',
-    },
+tags: {
+    label: 'Tags',
+    type: 'select',
+    options: [
+        { id: 'urgent', label: 'Urgent' },
+        { id: 'review', label: 'Review' },
+        { id: 'important', label: 'Important' },
+        { id: 'completed', label: 'Completed' },
+        { id: 'follow-up', label: 'Follow-Up' },
+    ],
+    multiple: true,
+    faker: 'random.arrayElement',
+},
+
     status: {
         label: 'Status',
         type: 'select',

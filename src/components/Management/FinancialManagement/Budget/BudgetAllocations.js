@@ -4,13 +4,20 @@ export const fieldsConfig = {
     budgetedAmount: { label: 'Budgeted Amount', type: 'number', faker: 'finance.amount' },
     actualAmount: { label: 'Actual Amount', type: 'number', faker: 'finance.amount' },
     fiscalYear: { label: 'Fiscal Year', type: 'number', faker: 'date.past' },
-    tags: {
-        label: 'Tags',
-        type: 'select',
-        options: [],  // Populate with actual tags
-        multiple: true,
-        faker: 'lorem.words',
-    },
+tags: {
+    label: 'Tags',
+    type: 'select',
+    options: [
+        { id: 'urgent', label: 'Urgent' },
+        { id: 'review', label: 'Review' },
+        { id: 'important', label: 'Important' },
+        { id: 'completed', label: 'Completed' },
+        { id: 'follow-up', label: 'Follow-Up' },
+    ],
+    multiple: true,
+    faker: 'random.arrayElement',
+},
+
     status: {
         label: 'Status',
         type: 'select',
