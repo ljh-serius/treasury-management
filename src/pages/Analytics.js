@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Container } from '@mui/material';
 
 const VisualAnalytics = ({ fetchItems, fieldsConfig }) => {
     const [data, setData] = useState([]);
@@ -38,8 +37,10 @@ const VisualAnalytics = ({ fetchItems, fieldsConfig }) => {
             if (row.status) {
                 statusMap[row.status] = (statusMap[row.status] || 0) + 1;
             }
-            if (row.category) {
-                categoryMap[row.category] = (categoryMap[row.category] || 0) + 1;
+            if (row.category && Array.isArray(row.category)) {
+                row.category.forEach(tag => {
+                    categoryMap[tag] = (categoryMap[tag] || 0) + 1;
+                });
             }
         });
 
@@ -57,6 +58,21 @@ const VisualAnalytics = ({ fetchItems, fieldsConfig }) => {
     const processChartsData = (rows) => {
         const charts = [];
 
+        // Category pie chart
+        if (kpiData.categoryDistribution) {
+            const categories = Object.keys(kpiData.categoryDistribution);
+            const values = categories.map(key => ({
+                name: key,
+                y: kpiData.categoryDistribution[key],
+            }));
+
+            charts.push({
+                title: 'Category Distribution',
+                type: 'pie',
+                data: values,
+            });
+        }
+
         // Dynamic chart generation based on fields with "options" property
         Object.keys(fieldsConfig).forEach(field => {
             const fieldConfig = fieldsConfig[field];
@@ -71,13 +87,16 @@ const VisualAnalytics = ({ fetchItems, fieldsConfig }) => {
                 });
 
                 const categories = Object.keys(categoryMap);
-                const values = categories.map(key => categoryMap[key]);
+                const values = categories.map(key => ({
+                    name: key,
+                    y: categoryMap[key],
+                }));
 
                 if (categories.length > 0) {
                     charts.push({
                         title: `${fieldConfig.label} Distribution`,
-                        categories,
-                        values,
+                        type: 'pie',
+                        data: values,
                     });
                 }
             }
@@ -100,94 +119,73 @@ const VisualAnalytics = ({ fetchItems, fieldsConfig }) => {
             charts.push({
                 title: 'Timeline Analysis',
                 type: 'line',
-                dates: timelineDates,
-                counts: timelineCounts,
+                data: timelineCounts,
+                categories: timelineDates,
             });
         }
 
-        // Set chart data
         setChartData(charts);
     };
 
     return (
-        <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
-            <div>
-                {/* KPI Section */}
-                <div className="kpi-section">
-                    <h2>Key Performance Indicators</h2>
+        <div>
+            {/* KPI Section */}
+            <div className="kpi-section">
+                <h2>Key Performance Indicators</h2>
+                <div className="kpi-card">
+                    <h3>Total Records</h3>
+                    <p>{kpiData.totalRecords}</p>
+                </div>
+                {kpiData.totalAmount !== null && (
                     <div className="kpi-card">
-                        <h3>Total Records</h3>
-                        <p>{kpiData.totalRecords}</p>
+                        <h3>Total Amount</h3>
+                        <p>${Number(kpiData.totalAmount).toFixed(2)}</p>
                     </div>
-                    {kpiData.totalAmount !== null && (
-                        <div className="kpi-card">
-                            <h3>Total Amount</h3>
-                            <p>${Number(kpiData.totalAmount).toFixed(2)}</p>
-                        </div>
-                    )}
-                    {kpiData.averageScore !== null && (
-                        <div className="kpi-card">
-                            <h3>Average Score</h3>
-                            <p>{Number(kpiData.averageScore).toFixed(2)}</p>
-                        </div>
-                    )}
-                    {kpiData.statusDistribution && (
-                        <div className="kpi-card">
-                            <h3>Status Distribution</h3>
-                            <p>{JSON.stringify(kpiData.statusDistribution)}</p>
-                        </div>
-                    )}
-                    {kpiData.categoryDistribution && (
-                        <div className="kpi-card">
-                            <h3>Category Distribution</h3>
-                            <p>{JSON.stringify(kpiData.categoryDistribution)}</p>
-                        </div>
-                    )}
-                </div>
-
-                {/* Highcharts Section */}
-                <div className="charts-section">
-                    <h2>Visual Analytics</h2>
-
-                    {/* Render dynamically generated charts */}
-                    {chartData.map((chart, index) => (
-                        <div className="chart-container" key={index}>
-                            <HighchartsReact 
-                                highcharts={Highcharts} 
-                                options={
-                                    chart.type === 'line' ? 
-                                    getTimelineAnalysisOptions(chart.title, chart.dates, chart.counts) : 
-                                    getCategoryDistributionOptions(chart.title, chart.categories, chart.values)
-                                } 
-                            />
-                        </div>
-                    ))}
-                </div>
+                )}
+                {kpiData.averageScore !== null && (
+                    <div className="kpi-card">
+                        <h3>Average Score</h3>
+                        <p>{Number(kpiData.averageScore).toFixed(2)}</p>
+                    </div>
+                )}
             </div>
-        </Container>
+
+            {/* Highcharts Section */}
+            <div className="charts-section">
+                <h2>Visual Analytics</h2>
+
+                {/* Render dynamically generated charts */}
+                {chartData.map((chart, index) => (
+                    <div className="chart-container" key={index}>
+                        <HighchartsReact 
+                            highcharts={Highcharts} 
+                            options={
+                                chart.type === 'line' ? 
+                                getTimelineAnalysisOptions(chart.title, chart.categories, chart.data) : 
+                                getPieChartOptions(chart.title, chart.data)
+                            } 
+                        />
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 };
 
-// Reusable functions to create Highcharts options
-function getCategoryDistributionOptions(title, categories, values) {
+// Reusable function to create pie chart options
+function getPieChartOptions(title, data) {
     return {
-        chart: { type: 'bar' },
+        chart: { type: 'pie' },
         title: { text: title },
-        xAxis: {
-            categories,
-            title: { text: null }
-        },
-        yAxis: {
-            min: 0,
-            title: { text: 'Count' }
-        },
         series: [{
             name: 'Count',
-            data: values
+            colorByPoint: true,
+            data: data
         }]
     };
 }
 
+// Reusable function to create timeline analysis options
 function getTimelineAnalysisOptions(title, dates, counts) {
     return {
         chart: { type: 'line' },
