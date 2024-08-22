@@ -24,7 +24,6 @@ export const fieldsConfig = {
     lastModifiedDate: { label: 'Last Modified Date', type: 'date', faker: 'date.recent' },
 };
 
-
 export const headCells = Object.keys(fieldsConfig).map(key => ({
     id: key,
     label: fieldsConfig[key].label,

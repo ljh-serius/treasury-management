@@ -1,15 +1,3 @@
-import {
-    fetchDocuments,
-    addDocument,
-    updateDocument,
-    deleteDocument,
-    fetchDocumentsBySelectValue,
-    fetchDocumentsByFieldValue,
-    fetchDocumentById
-} from '../../../../utils/firebaseCrudHelpers';
-
-import industries from '../../../../data/industries';
-
 export const fieldsConfig = {
     accountId: { label: 'Account ID', type: 'text', faker: 'datatype.uuid' },
     accountName: { label: 'Account Name', type: 'text', faker: 'finance.accountName' },

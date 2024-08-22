@@ -80,7 +80,7 @@ export const keyToLinkMap = {
     "corrective-actions": "/operations-asset-management/quality-control/corrective-actions",
     "hr-management": "/hr-management",
     "employee-records": "/hr-management/employee-records",
-    "personal-information": "/hr-management/employee-records/personal-information",
+    "employees-list": "/hr-management/employee-records/employees-list",
     "emergency-contacts": "/hr-management/employee-records/emergency-contacts",
     "employment-history": "/hr-management/employee-records/employment-history",
     "work-contracts": "/hr-management/work-contracts",

@@ -222,7 +222,7 @@ export const drawerItems = [
                 label: "Employee Records",
                 description: "Stores detailed information about each employee.",
                 children: [
-                    { key: "personal-information", label: "Personal Information", description: "Basic data like name, address, and contact details." },
+                    { key: "employees-list", label: "Employees List", description: "Basic data like name, address, and contact details." },
                     { key: "emergency-contacts", label: "Emergency Contacts", description: "People to be notified in case of an emergency involving the employee." },
                     { key: "employment-history", label: "Employment History", description: "The record of an employee’s past job roles and experience." }
                 ]
