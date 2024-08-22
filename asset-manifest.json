@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.a1b139c0.css",
-    "main.js": "/static/js/main.52e00ed8.js",
+    "main.js": "/static/js/main.ed3ac864.js",
     "static/js/1635.a35c43e8.chunk.js": "/static/js/1635.a35c43e8.chunk.js",
     "static/js/9880.0e7daae8.chunk.js": "/static/js/9880.0e7daae8.chunk.js",
     "static/js/9063.10786671.chunk.js": "/static/js/9063.10786671.chunk.js",
@@ -220,7 +220,7 @@
     "static/media/vault-insight-logo.png": "/static/media/vault-insight-logo.969982c3d0f66fd9bba6.png",
     "index.html": "/index.html",
     "main.a1b139c0.css.map": "/static/css/main.a1b139c0.css.map",
-    "main.52e00ed8.js.map": "/static/js/main.52e00ed8.js.map",
+    "main.ed3ac864.js.map": "/static/js/main.ed3ac864.js.map",
     "1635.a35c43e8.chunk.js.map": "/static/js/1635.a35c43e8.chunk.js.map",
     "9880.0e7daae8.chunk.js.map": "/static/js/9880.0e7daae8.chunk.js.map",
     "9063.10786671.chunk.js.map": "/static/js/9063.10786671.chunk.js.map",
@@ -439,6 +439,6 @@
   },
   "entrypoints": [
     "static/css/main.a1b139c0.css",
-    "static/js/main.52e00ed8.js"
+    "static/js/main.ed3ac864.js"
   ]
 }
