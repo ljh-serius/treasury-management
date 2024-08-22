@@ -516,7 +516,7 @@ export const drawerItems = [
                 label: "Risk Management",
                 description: "Identifies, assesses, and mitigates risks that could impact the company.",
                 children: [
-                    { key: "risk-assessments", label: "Risk Assessments", description: "Evaluations of potential risks and their impacts on the business." },
+                    { key: "risk-assessments-governance", label: "Risk Assessments", description: "Evaluations of potential risks and their impacts on the business." },
                     { key: "risk-mitigation-plans", label: "Risk Mitigation Plans", description: "Strategies to reduce or eliminate risks." },
                     { key: "incident-reporting", label: "Incident Reporting", description: "Documentation of events that could affect the company negatively." }
                 ]

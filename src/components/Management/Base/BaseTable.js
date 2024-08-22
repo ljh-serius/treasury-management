@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box, Table, TableBody,Checkbox, TableCell, TableContainer, TablePagination, TableRow, Paper } from '@mui/material';
+import { Box, Table, TableBody,Checkbox, TableCell, TableContainer, TablePagination, TableRow } from '@mui/material';
 
 import BaseTableHead from './BaseTableHead';
 
@@ -59,12 +59,6 @@ function BaseTable({
     setOrderBy(property);
   };
 
-    // Force a re-render when fieldConfig or items change
-    useEffect(() => {
-      // Trigger a re-render by updating state or by any means necessary
-      // Example: Just logging to ensure the effect is running when fieldConfig or items change
-      console.log("FieldConfig or Items updated", fieldConfig, items);
-    }, [fieldConfig, items]);
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
       const newSelected = items.map((n) => n.id);

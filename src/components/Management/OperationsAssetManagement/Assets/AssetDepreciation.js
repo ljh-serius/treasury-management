@@ -41,8 +41,3 @@ export const fieldsConfig = {
 
 export const entityName = 'Assets Depreciation';
 export const collectionName = 'assets-depreciation';
-
-export const headCells = Object.keys(fieldsConfig).map(key => ({
-    id: key,
-    label: fieldsConfig[key].label,
-}));

@@ -19,11 +19,11 @@ function ManagementComponent({ showAnalytics }) {
     useEffect(() => {
         const loadConfig = async () => {
             try {
-                console.log("File to import :", `../components/Management${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`)
+                console.log("File to import :", `../components/Management/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`)
                 const { fieldsConfig, entityName, collectionName} = await import(`../components/Management/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
                 // const analysisModule = await import(`./Analysis/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
                 const operations = helpersWrapper(collectionName);
-                
+
                 const headCells = Object.keys(fieldsConfig).map(key => ({
                     id: key,
                     label: fieldsConfig[key].label,

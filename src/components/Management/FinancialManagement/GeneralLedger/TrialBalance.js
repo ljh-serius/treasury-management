@@ -22,7 +22,5 @@ export const fieldsConfig = {
     lastModifiedDate: { label: 'Last Modified Date', type: 'date', faker: 'date.recent' },
   };
   
-  
-
 export const entityName = 'Trial Balance';
 export const collectionName = 'trial-balance';
