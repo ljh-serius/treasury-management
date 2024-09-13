@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function MilestoneDependenciesDashboard({ fetchData }) {
+export default function MilestoneDependenciesDashboard({ fetchItems }) {
   const [dependencyData, setDependencyData] = useState([]);
   const [totalDependencies, setTotalDependencies] = useState(0);
   const [relationshipTypeDistribution, setRelationshipTypeDistribution] = useState([]);
@@ -13,14 +13,14 @@ export default function MilestoneDependenciesDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setDependencyData(data);
       processDependencyData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processDependencyData = (data) => {
     // Total Dependencies

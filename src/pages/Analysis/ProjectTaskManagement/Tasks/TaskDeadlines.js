@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function TaskDeadlinesDashboard({ fetchData }) {
+export default function TaskDeadlinesDashboard({ fetchItems }) {
   const [deadlineData, setDeadlineData] = useState([]);
   const [totalDeadlines, setTotalDeadlines] = useState(0);
   const [urgentDeadlines, setUrgentDeadlines] = useState(0);
@@ -14,14 +14,14 @@ export default function TaskDeadlinesDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setDeadlineData(data);
       processDeadlineData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processDeadlineData = (data) => {
     // Total Deadlines

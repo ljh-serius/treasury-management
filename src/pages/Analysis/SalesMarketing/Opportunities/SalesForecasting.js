@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function SalesForecastingDashboard({ fetchData }) {
+export default function SalesForecastingDashboard({ fetchItems }) {
   const [forecastData, setForecastData] = useState([]);
   const [totalForecasts, setTotalForecasts] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
@@ -16,14 +16,14 @@ export default function SalesForecastingDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setForecastData(data);
       processForecastData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processForecastData = (data) => {
     // Total Forecasts

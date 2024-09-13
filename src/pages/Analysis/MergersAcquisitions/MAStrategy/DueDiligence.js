@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function DueDiligenceDashboard({ fetchData }) {
+export default function DueDiligenceDashboard({ fetchItems }) {
   const [dueDiligenceData, setDueDiligenceData] = useState([]);
   const [totalProcesses, setTotalProcesses] = useState(0);
   const [statusDistribution, setStatusDistribution] = useState([]);
@@ -14,14 +14,14 @@ export default function DueDiligenceDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setDueDiligenceData(data);
       processDueDiligenceData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processDueDiligenceData = (data) => {
     // Total Processes

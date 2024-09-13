@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function LeadNurturingDashboard({ fetchData }) {
+export default function LeadNurturingDashboard({ fetchItems }) {
   const [leadData, setLeadData] = useState([]);
   const [totalLeads, setTotalLeads] = useState(0);
   const [leadsByStage, setLeadsByStage] = useState([]);
@@ -14,14 +14,14 @@ export default function LeadNurturingDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setLeadData(data);
       processLeadData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processLeadData = (data) => {
     // Total Leads

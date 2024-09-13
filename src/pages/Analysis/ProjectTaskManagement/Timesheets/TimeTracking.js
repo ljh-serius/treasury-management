@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function TimeTrackingDashboard({ fetchData }) {
+export default function TimeTrackingDashboard({ fetchItems }) {
   const [trackingData, setTrackingData] = useState([]);
   const [totalHours, setTotalHours] = useState(0);
   const [urgentTasks, setUrgentTasks] = useState(0);
@@ -14,14 +14,14 @@ export default function TimeTrackingDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setTrackingData(data);
       processTrackingData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processTrackingData = (data) => {
     // Total Hours

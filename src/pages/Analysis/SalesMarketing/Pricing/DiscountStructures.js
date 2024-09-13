@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function DiscountStructuresDashboard({ fetchData }) {
+export default function DiscountStructuresDashboard({ fetchItems }) {
   const [discountData, setDiscountData] = useState([]);
   const [totalDiscounts, setTotalDiscounts] = useState(0);
   const [averageDiscount, setAverageDiscount] = useState(0);
@@ -16,14 +16,14 @@ export default function DiscountStructuresDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setDiscountData(data);
       processDiscountData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processDiscountData = (data) => {
     // Total Discounts

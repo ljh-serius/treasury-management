@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function CustomerSegmentationDashboard({ fetchData }) {
+export default function CustomerSegmentationDashboard({ fetchItems }) {
   const [segmentData, setSegmentData] = useState([]);
   const [revenueDistribution, setRevenueDistribution] = useState([]);
   const [customerCountDistribution, setCustomerCountDistribution] = useState([]);
@@ -15,14 +15,14 @@ export default function CustomerSegmentationDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setSegmentData(data);
       processSegmentData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processSegmentData = (data) => {
     // Total Segments

@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function StockLevelDashboard({ fetchData }) {
+export default function StockLevelDashboard({ fetchItems }) {
   const [stockData, setStockData] = useState([]);
   const [totalStock, setTotalStock] = useState(0);
   const [outOfStockItems, setOutOfStockItems] = useState(0);
@@ -15,14 +15,14 @@ export default function StockLevelDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setStockData(data);
       processStockData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processStockData = (data) => {
     // Total Stock

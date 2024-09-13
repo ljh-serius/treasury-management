@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function MilestoneReportingDashboard({ fetchData }) {
+export default function MilestoneReportingDashboard({ fetchItems }) {
   const [reportData, setReportData] = useState([]);
   const [totalReports, setTotalReports] = useState(0);
   const [urgentReports, setUrgentReports] = useState(0);
@@ -14,14 +14,14 @@ export default function MilestoneReportingDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setReportData(data);
       processReportData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processReportData = (data) => {
     // Total Reports

@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function UtilityManagementDashboard({ fetchData }) {
+export default function UtilityManagementDashboard({ fetchItems }) {
   const [utilityData, setUtilityData] = useState([]);
   const [totalConsumption, setTotalConsumption] = useState(0);
   const [overduePayments, setOverduePayments] = useState(0);
@@ -14,14 +14,14 @@ export default function UtilityManagementDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setUtilityData(data);
       processUtilityData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processUtilityData = (data) => {
     // Total Consumption

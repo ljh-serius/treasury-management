@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function BillableHoursDashboard({ fetchData }) {
+export default function BillableHoursDashboard({ fetchItems }) {
   const [billableData, setBillableData] = useState([]);
   const [totalBillableHours, setTotalBillableHours] = useState(0);
   const [invoicedHours, setInvoicedHours] = useState(0);
@@ -14,14 +14,14 @@ export default function BillableHoursDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setBillableData(data);
       processBillableData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processBillableData = (data) => {
     // Total Billable Hours

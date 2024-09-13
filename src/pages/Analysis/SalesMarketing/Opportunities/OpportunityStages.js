@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function OpportunityStagesDashboard({ fetchData }) {
+export default function OpportunityStagesDashboard({ fetchItems }) {
   const [stageData, setStageData] = useState([]);
   const [totalStages, setTotalStages] = useState(0);
   const [stagesInProgress, setStagesInProgress] = useState(0);
@@ -15,14 +15,14 @@ export default function OpportunityStagesDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setStageData(data);
       processStageData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processStageData = (data) => {
     // Total Stages

@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function FacilityMaintenanceDashboard({ fetchData }) {
+export default function FacilityMaintenanceDashboard({ fetchItems }) {
   const [maintenanceData, setMaintenanceData] = useState([]);
   const [totalMaintenanceCost, setTotalMaintenanceCost] = useState(0);
   const [upcomingMaintenance, setUpcomingMaintenance] = useState(0);
@@ -14,14 +14,14 @@ export default function FacilityMaintenanceDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setMaintenanceData(data);
       processMaintenanceData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processMaintenanceData = (data) => {
     // Total Maintenance Cost

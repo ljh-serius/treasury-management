@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function TasksAssignmentsDashboard({ fetchData }) {
+export default function TasksAssignmentsDashboard({ fetchItems }) {
   const [assignmentData, setAssignmentData] = useState([]);
   const [totalAssignments, setTotalAssignments] = useState(0);
   const [urgentAssignments, setUrgentAssignments] = useState(0);
@@ -14,14 +14,14 @@ export default function TasksAssignmentsDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setAssignmentData(data);
       processAssignmentData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processAssignmentData = (data) => {
     // Total Assignments

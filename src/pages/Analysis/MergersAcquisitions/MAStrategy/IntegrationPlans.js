@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function IntegrationPlansDashboard({ fetchData }) {
+export default function IntegrationPlansDashboard({ fetchItems }) {
   const [planData, setPlanData] = useState([]);
   const [totalPlans, setTotalPlans] = useState(0);
   const [statusDistribution, setStatusDistribution] = useState([]);
@@ -14,14 +14,14 @@ export default function IntegrationPlansDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setPlanData(data);
       processPlanData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processPlanData = (data) => {
     // Total Plans

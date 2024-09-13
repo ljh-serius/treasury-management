@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function PropertyDashboard({ fetchData }) {
+export default function PropertyDashboard({ fetchItems }) {
   const [propertyData, setPropertyData] = useState([]);
   const [totalProperties, setTotalProperties] = useState(0);
   const [totalSize, setTotalSize] = useState(0);
@@ -14,14 +14,14 @@ export default function PropertyDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setPropertyData(data);
       processPropertyData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processPropertyData = (data) => {
     // Total Properties

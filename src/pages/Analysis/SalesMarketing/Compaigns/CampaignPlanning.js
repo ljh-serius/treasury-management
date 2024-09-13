@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function CampaignAnalyticsDashboard({ fetchData }) {
+export default function CampaignAnalyticsDashboard({ fetchItems }) {
   const [campaignData, setCampaignData] = useState([]);
   const [budgetDistribution, setBudgetDistribution] = useState([]);
   const [tagDistribution, setTagDistribution] = useState([]);
@@ -14,14 +14,14 @@ export default function CampaignAnalyticsDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setCampaignData(data);
       processCampaignData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processCampaignData = (data) => {
     // Total Budget

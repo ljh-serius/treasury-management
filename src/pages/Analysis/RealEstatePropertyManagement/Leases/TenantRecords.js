@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function TenantRecordsDashboard({ fetchData }) {
+export default function TenantRecordsDashboard({ fetchItems }) {
   const [tenantData, setTenantData] = useState([]);
   const [totalTenants, setTotalTenants] = useState(0);
   const [upcomingExpirations, setUpcomingExpirations] = useState(0);
@@ -14,14 +14,14 @@ export default function TenantRecordsDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setTenantData(data);
       processTenantData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processTenantData = (data) => {
     // Total Tenants

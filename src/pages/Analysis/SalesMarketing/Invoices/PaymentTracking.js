@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function PaymentTrackingDashboard({ fetchData }) {
+export default function PaymentTrackingDashboard({ fetchItems }) {
   const [paymentData, setPaymentData] = useState([]);
   const [totalPayments, setTotalPayments] = useState(0);
   const [totalAmountPaid, setTotalAmountPaid] = useState(0);
@@ -17,14 +17,14 @@ export default function PaymentTrackingDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setPaymentData(data);
       processPaymentData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processPaymentData = (data) => {
     // Total Payments

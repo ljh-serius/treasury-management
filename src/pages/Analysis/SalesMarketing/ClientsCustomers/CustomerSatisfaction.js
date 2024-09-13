@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function CustomerSatisfactionDashboard({ fetchData }) {
+export default function CustomerSatisfactionDashboard({ fetchItems }) {
   const [satisfactionData, setSatisfactionData] = useState([]);
   const [satisfactionDistribution, setSatisfactionDistribution] = useState([]);
   const [feedbackDistribution, setFeedbackDistribution] = useState([]);
@@ -16,14 +16,14 @@ export default function CustomerSatisfactionDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setSatisfactionData(data);
       processSatisfactionData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processSatisfactionData = (data) => {
     // Total Responses

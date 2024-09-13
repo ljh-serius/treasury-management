@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function MilestoneCompletionDashboard({ fetchData }) {
+export default function MilestoneCompletionDashboard({ fetchItems }) {
   const [completionData, setCompletionData] = useState([]);
   const [totalMilestones, setTotalMilestones] = useState(0);
   const [delayedMilestones, setDelayedMilestones] = useState(0);
@@ -14,14 +14,14 @@ export default function MilestoneCompletionDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setCompletionData(data);
       processCompletionData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processCompletionData = (data) => {
     // Total Milestones

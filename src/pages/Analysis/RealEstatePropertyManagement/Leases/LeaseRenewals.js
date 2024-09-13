@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function LeaseRenewalsDashboard({ fetchData }) {
+export default function LeaseRenewalsDashboard({ fetchItems }) {
   const [renewalData, setRenewalData] = useState([]);
   const [totalRenewals, setTotalRenewals] = useState(0);
   const [upcomingRenewals, setUpcomingRenewals] = useState(0);
@@ -14,14 +14,14 @@ export default function LeaseRenewalsDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setRenewalData(data);
       processRenewalData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processRenewalData = (data) => {
     // Total Renewals

@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function PriceListsDashboard({ fetchData }) {
+export default function PriceListsDashboard({ fetchItems }) {
   const [priceListData, setPriceListData] = useState([]);
   const [totalPriceLists, setTotalPriceLists] = useState(0);
   const [averageDiscountRate, setAverageDiscountRate] = useState(0);
@@ -14,14 +14,14 @@ export default function PriceListsDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setPriceListData(data);
       processPriceListData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processPriceListData = (data) => {
     // Total Price Lists

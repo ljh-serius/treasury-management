@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function RentalAgreementsDashboard({ fetchData }) {
+export default function RentalAgreementsDashboard({ fetchItems }) {
   const [rentalData, setRentalData] = useState([]);
   const [totalRent, setTotalRent] = useState(0);
   const [totalSecurityDeposit, setTotalSecurityDeposit] = useState(0);
@@ -15,14 +15,14 @@ export default function RentalAgreementsDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setRentalData(data);
       processRentalData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processRentalData = (data) => {
     // Total Rent and Security Deposits

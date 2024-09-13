@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function InvoiceTemplatesDashboard({ fetchData }) {
+export default function InvoiceTemplatesDashboard({ fetchItems }) {
   const [templateData, setTemplateData] = useState([]);
   const [templateTypeDistribution, setTemplateTypeDistribution] = useState([]);
   const [totalTemplates, setTotalTemplates] = useState(0);
@@ -19,14 +19,14 @@ export default function InvoiceTemplatesDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setTemplateData(data);
       processTemplateData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processTemplateData = (data) => {
     // Total Templates

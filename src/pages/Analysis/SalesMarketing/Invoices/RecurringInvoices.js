@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function RecurringInvoicesDashboard({ fetchData }) {
+export default function RecurringInvoicesDashboard({ fetchItems }) {
   const [invoiceData, setInvoiceData] = useState([]);
   const [totalInvoices, setTotalInvoices] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
@@ -16,14 +16,14 @@ export default function RecurringInvoicesDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setInvoiceData(data);
       processInvoiceData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processInvoiceData = (data) => {
     // Total Invoices

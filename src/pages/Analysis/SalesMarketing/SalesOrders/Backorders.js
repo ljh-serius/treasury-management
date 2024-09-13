@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function BackorderDashboard({ fetchData }) {
+export default function BackorderDashboard({ fetchItems }) {
   const [backorderData, setBackorderData] = useState([]);
   const [totalBackorders, setTotalBackorders] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
@@ -15,14 +15,14 @@ export default function BackorderDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setBackorderData(data);
       processBackorderData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processBackorderData = (data) => {
     // Total Backorders

@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function PropertyTaxesDashboard({ fetchData }) {
+export default function PropertyTaxesDashboard({ fetchItems }) {
   const [taxData, setTaxData] = useState([]);
   const [totalTaxesDue, setTotalTaxesDue] = useState(0);
   const [pendingPayments, setPendingPayments] = useState(0);
@@ -15,14 +15,14 @@ export default function PropertyTaxesDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setTaxData(data);
       processTaxData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processTaxData = (data) => {
     // Total Taxes Due

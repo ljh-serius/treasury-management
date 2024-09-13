@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function ProjectPhasesDashboard({ fetchData }) {
+export default function ProjectPhasesDashboard({ fetchItems }) {
   const [phaseData, setPhaseData] = useState([]);
   const [totalPhases, setTotalPhases] = useState(0);
   const [ongoingPhases, setOngoingPhases] = useState(0);
@@ -14,14 +14,14 @@ export default function ProjectPhasesDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setPhaseData(data);
       processPhaseData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processPhaseData = (data) => {
     // Total Phases

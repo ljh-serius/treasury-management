@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function ResourceAllocationsDashboard({ fetchData }) {
+export default function ResourceAllocationsDashboard({ fetchItems }) {
   const [allocationData, setAllocationData] = useState([]);
   const [totalAllocations, setTotalAllocations] = useState(0);
   const [urgentAllocations, setUrgentAllocations] = useState(0);
@@ -14,14 +14,14 @@ export default function ResourceAllocationsDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setAllocationData(data);
       processAllocationData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processAllocationData = (data) => {
     // Total Allocations

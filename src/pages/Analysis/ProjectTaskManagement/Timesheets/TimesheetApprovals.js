@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function TimesheetsApprovalsDashboard({ fetchData }) {
+export default function TimesheetsApprovalsDashboard({ fetchItems }) {
   const [approvalData, setApprovalData] = useState([]);
   const [totalApprovals, setTotalApprovals] = useState(0);
   const [approvalStatusDistribution, setApprovalStatusDistribution] = useState([]);
@@ -13,14 +13,14 @@ export default function TimesheetsApprovalsDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setApprovalData(data);
       processApprovalData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processApprovalData = (data) => {
     // Total Approvals

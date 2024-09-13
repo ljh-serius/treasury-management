@@ -3,7 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function LeadScoringDashboard({ fetchData }) {
+export default function LeadScoringDashboard({ fetchItems }) {
   const [leadData, setLeadData] = useState([]);
   const [totalLeads, setTotalLeads] = useState(0);
   const [averageScore, setAverageScore] = useState(0);
@@ -17,14 +17,14 @@ export default function LeadScoringDashboard({ fetchData }) {
   useEffect(() => {
     const fetchDataAsync = async () => {
       setLoading(true);
-      const data = await fetchData();
+      const data = await fetchItems();
       setLeadData(data);
       processLeadData(data);
       setLoading(false);
     };
 
     fetchDataAsync();
-  }, [fetchData]);
+  }, [fetchItems]);
 
   const processLeadData = (data) => {
     // Total Leads
