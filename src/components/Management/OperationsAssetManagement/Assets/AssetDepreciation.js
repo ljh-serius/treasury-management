@@ -1,50 +1,25 @@
 export const fieldsConfig = {
-    assetId: { label: 'Asset ID', type: 'text', faker: 'datatype.uuid' },
+    depreciationId: { label: 'Depreciation ID', type: 'text', faker: 'datatype.uuid' },
     assetName: { label: 'Asset Name', type: 'text', faker: 'commerce.productName' },
-    assetType: {
-        label: 'Asset Type',
-        type: 'select',
-        options: [
-            { id: 'fixed', label: 'Fixed Asset' },
-            { id: 'current', label: 'Current Asset' },
-            { id: 'intangible', label: 'Intangible Asset' },
-        ],
-        faker: 'random.arrayElement',
-    },
     purchaseDate: { label: 'Purchase Date', type: 'date', faker: 'date.past' },
-    purchasePrice: { label: 'Purchase Price', type: 'number', faker: 'finance.amount' },
-    depreciationRate: { label: 'Depreciation Rate (%)', type: 'number', faker: 'datatype.number' },
-    currentValue: { label: 'Current Value', type: 'number', faker: 'finance.amount' },
-    location: { label: 'Location', type: 'text', faker: 'address.city' },
-    status: {
-        label: 'Status',
-        type: 'select',
-        options: [
-            { id: 'active', label: 'Active' },
-            { id: 'inactive', label: 'Inactive' },
-            { id: 'disposed', label: 'Disposed' },
-        ],
-        faker: 'random.arrayElement',
+    depreciationRate: { label: 'Depreciation Rate', type: 'number', faker: 'datatype.float' },
+    accumulatedDepreciation: { label: 'Accumulated Depreciation', type: 'number', faker: 'finance.amount' },
+    tags: {
+      label: 'Tags',
+      type: 'select',
+      options: [
+        { id: 'fully_depreciated', label: 'Fully Depreciated' },
+        { id: 'under_depreciation', label: 'Under Depreciation' },
+        { id: 'residual_value', label: 'Residual Value' }
+      ],
+      multiple: true,
+      faker: 'random.arrayElement',
     },
-tags: {
-    label: 'Tags',
-    type: 'select',
-    options: [
-        { id: 'urgent', label: 'Urgent' },
-        { id: 'review', label: 'Review' },
-        { id: 'important', label: 'Important' },
-        { id: 'completed', label: 'Completed' },
-        { id: 'follow-up', label: 'Follow-Up' },
-    ],
-    multiple: true,
-    faker: 'random.arrayElement',
-},
-
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     lastModifiedBy: { label: 'Last Modified By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
     lastModifiedDate: { label: 'Last Modified Date', type: 'date', faker: 'date.recent' },
 };
 
-export const entityName = 'Assets Depreciation';
-export const collectionName = 'assets-depreciation';
+export const entityName = 'Asset Depreciation';
+export const collectionName = 'asset-depreciation';

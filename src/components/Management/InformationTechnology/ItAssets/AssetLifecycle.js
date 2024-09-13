@@ -23,6 +23,18 @@ export const fieldsConfig = {
         faker: 'random.arrayElement',
     },
     assignedTo: { label: 'Assigned To', type: 'text', faker: 'name.fullName' },
+    tags: {
+        label: 'Tags',
+        type: 'select',
+        options: [
+            { id: 'hardware', label: 'Hardware' },
+            { id: 'software', label: 'Software' },
+            { id: 'critical', label: 'Critical' },
+            { id: 'review', label: 'Review' },
+        ],
+        multiple: true,
+        faker: 'lorem.words',
+    },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
 };

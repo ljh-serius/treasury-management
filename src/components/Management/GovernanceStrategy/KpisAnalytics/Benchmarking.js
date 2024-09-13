@@ -23,7 +23,5 @@ export const fieldsConfig = {
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
   };
 
-  
-    
 export const entityName = 'Benchmarking';
 export const collectionName = 'benchmarking'

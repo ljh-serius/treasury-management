@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import BaseManagementComponent from '../components/Management/Base';
 import { helpersWrapper } from '../utils/firebaseCrudHelpers';
 import { useParams } from 'react-router-dom';
-import VisualAnalytics from './Analytics'
 
 const getPath = (path) => {
     return path.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join('');
@@ -20,9 +19,8 @@ function ManagementComponent({ showAnalytics }) {
     useEffect(() => {
         const loadConfig = async () => {
             try {
-                // console.log("File to import :", `../components/Management/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`)
                 const { fieldsConfig, entityName, collectionName} = await import(`../components/Management/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
-                // const analysisModule = await import(`./Analysis/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
+                const analysisModule = await import(`./Analysis/${capitalizedModuleName}/${capitalizedSubModuleName}/${capitalizedComponentName}`);
                 const operations = helpersWrapper(collectionName);
 
                 const headCells = Object.keys(fieldsConfig).map(key => ({
@@ -40,7 +38,7 @@ function ManagementComponent({ showAnalytics }) {
                     headCells: headCells,
                 });
 
-                // setAnalysisComponent(() => analysisModule.default);
+                setAnalysisComponent(() => analysisModule.default);
             } catch (error) {
                 console.error('Error loading modules:', error);
             }
@@ -57,7 +55,7 @@ function ManagementComponent({ showAnalytics }) {
     return (
         <>
             {showAnalytics ? (
-                <VisualAnalytics fetchItems={config.fetchItems} fieldsConfig={config.fieldsConfig} />
+                <AnalysisComponent fetchItems={config.fetchItems} fieldsConfig={config.fieldsConfig} />
             ) : (
                 <BaseManagementComponent
                     fieldConfig={config.fieldsConfig}

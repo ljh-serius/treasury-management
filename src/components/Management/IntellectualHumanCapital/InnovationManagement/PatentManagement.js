@@ -6,20 +6,33 @@ export const fieldsConfig = {
     approvalDate: { label: 'Approval Date', type: 'date', faker: 'date.future' },
     expirationDate: { label: 'Expiration Date', type: 'date', faker: 'date.future' },
     status: {
-        label: 'Status',
-        type: 'select',
-        options: [
-            { id: 'filed', label: 'Filed' },
-            { id: 'approved', label: 'Approved' },
-            { id: 'rejected', label: 'Rejected' },
-            { id: 'expired', label: 'Expired' },
-        ],
-        faker: 'random.arrayElement',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { id: 'filed', label: 'Filed' },
+        { id: 'approved', label: 'Approved' },
+        { id: 'rejected', label: 'Rejected' },
+        { id: 'expired', label: 'Expired' },
+      ],
+      faker: 'random.arrayElement',
     },
     patentNumber: { label: 'Patent Number', type: 'text', faker: 'finance.amount' },
+    tags: {
+      label: 'Tags',
+      type: 'select',
+      options: [
+        { id: 'filed', label: 'Filed' },
+        { id: 'approved', label: 'Approved' },
+        { id: 'rejected', label: 'Rejected' },
+        { id: 'expired', label: 'Expired' },
+      ],
+      multiple: true,
+      faker: 'random.arrayElement',
+    },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
-};
-
-export const entityName = 'Patent Management';
-export const collectionName = 'patent-management';
+  };
+  
+  export const entityName = 'Patent Management';
+  export const collectionName = 'patent-management';
+  

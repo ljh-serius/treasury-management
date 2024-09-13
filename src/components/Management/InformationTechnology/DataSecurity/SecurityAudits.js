@@ -24,6 +24,18 @@ export const fieldsConfig = {
         ],
         faker: 'random.arrayElement',
     },
+    tags: {
+        label: 'Tags',
+        type: 'select',
+        options: [
+            { id: 'security', label: 'Security' },
+            { id: 'compliance', label: 'Compliance' },
+            { id: 'audit', label: 'Audit' },
+            { id: 'remediation', label: 'Remediation' },
+        ],
+        multiple: true,
+        faker: 'lorem.words',
+    },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
 };

@@ -3,18 +3,31 @@ export const fieldsConfig = {
     supplierId: { label: 'Supplier ID', type: 'text', faker: 'datatype.uuid' },
     complianceDate: { label: 'Compliance Date', type: 'date', faker: 'date.past' },
     complianceStatus: {
-        label: 'Compliance Status',
-        type: 'select',
-        options: [
-            { id: 'compliant', label: 'Compliant' },
-            { id: 'non-compliant', label: 'Non-Compliant' },
-        ],
-        faker: 'random.arrayElement',
+      label: 'Compliance Status',
+      type: 'select',
+      options: [
+        { id: 'compliant', label: 'Compliant' },
+        { id: 'non-compliant', label: 'Non-Compliant' },
+      ],
+      faker: 'random.arrayElement',
     },
     complianceDetails: { label: 'Compliance Details', type: 'text', faker: 'lorem.paragraph' },
+    tags: {
+      label: 'Tags',
+      type: 'select',
+      options: [
+        { id: 'urgent', label: 'Urgent' },
+        { id: 'review', label: 'Review' },
+        { id: 'compliant', label: 'Compliant' },
+        { id: 'non-compliant', label: 'Non-Compliant' },
+      ],
+      multiple: true,
+      faker: 'random.arrayElement',
+    },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
-};
-
-export const entityName = 'Contract Compliance';
-export const collectionName = 'contract-compliance';
+  };
+  
+  export const entityName = 'Contract Compliance';
+  export const collectionName = 'contract-compliance';
+  

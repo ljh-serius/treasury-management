@@ -13,6 +13,18 @@ export const fieldsConfig = {
         faker: 'random.arrayElement',
     },
     deviceCount: { label: 'Device Count', type: 'number', faker: 'finance.amount' },
+    tags: {
+        label: 'Tags',
+        type: 'select',
+        options: [
+            { id: 'critical', label: 'Critical' },
+            { id: 'high-priority', label: 'High Priority' },
+            { id: 'device-management', label: 'Device Management' },
+            { id: 'network-architecture', label: 'Network Architecture' },
+        ],
+        multiple: true,
+        faker: 'lorem.words',
+    },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
 };

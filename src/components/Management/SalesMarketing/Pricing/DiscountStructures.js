@@ -5,15 +5,22 @@ export const fieldsConfig = {
     validFrom: { label: 'Valid From', type: 'date', faker: 'date.past' },
     validTo: { label: 'Valid To', type: 'date', faker: 'date.future' },
     tags: {
-        label: 'Tags',
-        type: 'select',
-        options: [],
-        multiple: true,
-        faker: 'lorem.words',
+      label: 'Tags',
+      type: 'select',
+      options: [
+        { id: 'seasonal', label: 'Seasonal' },
+        { id: 'clearance', label: 'Clearance' },
+        { id: 'holiday', label: 'Holiday' },
+        { id: 'bulk-purchase', label: 'Bulk Purchase' },
+        { id: 'limited-time', label: 'Limited Time' },
+      ],
+      multiple: true,
+      faker: 'lorem.words',
     },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
-};
-
-export const entityName = 'Discount Structures';
-export const collectionName = 'discount-structures';
+  };
+  
+  export const entityName = 'Discount Structures';
+  export const collectionName = 'discount-structures';
+  

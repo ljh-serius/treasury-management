@@ -31,3 +31,4 @@ export const fieldsConfig = {
 
 export const entityName = 'IP Licensing';
 export const collectionName = 'ip-licensing';
+    

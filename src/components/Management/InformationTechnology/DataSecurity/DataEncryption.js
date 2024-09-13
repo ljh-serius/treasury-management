@@ -24,6 +24,18 @@ export const fieldsConfig = {
     encryptionDate: { label: 'Encryption Date', type: 'date', faker: 'date.past' },
     encryptedBy: { label: 'Encrypted By', type: 'text', faker: 'name.fullName' },
     decryptionKey: { label: 'Decryption Key', type: 'text', faker: 'datatype.uuid' },
+    tags: {
+        label: 'Tags',
+        type: 'select',
+        options: [
+            { id: 'sensitive', label: 'Sensitive' },
+            { id: 'high-priority', label: 'High Priority' },
+            { id: 'secure', label: 'Secure' },
+            { id: 'urgent', label: 'Urgent' },
+        ],
+        multiple: true,
+        faker: 'random.arrayElement',
+    },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
 };

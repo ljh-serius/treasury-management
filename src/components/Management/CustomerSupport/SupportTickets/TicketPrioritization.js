@@ -43,6 +43,3 @@ export const fieldsConfig = {
     description: { label: 'Description', type: 'text', faker: 'lorem.paragraph' },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
 };
-
-export const entityName = 'Ticket Prioritization';
-export const collectionName = 'ticket-prioritization';

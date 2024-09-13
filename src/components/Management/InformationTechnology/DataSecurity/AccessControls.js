@@ -15,6 +15,18 @@ export const fieldsConfig = {
     grantedBy: { label: 'Granted By', type: 'text', faker: 'name.fullName' },
     grantedDate: { label: 'Granted Date', type: 'date', faker: 'date.past' },
     expirationDate: { label: 'Expiration Date', type: 'date', faker: 'date.future' },
+    tags: {
+        label: 'Tags',
+        type: 'select',
+        options: [
+            { id: 'high-security', label: 'High Security' },
+            { id: 'limited', label: 'Limited' },
+            { id: 'temporary', label: 'Temporary' },
+            { id: 'permanent', label: 'Permanent' },
+        ],
+        multiple: true,
+        faker: 'random.arrayElement',
+    },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
 };

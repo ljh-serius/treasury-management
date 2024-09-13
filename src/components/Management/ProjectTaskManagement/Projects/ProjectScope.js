@@ -6,15 +6,22 @@ export const fieldsConfig = {
     constraints: { label: 'Constraints', type: 'text', multiline: true, rows: 4, faker: 'lorem.sentence' },
     assumptions: { label: 'Assumptions', type: 'text', multiline: true, rows: 4, faker: 'lorem.sentence' },
     tags: {
-        label: 'Tags',
-        type: 'select',
-        options: [],
-        multiple: true,
-        faker: 'lorem.words',
+      label: 'Tags',
+      type: 'select',
+      options: [
+        { id: 'high-priority', label: 'High Priority' },
+        { id: 'low-priority', label: 'Low Priority' },
+        { id: 'urgent', label: 'Urgent' },
+        { id: 'pending', label: 'Pending' },
+        { id: 'completed', label: 'Completed' },
+      ],
+      multiple: true,
+      faker: 'random.arrayElement',
     },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
-};
-
-export const entityName = 'Project Scopes';
-export const collectionName = 'project-scopes';
+  };
+  
+  export const entityName = 'Project Scopes';
+  export const collectionName = 'project-scopes';
+  

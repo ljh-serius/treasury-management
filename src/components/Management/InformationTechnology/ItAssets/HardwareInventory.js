@@ -28,6 +28,18 @@ export const fieldsConfig = {
     },
     location: { label: 'Location', type: 'text', faker: 'address.streetAddress' },
     assignedTo: { label: 'Assigned To', type: 'text', faker: 'name.fullName' },
+    tags: {
+        label: 'Tags',
+        type: 'select',
+        options: [
+            { id: 'critical', label: 'Critical' },
+            { id: 'review', label: 'Review' },
+            { id: 'urgent', label: 'Urgent' },
+            { id: 'maintenance', label: 'Maintenance' },
+        ],
+        multiple: true,
+        faker: 'lorem.words',
+    },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
 };

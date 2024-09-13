@@ -8,18 +8,31 @@ export const fieldsConfig = {
     trackingDate: { label: 'Tracking Date', type: 'date', faker: 'date.past' },
     responsiblePerson: { label: 'Responsible Person', type: 'text', faker: 'name.fullName' },
     status: {
-        label: 'Status',
-        type: 'select',
-        options: [
-            { id: 'ongoing', label: 'Ongoing' },
-            { id: 'achieved', label: 'Achieved' },
-            { id: 'not-achieved', label: 'Not Achieved' },
-        ],
-        faker: 'random.arrayElement',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { id: 'ongoing', label: 'Ongoing' },
+        { id: 'achieved', label: 'Achieved' },
+        { id: 'not-achieved', label: 'Not Achieved' },
+      ],
+      faker: 'random.arrayElement',
+    },
+    tags: {
+      label: 'Tags',
+      type: 'select',
+      options: [
+        { id: 'high-priority', label: 'High Priority' },
+        { id: 'urgent', label: 'Urgent' },
+        { id: 'in-progress', label: 'In Progress' },
+        { id: 'achieved', label: 'Achieved' },
+      ],
+      multiple: true,
+      faker: 'random.arrayElement',
     },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
-};
-
-export const entityName = 'Synergy Tracking';
-export const collectionName = 'synergy-tracking';
+  };
+  
+  export const entityName = 'Synergy Tracking';
+  export const collectionName = 'synergy-tracking';
+  

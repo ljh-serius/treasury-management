@@ -10,18 +10,31 @@ export const fieldsConfig = {
     identifiedBy: { label: 'Identified By', type: 'text', faker: 'name.fullName' },
     identificationDate: { label: 'Identification Date', type: 'date', faker: 'date.past' },
     status: {
-        label: 'Status',
-        type: 'select',
-        options: [
-            { id: 'under-review', label: 'Under Review' },
-            { id: 'approved', label: 'Approved' },
-            { id: 'rejected', label: 'Rejected' },
-        ],
-        faker: 'random.arrayElement',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { id: 'under-review', label: 'Under Review' },
+        { id: 'approved', label: 'Approved' },
+        { id: 'rejected', label: 'Rejected' },
+      ],
+      faker: 'random.arrayElement',
+    },
+    tags: {
+      label: 'Tags',
+      type: 'select',
+      options: [
+        { id: 'high-priority', label: 'High Priority' },
+        { id: 'low-risk', label: 'Low Risk' },
+        { id: 'high-risk', label: 'High Risk' },
+        { id: 'pending', label: 'Pending' },
+      ],
+      multiple: true,
+      faker: 'random.arrayElement',
     },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
-};
-
-export const entityName = 'Target Identification';
-export const collectionName = 'target-identification';
+  };
+  
+  export const entityName = 'Target Identification';
+  export const collectionName = 'target-identification';
+  

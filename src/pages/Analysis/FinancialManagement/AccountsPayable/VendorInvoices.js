@@ -7,65 +7,50 @@ import Backdrop from '@mui/material/Backdrop';
 
 export default function InvoiceAnalysisDashboard({ fetchItems }) {
   const [invoicesData, setInvoicesData] = useState([]);
-  const [invoiceTypeDistribution, setInvoiceTypeDistribution] = useState([]);
-  const [invoiceCategoryDistribution, setInvoiceCategoryDistribution] = useState([]);
-  const [paymentMethodDistribution, setPaymentMethodDistribution] = useState([]);
+  const [currencyDistribution, setCurrencyDistribution] = useState([]);
+  const [paymentTermsDistribution, setPaymentTermsDistribution] = useState([]);
   const [monthlyTrendsData, setMonthlyTrendsData] = useState([]);
   const [topVendors, setTopVendors] = useState([]);
-  const [totalIssuedValue, setTotalIssuedValue] = useState(0);
-  const [totalReceivedValue, setTotalReceivedValue] = useState(0);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [totalAmountExclVAT, setTotalAmountExclVAT] = useState(0);
+  const [totalAmountInclVAT, setTotalAmountInclVAT] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true); // Start loading
+      setLoading(true);
       const data = await fetchItems();
       setInvoicesData(data);
       processInvoiceData(data);
-      setLoading(false); // Stop loading
+      setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
   const processInvoiceData = (data) => {
-    // Invoice Type Distribution
-    const typeCounts = data.reduce((acc, invoice) => {
-      acc[invoice.invoiceType] = (acc[invoice.invoiceType] || 0) + 1;
+    // Currency Distribution
+    const currencyCounts = data.reduce((acc, invoice) => {
+      acc[invoice.preferredCurrency] = (acc[invoice.preferredCurrency] || 0) + 1;
       return acc;
     }, {});
 
-    setInvoiceTypeDistribution(Object.keys(typeCounts).map(key => ({
+    setCurrencyDistribution(Object.keys(currencyCounts).map(key => ({
       name: key,
-      y: typeCounts[key],
-      invoiceNames: data.filter(invoice => invoice.invoiceType === key).map(invoice => invoice.providerDetails).join(', '),
+      y: currencyCounts[key],
     })));
 
-    // Invoice Category Distribution
-    const categoryCounts = data.reduce((acc, invoice) => {
-      acc[invoice.invoiceCategory] = (acc[invoice.invoiceCategory] || 0) + 1;
+    // Payment Terms Distribution
+    const paymentTermsCounts = data.reduce((acc, invoice) => {
+      acc[invoice.paymentTerms] = (acc[invoice.paymentTerms] || 0) + 1;
       return acc;
     }, {});
 
-    setInvoiceCategoryDistribution(Object.keys(categoryCounts).map(key => ({
+    setPaymentTermsDistribution(Object.keys(paymentTermsCounts).map(key => ({
       name: key,
-      y: categoryCounts[key],
-      invoiceNames: data.filter(invoice => invoice.invoiceCategory === key).map(invoice => invoice.providerDetails).join(', '),
+      y: paymentTermsCounts[key],
     })));
 
-    // Payment Method Distribution
-    const paymentCounts = data.reduce((acc, invoice) => {
-      acc[invoice.paymentMethod] = (acc[invoice.paymentMethod] || 0) + 1;
-      return acc;
-    }, {});
-
-    setPaymentMethodDistribution(Object.keys(paymentCounts).map(key => ({
-      name: key,
-      y: paymentCounts[key],
-      invoiceNames: data.filter(invoice => invoice.paymentMethod === key).map(invoice => invoice.providerDetails).join(', '),
-    })));
-
-    // Monthly Trends Data
+    // Monthly Trends Data (based on 'issuedAt')
     const trendCounts = data.reduce((acc, invoice) => {
       const month = new Date(invoice.issuedAt).getMonth() + 1;
       acc[month] = (acc[month] || 0) + 1;
@@ -77,82 +62,53 @@ export default function InvoiceAnalysisDashboard({ fetchItems }) {
       y: trendCounts[key],
     })));
 
-    // Total Issued & Received Invoice Values
+    // Total Amounts Excluding and Including VAT
     const totals = data.reduce(
       (acc, invoice) => {
-        const value = Number(invoice.contractValue) || 0;
-        if (invoice.invoiceType === 'issued') {
-          acc.issued += value;
-        } else {
-          acc.received += value;
-        }
+        acc.exclVAT += Number(invoice.totalAmountExclVAT) || 0;
+        acc.inclVAT += Number(invoice.totalAmountInclVAT) || 0;
         return acc;
       },
-      { issued: 0, received: 0 }
+      { exclVAT: 0, inclVAT: 0 }
     );
 
-    setTotalIssuedValue(totals.issued);
-    setTotalReceivedValue(totals.received);
+    setTotalAmountExclVAT(totals.exclVAT);
+    setTotalAmountInclVAT(totals.inclVAT);
 
-    // Top 5 Vendors by Invoice Value
+    // Top 5 Vendors by Total Amount Excluding VAT
     const topVendorsList = data
-      .sort((a, b) => Number(b.contractValue) - Number(a.contractValue))
+      .sort((a, b) => Number(b.totalAmountExclVAT) - Number(a.totalAmountExclVAT))
       .slice(0, 5);
     setTopVendors(topVendorsList);
   };
 
-  const invoiceTypeChartOptions = {
+  const currencyChartOptions = {
     chart: {
       type: 'pie',
     },
     title: {
-      text: 'Invoice Type Distribution',
-    },
-    tooltip: {
-      pointFormat: '{point.name}: <b>{point.y}</b><br/>Providers: {point.invoiceNames}'
+      text: 'Currency Distribution',
     },
     series: [
       {
-        name: 'Invoices',
+        name: 'Currencies',
         colorByPoint: true,
-        data: invoiceTypeDistribution,
+        data: currencyDistribution,
       },
     ],
   };
 
-  const invoiceCategoryChartOptions = {
-    chart: {
-      type: 'pie',
-    },
-    title: {
-      text: 'Invoice Category Distribution',
-    },
-    tooltip: {
-      pointFormat: '{point.name}: <b>{point.y}</b><br/>Providers: {point.invoiceNames}'
-    },
-    series: [
-      {
-        name: 'Categories',
-        colorByPoint: true,
-        data: invoiceCategoryDistribution,
-      },
-    ],
-  };
-
-  const paymentMethodChartOptions = {
+  const paymentTermsChartOptions = {
     chart: {
       type: 'column',
     },
     title: {
-      text: 'Payment Method Distribution',
-    },
-    tooltip: {
-      pointFormat: '{point.name}: <b>{point.y}</b> invoices'
+      text: 'Payment Terms Distribution',
     },
     series: [
       {
-        name: 'Payment Methods',
-        data: paymentMethodDistribution,
+        name: 'Payment Terms',
+        data: paymentTermsDistribution,
       },
     ],
   };
@@ -189,12 +145,12 @@ export default function InvoiceAnalysisDashboard({ fetchItems }) {
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Issued Invoice Value</Typography>
+                <Typography variant="h6">Total Amount (Excl. VAT)</Typography>
                 <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  ${totalIssuedValue.toFixed(2)}
+                  ${totalAmountExclVAT.toFixed(2)}
                 </Typography>
                 <Typography variant="body2">
-                  This represents the total value of all issued invoices.
+                  This represents the total amount of all invoices excluding VAT.
                 </Typography>
               </CardContent>
             </Card>
@@ -202,12 +158,12 @@ export default function InvoiceAnalysisDashboard({ fetchItems }) {
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Received Invoice Value</Typography>
+                <Typography variant="h6">Total Amount (Incl. VAT)</Typography>
                 <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
-                  ${totalReceivedValue.toFixed(2)}
+                  ${totalAmountInclVAT.toFixed(2)}
                 </Typography>
                 <Typography variant="body2">
-                  This represents the total value of all received invoices.
+                  This represents the total amount of all invoices including VAT.
                 </Typography>
               </CardContent>
             </Card>
@@ -215,12 +171,12 @@ export default function InvoiceAnalysisDashboard({ fetchItems }) {
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Top 5 Vendors by Invoice Value</Typography>
+                <Typography variant="h6">Top 5 Vendors by Total Amount (Excl. VAT)</Typography>
                 <ol>
                   {topVendors.map(invoice => (
-                    <li key={invoice.id}>
+                    <li key={invoice.invoiceId}>
                       <Typography variant="body2">
-                        {invoice.providerDetails} - Value: ${Number(invoice.contractValue).toFixed(2)}
+                        {invoice.providerDetails} - Value: ${Number(invoice.totalAmountExclVAT).toFixed(2)}
                       </Typography>
                     </li>
                   ))}
@@ -231,15 +187,12 @@ export default function InvoiceAnalysisDashboard({ fetchItems }) {
 
           {/* Chart Section */}
           <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={invoiceTypeChartOptions} />
+            <HighchartsReact highcharts={Highcharts} options={currencyChartOptions} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={invoiceCategoryChartOptions} />
+            <HighchartsReact highcharts={Highcharts} options={paymentTermsChartOptions} />
           </Grid>
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={paymentMethodChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={12}>
             <HighchartsReact highcharts={Highcharts} options={monthlyTrendsChartOptions} />
           </Grid>
         </Grid>

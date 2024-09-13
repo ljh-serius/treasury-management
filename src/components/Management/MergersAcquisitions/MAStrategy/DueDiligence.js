@@ -11,19 +11,33 @@ export const fieldsConfig = {
     startDate: { label: 'Start Date', type: 'date', faker: 'date.past' },
     endDate: { label: 'End Date', type: 'date', faker: 'date.past' },
     status: {
-        label: 'Status',
-        type: 'select',
-        options: [
-            { id: 'in-progress', label: 'In Progress' },
-            { id: 'completed', label: 'Completed' },
-            { id: 'on-hold', label: 'On Hold' },
-        ],
-        faker: 'random.arrayElement',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { id: 'in-progress', label: 'In Progress' },
+        { id: 'completed', label: 'Completed' },
+        { id: 'on-hold', label: 'On Hold' },
+      ],
+      faker: 'random.arrayElement',
     },
     approvedBy: { label: 'Approved By', type: 'text', faker: 'name.fullName' },
+    tags: {
+      label: 'Tags',
+      type: 'select',
+      options: [
+        { id: 'urgent', label: 'Urgent' },
+        { id: 'high-risk', label: 'High Risk' },
+        { id: 'low-risk', label: 'Low Risk' },
+        { id: 'pending', label: 'Pending' },
+        { id: 'completed', label: 'Completed' },
+      ],
+      multiple: true,
+      faker: 'random.arrayElement',
+    },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
-};
-
-export const entityName = 'Due Diligence';
-export const collectionName = 'due-diligence';
+  };
+  
+  export const entityName = 'Due Diligence';
+  export const collectionName = 'due-diligence';
+  

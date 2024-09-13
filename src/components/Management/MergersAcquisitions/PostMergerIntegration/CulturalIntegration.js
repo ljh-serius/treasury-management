@@ -10,18 +10,31 @@ export const fieldsConfig = {
     progress: { label: 'Progress (%)', type: 'number', faker: 'finance.amount' },
     responsiblePerson: { label: 'Responsible Person', type: 'text', faker: 'name.fullName' },
     status: {
-        label: 'Status',
-        type: 'select',
-        options: [
-            { id: 'not-started', label: 'Not Started' },
-            { id: 'in-progress', label: 'In Progress' },
-            { id: 'completed', label: 'Completed' },
-        ],
-        faker: 'random.arrayElement',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { id: 'not-started', label: 'Not Started' },
+        { id: 'in-progress', label: 'In Progress' },
+        { id: 'completed', label: 'Completed' },
+      ],
+      faker: 'random.arrayElement',
+    },
+    tags: {
+      label: 'Tags',
+      type: 'select',
+      options: [
+        { id: 'urgent', label: 'Urgent' },
+        { id: 'high-priority', label: 'High Priority' },
+        { id: 'in-progress', label: 'In Progress' },
+        { id: 'completed', label: 'Completed' },
+      ],
+      multiple: true,
+      faker: 'random.arrayElement',
     },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
-};
-
-export const entityName = 'Cultural Integration';
-export const collectionName = 'cultural-integration';
+  };
+  
+  export const entityName = 'Cultural Integration';
+  export const collectionName = 'cultural-integration';
+  

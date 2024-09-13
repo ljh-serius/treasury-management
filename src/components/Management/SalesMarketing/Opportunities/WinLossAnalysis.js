@@ -15,7 +15,13 @@ export const fieldsConfig = {
   tags: {
     label: 'Tags',
     type: 'select',
-    options: [],  
+    options: [
+      { id: 'high-value', label: 'High Value' },
+      { id: 'competitor-loss', label: 'Competitor Loss' },
+      { id: 'price-sensitive', label: 'Price Sensitive' },
+      { id: 'customer-retained', label: 'Customer Retained' },
+      { id: 'follow-up-needed', label: 'Follow-up Needed' },
+    ],
     multiple: true,
     faker: 'lorem.words',
   },

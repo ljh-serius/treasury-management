@@ -4,15 +4,22 @@ export const fieldsConfig = {
     stageOrder: { label: 'Stage Order', type: 'number', faker: 'datatype.number' },
     stageDescription: { label: 'Stage Description', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraph' },
     tags: {
-        label: 'Tags',
-        type: 'select',
-        options: [],
-        multiple: true,
-        faker: 'lorem.words',
+      label: 'Tags',
+      type: 'select',
+      options: [
+        { id: 'high-priority', label: 'High Priority' },
+        { id: 'in-progress', label: 'In Progress' },
+        { id: 'completed', label: 'Completed' },
+        { id: 'initial-stage', label: 'Initial Stage' },
+        { id: 'final-stage', label: 'Final Stage' },
+      ],
+      multiple: true,
+      faker: 'lorem.words',
     },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
-};
-
-export const entityName = 'Opportunity Stages';
-export const collectionName = 'oppurtunity-stages';
+  };
+  
+  export const entityName = 'Opportunity Stages';
+  export const collectionName = 'opportunity-stages';
+  
