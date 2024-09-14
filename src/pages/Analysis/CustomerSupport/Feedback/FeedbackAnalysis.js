@@ -1,119 +1,108 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Card, Grid, Typography, Chip } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-const FeedbackAnalysis = ({ fetchItems }) => {
-  const [data, setData] = useState([]);
+export default function FeedbackAnalysisDashboard({ fetchItems }) {
+  const [feedbackData, setFeedbackData] = useState([]);
+  const [totalFeedback, setTotalFeedback] = useState(0);
+  const [feedbackTypeDistribution, setFeedbackTypeDistribution] = useState([]);
+  const [feedbackTimeline, setFeedbackTimeline] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetchItems();
-      setData(response);
+    const fetchDataAsync = async () => {
+      setLoading(true);
+      const data = await fetchItems();
+      setFeedbackData(data);
+      processFeedbackData(data);
       setLoading(false);
-    }
-    fetchData();
+    };
+
+    fetchDataAsync();
   }, [fetchItems]);
 
-  if (loading) return <Typography>Loading...</Typography>;
+  const processFeedbackData = (data) => {
+    // Total Feedback
+    setTotalFeedback(data.length);
 
-  // KPIs
-  const totalFeedback = data.length;
-  const positiveFeedback = data.filter((item) => item.feedbackType === 'positive').length;
-  const negativeFeedback = data.filter((item) => item.feedbackType === 'negative').length;
-  const neutralFeedback = data.filter((item) => item.feedbackType === 'neutral').length;
-  const resolvedFeedback = data.filter((item) => item.resolutionStatus === 'resolved').length;
+    // Feedback Type Distribution for Pie Chart
+    const typeCounts = data.reduce((acc, feedback) => {
+      acc[feedback.feedbackType] = (acc[feedback.feedbackType] || 0) + 1;
+      return acc;
+    }, {});
+    setFeedbackTypeDistribution(Object.keys(typeCounts).map(key => ({
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+      y: typeCounts[key],
+    })));
 
-  // Highcharts options for feedback type distribution
-  const feedbackTypeOptions = {
-    chart: { type: 'pie' },
-    title: { text: 'Feedback Type Distribution' },
-    series: [
-      {
-        name: 'Feedback',
-        colorByPoint: true,
-        data: [
-          { name: 'Positive', y: positiveFeedback },
-          { name: 'Neutral', y: neutralFeedback },
-          { name: 'Negative', y: negativeFeedback },
-        ],
-      },
-    ],
+    // Feedback Timeline for Line Chart
+    const timelineData = data.map(feedback => ({
+      date: new Date(feedback.feedbackDate).getTime(),
+      label: `Feedback ${feedback.feedbackId.slice(-4)}`,
+    })).sort((a, b) => a.date - b.date);
+    setFeedbackTimeline(timelineData);
   };
 
-  // Highcharts options for resolution status distribution
-  const resolutionStatusOptions = {
+  // Highcharts options for Feedback Type Distribution
+  const feedbackTypeChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Resolution Status Distribution' },
-    series: [
-      {
-        name: 'Resolution Status',
-        colorByPoint: true,
-        data: [
-          { name: 'Resolved', y: resolvedFeedback },
-          { name: 'Unresolved', y: totalFeedback - resolvedFeedback },
-        ],
-      },
-    ],
+    title: { text: 'Feedback Type Distribution' },
+    series: [{
+      name: 'Feedback Type',
+      colorByPoint: true,
+      data: feedbackTypeDistribution,
+    }],
+  };
+
+  // Highcharts options for Feedback Timeline
+  const feedbackTimelineChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Feedback Entries Over Time' },
+    xAxis: { type: 'datetime', title: { text: 'Feedback Date' } },
+    yAxis: { title: { text: 'Feedback Entries' } },
+    series: [{
+      name: 'Feedback Entries',
+      data: feedbackTimeline.map(item => [item.date, 1]), // Y-axis is constant (1) since we're counting the occurrences
+    }],
   };
 
   return (
-    <Grid container spacing={4}>
-      {/* KPI Cards */}
-      <Grid item xs={12} md={3}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Feedback</Typography>
-          <Typography variant="h4">{totalFeedback}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={3}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Positive Feedback</Typography>
-          <Typography variant="h4">{positiveFeedback}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={3}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Negative Feedback</Typography>
-          <Typography variant="h4">{negativeFeedback}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={3}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Resolved Feedback</Typography>
-          <Typography variant="h4">{resolvedFeedback}</Typography>
-        </Card>
-      </Grid>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Box sx={{ padding: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Feedback Analysis Dashboard
+        </Typography>
 
-      {/* Highcharts */}
-      <Grid item xs={12} md={6}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={feedbackTypeOptions} />
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={resolutionStatusOptions} />
-        </Card>
-      </Grid>
+        <Grid container spacing={4}>
+          {/* KPIs Section */}
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Feedback</Typography>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                  {totalFeedback}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
 
-      {/* Tags */}
-      <Grid item xs={12}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Tags</Typography>
-          {data.map((record, index) => (
-            <div key={index}>
-              <Typography variant="subtitle1">{`Feedback ${index + 1}:`}</Typography>
-              {record.tags.map((tag) => (
-                <Chip key={tag.id} label={tag.label} style={{ margin: '5px' }} />
-              ))}
-            </div>
-          ))}
-        </Card>
-      </Grid>
-    </Grid>
+        <Grid container spacing={4} sx={{ marginTop: 4 }}>
+          {/* Feedback Type Distribution Chart */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={feedbackTypeChartOptions} />
+          </Grid>
+
+          {/* Feedback Timeline Chart */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={feedbackTimelineChartOptions} />
+          </Grid>
+        </Grid>
+      </Box>
+    </Container>
   );
-};
-
-export default FeedbackAnalysis;
+}

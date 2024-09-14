@@ -1,97 +1,101 @@
-import React, { useEffect, useState } from 'react';
-import { Grid, Typography, Card, CardContent, CircularProgress } from '@mui/material';
+import React, { useState, useEffect } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { Card, Grid, Typography, Chip } from '@mui/material';
 
 const AnnouncementsAnalytics = ({ fetchItems }) => {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function fetchData() {
-            const result = await fetchItems();
-            setData(result);
-            setLoading(false);
-        }
-        fetchData();
-    }, [fetchItems]);
-
-    if (loading) {
-        return <CircularProgress />;
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetchItems();
+      setData(response || []); // Ensure data is an array
+      setLoading(false);
     }
+    fetchData();
+  }, [fetchItems]);
 
-    // Calculate KPIs
-    const totalAnnouncements = data.length;
-    const urgentAnnouncements = data.filter(item => item.tags.includes('urgent')).length;
+  if (loading) return <Typography>Loading...</Typography>;
 
-    const announcementsByAudience = {
-        allEmployees: data.filter(item => item.audience === 'all-employees').length,
-        management: data.filter(item => item.audience === 'management').length,
-        departmentSpecific: data.filter(item => item.audience === 'department-specific').length,
-    };
+  // KPIs
+  const totalAnnouncements = data.length;
 
-    // Highcharts options
-    const audienceDistributionOptions = {
-        chart: { type: 'pie' },
-        title: { text: 'Audience Distribution' },
-        series: [
-            {
-                name: 'Audience',
-                colorByPoint: true,
-                data: [
-                    { name: 'All Employees', y: announcementsByAudience.allEmployees },
-                    { name: 'Management', y: announcementsByAudience.management },
-                    { name: 'Department Specific', y: announcementsByAudience.departmentSpecific },
-                ],
-            },
-        ],
-    };
+  // Grouping announcements by audience
+  const audienceCounts = data.reduce((acc, record) => {
+    acc[record.audience] = (acc[record.audience] || 0) + 1;
+    return acc;
+  }, {});
 
-    const urgentAnnouncementOptions = {
-        chart: { type: 'bar' },
-        title: { text: 'Urgent Announcements' },
-        xAxis: { categories: ['Urgent', 'Non-Urgent'] },
-        series: [
-            {
-                name: 'Urgency',
-                data: [urgentAnnouncements, totalAnnouncements - urgentAnnouncements],
-            },
-        ],
-    };
+  const audienceDistribution = Object.keys(audienceCounts).map(audience => ({
+    name: audience.charAt(0).toUpperCase() + audience.slice(1).replace(/-/g, ' '),
+    y: audienceCounts[audience],
+  }));
 
-    return (
-        <Grid container spacing={3}>
-            <Grid item xs={12}>
-                <Typography variant="h4">Announcements Analytics</Typography>
-            </Grid>
+  // Highcharts options for audience distribution
+  const audienceChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Audience Distribution of Announcements' },
+    series: [{
+      name: 'Audience',
+      colorByPoint: true,
+      data: audienceDistribution,
+    }],
+  };
 
-            <Grid item xs={12} md={4}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h6">Total Announcements</Typography>
-                        <Typography variant="h4">{totalAnnouncements}</Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
+  // Highcharts options for announcement frequency over time
+  const announcementDateChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Announcements Over Time' },
+    xAxis: {
+      categories: data.map(record => new Date(record.announcementDate).toLocaleDateString()),
+      title: { text: 'Announcement Date' },
+    },
+    yAxis: { title: { text: 'Number of Announcements' } },
+    series: [{
+      name: 'Announcements',
+      data: data.map(() => 1), // Each announcement counts as one
+    }],
+  };
 
-            <Grid item xs={12} md={4}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h6">Urgent Announcements</Typography>
-                        <Typography variant="h4">{urgentAnnouncements}</Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
+  return (
+    <Grid container spacing={4}>
+      {/* KPI Cards */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Total Announcements</Typography>
+          <Typography variant="h4">{totalAnnouncements}</Typography>
+        </Card>
+      </Grid>
 
-            <Grid item xs={12} md={6}>
-                <HighchartsReact highcharts={Highcharts} options={audienceDistributionOptions} />
-            </Grid>
+      {/* Highcharts */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={audienceChartOptions} />
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={12}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={announcementDateChartOptions} />
+        </Card>
+      </Grid>
 
-            <Grid item xs={12} md={6}>
-                <HighchartsReact highcharts={Highcharts} options={urgentAnnouncementOptions} />
-            </Grid>
-        </Grid>
-    );
+      {/* Tags */}
+      <Grid item xs={12}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Tags</Typography>
+          {data.map((record, index) => (
+            <div key={index}>
+              <Typography variant="subtitle1">{record.title}:</Typography>
+              {Array.isArray(record.tags) ? record.tags.map((tag, tagIndex) => (
+                <Chip key={tagIndex} label={tag.label} style={{ margin: '5px' }} />
+              )) : 'No Tags'}
+            </div>
+          ))}
+        </Card>
+      </Grid>
+    </Grid>
+  );
 };
 
 export default AnnouncementsAnalytics;

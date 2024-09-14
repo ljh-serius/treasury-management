@@ -71,15 +71,23 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
-const routesSequence = Object.keys(keyToLinkMap).map((link) => keyToLinkMap[link]);
+// Function to check if a route is composed of exactly 3 path segments
+const isThreeSegmentRoute = (route) => {
+  const segments = route.split('/').filter(Boolean); // Remove empty strings from split
+  return segments.length === 3; // Return true if exactly 3 segments
+};
 
+// Filter out only the 3-segment routes
+const validRoutes = Object.keys(keyToLinkMap)
+  .map((link) => keyToLinkMap[link])
+  .filter(isThreeSegmentRoute);
 
 const Dashboard = ({ children }) => {
   const theme = useTheme();
   const { language, toggleLanguage } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [open, setOpen] = useState(true);
   const [currentAnalysisPage, setCurrentAnalysisPage] = useState(0);
 
@@ -115,38 +123,33 @@ const Dashboard = ({ children }) => {
   };
 
   const handleNextAnalysis = () => {
-    const currentIndex = routesSequence.indexOf(location.pathname);
+    const currentIndex = validRoutes.indexOf(location.pathname);
     if (currentIndex !== -1) {
-      const nextIndex = (currentIndex + 1) % routesSequence.length; // Circular navigation
-      navigate(routesSequence[nextIndex]);
+      const nextIndex = (currentIndex + 1) % validRoutes.length; // Circular navigation
+      navigate(validRoutes[nextIndex]);
     }
   };
 
   const handlePreviousAnalysis = () => {
-    const currentIndex = routesSequence.indexOf(location.pathname);
+    const currentIndex = validRoutes.indexOf(location.pathname);
     if (currentIndex !== -1) {
-      const prevIndex = (currentIndex - 1 + routesSequence.length) % routesSequence.length; // Circular navigation
-      navigate(routesSequence[prevIndex]);
+      const prevIndex = (currentIndex - 1 + validRoutes.length) % validRoutes.length; // Circular navigation
+      navigate(validRoutes[prevIndex]);
     }
   };
 
-  // Add event listeners for TAB, SHIFT + TAB, and Control + Enter
+  // Add event listeners for ArrowRight, ArrowLeft, and Control + Enter
   useEffect(() => {
     const handleKeyDown = (event) => {
-
-      console.log(event.key)
-      if (event.ctrlKey || event.shiftKey) {
-        if (event.key == 'ArrowLeft') {
-          // SHIFT + TAB for Previous
-          event.preventDefault(); // Prevent the default tabbing behavior
+      if (event.shiftKey) {
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault(); // Prevent the default arrow behavior
           handlePreviousAnalysis();
-        } else if (event.key == 'ArrowRight'){
-          // TAB for Next
-          event.preventDefault(); // Prevent the default tabbing behavior
+        } else if (event.key === 'ArrowRight') {
+          event.preventDefault(); // Prevent the default arrow behavior
           handleNextAnalysis();
         }
       } else if (event.key === 'Enter' && event.ctrlKey) {
-        // Control + Enter to navigate to /summary
         event.preventDefault();
         navigate('/summary');
       }
@@ -164,7 +167,7 @@ const Dashboard = ({ children }) => {
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar position="fixed" open={open}>
-        <Toolbar >
+        <Toolbar>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -174,8 +177,8 @@ const Dashboard = ({ children }) => {
           >
             <MenuIcon />
           </IconButton>
-          <Container 
-            sx={{ display: 'flex', justifyContent:"end",  mr: 0 }}
+          <Container
+            sx={{ display: 'flex', justifyContent: "end", mr: 0 }}
           >
             <Button
               variant="outlined"
@@ -185,7 +188,7 @@ const Dashboard = ({ children }) => {
             >
               {showAnalytics ? translate("Show Data", language) : translate("Show Analysis", language)}
             </Button>
-            {showAnalytics && 
+            {showAnalytics &&
               <>
                 <Button
                   sx={{ mr: 2 }}
@@ -205,26 +208,20 @@ const Dashboard = ({ children }) => {
                 </Button>
               </>
             }
-             <Button
-            variant="outlined"
-            color="inherit"
-            onClick={toggleLanguage}
-          >
-            {translate("Switch Language", language)}
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={toggleLanguage}
+            >
+              {translate("Switch Language", language)}
             </Button>
 
           </Container>
         </Toolbar>
       </AppBar>
-        {/* <ListItem key="logout" disablePadding onClick={handleLogout}>
-            <ListItemButton>
-                <ListItemText primary={<Typography variant="body1">Logout</Typography>} />
-            </ListItemButton>
-        </ListItem>
-      </Drawer> */}
       <DrawerDashboard setShowAnalytics={setShowAnalytics} setCurrentAnalysisPage={setCurrentAnalysisPage} />
 
-      <Main open={open} sx={{ marginLeft: '300px'}}>
+      <Main open={open} sx={{ marginLeft: '300px' }}>
         <Box>
           {React.cloneElement(children, { showAnalytics, currentAnalysisPage })}
         </Box>

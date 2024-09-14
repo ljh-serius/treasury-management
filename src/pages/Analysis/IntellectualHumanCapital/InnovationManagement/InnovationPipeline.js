@@ -1,108 +1,107 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
+import { Card, Grid, Typography, Chip } from '@mui/material';
 
-export default function InnovationPipelineDashboard({ fetchItems }) {
-  const [pipelineData, setPipelineData] = useState([]);
-  const [totalPipelines, setTotalPipelines] = useState(0);
-  const [progressDistribution, setProgressDistribution] = useState([]);
-  const [stageTrends, setStageTrends] = useState([]);
+const InnovationPipelineAnalytics = ({ fetchItems }) => {
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const data = await fetchItems();
-      setPipelineData(data);
-      processPipelineData(data);
+    async function fetchData() {
+      const response = await fetchItems();
+      setData(response || []); // Ensure data is an array
       setLoading(false);
-    };
-
+    }
     fetchData();
   }, [fetchItems]);
 
-  const processPipelineData = (data) => {
-    // Total Pipelines
-    setTotalPipelines(data.length);
+  if (loading) return <Typography>Loading...</Typography>;
 
-    // Progress Distribution for Pie Chart
-    const progressCounts = data.reduce((acc, pipeline) => {
-      acc[pipeline.stage] = (acc[pipeline.stage] || 0) + 1;
-      return acc;
-    }, {});
-    setProgressDistribution(Object.keys(progressCounts).map(key => ({
-      name: key.replace('-', ' ').toUpperCase(),
-      y: progressCounts[key],
-    })));
+  // KPIs
+  const totalIdeas = data.length;
+  const avgProgress = totalIdeas > 0
+    ? data.reduce((sum, record) => sum + (Number(record.progressPercentage) || 0), 0) / totalIdeas
+    : 0;
 
-    // Stage Progress Trends for Line Chart
-    const trendsData = data.map(pipeline => ({
-      date: new Date(pipeline.expectedCompletionDate).getTime(),
-      progress: pipeline.progressPercentage,
-    })).sort((a, b) => a.date - b.date);
-    setStageTrends(trendsData);
-  };
+  // Count ideas by stage
+  const stageCounts = data.reduce((acc, record) => {
+    acc[record.stage] = (acc[record.stage] || 0) + 1;
+    return acc;
+  }, {});
 
-  // Highcharts options for Progress Distribution
-  const progressChartOptions = {
+  const stageDistribution = Object.keys(stageCounts).map(stage => ({
+    name: stage.replace(/-/g, ' ').replace(/\b\w/g, char => char.toUpperCase()),
+    y: stageCounts[stage],
+  }));
+
+  // Highcharts options for stage distribution
+  const stageDistributionChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Pipeline Progress Distribution' },
+    title: { text: 'Stage Distribution in Innovation Pipeline' },
     series: [{
-      name: 'Stage',
+      name: 'Stages',
       colorByPoint: true,
-      data: progressDistribution,
-    }],
+      data: stageDistribution,
+    }]
   };
 
-  // Highcharts options for Stage Progress Trends
-  const stageTrendsChartOptions = {
-    chart: { type: 'line' },
-    title: { text: 'Stage Completion Trends' },
-    xAxis: { type: 'datetime', title: { text: 'Expected Completion Date' } },
-    yAxis: { title: { text: 'Progress Percentage' } },
+  // Highcharts options for progress tracking
+  const progressChartOptions = {
+    chart: { type: 'bar' },
+    title: { text: 'Progress by Idea' },
+    xAxis: { categories: data.map(record => record.ideaTitle || 'Unknown') },
+    yAxis: { title: { text: 'Progress (%)' } },
     series: [{
-      name: 'Progress',
-      data: stageTrends.map(item => [item.date, item.progress]),
-    }],
+      name: 'Progress (%)',
+      data: data.map(record => Number(record.progressPercentage) || 0),
+    }]
   };
 
   return (
-    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
-      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
-      <Box sx={{ padding: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Innovation Pipeline Dashboard
-        </Typography>
+    <Grid container spacing={4}>
+      {/* KPI Cards */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Total Ideas in Pipeline</Typography>
+          <Typography variant="h4">{totalIdeas}</Typography>
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Average Progress (%)</Typography>
+          <Typography variant="h4">{avgProgress.toFixed(2)}%</Typography>
+        </Card>
+      </Grid>
 
-        <Grid container spacing={4}>
-          {/* KPIs Section */}
-          <Grid item xs={12} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Total Pipelines</Typography>
-                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  {totalPipelines}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+      {/* Highcharts */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={stageDistributionChartOptions} />
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={progressChartOptions} />
+        </Card>
+      </Grid>
 
-        <Grid container spacing={4} sx={{ marginTop: 4 }}>
-          {/* Progress Distribution Chart */}
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={progressChartOptions} />
-          </Grid>
-
-          {/* Stage Completion Trends Chart */}
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={stageTrendsChartOptions} />
-          </Grid>
-        </Grid>
-      </Box>
-    </Container>
+      {/* Tags */}
+      <Grid item xs={12}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Tags</Typography>
+          {data.map((record, index) => (
+            <div key={index}>
+              <Typography variant="subtitle1">{record.ideaTitle}:</Typography>
+              {Array.isArray(record.tags) ? record.tags.map((tag, tagIndex) => (
+                <Chip key={tagIndex} label={tag.label} style={{ margin: '5px' }} />
+              )) : 'No Tags'}
+            </div>
+          ))}
+        </Card>
+      </Grid>
+    </Grid>
   );
-}
+};
+
+export default InnovationPipelineAnalytics;

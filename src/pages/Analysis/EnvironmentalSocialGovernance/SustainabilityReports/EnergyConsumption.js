@@ -1,121 +1,130 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Card, Grid, Typography, Chip } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-const EnergyConsumptionAnalytics = ({ fetchItems }) => {
-  const [data, setData] = useState([]);
+export default function EnergyConsumptionDashboard({ fetchItems }) {
+  const [energyData, setEnergyData] = useState([]);
+  const [totalConsumption, setTotalConsumption] = useState(0);
+  const [totalCost, setTotalCost] = useState(0);
+  const [energyTypeDistribution, setEnergyTypeDistribution] = useState([]);
+  const [reductionTrends, setReductionTrends] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetchItems();
-      setData(response);
+    const fetchDataAsync = async () => {
+      setLoading(true);
+      const data = await fetchItems();
+      setEnergyData(data);
+      processEnergyData(data);
       setLoading(false);
-    }
-    fetchData();
+    };
+
+    fetchDataAsync();
   }, [fetchItems]);
 
-  if (loading) return <Typography>Loading...</Typography>;
+  const processEnergyData = (data) => {
+    // Total Energy Consumption and Cost
+    const totalEnergy = data.reduce((acc, record) => acc + Number(record.totalConsumption), 0);
+    const totalCostAmount = data.reduce((acc, record) => acc + Number(record.cost), 0);
+    setTotalConsumption(totalEnergy);
+    setTotalCost(totalCostAmount);
 
-  // Calculate KPIs
-  const totalConsumption = data.reduce((sum, record) => sum + record.totalConsumption, 0);
-  const totalCost = data.reduce((sum, record) => sum + record.cost, 0);
-  const avgReductionTarget = data.reduce((sum, record) => sum + record.reductionTarget, 0) / data.length;
-  const avgAchievedReduction = data.reduce((sum, record) => sum + record.achievedReduction, 0) / data.length;
+    // Energy Type Distribution for Pie Chart
+    const energyTypeCounts = data.reduce((acc, record) => {
+      acc[record.energyType] = (acc[record.energyType] || 0) + 1;
+      return acc;
+    }, {});
+    setEnergyTypeDistribution(Object.keys(energyTypeCounts).map(key => ({
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+      y: energyTypeCounts[key],
+    })));
 
-  // Highcharts options for energy consumption over time
-  const consumptionChartOptions = {
-    title: { text: 'Energy Consumption Over Time (MWh)' },
-    xAxis: { categories: data.map((record) => record.year) },
-    yAxis: { title: { text: 'Consumption (MWh)' } },
-    series: [
-      { name: 'Total Consumption', data: data.map((record) => record.totalConsumption) },
-    ],
+    // Reduction Trends (Achieved vs Target) for Line Chart
+    const reductionData = data.map(record => ({
+      date: new Date(record.year).getTime(),
+      target: Number(record.reductionTarget),
+      achieved: Number(record.achievedReduction),
+    }));
+    setReductionTrends(reductionData);
   };
 
-  // Highcharts options for cost of energy over time
-  const costChartOptions = {
-    title: { text: 'Energy Cost Over Time ($)' },
-    xAxis: { categories: data.map((record) => record.year) },
-    yAxis: { title: { text: 'Cost ($)' } },
-    series: [
-      { name: 'Total Cost', data: data.map((record) => record.cost) },
-    ],
+  // Highcharts options for Energy Type Distribution
+  const energyTypeChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Energy Type Distribution' },
+    series: [{
+      name: 'Energy Types',
+      colorByPoint: true,
+      data: energyTypeDistribution,
+    }],
   };
 
-  // Highcharts options for achieved vs target reduction
-  const reductionChartOptions = {
-    title: { text: 'Reduction Target vs Achieved Reduction (%)' },
-    xAxis: { categories: data.map((record) => record.year) },
+  // Highcharts options for Reduction Trends (Achieved vs Target)
+  const reductionTrendChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Reduction Target vs Achieved' },
+    xAxis: { type: 'datetime', title: { text: 'Year' } },
     yAxis: { title: { text: 'Reduction (%)' } },
     series: [
-      { name: 'Reduction Target', data: data.map((record) => record.reductionTarget) },
-      { name: 'Achieved Reduction', data: data.map((record) => record.achievedReduction) },
+      {
+        name: 'Target Reduction (%)',
+        data: reductionTrends.map(item => [item.date, item.target]),
+      },
+      {
+        name: 'Achieved Reduction (%)',
+        data: reductionTrends.map(item => [item.date, item.achieved]),
+      },
     ],
   };
 
   return (
-    <Grid container spacing={4}>
-      {/* KPI Cards */}
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Consumption (MWh)</Typography>
-          <Typography variant="h4">{totalConsumption.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Cost ($)</Typography>
-          <Typography variant="h4">{totalCost.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Average Reduction Target (%)</Typography>
-          <Typography variant="h4">{avgReductionTarget.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Average Achieved Reduction (%)</Typography>
-          <Typography variant="h4">{avgAchievedReduction.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Box sx={{ padding: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Energy Consumption Dashboard
+        </Typography>
 
-      {/* Highcharts */}
-      <Grid item xs={12}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={consumptionChartOptions} />
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={costChartOptions} />
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={reductionChartOptions} />
-        </Card>
-      </Grid>
+        <Grid container spacing={4}>
+          {/* KPIs Section */}
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Consumption (MWh)</Typography>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                  {totalConsumption.toFixed(2)}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
 
-      {/* Tags */}
-      <Grid item xs={12}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Tags</Typography>
-          {data.map((record, index) => (
-            <div key={index}>
-              <Typography variant="subtitle1">{record.year}:</Typography>
-              {record.tags.map((tag) => (
-                <Chip key={tag.id} label={tag.label} style={{ margin: '5px' }} />
-              ))}
-            </div>
-          ))}
-        </Card>
-      </Grid>
-    </Grid>
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Cost ($)</Typography>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  {totalCost.toFixed(2)}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        <Grid container spacing={4} sx={{ marginTop: 4 }}>
+          {/* Energy Type Distribution Chart */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={energyTypeChartOptions} />
+          </Grid>
+
+          {/* Reduction Trends Chart */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={reductionTrendChartOptions} />
+          </Grid>
+        </Grid>
+      </Box>
+    </Container>
   );
-};
-
-export default EnergyConsumptionAnalytics;
+}

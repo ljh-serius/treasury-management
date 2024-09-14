@@ -1,55 +1,50 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
+import { Card, Grid, Typography, Chip } from '@mui/material';
 
-export default function SynergyTrackingDashboard({ fetchItems }) {
-  const [synergyData, setSynergyData] = useState([]);
-  const [totalSynergies, setTotalSynergies] = useState(0);
-  const [statusDistribution, setStatusDistribution] = useState([]);
-  const [synergyValueTrends, setSynergyValueTrends] = useState([]);
-  const [achievedSynergiesTrends, setAchievedSynergiesTrends] = useState([]);
+const SynergyTrackingAnalytics = ({ fetchItems }) => {
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const data = await fetchItems();
-      setSynergyData(data);
-      processSynergyData(data);
+    async function fetchData() {
+      const response = await fetchItems();
+      setData(response || []); // Ensure data is an array
       setLoading(false);
-    };
-
+    }
     fetchData();
   }, [fetchItems]);
 
-  const processSynergyData = (data) => {
-    // Total Synergies
-    setTotalSynergies(data.length);
+  if (loading) return <Typography>Loading...</Typography>;
 
-    // Status Distribution for Pie Chart
-    const statusCounts = data.reduce((acc, synergy) => {
-      acc[synergy.status] = (acc[synergy.status] || 0) + 1;
-      return acc;
-    }, {});
-    setStatusDistribution(Object.keys(statusCounts).map(key => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),
-      y: statusCounts[key],
-    })));
+  // KPIs
+  const totalSynergyValue = data.reduce((sum, record) => sum + Number(record.synergyValue || 0), 0);
+  const averageSynergyValue = (totalSynergyValue / (data.length || 1)).toFixed(2);
 
-    // Synergy Value Trends for Line Chart
-    const valueData = data.map(synergy => ({
-      date: new Date(synergy.trackingDate).getTime(),
-      value: synergy.synergyValue,
-    })).sort((a, b) => a.date - b.date);
-    setSynergyValueTrends(valueData);
+  const statusCounts = data.reduce((acc, record) => {
+    acc[record.status] = (acc[record.status] || 0) + 1;
+    return acc;
+  }, {});
 
-    // Achieved Synergies Trends for Line Chart
-    const achievedData = data.map(synergy => ({
-      date: new Date(synergy.trackingDate).getTime(),
-      achieved: synergy.achievedSynergies.length,
-    })).sort((a, b) => a.date - b.date);
-    setAchievedSynergiesTrends(achievedData);
+  const statusDistribution = Object.keys(statusCounts).map(status => ({
+    name: status.charAt(0).toUpperCase() + status.slice(1),
+    y: statusCounts[status],
+  }));
+
+  // Highcharts options for Synergy Value Over Time
+  const synergyValueChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Synergy Value Over Time' },
+    xAxis: {
+      categories: data.map(record => new Date(record.trackingDate).getFullYear()),
+      title: { text: 'Year' }
+    },
+    yAxis: { title: { text: 'Synergy Value (USD)' } },
+    series: [{
+      name: 'Synergy Value',
+      data: data.map(record => record.synergyValue || 0),
+    }],
   };
 
   // Highcharts options for Status Distribution
@@ -63,71 +58,58 @@ export default function SynergyTrackingDashboard({ fetchItems }) {
     }],
   };
 
-  // Highcharts options for Synergy Value Trends
-  const synergyValueChartOptions = {
-    chart: { type: 'line' },
-    title: { text: 'Synergy Value Trends Over Time' },
-    xAxis: { type: 'datetime', title: { text: 'Tracking Date' } },
-    yAxis: { title: { text: 'Synergy Value' } },
-    series: [{
-      name: 'Synergy Value',
-      data: synergyValueTrends.map(item => [item.date, item.value]),
-    }],
-  };
-
-  // Highcharts options for Achieved Synergies Trends
-  const achievedSynergiesChartOptions = {
-    chart: { type: 'line' },
-    title: { text: 'Achieved Synergies Trends Over Time' },
-    xAxis: { type: 'datetime', title: { text: 'Tracking Date' } },
-    yAxis: { title: { text: 'Achieved Synergies' } },
-    series: [{
-      name: 'Achieved Synergies',
-      data: achievedSynergiesTrends.map(item => [item.date, item.achieved]),
-    }],
-  };
-
   return (
-    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
-      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
-      <Box sx={{ padding: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Synergy Tracking Dashboard
-        </Typography>
+    <Grid container spacing={4}>
+      {/* KPI Cards */}
+      <Grid item xs={12} md={4}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Total Synergy Value (USD)</Typography>
+          <Typography variant="h4">${totalSynergyValue.toFixed(2)}</Typography>
+        </Card>
+      </Grid>
 
-        <Grid container spacing={4}>
-          {/* KPIs Section */}
-          <Grid item xs={12} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Total Synergies</Typography>
-                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  {totalSynergies}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+      <Grid item xs={12} md={4}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Average Synergy Value (USD)</Typography>
+          <Typography variant="h4">${averageSynergyValue}</Typography>
+        </Card>
+      </Grid>
 
-        <Grid container spacing={4} sx={{ marginTop: 4 }}>
-          {/* Status Distribution Chart */}
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
-          </Grid>
+      <Grid item xs={12} md={4}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Total Synergies Tracked</Typography>
+          <Typography variant="h4">{data.length}</Typography>
+        </Card>
+      </Grid>
 
-          {/* Synergy Value Trends Chart */}
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={synergyValueChartOptions} />
-          </Grid>
+      {/* Highcharts */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={synergyValueChartOptions} />
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
+        </Card>
+      </Grid>
 
-          {/* Achieved Synergies Trends Chart */}
-          <Grid item xs={12} md={6} sx={{ marginTop: 4 }}>
-            <HighchartsReact highcharts={Highcharts} options={achievedSynergiesChartOptions} />
-          </Grid>
-        </Grid>
-      </Box>
-    </Container>
+      {/* Tags */}
+      <Grid item xs={12}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Synergy Tags</Typography>
+          {data.map((record, index) => (
+            <div key={index}>
+              <Typography variant="subtitle1">{record.expectedSynergies}:</Typography>
+              {(record.tags || []).map((tag, idx) => (
+                <Chip key={idx} label={tag.label || tag} style={{ margin: '5px' }} />
+              ))}
+            </div>
+          ))}
+        </Card>
+      </Grid>
+    </Grid>
   );
-}
+};
+
+export default SynergyTrackingAnalytics;

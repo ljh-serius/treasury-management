@@ -1,108 +1,101 @@
-import React, { useEffect, useState } from 'react';
-import { Grid, Typography, Card, CardContent, CircularProgress } from '@mui/material';
+import React, { useState, useEffect } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { Card, Grid, Typography, Chip } from '@mui/material';
 
 const MediaRelationsAnalytics = ({ fetchItems }) => {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function fetchData() {
-            const result = await fetchItems();
-            setData(result);
-            setLoading(false);
-        }
-        fetchData();
-    }, [fetchItems]);
-
-    if (loading) {
-        return <CircularProgress />;
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetchItems();
+      setData(response || []); // Ensure data is an array
+      setLoading(false);
     }
+    fetchData();
+  }, [fetchItems]);
 
-    // Calculate KPIs
-    const totalRelations = data.length;
-    const urgentRelations = data.filter(item => item.tags.includes('urgent')).length;
-    const completedRelations = data.filter(item => item.tags.includes('completed')).length;
+  if (loading) return <Typography>Loading...</Typography>;
 
-    // Highcharts options
-    const methodDistributionOptions = {
-        chart: { type: 'pie' },
-        title: { text: 'Communication Method Distribution' },
-        series: [
-            {
-                name: 'Methods',
-                colorByPoint: true,
-                data: [
-                    { name: 'Email', y: data.filter(item => item.communicationMethod === 'email').length },
-                    { name: 'Phone Call', y: data.filter(item => item.communicationMethod === 'phone-call').length },
-                    { name: 'Meeting', y: data.filter(item => item.communicationMethod === 'meeting').length },
-                    { name: 'Press Conference', y: data.filter(item => item.communicationMethod === 'press-conference').length },
-                ],
-            },
-        ],
-    };
+  // KPIs
+  const totalRelations = data.length;
 
-    const outcomeCounts = data.reduce((acc, item) => {
-        const outcome = item.outcome;
-        acc[outcome] = (acc[outcome] || 0) + 1;
-        return acc;
-    }, {});
+  // Communication Method Distribution
+  const communicationCount = data.reduce((acc, record) => {
+    acc[record.communicationMethod] = (acc[record.communicationMethod] || 0) + 1;
+    return acc;
+  }, {});
 
-    const outcomeOptions = {
-        chart: { type: 'column' },
-        title: { text: 'Outcomes Distribution' },
-        xAxis: { categories: Object.keys(outcomeCounts) },
-        series: [
-            {
-                name: 'Outcomes',
-                data: Object.values(outcomeCounts),
-            },
-        ],
-    };
+  const communicationMethodDistribution = Object.keys(communicationCount).map(method => ({
+    name: method.charAt(0).toUpperCase() + method.slice(1).replace(/-/g, ' '),
+    y: communicationCount[method],
+  }));
 
-    return (
-        <Grid container spacing={3}>
-            <Grid item xs={12}>
-                <Typography variant="h4">Media Relations Analytics</Typography>
-            </Grid>
+  // Highcharts options for Communication Method Distribution
+  const communicationMethodChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Communication Methods' },
+    series: [{
+      name: 'Methods',
+      colorByPoint: true,
+      data: communicationMethodDistribution,
+    }],
+  };
 
-            <Grid item xs={12} md={4}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h6">Total Relations</Typography>
-                        <Typography variant="h4">{totalRelations}</Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
+  // Highcharts options for Communications Over Time
+  const communicationTrendsChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Communications Over Time' },
+    xAxis: {
+      categories: data.map(record => new Date(record.communicationDate).toLocaleDateString()),
+      title: { text: 'Date' },
+    },
+    yAxis: { title: { text: 'Number of Communications' } },
+    series: [{
+      name: 'Communications',
+      data: data.map(() => 1), // Each communication counts as one
+    }],
+  };
 
-            <Grid item xs={12} md={4}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h6">Urgent Relations</Typography>
-                        <Typography variant="h4">{urgentRelations}</Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
+  return (
+    <Grid container spacing={4}>
+      {/* KPI Cards */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Total Media Relations</Typography>
+          <Typography variant="h4">{totalRelations}</Typography>
+        </Card>
+      </Grid>
 
-            <Grid item xs={12} md={4}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h6">Completed Relations</Typography>
-                        <Typography variant="h4">{completedRelations}</Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
+      {/* Highcharts */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={communicationMethodChartOptions} />
+        </Card>
+      </Grid>
+      <Grid item xs={12}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={communicationTrendsChartOptions} />
+        </Card>
+      </Grid>
 
-            <Grid item xs={12} md={6}>
-                <HighchartsReact highcharts={Highcharts} options={methodDistributionOptions} />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-                <HighchartsReact highcharts={Highcharts} options={outcomeOptions} />
-            </Grid>
-        </Grid>
-    );
+      {/* Tags */}
+      <Grid item xs={12}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Tags</Typography>
+          {data.map((record, index) => (
+            <div key={index}>
+              <Typography variant="subtitle1">{record.mediaOutlet}:</Typography>
+              {Array.isArray(record.tags) ? record.tags.map((tag, tagIndex) => (
+                <Chip key={tagIndex} label={tag.label} style={{ margin: '5px' }} />
+              )) : 'No Tags'}
+            </div>
+          ))}
+        </Card>
+      </Grid>
+    </Grid>
+  );
 };
 
 export default MediaRelationsAnalytics;

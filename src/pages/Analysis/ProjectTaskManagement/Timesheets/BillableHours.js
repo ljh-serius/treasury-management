@@ -27,11 +27,11 @@ export default function BillableHoursDashboard({ fetchItems }) {
     // Total Billable Hours
     const totalHours = data.reduce((acc, item) => acc + item.billableHours, 0);
     setTotalBillableHours(totalHours);
-
+  
     // Invoiced Hours
     const invoiced = data.filter(item => item.invoiceStatus === 'invoiced').reduce((acc, item) => acc + item.billableHours, 0);
     setInvoicedHours(invoiced);
-
+  
     // Invoice Status Distribution for Pie Chart
     const statusCounts = data.reduce((acc, item) => {
       acc[item.invoiceStatus] = (acc[item.invoiceStatus] || 0) + 1;
@@ -41,26 +41,15 @@ export default function BillableHoursDashboard({ fetchItems }) {
       name: key.charAt(0).toUpperCase() + key.slice(1),
       y: statusCounts[key],
     })));
-
+  
     // Billing Trends for Line Chart
     const trendData = data.map(item => ({
-      date: new Date(item.createdDate).getTime(),
-      amount: item.totalAmount,
+      date: new Date(item.createdDate).getTime(), // Ensure date is a timestamp
+      amount: parseFloat(item.totalAmount), // Ensure amount is a number
     })).sort((a, b) => a.date - b.date);
     setBillingTrends(trendData);
   };
-
-  // Highcharts options for Invoice Status Distribution
-  const statusChartOptions = {
-    chart: { type: 'pie' },
-    title: { text: 'Invoice Status Distribution' },
-    series: [{
-      name: 'Invoice Status',
-      colorByPoint: true,
-      data: invoiceStatusDistribution,
-    }],
-  };
-
+  
   // Highcharts options for Billing Trends
   const billingTrendChartOptions = {
     chart: { type: 'line' },
@@ -69,7 +58,17 @@ export default function BillableHoursDashboard({ fetchItems }) {
     yAxis: { title: { text: 'Total Amount' } },
     series: [{
       name: 'Total Amount',
-      data: billingTrends.map(item => [item.date, item.amount]),
+      data: billingTrends.map(item => [item.date, item.amount]), // Properly formatted date and amount
+    }],
+  };
+  // Highcharts options for Invoice Status Distribution
+  const statusChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Invoice Status Distribution' },
+    series: [{
+      name: 'Invoice Status',
+      colorByPoint: true,
+      data: invoiceStatusDistribution,
     }],
   };
 

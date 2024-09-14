@@ -1,29 +1,27 @@
 export const fieldsConfig = {
-    applicantId: { label: 'Applicant ID', type: 'text', faker: 'datatype.uuid' },
-    jobId: { label: 'Job ID', type: 'text', faker: 'datatype.uuid' },
+    applicationId: { label: 'Application ID', type: 'text', faker: 'datatype.uuid' },
+    jobTitle: { label: 'Job Title', type: 'text', faker: 'name.jobTitle' },
     applicantName: { label: 'Applicant Name', type: 'text', faker: 'name.fullName' },
     applicationDate: { label: 'Application Date', type: 'date', faker: 'date.past' },
-    interviewStatus: {
-        label: 'Interview Status',
+    status: {
+        label: 'Application Status',
         type: 'select',
         options: [
-            { id: 'pending', label: 'Pending' },
-            { id: 'scheduled', label: 'Scheduled' },
-            { id: 'completed', label: 'Completed' },
+            { id: 'applied', label: 'Applied' },
+            { id: 'interview_scheduled', label: 'Interview Scheduled' },
             { id: 'rejected', label: 'Rejected' },
+            { id: 'hired', label: 'Hired' },
         ],
         faker: 'random.arrayElement',
     },
-    notes: { label: 'Notes', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraph' },
     tags: {
         label: 'Tags',
         type: 'select',
         options: [
             { id: 'urgent', label: 'Urgent' },
-            { id: 'review', label: 'Review' },
-            { id: 'important', label: 'Important' },
-            { id: 'completed', label: 'Completed' },
-            { id: 'follow-up', label: 'Follow-Up' },
+            { id: 'qualified', label: 'Qualified' },
+            { id: 'rejected', label: 'Rejected' },
+            { id: 'under_review', label: 'Under Review' },
         ],
         multiple: true,
         faker: 'random.arrayElement',
@@ -34,6 +32,5 @@ export const fieldsConfig = {
     lastModifiedDate: { label: 'Last Modified Date', type: 'date', faker: 'date.recent' },
 };
 
-export const entityName = 'Application Tracking';
+export const entityName = 'Applicant Tracking';
 export const collectionName = 'applicant-tracking';
-

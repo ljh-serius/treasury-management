@@ -25,7 +25,7 @@ export default function PurchaseOrdersDashboard({ fetchItems }) {
   const processOrderData = (data) => {
     // Total Orders
     setTotalOrders(data.length);
-
+  
     // Quantity Distribution for Pie Chart
     const quantityCounts = data.reduce((acc, order) => {
       acc[order.quantity] = (acc[order.quantity] || 0) + 1;
@@ -35,26 +35,15 @@ export default function PurchaseOrdersDashboard({ fetchItems }) {
       name: `Quantity: ${key}`,
       y: quantityCounts[key],
     })));
-
+  
     // Total Amount Trends for Line Chart
     const trendsData = data.map(order => ({
-      date: new Date(order.orderDate).getTime(),
-      amount: order.totalAmount,
+      date: new Date(order.orderDate).getTime(), // Convert date to timestamp
+      amount: parseFloat(order.totalAmount), // Ensure totalAmount is a number
     })).sort((a, b) => a.date - b.date);
     setTotalAmountTrends(trendsData);
   };
-
-  // Highcharts options for Quantity Distribution
-  const quantityChartOptions = {
-    chart: { type: 'pie' },
-    title: { text: 'Quantity Distribution' },
-    series: [{
-      name: 'Quantity',
-      colorByPoint: true,
-      data: quantityDistribution,
-    }],
-  };
-
+  
   // Highcharts options for Total Amount Trends
   const totalAmountChartOptions = {
     chart: { type: 'line' },
@@ -63,7 +52,18 @@ export default function PurchaseOrdersDashboard({ fetchItems }) {
     yAxis: { title: { text: 'Total Amount' } },
     series: [{
       name: 'Total Amount',
-      data: totalAmountTrends.map(item => [item.date, item.amount]),
+      data: totalAmountTrends.map(item => [item.date, item.amount]), // Properly formatted date and amount
+    }],
+  };
+  
+  // Highcharts options for Quantity Distribution
+  const quantityChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Quantity Distribution' },
+    series: [{
+      name: 'Quantity',
+      colorByPoint: true,
+      data: quantityDistribution,
     }],
   };
 

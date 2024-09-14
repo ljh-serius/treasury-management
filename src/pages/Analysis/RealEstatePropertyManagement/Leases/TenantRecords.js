@@ -3,16 +3,17 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function TenantRecordsDashboard({ fetchItems }) {
+export default function TenantRecordsAnalytics({ fetchItems }) {
   const [tenantData, setTenantData] = useState([]);
   const [totalTenants, setTotalTenants] = useState(0);
-  const [upcomingExpirations, setUpcomingExpirations] = useState(0);
-  const [rentTrends, setRentTrends] = useState([]);
+  const [expiringLeases, setExpiringLeases] = useState(0);
+  const [totalRent, setTotalRent] = useState(0);
   const [tagDistribution, setTagDistribution] = useState([]);
+  const [rentTrends, setRentTrends] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDataAsync = async () => {
+    const fetchData = async () => {
       setLoading(true);
       const data = await fetchItems();
       setTenantData(data);
@@ -20,29 +21,35 @@ export default function TenantRecordsDashboard({ fetchItems }) {
       setLoading(false);
     };
 
-    fetchDataAsync();
+    fetchData();
   }, [fetchItems]);
 
   const processTenantData = (data) => {
     // Total Tenants
     setTotalTenants(data.length);
 
-    // Count Upcoming Lease Expirations
-    const upcoming = data.filter(tenant => new Date(tenant.leaseEndDate) > new Date()).length;
-    setUpcomingExpirations(upcoming);
+    // Count Expiring Leases
+    const expiring = data.filter(tenant => new Date(tenant.leaseEndDate) < new Date(new Date().setMonth(new Date().getMonth() + 3))).length;
+    setExpiringLeases(expiring);
+
+    // Total Rent Income
+    const totalRentIncome = data.reduce((acc, tenant) => acc + Number(tenant.monthlyRent), 0);
+    setTotalRent(totalRentIncome);
 
     // Rent Trends for Line Chart
-    const trendData = data.map(tenant => ({
+    const trends = data.map(tenant => ({
       date: new Date(tenant.leaseStartDate).getTime(),
       rent: Number(tenant.monthlyRent),
     }));
-    setRentTrends(trendData);
+    setRentTrends(trends);
 
     // Tag Distribution for Pie Chart
     const tagCounts = data.reduce((acc, tenant) => {
-      tenant.tags.forEach(tag => {
-        acc[tag] = (acc[tag] || 0) + 1;
-      });
+      if (Array.isArray(tenant.tags)) {
+        tenant.tags.forEach(tag => {
+          acc[tag] = (acc[tag] || 0) + 1;
+        });
+      }
       return acc;
     }, {});
     setTagDistribution(Object.keys(tagCounts).map(key => ({
@@ -55,7 +62,7 @@ export default function TenantRecordsDashboard({ fetchItems }) {
   const rentTrendChartOptions = {
     chart: { type: 'line' },
     title: { text: 'Monthly Rent Trends' },
-    xAxis: { type: 'datetime', title: { text: 'Date' } },
+    xAxis: { type: 'datetime', title: { text: 'Lease Start Date' } },
     yAxis: { title: { text: 'Monthly Rent' } },
     series: [{
       name: 'Monthly Rent',
@@ -81,7 +88,7 @@ export default function TenantRecordsDashboard({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Tenant Records Dashboard
+          Tenant Records Analytics
         </Typography>
 
         <Grid container spacing={4}>
@@ -100,9 +107,20 @@ export default function TenantRecordsDashboard({ fetchItems }) {
           <Grid item xs={12} md={3}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Upcoming Expirations</Typography>
-                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
-                  {upcomingExpirations}
+                <Typography variant="h6">Expiring Leases (Next 3 Months)</Typography>
+                <Typography variant="h4" color="red" sx={{ fontWeight: 'bold' }}>
+                  {expiringLeases}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Rent Income</Typography>
+                <Typography variant="h4" color="purple" sx={{ fontWeight: 'bold' }}>
+                  ${totalRent.toFixed(2)}
                 </Typography>
               </CardContent>
             </Card>

@@ -3,11 +3,12 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function BandwidthMonitoringDashboard({ fetchItems }) {
+export default function BandwidthMonitoringAnalytics({ fetchItems }) {
   const [monitoringData, setMonitoringData] = useState([]);
-  const [totalMonitored, setTotalMonitored] = useState(0);
-  const [averageUsageData, setAverageUsageData] = useState([]);
-  const [peakUsageData, setPeakUsageData] = useState([]);
+  const [totalMonitoredNetworks, setTotalMonitoredNetworks] = useState(0);
+  const [criticalNetworks, setCriticalNetworks] = useState(0);
+  const [averageUsageTrends, setAverageUsageTrends] = useState([]);
+  const [peakUsageDistribution, setPeakUsageDistribution] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,47 +24,53 @@ export default function BandwidthMonitoringDashboard({ fetchItems }) {
   }, [fetchItems]);
 
   const processMonitoringData = (data) => {
-    // Total Monitored
-    setTotalMonitored(data.length);
+    // Total Monitored Networks
+    setTotalMonitoredNetworks(data.length);
 
-    // Process Average Usage Data
-    setAverageUsageData(
-      data.map(item => ({
-        name: item.networkName,
-        y: item.averageUsage,
-      }))
-    );
+    // Count Critical Networks (ensure tags exists and is an array)
+    const critical = data.filter(network => Array.isArray(network.tags) && network.tags.includes('critical')).length;
+    setCriticalNetworks(critical);
 
-    // Process Peak Usage Data
-    setPeakUsageData(
-      data.map(item => ({
-        name: item.networkName,
-        y: item.peakUsage,
-      }))
-    );
+    // Average Usage Trends for Line Chart
+    const usageTrends = data.map(network => ({
+      date: new Date(network.monitoredDate).getTime(),
+      usage: Number(network.averageUsage),
+    }));
+    setAverageUsageTrends(usageTrends);
+
+    // Peak Usage Distribution for Pie Chart
+    const peakUsageCounts = data.reduce((acc, network) => {
+      const range = network.peakUsage < 50 ? '<50 Mbps' :
+                    network.peakUsage < 100 ? '50-100 Mbps' : '>100 Mbps';
+      acc[range] = (acc[range] || 0) + 1;
+      return acc;
+    }, {});
+    setPeakUsageDistribution(Object.keys(peakUsageCounts).map(key => ({
+      name: key,
+      y: peakUsageCounts[key],
+    })));
   };
 
-  // Highcharts options for Average Usage
+  // Highcharts options for Average Usage Trends
   const averageUsageChartOptions = {
-    chart: { type: 'bar' },
-    title: { text: 'Average Bandwidth Usage (Mbps)' },
-    xAxis: { type: 'category', title: { text: 'Network Name' } },
-    yAxis: { title: { text: 'Mbps' } },
+    chart: { type: 'line' },
+    title: { text: 'Average Bandwidth Usage Trends' },
+    xAxis: { type: 'datetime', title: { text: 'Monitored Date' } },
+    yAxis: { title: { text: 'Average Usage (Mbps)' } },
     series: [{
       name: 'Average Usage',
-      data: averageUsageData,
+      data: averageUsageTrends.map(item => [item.date, item.usage]),
     }],
   };
 
-  // Highcharts options for Peak Usage
+  // Highcharts options for Peak Usage Distribution
   const peakUsageChartOptions = {
-    chart: { type: 'column' },
-    title: { text: 'Peak Bandwidth Usage (Mbps)' },
-    xAxis: { type: 'category', title: { text: 'Network Name' } },
-    yAxis: { title: { text: 'Mbps' } },
+    chart: { type: 'pie' },
+    title: { text: 'Peak Bandwidth Usage Distribution' },
     series: [{
       name: 'Peak Usage',
-      data: peakUsageData,
+      colorByPoint: true,
+      data: peakUsageDistribution,
     }],
   };
 
@@ -74,7 +81,7 @@ export default function BandwidthMonitoringDashboard({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Bandwidth Monitoring Dashboard
+          Bandwidth Monitoring Analytics
         </Typography>
 
         <Grid container spacing={4}>
@@ -82,9 +89,20 @@ export default function BandwidthMonitoringDashboard({ fetchItems }) {
           <Grid item xs={12} md={3}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Networks Monitored</Typography>
+                <Typography variant="h6">Total Monitored Networks</Typography>
                 <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  {totalMonitored}
+                  {totalMonitoredNetworks}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Critical Networks</Typography>
+                <Typography variant="h4" color="red" sx={{ fontWeight: 'bold' }}>
+                  {criticalNetworks}
                 </Typography>
               </CardContent>
             </Card>
@@ -92,12 +110,12 @@ export default function BandwidthMonitoringDashboard({ fetchItems }) {
         </Grid>
 
         <Grid container spacing={4} sx={{ marginTop: 4 }}>
-          {/* Average Usage Chart */}
+          {/* Average Usage Trends Chart */}
           <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={averageUsageChartOptions} />
           </Grid>
 
-          {/* Peak Usage Chart */}
+          {/* Peak Usage Distribution Chart */}
           <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={peakUsageChartOptions} />
           </Grid>

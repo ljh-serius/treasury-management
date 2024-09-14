@@ -27,7 +27,7 @@ export default function PayslipsDashboard({ fetchItems }) {
     setTotalPayslips(data.length);
 
     // Calculate total and average net pay
-    const totalNetPayAmount = data.reduce((acc, payslip) => acc + payslip.netPay, 0);
+    const totalNetPayAmount = data.reduce((acc, payslip) => acc + (parseFloat(payslip.netPay) || 0), 0); // Ensure netPay is treated as a number
     setTotalNetPay(totalNetPayAmount);
     setAverageNetPay(data.length > 0 ? totalNetPayAmount / data.length : 0);
 
@@ -84,7 +84,7 @@ export default function PayslipsDashboard({ fetchItems }) {
               <CardContent>
                 <Typography variant="h6">Total Net Pay</Typography>
                 <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
-                  {totalNetPay.toFixed(2)}
+                  {totalNetPay.toFixed(2)} {/* Ensure totalNetPay is a number */}
                 </Typography>
               </CardContent>
             </Card>
@@ -95,7 +95,7 @@ export default function PayslipsDashboard({ fetchItems }) {
               <CardContent>
                 <Typography variant="h6">Average Net Pay</Typography>
                 <Typography variant="h4" color="purple" sx={{ fontWeight: 'bold' }}>
-                  {averageNetPay.toFixed(2)}
+                  {averageNetPay.toFixed(2)} {/* Ensure averageNetPay is a number */}
                 </Typography>
               </CardContent>
             </Card>

@@ -25,7 +25,7 @@ export default function PurchaseRequisitionsDashboard({ fetchItems }) {
   const processRequisitionData = (data) => {
     // Total Requisitions
     setTotalRequisitions(data.length);
-
+  
     // Approval Status Distribution for Pie Chart
     const statusCounts = data.reduce((acc, requisition) => {
       acc[requisition.approvalStatus] = (acc[requisition.approvalStatus] || 0) + 1;
@@ -35,26 +35,15 @@ export default function PurchaseRequisitionsDashboard({ fetchItems }) {
       name: key.charAt(0).toUpperCase() + key.slice(1),
       y: statusCounts[key],
     })));
-
+  
     // Total Cost Trends for Line Chart
     const trendsData = data.map(requisition => ({
-      date: new Date(requisition.requestDate).getTime(),
-      amount: requisition.totalCost,
+      date: new Date(requisition.requestDate).getTime(), // Convert date to timestamp
+      amount: parseFloat(requisition.totalCost), // Ensure totalCost is a number
     })).sort((a, b) => a.date - b.date);
     setTotalCostTrends(trendsData);
   };
-
-  // Highcharts options for Approval Status Distribution
-  const approvalStatusChartOptions = {
-    chart: { type: 'pie' },
-    title: { text: 'Approval Status Distribution' },
-    series: [{
-      name: 'Approval Status',
-      colorByPoint: true,
-      data: approvalStatusDistribution,
-    }],
-  };
-
+  
   // Highcharts options for Total Cost Trends
   const totalCostChartOptions = {
     chart: { type: 'line' },
@@ -63,7 +52,18 @@ export default function PurchaseRequisitionsDashboard({ fetchItems }) {
     yAxis: { title: { text: 'Total Cost' } },
     series: [{
       name: 'Total Cost',
-      data: totalCostTrends.map(item => [item.date, item.amount]),
+      data: totalCostTrends.map(item => [item.date, item.amount]), // Properly formatted date and cost
+    }],
+  };
+  
+  // Highcharts options for Approval Status Distribution
+  const approvalStatusChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Approval Status Distribution' },
+    series: [{
+      name: 'Approval Status',
+      colorByPoint: true,
+      data: approvalStatusDistribution,
     }],
   };
 

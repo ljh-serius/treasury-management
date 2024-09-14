@@ -1,109 +1,108 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Card, Grid, Typography, Chip } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-const NPSAnalytics = ({ fetchItems }) => {
-  const [data, setData] = useState([]);
+export default function NpsDashboard({ fetchItems }) {
+  const [npsData, setNpsData] = useState([]);
+  const [totalResponses, setTotalResponses] = useState(0);
+  const [scoreDistribution, setScoreDistribution] = useState([]);
+  const [commentsTimeline, setCommentsTimeline] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetchItems();
-      setData(response);
+    const fetchDataAsync = async () => {
+      setLoading(true);
+      const data = await fetchItems();
+      setNpsData(data);
+      processNpsData(data);
       setLoading(false);
-    }
-    fetchData();
+    };
+
+    fetchDataAsync();
   }, [fetchItems]);
 
-  if (loading) return <Typography>Loading...</Typography>;
+  const processNpsData = (data) => {
+    // Total Responses
+    setTotalResponses(data.length);
 
-  // KPIs
-  const totalResponses = data.length;
-  const promoters = data.filter((item) => item.score >= 9).length;
-  const passives = data.filter((item) => item.score >= 7 && item.score <= 8).length;
-  const detractors = data.filter((item) => item.score <= 6).length;
+    // Score Distribution for Pie Chart
+    const scoreCounts = data.reduce((acc, response) => {
+      acc[response.score] = (acc[response.score] || 0) + 1;
+      return acc;
+    }, {});
+    setScoreDistribution(Object.keys(scoreCounts).map(key => ({
+      name: `Score ${key}`,
+      y: scoreCounts[key],
+    })));
 
-  // Calculate NPS
-  const npsScore = ((promoters - detractors) / totalResponses) * 100;
+    // Comments Timeline for Line Chart
+    const timelineData = data.map(response => ({
+      date: new Date(response.surveyDate).getTime(),
+      label: `NPS ${response.npsId.slice(-4)}`,
+    })).sort((a, b) => a.date - b.date);
+    setCommentsTimeline(timelineData);
+  };
 
-  // Highcharts options for NPS distribution
-  const npsDistributionOptions = {
-    chart: { type: 'column' },
+  // Highcharts options for NPS Score Distribution
+  const scoreChartOptions = {
+    chart: { type: 'pie' },
     title: { text: 'NPS Score Distribution' },
-    xAxis: {
-      categories: ['Promoters (9-10)', 'Passives (7-8)', 'Detractors (0-6)'],
-      crosshair: true,
-    },
-    yAxis: {
-      min: 0,
-      title: { text: 'Number of Responses' },
-    },
-    series: [
-      {
-        name: 'Responses',
-        data: [promoters, passives, detractors],
-      },
-    ],
+    series: [{
+      name: 'Scores',
+      colorByPoint: true,
+      data: scoreDistribution,
+    }],
+  };
+
+  // Highcharts options for Comments Timeline
+  const commentsTimelineChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'NPS Responses Over Time' },
+    xAxis: { type: 'datetime', title: { text: 'Survey Date' } },
+    yAxis: { title: { text: 'Responses' } },
+    series: [{
+      name: 'Responses',
+      data: commentsTimeline.map(item => [item.date, 1]), // Y-axis is constant (1) since we're counting occurrences
+    }],
   };
 
   return (
-    <Grid container spacing={4}>
-      {/* KPI Cards */}
-      <Grid item xs={12} md={3}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Responses</Typography>
-          <Typography variant="h4">{totalResponses}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={3}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Promoters</Typography>
-          <Typography variant="h4">{promoters}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={3}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Passives</Typography>
-          <Typography variant="h4">{passives}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={3}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Detractors</Typography>
-          <Typography variant="h4">{detractors}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={3}>
-        <Card>
-          <Typography variant="h6" gutterBottom>NPS Score</Typography>
-          <Typography variant="h4">{npsScore.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Box sx={{ padding: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Net Promoter Score (NPS) Dashboard
+        </Typography>
 
-      {/* Highcharts */}
-      <Grid item xs={12} md={12}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={npsDistributionOptions} />
-        </Card>
-      </Grid>
+        <Grid container spacing={4}>
+          {/* KPIs Section */}
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Responses</Typography>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                  {totalResponses}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
 
-      {/* Tags */}
-      <Grid item xs={12}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Tags</Typography>
-          {data.map((record, index) => (
-            <div key={index}>
-              <Typography variant="subtitle1">{`Response ${index + 1}:`}</Typography>
-              {record.tags.map((tag) => (
-                <Chip key={tag.id} label={tag.label} style={{ margin: '5px' }} />
-              ))}
-            </div>
-          ))}
-        </Card>
-      </Grid>
-    </Grid>
+        <Grid container spacing={4} sx={{ marginTop: 4 }}>
+          {/* NPS Score Distribution Chart */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={scoreChartOptions} />
+          </Grid>
+
+          {/* Comments Timeline Chart */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={commentsTimelineChartOptions} />
+          </Grid>
+        </Grid>
+      </Box>
+    </Container>
   );
-};
-
-export default NPSAnalytics;
+}

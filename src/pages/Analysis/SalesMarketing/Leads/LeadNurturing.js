@@ -26,11 +26,11 @@ export default function LeadNurturingDashboard({ fetchItems }) {
   const processLeadData = (data) => {
     // Total Leads
     setTotalLeads(data.length);
-
+  
     // Count Leads Needing Follow-Up
     const followUp = data.filter(lead => lead.tags.includes('follow-up-needed')).length;
     setFollowUpLeads(followUp);
-
+  
     // Leads by Nurture Stage
     const stageCounts = data.reduce((acc, lead) => {
       acc[lead.nurtureStage] = (acc[lead.nurtureStage] || 0) + 1;
@@ -40,14 +40,38 @@ export default function LeadNurturingDashboard({ fetchItems }) {
       name: key.charAt(0).toUpperCase() + key.slice(1),
       y: stageCounts[key],
     })));
-
-    // Next Contact Schedule
-    const schedule = data.map(lead => ({
-      date: new Date(lead.nextContactDate).getTime(),
-      name: lead.leadId,
-    })).sort((a, b) => a.date - b.date);
+  
+    // Group leads by contact date
+    const groupedByDate = data.reduce((acc, lead) => {
+      const contactDate = new Date(lead.nextContactDate).setHours(0, 0, 0, 0); // Normalize to date
+      if (!acc[contactDate]) {
+        acc[contactDate] = 0;
+      }
+      acc[contactDate] += 1;
+      return acc;
+    }, {});
+  
+    // Create data points for the chart
+    const schedule = Object.keys(groupedByDate).map(date => [
+      parseFloat(date),  // Convert date string to number
+      groupedByDate[date] // Count of leads for that date
+    ]).sort((a, b) => a[0] - b[0]);
+  
     setNextContactSchedule(schedule);
   };
+  
+  // Highcharts options for Next Contact Schedule
+  const contactScheduleChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Next Contact Schedule' },
+    xAxis: { type: 'datetime', title: { text: 'Date' } },
+    yAxis: { title: { text: 'Leads' } },
+    series: [{
+      name: 'Next Contact',
+      data: nextContactSchedule,  // Data is now in the correct [date, count] format
+    }],
+  };
+  
 
   // Highcharts options for Leads by Nurture Stage
   const stageChartOptions = {
@@ -57,18 +81,6 @@ export default function LeadNurturingDashboard({ fetchItems }) {
       name: 'Leads',
       colorByPoint: true,
       data: leadsByStage,
-    }],
-  };
-
-  // Highcharts options for Next Contact Schedule
-  const contactScheduleChartOptions = {
-    chart: { type: 'line' },
-    title: { text: 'Next Contact Schedule' },
-    xAxis: { type: 'datetime', title: { text: 'Date' } },
-    yAxis: { title: { text: 'Leads' } },
-    series: [{
-      name: 'Next Contact',
-      data: nextContactSchedule.map(item => [item.date, item.name]),
     }],
   };
 
@@ -109,14 +121,14 @@ export default function LeadNurturingDashboard({ fetchItems }) {
 
         <Grid container spacing={4} sx={{ marginTop: 4 }}>
           {/* Leads by Nurture Stage Chart */}
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={stageChartOptions} />
-          </Grid>
+            <Grid item xs={12} md={6}>
+              <HighchartsReact highcharts={Highcharts} options={stageChartOptions} />
+            </Grid>
 
           {/* Next Contact Schedule Chart */}
-          <Grid item xs={12} md={6}>
+          {/* <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={contactScheduleChartOptions} />
-          </Grid>
+          </Grid> */}
         </Grid>
       </Box>
     </Container>

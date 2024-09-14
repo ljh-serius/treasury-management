@@ -1,96 +1,108 @@
-import React, { useEffect, useState } from 'react';
-import { Grid, Typography, Card, CardContent, CircularProgress } from '@mui/material';
+import React, { useState, useEffect } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { Card, Grid, Typography, Chip } from '@mui/material';
 
 const PublicStatementsAnalytics = ({ fetchItems }) => {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function fetchData() {
-            const result = await fetchItems();
-            setData(result);
-            setLoading(false);
-        }
-        fetchData();
-    }, [fetchItems]);
-
-    if (loading) {
-        return <CircularProgress />;
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetchItems();
+      setData(response || []); // Ensure data is an array
+      setLoading(false);
     }
+    fetchData();
+  }, [fetchItems]);
 
-    // Calculate KPIs
-    const totalStatements = data.length;
-    const urgentStatements = data.filter(item => item.tags.includes('urgent')).length;
-    const statementsByAudience = {
-        public: data.filter(item => item.audience === 'public').length,
-        investors: data.filter(item => item.audience === 'investors').length,
-        customers: data.filter(item => item.audience === 'customers').length,
-    };
+  if (loading) return <Typography>Loading...</Typography>;
 
-    // Highcharts options
-    const distributionChannelOptions = {
-        chart: { type: 'pie' },
-        title: { text: 'Distribution Channels' },
-        series: [
-            {
-                name: 'Channels',
-                colorByPoint: true,
-                data: [
-                    { name: 'Website', y: data.filter(item => item.distributionChannels === 'website').length },
-                    { name: 'Email', y: data.filter(item => item.distributionChannels === 'email').length },
-                    { name: 'Social Media', y: data.filter(item => item.distributionChannels === 'social-media').length },
-                ],
-            },
-        ],
-    };
+  // KPIs
+  const totalStatements = data.length;
 
-    const audienceOptions = {
-        chart: { type: 'bar' },
-        title: { text: 'Statements by Audience' },
-        xAxis: { categories: ['Public', 'Investors', 'Customers'] },
-        series: [
-            {
-                name: 'Audience',
-                data: [statementsByAudience.public, statementsByAudience.investors, statementsByAudience.customers],
-            },
-        ],
-    };
+  // Audience Distribution
+  const audienceCount = data.reduce((acc, record) => {
+    acc[record.audience] = (acc[record.audience] || 0) + 1;
+    return acc;
+  }, {});
 
-    return (
-        <Grid container spacing={3}>
-            <Grid item xs={12}>
-                <Typography variant="h4">Public Statements Analytics</Typography>
-            </Grid>
+  const audienceDistribution = Object.keys(audienceCount).map(audience => ({
+    name: audience.charAt(0).toUpperCase() + audience.slice(1),
+    y: audienceCount[audience],
+  }));
 
-            <Grid item xs={12} md={4}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h6">Total Statements</Typography>
-                        <Typography variant="h4">{totalStatements}</Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
+  // Distribution Channels
+  const channelCount = data.reduce((acc, record) => {
+    acc[record.distributionChannels] = (acc[record.distributionChannels] || 0) + 1;
+    return acc;
+  }, {});
 
-            <Grid item xs={12} md={4}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h6">Urgent Statements</Typography>
-                        <Typography variant="h4">{urgentStatements}</Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
+  const distributionChannelData = Object.keys(channelCount).map(channel => ({
+    name: channel.charAt(0).toUpperCase() + channel.slice(1).replace(/-/g, ' '),
+    y: channelCount[channel],
+  }));
 
-            <Grid item xs={12} md={6}>
-                <HighchartsReact highcharts={Highcharts} options={distributionChannelOptions} />
-            </Grid>
+  // Highcharts options for Audience Distribution
+  const audienceChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Audience Distribution' },
+    series: [{
+      name: 'Audience',
+      colorByPoint: true,
+      data: audienceDistribution,
+    }],
+  };
 
-            <Grid item xs={12} md={6}>
-                <HighchartsReact highcharts={Highcharts} options={audienceOptions} />
-            </Grid>
-        </Grid>
-    );
+  // Highcharts options for Distribution Channels
+  const distributionChannelsChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Distribution Channels' },
+    series: [{
+      name: 'Channels',
+      colorByPoint: true,
+      data: distributionChannelData,
+    }],
+  };
+
+  return (
+    <Grid container spacing={4}>
+      {/* KPI Cards */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Total Public Statements</Typography>
+          <Typography variant="h4">{totalStatements}</Typography>
+        </Card>
+      </Grid>
+
+      {/* Highcharts */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={audienceChartOptions} />
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={distributionChannelsChartOptions} />
+        </Card>
+      </Grid>
+
+      {/* Tags */}
+      <Grid item xs={12}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Tags</Typography>
+          {data.map((record, index) => (
+            <div key={index}>
+              <Typography variant="subtitle1">{record.title}:</Typography>
+              {Array.isArray(record.tags) ? record.tags.map((tag, tagIndex) => (
+                <Chip key={tagIndex} label={tag.label} style={{ margin: '5px' }} />
+              )) : 'No Tags'}
+            </div>
+          ))}
+        </Card>
+      </Grid>
+    </Grid>
+  );
 };
 
 export default PublicStatementsAnalytics;

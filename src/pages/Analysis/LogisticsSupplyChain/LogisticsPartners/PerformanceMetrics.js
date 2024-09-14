@@ -63,7 +63,7 @@ export default function PerformanceMetricsDashboard({ fetchItems }) {
     yAxis: { title: { text: 'Metric Value' } },
     series: [{
       name: 'Metric Value',
-      data: metricValueTrends.map(item => [item.date, item.value]),
+      data: metricValueTrends.map(item => parseFloat([item.date, item.value])),
     }],
   };
 

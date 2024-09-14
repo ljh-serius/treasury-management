@@ -25,7 +25,7 @@ export default function OrderProcessingDashboard({ fetchItems }) {
   const processOrderData = (data) => {
     // Total Orders
     setTotalOrders(data.length);
-
+  
     // Status Distribution for Pie Chart
     const statusCounts = data.reduce((acc, order) => {
       acc[order.status] = (acc[order.status] || 0) + 1;
@@ -35,15 +35,15 @@ export default function OrderProcessingDashboard({ fetchItems }) {
       name: key.charAt(0).toUpperCase() + key.slice(1),
       y: statusCounts[key],
     })));
-
+  
     // Total Amount Trends for Line Chart
     const trendsData = data.map(order => ({
-      date: new Date(order.orderDate).getTime(),
-      amount: order.totalAmount,
+      date: new Date(order.orderDate).getTime(), // Convert date to timestamp
+      amount: parseFloat(order.totalAmount), // Ensure totalAmount is a number
     })).sort((a, b) => a.date - b.date);
     setTotalAmountTrends(trendsData);
   };
-
+  
   // Highcharts options for Status Distribution
   const statusChartOptions = {
     chart: { type: 'pie' },
@@ -54,7 +54,7 @@ export default function OrderProcessingDashboard({ fetchItems }) {
       data: statusDistribution,
     }],
   };
-
+  
   // Highcharts options for Total Amount Trends
   const totalAmountChartOptions = {
     chart: { type: 'line' },
@@ -63,10 +63,10 @@ export default function OrderProcessingDashboard({ fetchItems }) {
     yAxis: { title: { text: 'Total Amount' } },
     series: [{
       name: 'Total Amount',
-      data: totalAmountTrends.map(item => [item.date, item.amount]),
+      data: totalAmountTrends.map(item => [item.date, item.amount]), // Correct format for Highcharts
     }],
   };
-
+  
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
@@ -76,7 +76,7 @@ export default function OrderProcessingDashboard({ fetchItems }) {
         <Typography variant="h4" gutterBottom>
           Order Processing Dashboard
         </Typography>
-
+  
         <Grid container spacing={4}>
           {/* KPIs Section */}
           <Grid item xs={12} md={3}>
@@ -90,13 +90,13 @@ export default function OrderProcessingDashboard({ fetchItems }) {
             </Card>
           </Grid>
         </Grid>
-
+  
         <Grid container spacing={4} sx={{ marginTop: 4 }}>
           {/* Status Distribution Chart */}
           <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
           </Grid>
-
+  
           {/* Total Amount Trends Chart */}
           <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={totalAmountChartOptions} />
@@ -105,4 +105,4 @@ export default function OrderProcessingDashboard({ fetchItems }) {
       </Box>
     </Container>
   );
-}
+}  

@@ -1,115 +1,141 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Card, Grid, Typography, Chip } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-const WasteManagementAnalytics = ({ fetchItems }) => {
-  const [data, setData] = useState([]);
+export default function WasteManagementDashboard({ fetchItems }) {
+  const [wasteData, setWasteData] = useState([]);
+  const [totalWaste, setTotalWaste] = useState(0);
+  const [wasteTypeDistribution, setWasteTypeDistribution] = useState([]);
+  const [reductionTrends, setReductionTrends] = useState([]);
+  const [recyclingTrends, setRecyclingTrends] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetchItems();
-      setData(response);
+    const fetchDataAsync = async () => {
+      setLoading(true);
+      const data = await fetchItems();
+      setWasteData(data);
+      processWasteData(data);
       setLoading(false);
-    }
-    fetchData();
+    };
+
+    fetchDataAsync();
   }, [fetchItems]);
 
-  if (loading) return <Typography>Loading...</Typography>;
+  const processWasteData = (data) => {
+    // Total Waste Generated
+    const totalGenerated = data.reduce((acc, record) => acc + Number(record.totalWasteGenerated), 0);
+    setTotalWaste(totalGenerated);
 
-  // Calculate KPIs
-  const totalWasteGenerated = data.reduce((sum, record) => sum + record.totalWasteGenerated, 0);
-  const totalWasteDisposed = data.reduce((sum, record) => sum + record.wasteDisposed, 0);
-  const totalWasteRecycled = data.reduce((sum, record) => sum + record.wasteRecycled, 0);
-  const avgReductionTarget = data.reduce((sum, record) => sum + record.reductionTarget, 0) / data.length;
-  const avgAchievedReduction = data.reduce((sum, record) => sum + record.achievedReduction, 0) / data.length;
+    // Waste Type Distribution for Pie Chart
+    const wasteTypeCounts = data.reduce((acc, record) => {
+      acc[record.wasteType] = (acc[record.wasteType] || 0) + 1;
+      return acc;
+    }, {});
+    setWasteTypeDistribution(Object.keys(wasteTypeCounts).map(key => ({
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+      y: wasteTypeCounts[key],
+    })));
 
-  // Highcharts options for waste generation
-  const wasteChartOptions = {
-    title: { text: 'Total Waste Generated Over Time (tons)' },
-    xAxis: { categories: data.map((record) => record.year) },
-    yAxis: { title: { text: 'Waste Generated (tons)' } },
+    // Reduction Trends for Line Chart (Achieved vs Target)
+    const reductionData = data.map(record => ({
+      date: new Date(record.year).getTime(),
+      target: Number(record.reductionTarget),
+      achieved: Number(record.achievedReduction),
+    }));
+    setReductionTrends(reductionData);
+
+    // Recycling Trends for Line Chart (Waste Recycled)
+    const recyclingData = data.map(record => ({
+      date: new Date(record.year).getTime(),
+      recycled: Number(record.wasteRecycled),
+    }));
+    setRecyclingTrends(recyclingData);
+  };
+
+  // Highcharts options for Waste Type Distribution
+  const wasteTypeChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Waste Type Distribution' },
+    series: [{
+      name: 'Waste Types',
+      colorByPoint: true,
+      data: wasteTypeDistribution,
+    }],
+  };
+
+  // Highcharts options for Reduction Trends (Achieved vs Target)
+  const reductionTrendChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Waste Reduction Target vs Achieved' },
+    xAxis: { type: 'datetime', title: { text: 'Year' } },
+    yAxis: { title: { text: 'Reduction (%)' } },
     series: [
-      { name: 'Total Waste Generated', data: data.map((record) => record.totalWasteGenerated) },
-      { name: 'Waste Disposed', data: data.map((record) => record.wasteDisposed) },
-      { name: 'Waste Recycled', data: data.map((record) => record.wasteRecycled) },
+      {
+        name: 'Target Reduction (%)',
+        data: reductionTrends.map(item => [item.date, item.target]),
+      },
+      {
+        name: 'Achieved Reduction (%)',
+        data: reductionTrends.map(item => [item.date, item.achieved]),
+      },
     ],
   };
 
-  // Highcharts options for waste reduction target vs achieved reduction
-  const reductionChartOptions = {
-    title: { text: 'Waste Reduction Target vs Achieved (%)' },
-    xAxis: { categories: data.map((record) => record.year) },
-    yAxis: { title: { text: 'Reduction (%)' } },
-    series: [
-      { name: 'Reduction Target', data: data.map((record) => record.reductionTarget) },
-      { name: 'Achieved Reduction', data: data.map((record) => record.achievedReduction) },
-    ],
+  // Highcharts options for Recycling Trends
+  const recyclingTrendChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Waste Recycling Trends (tons)' },
+    xAxis: { type: 'datetime', title: { text: 'Year' } },
+    yAxis: { title: { text: 'Recycled Waste (tons)' } },
+    series: [{
+      name: 'Waste Recycled',
+      data: recyclingTrends.map(item => [item.date, item.recycled]),
+    }],
   };
 
   return (
-    <Grid container spacing={4}>
-      {/* KPI Cards */}
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Waste Generated (tons)</Typography>
-          <Typography variant="h4">{totalWasteGenerated.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Waste Disposed (tons)</Typography>
-          <Typography variant="h4">{totalWasteDisposed.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Waste Recycled (tons)</Typography>
-          <Typography variant="h4">{totalWasteRecycled.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Average Reduction Target (%)</Typography>
-          <Typography variant="h4">{avgReductionTarget.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Average Achieved Reduction (%)</Typography>
-          <Typography variant="h4">{avgAchievedReduction.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Box sx={{ padding: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Waste Management Dashboard
+        </Typography>
 
-      {/* Highcharts */}
-      <Grid item xs={12}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={wasteChartOptions} />
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={reductionChartOptions} />
-        </Card>
-      </Grid>
+        <Grid container spacing={4}>
+          {/* KPIs Section */}
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Waste Generated (tons)</Typography>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                  {totalWaste.toFixed(2)}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
 
-      {/* Tags */}
-      <Grid item xs={12}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Tags</Typography>
-          {data.map((record, index) => (
-            <div key={index}>
-              <Typography variant="subtitle1">{record.year}:</Typography>
-              {record.tags.map((tag) => (
-                <Chip key={tag.id} label={tag.label} style={{ margin: '5px' }} />
-              ))}
-            </div>
-          ))}
-        </Card>
-      </Grid>
-    </Grid>
+        <Grid container spacing={4} sx={{ marginTop: 4 }}>
+          {/* Waste Type Distribution Chart */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={wasteTypeChartOptions} />
+          </Grid>
+
+          {/* Reduction Trends Chart */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={reductionTrendChartOptions} />
+          </Grid>
+
+          {/* Recycling Trends Chart */}
+          <Grid item xs={12} md={12} sx={{ marginTop: 4 }}>
+            <HighchartsReact highcharts={Highcharts} options={recyclingTrendChartOptions} />
+          </Grid>
+        </Grid>
+      </Box>
+    </Container>
   );
-};
-
-export default WasteManagementAnalytics;
+}

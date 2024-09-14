@@ -25,7 +25,7 @@ export default function FreightManagementDashboard({ fetchItems }) {
   const processFreightData = (data) => {
     // Total Freight
     setTotalFreight(data.length);
-
+  
     // Freight Type Distribution for Pie Chart
     const typeCounts = data.reduce((acc, freight) => {
       acc[freight.freightType] = (acc[freight.freightType] || 0) + 1;
@@ -35,26 +35,15 @@ export default function FreightManagementDashboard({ fetchItems }) {
       name: key.charAt(0).toUpperCase() + key.slice(1),
       y: typeCounts[key],
     })));
-
+  
     // Cost Trends for Line Chart
     const trendsData = data.map(freight => ({
-      date: new Date(freight.departureDate).getTime(),
-      amount: freight.cost,
+      date: new Date(freight.departureDate).getTime(), // Ensure date is a timestamp
+      amount: parseFloat(freight.cost), // Ensure cost is a number
     })).sort((a, b) => a.date - b.date);
     setCostTrends(trendsData);
   };
-
-  // Highcharts options for Freight Type Distribution
-  const freightTypeChartOptions = {
-    chart: { type: 'pie' },
-    title: { text: 'Freight Type Distribution' },
-    series: [{
-      name: 'Freight Types',
-      colorByPoint: true,
-      data: freightTypeDistribution,
-    }],
-  };
-
+  
   // Highcharts options for Cost Trends
   const costChartOptions = {
     chart: { type: 'line' },
@@ -63,7 +52,18 @@ export default function FreightManagementDashboard({ fetchItems }) {
     yAxis: { title: { text: 'Cost' } },
     series: [{
       name: 'Freight Cost',
-      data: costTrends.map(item => [item.date, item.amount]),
+      data: costTrends.map(item => [item.date, item.amount]), // Properly formatted data for Highcharts
+    }],
+  };
+  
+  // Highcharts options for Freight Type Distribution
+  const freightTypeChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Freight Type Distribution' },
+    series: [{
+      name: 'Freight Types',
+      colorByPoint: true,
+      data: freightTypeDistribution,
     }],
   };
 

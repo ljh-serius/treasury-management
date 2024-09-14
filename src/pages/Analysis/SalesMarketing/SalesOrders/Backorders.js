@@ -27,30 +27,31 @@ export default function BackorderDashboard({ fetchItems }) {
   const processBackorderData = (data) => {
     // Total Backorders
     setTotalBackorders(data.length);
-
+  
     // Total Quantity Backordered
     const totalQty = data.reduce((acc, backorder) => acc + Number(backorder.quantity), 0);
     setTotalQuantity(totalQty);
-
+  
     // Count Urgent Backorders
     const urgent = data.filter(backorder => backorder.tags.includes('urgent')).length;
     setUrgentBackorders(urgent);
-
+  
     // Backorder Trends for Column Chart
     const trendData = data.map(backorder => ({
       name: `Backorder ${backorder.backorderId.slice(-4)}`,
       y: Number(backorder.quantity),
     }));
     setBackorderTrends(trendData);
-
+  
     // Restock Timeline Over Time
-    const timeline = data.map(backorder => ({
+    const timeline = data.map((backorder, index) => ({
       date: new Date(backorder.expectedRestockDate).getTime(),
-      name: `Backorder ${backorder.backorderId.slice(-4)}`,
+      id: `Backorder ${backorder.backorderId.slice(-4)}`, // Backorder ID as label
+      y: index + 1, // Use index as y-axis value
     })).sort((a, b) => a.date - b.date);
     setRestockTimeline(timeline);
   };
-
+  
   // Highcharts options for Backorder Trends
   const backorderTrendsChartOptions = {
     chart: { type: 'column' },
@@ -60,19 +61,22 @@ export default function BackorderDashboard({ fetchItems }) {
       data: backorderTrends,
     }],
   };
-
+  
   // Highcharts options for Restock Timeline
   const restockTimelineChartOptions = {
     chart: { type: 'line' },
     title: { text: 'Expected Restock Timeline' },
     xAxis: { type: 'datetime', title: { text: 'Date' } },
-    yAxis: { title: { text: 'Backorders' } },
+    yAxis: {
+      title: { text: 'Backorders' },
+      categories: restockTimeline.map(item => item.id), // Map numeric y-values to backorder IDs
+    },
     series: [{
       name: 'Expected Restock',
-      data: restockTimeline.map(item => [item.date, item.name]),
+      data: restockTimeline.map(item => [item.date, item.y]), // Numeric values for the y-axis
     }],
   };
-
+  
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
@@ -82,7 +86,7 @@ export default function BackorderDashboard({ fetchItems }) {
         <Typography variant="h4" gutterBottom>
           Backorder Dashboard
         </Typography>
-
+  
         <Grid container spacing={4}>
           {/* KPIs Section */}
           <Grid item xs={12} md={3}>
@@ -95,7 +99,7 @@ export default function BackorderDashboard({ fetchItems }) {
               </CardContent>
             </Card>
           </Grid>
-
+  
           <Grid item xs={12} md={3}>
             <Card>
               <CardContent>
@@ -106,7 +110,7 @@ export default function BackorderDashboard({ fetchItems }) {
               </CardContent>
             </Card>
           </Grid>
-
+  
           <Grid item xs={12} md={3}>
             <Card>
               <CardContent>
@@ -118,13 +122,13 @@ export default function BackorderDashboard({ fetchItems }) {
             </Card>
           </Grid>
         </Grid>
-
+  
         <Grid container spacing={4} sx={{ marginTop: 4 }}>
           {/* Backorder Trends Chart */}
           <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={backorderTrendsChartOptions} />
           </Grid>
-
+  
           {/* Restock Timeline Chart */}
           <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={restockTimelineChartOptions} />
@@ -133,4 +137,4 @@ export default function BackorderDashboard({ fetchItems }) {
       </Box>
     </Container>
   );
-}
+}  

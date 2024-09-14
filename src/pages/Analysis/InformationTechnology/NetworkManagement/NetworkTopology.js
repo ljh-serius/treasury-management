@@ -3,11 +3,12 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function NetworkTopologyDashboard({ fetchItems }) {
+export default function NetworkTopologyAnalytics({ fetchItems }) {
   const [topologyData, setTopologyData] = useState([]);
   const [totalTopologies, setTotalTopologies] = useState(0);
-  const [topologyTypeData, setTopologyTypeData] = useState([]);
-  const [deviceCountData, setDeviceCountData] = useState([]);
+  const [criticalTopologies, setCriticalTopologies] = useState(0);
+  const [topologyTypeDistribution, setTopologyTypeDistribution] = useState([]);
+  const [deviceCountDistribution, setDeviceCountDistribution] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,53 +24,52 @@ export default function NetworkTopologyDashboard({ fetchItems }) {
   }, [fetchItems]);
 
   const processTopologyData = (data) => {
+    // Total Topologies
     setTotalTopologies(data.length);
-
-    // Aggregate Topology Types
-    const topologyMap = {};
-    data.forEach((item) => {
-      const type = item.topologyType;
-      topologyMap[type] = (topologyMap[type] || 0) + 1;
-    });
-    const topologyArray = Object.entries(topologyMap).map(([type, count]) => ({
-      name: type,
-      y: count,
+  
+    // Count Critical Topologies (ensure tags exists and is an array)
+    const critical = data.filter(topology => Array.isArray(topology.tags) && topology.tags.includes('critical')).length;
+    setCriticalTopologies(critical);
+  
+    // Topology Type Distribution for Pie Chart
+    const typeCounts = data.reduce((acc, topology) => {
+      acc[topology.topologyType] = (acc[topology.topologyType] || 0) + 1;
+      return acc;
+    }, {});
+    setTopologyTypeDistribution(Object.keys(typeCounts).map(key => ({
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+      y: typeCounts[key],
+    })));
+  
+    // Device Count Distribution for Bar Chart
+    const deviceCounts = data.map(topology => ({
+      name: topology.networkName,
+      y: Number(topology.deviceCount),
     }));
-    setTopologyTypeData(topologyArray);
-
-    // Aggregate Device Counts
-    setDeviceCountData(
-      data.map((item) => ({
-        name: item.networkName,
-        y: item.deviceCount,
-      }))
-    );
+    setDeviceCountDistribution(deviceCounts);
   };
 
-  // Highcharts options for Topology Types
+  // Highcharts options for Topology Type Distribution
   const topologyTypeChartOptions = {
     chart: { type: 'pie' },
     title: { text: 'Network Topology Types Distribution' },
-    series: [
-      {
-        name: 'Topologies',
-        data: topologyTypeData,
-      },
-    ],
+    series: [{
+      name: 'Topologies',
+      colorByPoint: true,
+      data: topologyTypeDistribution,
+    }],
   };
 
-  // Highcharts options for Device Count
+  // Highcharts options for Device Count Distribution
   const deviceCountChartOptions = {
     chart: { type: 'bar' },
     title: { text: 'Device Count by Network' },
     xAxis: { type: 'category', title: { text: 'Network Name' } },
     yAxis: { title: { text: 'Device Count' } },
-    series: [
-      {
-        name: 'Devices',
-        data: deviceCountData,
-      },
-    ],
+    series: [{
+      name: 'Devices',
+      data: deviceCountDistribution,
+    }],
   };
 
   return (
@@ -79,7 +79,7 @@ export default function NetworkTopologyDashboard({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Network Topology Dashboard
+          Network Topology Analytics
         </Typography>
 
         <Grid container spacing={4}>
@@ -94,15 +94,26 @@ export default function NetworkTopologyDashboard({ fetchItems }) {
               </CardContent>
             </Card>
           </Grid>
+
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Critical Topologies</Typography>
+                <Typography variant="h4" color="red" sx={{ fontWeight: 'bold' }}>
+                  {criticalTopologies}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
 
         <Grid container spacing={4} sx={{ marginTop: 4 }}>
-          {/* Topology Types Chart */}
+          {/* Topology Type Distribution Chart */}
           <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={topologyTypeChartOptions} />
           </Grid>
 
-          {/* Device Count Chart */}
+          {/* Device Count Distribution Chart */}
           <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={deviceCountChartOptions} />
           </Grid>

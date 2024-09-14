@@ -1,93 +1,112 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Card, Grid, Typography, Chip } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-const EnergyAuditAnalytics = ({ fetchItems }) => {
-  const [data, setData] = useState([]);
+export default function EnergyAuditsDashboard({ fetchItems }) {
+  const [auditData, setAuditData] = useState([]);
+  const [totalAudits, setTotalAudits] = useState(0);
+  const [tagsDistribution, setTagsDistribution] = useState([]);
+  const [auditFindingsTrends, setAuditFindingsTrends] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetchItems();
-      setData(response);
+    const fetchDataAsync = async () => {
+      setLoading(true);
+      const data = await fetchItems();
+      setAuditData(data);
+      processAuditData(data);
       setLoading(false);
-    }
-    fetchData();
-  }, []);
+    };
 
-  if (loading) return <Typography>Loading...</Typography>;
+    fetchDataAsync();
+  }, [fetchItems]);
 
-  // Calculate KPIs
-  const totalAudits = data.length;
-  const totalFindings = data.reduce((sum, audit) => sum + audit.findings.split(' ').length, 0);
-  const totalRecommendations = data.reduce((sum, audit) => sum + audit.recommendations.split(' ').length, 0);
+  const processAuditData = (data) => {
+    // Total Audits
+    setTotalAudits(data.length);
 
-  // Highcharts options
-  const auditTimelineOptions = {
-    title: { text: 'Audits Over Time' },
-    xAxis: { categories: data.map((audit) => audit.auditDate) },
-    yAxis: { title: { text: 'Number of Findings' } },
-    series: [{ name: 'Findings', data: data.map((audit) => audit.findings.split(' ').length) }],
+    // Tag Distribution for Pie Chart
+    const tagCounts = data.reduce((acc, audit) => {
+      if (audit.tags) {
+        audit.tags.forEach(tag => {
+          acc[tag] = (acc[tag] || 0) + 1;
+        });
+      }
+      return acc;
+    }, {});
+    setTagsDistribution(Object.keys(tagCounts).map(key => ({
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+      y: tagCounts[key],
+    })));
+
+    // Audit Findings Trends for Line Chart
+    const findingsTrends = data.map(audit => ({
+      date: new Date(audit.auditDate).getTime(),
+      findings: audit.findings.split(' ').length, // Counting number of words in findings
+    })).sort((a, b) => a.date - b.date);
+    setAuditFindingsTrends(findingsTrends);
   };
 
-  const recommendationChartOptions = {
-    title: { text: 'Recommendations Over Time' },
-    xAxis: { categories: data.map((audit) => audit.auditDate) },
-    yAxis: { title: { text: 'Number of Recommendations' } },
-    series: [{ name: 'Recommendations', data: data.map((audit) => audit.recommendations.split(' ').length) }],
+  // Highcharts options for Tag Distribution
+  const tagChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Audit Tags Distribution' },
+    series: [{
+      name: 'Tags',
+      colorByPoint: true,
+      data: tagsDistribution,
+    }],
+  };
+
+  // Highcharts options for Audit Findings Trends
+  const findingsTrendChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Audit Findings Trends' },
+    xAxis: { type: 'datetime', title: { text: 'Audit Date' } },
+    yAxis: { title: { text: 'Number of Words in Findings' } },
+    series: [{
+      name: 'Findings',
+      data: auditFindingsTrends.map(item => [item.date, item.findings]),
+    }],
   };
 
   return (
-    <Grid container spacing={4}>
-      {/* KPI Cards */}
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Audits</Typography>
-          <Typography variant="h4">{totalAudits}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Findings</Typography>
-          <Typography variant="h4">{totalFindings}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Recommendations</Typography>
-          <Typography variant="h4">{totalRecommendations}</Typography>
-        </Card>
-      </Grid>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Box sx={{ padding: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Energy Audits Dashboard
+        </Typography>
 
-      {/* Highcharts */}
-      <Grid item xs={12}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={auditTimelineOptions} />
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={recommendationChartOptions} />
-        </Card>
-      </Grid>
+        <Grid container spacing={4}>
+          {/* KPIs Section */}
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Audits</Typography>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                  {totalAudits}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
 
-      {/* Tags */}
-      <Grid item xs={12}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Tags</Typography>
-          {data.map((audit, index) => (
-            <div key={index}>
-              <Typography variant="subtitle1">{audit.auditDate}:</Typography>
-              {audit.tags.map((tag) => (
-                <Chip key={tag.id} label={tag.label} style={{ margin: '5px' }} />
-              ))}
-            </div>
-          ))}
-        </Card>
-      </Grid>
-    </Grid>
+        <Grid container spacing={4} sx={{ marginTop: 4 }}>
+          {/* Tag Distribution Chart */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={tagChartOptions} />
+          </Grid>
+
+          {/* Audit Findings Trends Chart */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={findingsTrendChartOptions} />
+          </Grid>
+        </Grid>
+      </Box>
+    </Container>
   );
-};
-
-export default EnergyAuditAnalytics;
+}

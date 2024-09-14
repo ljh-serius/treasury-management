@@ -25,7 +25,7 @@ export default function PartnerAgreementsDashboard({ fetchItems }) {
   const processAgreementData = (data) => {
     // Total Agreements
     setTotalAgreements(data.length);
-
+  
     // Compliance Distribution for Pie Chart
     const complianceCounts = data.reduce((acc, agreement) => {
       acc[agreement.complianceStatus] = (acc[agreement.complianceStatus] || 0) + 1;
@@ -35,14 +35,27 @@ export default function PartnerAgreementsDashboard({ fetchItems }) {
       name: key.charAt(0).toUpperCase() + key.slice(1),
       y: complianceCounts[key],
     })));
-
+  
     // Contract Value Trends for Line Chart
     const valueData = data.map(agreement => ({
-      date: new Date(agreement.startDate).getTime(),
-      value: agreement.contractValue,
+      date: new Date(agreement.startDate).getTime(), // Ensure date is a timestamp
+      value: parseFloat(agreement.contractValue), // Ensure value is a number
     })).sort((a, b) => a.date - b.date);
     setContractValueTrends(valueData);
   };
+  
+  // Highcharts options for Contract Value Trends
+  const contractValueChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Contract Value Trends Over Time' },
+    xAxis: { type: 'datetime', title: { text: 'Start Date' } },
+    yAxis: { title: { text: 'Contract Value' } },
+    series: [{
+      name: 'Contract Value',
+      data: contractValueTrends.map(item => [item.date, item.value]), // Properly formatted data for Highcharts
+    }],
+  };
+  
 
   // Highcharts options for Compliance Status Distribution
   const complianceChartOptions = {
@@ -52,18 +65,6 @@ export default function PartnerAgreementsDashboard({ fetchItems }) {
       name: 'Compliance Status',
       colorByPoint: true,
       data: complianceDistribution,
-    }],
-  };
-
-  // Highcharts options for Contract Value Trends
-  const contractValueChartOptions = {
-    chart: { type: 'line' },
-    title: { text: 'Contract Value Trends Over Time' },
-    xAxis: { type: 'datetime', title: { text: 'Start Date' } },
-    yAxis: { title: { text: 'Contract Value' } },
-    series: [{
-      name: 'Contract Value',
-      data: contractValueTrends.map(item => [item.date, item.value]),
     }],
   };
 

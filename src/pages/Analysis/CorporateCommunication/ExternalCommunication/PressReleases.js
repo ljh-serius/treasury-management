@@ -1,96 +1,107 @@
-import React, { useEffect, useState } from 'react';
-import { Grid, Typography, Card, CardContent, CircularProgress } from '@mui/material';
+import React, { useState, useEffect } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { Card, Grid, Typography, Chip } from '@mui/material';
 
 const PressReleasesAnalytics = ({ fetchItems }) => {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function fetchData() {
-            const result = await fetchItems();
-            setData(result);
-            setLoading(false);
-        }
-        fetchData();
-    }, [fetchItems]);
-
-    if (loading) {
-        return <CircularProgress />;
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetchItems();
+      setData(response || []); // Ensure data is an array
+      setLoading(false);
     }
+    fetchData();
+  }, [fetchItems]);
 
-    // Calculate KPIs
-    const totalReleases = data.length;
-    const urgentReleases = data.filter(item => item.tags.includes('urgent')).length;
-    const releasesByDistributionChannel = {
-        website: data.filter(item => item.distributionChannels === 'website').length,
-        email: data.filter(item => item.distributionChannels === 'email').length,
-        socialMedia: data.filter(item => item.distributionChannels === 'social-media').length,
-    };
+  if (loading) return <Typography>Loading...</Typography>;
 
-    // Highcharts options
-    const distributionChannelOptions = {
-        chart: { type: 'pie' },
-        title: { text: 'Distribution Channels' },
-        series: [
-            {
-                name: 'Channels',
-                colorByPoint: true,
-                data: [
-                    { name: 'Website', y: releasesByDistributionChannel.website },
-                    { name: 'Email', y: releasesByDistributionChannel.email },
-                    { name: 'Social Media', y: releasesByDistributionChannel.socialMedia },
-                ],
-            },
-        ],
-    };
+  // KPIs
+  const totalPressReleases = data.length;
 
-    const urgentReleaseOptions = {
-        chart: { type: 'bar' },
-        title: { text: 'Urgent Press Releases' },
-        xAxis: { categories: ['Urgent', 'Non-Urgent'] },
-        series: [
-            {
-                name: 'Urgency',
-                data: [urgentReleases, totalReleases - urgentReleases],
-            },
-        ],
-    };
+  // Distribution Channels Analysis
+  const channelsCount = data.reduce((acc, record) => {
+    if (Array.isArray(record.distributionChannels)) {
+      record.distributionChannels.forEach(channel => {
+        acc[channel] = (acc[channel] || 0) + 1;
+      });
+    } else {
+      acc[record.distributionChannels] = (acc[record.distributionChannels] || 0) + 1;
+    }
+    return acc;
+  }, {});
 
-    return (
-        <Grid container spacing={3}>
-            <Grid item xs={12}>
-                <Typography variant="h4">Press Releases Analytics</Typography>
-            </Grid>
+  const channelsDistribution = Object.keys(channelsCount).map(channel => ({
+    name: channel.charAt(0).toUpperCase() + channel.slice(1).replace(/-/g, ' '),
+    y: channelsCount[channel],
+  }));
 
-            <Grid item xs={12} md={4}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h6">Total Press Releases</Typography>
-                        <Typography variant="h4">{totalReleases}</Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
+  // Highcharts options for Distribution Channels
+  const distributionChannelsChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Distribution Channels' },
+    series: [{
+      name: 'Channels',
+      colorByPoint: true,
+      data: channelsDistribution,
+    }],
+  };
 
-            <Grid item xs={12} md={4}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h6">Urgent Press Releases</Typography>
-                        <Typography variant="h4">{urgentReleases}</Typography>
-                    </CardContent>
-                </Card>
-            </Grid>
+  // Highcharts options for press release trends over time
+  const pressReleasesChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Press Releases Over Time' },
+    xAxis: {
+      categories: data.map(record => new Date(record.releaseDate).toLocaleDateString()),
+      title: { text: 'Release Date' },
+    },
+    yAxis: { title: { text: 'Number of Releases' } },
+    series: [{
+      name: 'Releases',
+      data: data.map(() => 1), // Each release counts as one
+    }],
+  };
 
-            <Grid item xs={12} md={6}>
-                <HighchartsReact highcharts={Highcharts} options={distributionChannelOptions} />
-            </Grid>
+  return (
+    <Grid container spacing={4}>
+      {/* KPI Cards */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Total Press Releases</Typography>
+          <Typography variant="h4">{totalPressReleases}</Typography>
+        </Card>
+      </Grid>
 
-            <Grid item xs={12} md={6}>
-                <HighchartsReact highcharts={Highcharts} options={urgentReleaseOptions} />
-            </Grid>
-        </Grid>
-    );
+      {/* Highcharts */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={distributionChannelsChartOptions} />
+        </Card>
+      </Grid>
+      <Grid item xs={12}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={pressReleasesChartOptions} />
+        </Card>
+      </Grid>
+
+      {/* Tags */}
+      <Grid item xs={12}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Tags</Typography>
+          {data.map((record, index) => (
+            <div key={index}>
+              <Typography variant="subtitle1">{record.title}:</Typography>
+              {Array.isArray(record.tags) ? record.tags.map((tag, tagIndex) => (
+                <Chip key={tagIndex} label={tag.label} style={{ margin: '5px' }} />
+              )) : 'No Tags'}
+            </div>
+          ))}
+        </Card>
+      </Grid>
+    </Grid>
+  );
 };
 
 export default PressReleasesAnalytics;

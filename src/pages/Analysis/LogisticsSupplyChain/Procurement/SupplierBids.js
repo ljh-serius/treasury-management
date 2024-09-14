@@ -25,7 +25,7 @@ export default function SupplierBidsDashboard({ fetchItems }) {
   const processBidData = (data) => {
     // Total Bids
     setTotalBids(data.length);
-
+  
     // Status Distribution for Pie Chart
     const statusCounts = data.reduce((acc, bid) => {
       acc[bid.status] = (acc[bid.status] || 0) + 1;
@@ -35,26 +35,15 @@ export default function SupplierBidsDashboard({ fetchItems }) {
       name: key.charAt(0).toUpperCase() + key.slice(1),
       y: statusCounts[key],
     })));
-
+  
     // Bid Amount Trends for Line Chart
     const trendsData = data.map(bid => ({
-      date: new Date(bid.submissionDate).getTime(),
-      amount: bid.bidAmount,
+      date: new Date(bid.submissionDate).getTime(), // Convert date to timestamp
+      amount: parseFloat(bid.bidAmount), // Ensure bidAmount is a number
     })).sort((a, b) => a.date - b.date);
     setBidAmountTrends(trendsData);
   };
-
-  // Highcharts options for Status Distribution
-  const statusChartOptions = {
-    chart: { type: 'pie' },
-    title: { text: 'Bid Status Distribution' },
-    series: [{
-      name: 'Status',
-      colorByPoint: true,
-      data: statusDistribution,
-    }],
-  };
-
+  
   // Highcharts options for Bid Amount Trends
   const bidAmountChartOptions = {
     chart: { type: 'line' },
@@ -63,7 +52,18 @@ export default function SupplierBidsDashboard({ fetchItems }) {
     yAxis: { title: { text: 'Bid Amount' } },
     series: [{
       name: 'Bid Amount',
-      data: bidAmountTrends.map(item => [item.date, item.amount]),
+      data: bidAmountTrends.map(item => [item.date, item.amount]), // Properly formatted date and amount
+    }],
+  };
+  
+  // Highcharts options for Status Distribution
+  const statusChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Bid Status Distribution' },
+    series: [{
+      name: 'Status',
+      colorByPoint: true,
+      data: statusDistribution,
     }],
   };
 

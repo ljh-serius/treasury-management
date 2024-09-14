@@ -3,16 +3,17 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-export default function LeaseRenewalsDashboard({ fetchItems }) {
+export default function LeaseRenewalsAnalytics({ fetchItems }) {
   const [renewalData, setRenewalData] = useState([]);
   const [totalRenewals, setTotalRenewals] = useState(0);
   const [upcomingRenewals, setUpcomingRenewals] = useState(0);
-  const [rentTrends, setRentTrends] = useState([]);
+  const [totalRent, setTotalRent] = useState(0);
   const [tagDistribution, setTagDistribution] = useState([]);
+  const [rentTrends, setRentTrends] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDataAsync = async () => {
+    const fetchData = async () => {
       setLoading(true);
       const data = await fetchItems();
       setRenewalData(data);
@@ -20,7 +21,7 @@ export default function LeaseRenewalsDashboard({ fetchItems }) {
       setLoading(false);
     };
 
-    fetchDataAsync();
+    fetchData();
   }, [fetchItems]);
 
   const processRenewalData = (data) => {
@@ -31,18 +32,24 @@ export default function LeaseRenewalsDashboard({ fetchItems }) {
     const upcoming = data.filter(renewal => new Date(renewal.newEndDate) > new Date()).length;
     setUpcomingRenewals(upcoming);
 
+    // Total Rent Income
+    const totalRentIncome = data.reduce((acc, renewal) => acc + Number(renewal.monthlyRent), 0);
+    setTotalRent(totalRentIncome);
+
     // Rent Trends for Line Chart
-    const trendData = data.map(renewal => ({
+    const trends = data.map(renewal => ({
       date: new Date(renewal.renewalDate).getTime(),
       rent: Number(renewal.monthlyRent),
     }));
-    setRentTrends(trendData);
+    setRentTrends(trends);
 
     // Tag Distribution for Pie Chart
     const tagCounts = data.reduce((acc, renewal) => {
-      renewal.tags.forEach(tag => {
-        acc[tag] = (acc[tag] || 0) + 1;
-      });
+      if (Array.isArray(renewal.tags)) {
+        renewal.tags.forEach(tag => {
+          acc[tag] = (acc[tag] || 0) + 1;
+        });
+      }
       return acc;
     }, {});
     setTagDistribution(Object.keys(tagCounts).map(key => ({
@@ -54,8 +61,8 @@ export default function LeaseRenewalsDashboard({ fetchItems }) {
   // Highcharts options for Rent Trends
   const rentTrendChartOptions = {
     chart: { type: 'line' },
-    title: { text: 'Monthly Rent Trends' },
-    xAxis: { type: 'datetime', title: { text: 'Date' } },
+    title: { text: 'Monthly Rent Trends (Renewals)' },
+    xAxis: { type: 'datetime', title: { text: 'Renewal Date' } },
     yAxis: { title: { text: 'Monthly Rent' } },
     series: [{
       name: 'Monthly Rent',
@@ -81,7 +88,7 @@ export default function LeaseRenewalsDashboard({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Lease Renewals Dashboard
+          Lease Renewals Analytics
         </Typography>
 
         <Grid container spacing={4}>
@@ -103,6 +110,17 @@ export default function LeaseRenewalsDashboard({ fetchItems }) {
                 <Typography variant="h6">Upcoming Renewals</Typography>
                 <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {upcomingRenewals}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Rent Income</Typography>
+                <Typography variant="h4" color="purple" sx={{ fontWeight: 'bold' }}>
+                  ${totalRent.toFixed(2)}
                 </Typography>
               </CardContent>
             </Card>

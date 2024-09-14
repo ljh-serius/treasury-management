@@ -1,90 +1,108 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Card, Grid, Typography, Chip } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
 
-const CustomerSurveysAnalytics = ({ fetchItems }) => {
-  const [data, setData] = useState([]);
+export default function CustomerSurveysDashboard({ fetchItems }) {
+  const [surveyData, setSurveyData] = useState([]);
+  const [totalSurveys, setTotalSurveys] = useState(0);
+  const [satisfactionDistribution, setSatisfactionDistribution] = useState([]);
+  const [surveyTimeline, setSurveyTimeline] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetchItems();
-      setData(response);
+    const fetchData = async () => {
+      setLoading(true);
+      const data = await fetchItems();
+      setSurveyData(data);
+      processSurveyData(data);
       setLoading(false);
-    }
+    };
+
     fetchData();
   }, [fetchItems]);
 
-  if (loading) return <Typography>Loading...</Typography>;
+  const processSurveyData = (data) => {
+    // Total Surveys
+    setTotalSurveys(data.length);
 
-  // Calculate KPIs
-  const totalSurveys = data.length;
-  const averageSatisfactionScore = (
-    data.reduce((sum, record) => sum + parseInt(record.satisfactionScore, 10), 0) / totalSurveys
-  ).toFixed(2);
+    // Satisfaction Score Distribution for Pie Chart
+    const scoreCounts = data.reduce((acc, survey) => {
+      acc[survey.satisfactionScore] = (acc[survey.satisfactionScore] || 0) + 1;
+      return acc;
+    }, {});
+    setSatisfactionDistribution(Object.keys(scoreCounts).map(key => ({
+      name: `Score ${key}`,
+      y: scoreCounts[key],
+    })));
 
-  // Highcharts options for satisfaction score distribution
-  const satisfactionScoreOptions = {
-    chart: { type: 'column' },
+    // Survey Timeline for Line Chart
+    const timelineData = data.map(survey => ({
+      date: new Date(survey.surveyDate).getTime(),
+      label: `Survey ${survey.surveyId.slice(-4)}`,
+    })).sort((a, b) => a.date - b.date);
+    setSurveyTimeline(timelineData);
+  };
+
+  // Highcharts options for Satisfaction Score Distribution
+  const satisfactionChartOptions = {
+    chart: { type: 'pie' },
     title: { text: 'Satisfaction Score Distribution' },
-    xAxis: {
-      categories: ['1', '2', '3', '4', '5'],
-      title: { text: 'Score' },
-    },
-    yAxis: {
-      min: 0,
-      title: { text: 'Number of Responses' },
-    },
-    series: [
-      {
-        name: 'Responses',
-        data: [1, 2, 3, 4, 5].map(
-          (score) => data.filter((record) => record.satisfactionScore === String(score)).length
-        ),
-      },
-    ],
+    series: [{
+      name: 'Satisfaction Score',
+      colorByPoint: true,
+      data: satisfactionDistribution,
+    }],
+  };
+
+  // Highcharts options for Survey Timeline
+  const surveyTimelineChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Surveys Conducted Over Time' },
+    xAxis: { type: 'datetime', title: { text: 'Survey Date' } },
+    yAxis: { title: { text: 'Surveys' } },
+    series: [{
+      name: 'Surveys',
+      data: surveyTimeline.map(item => [item.date, 1]), // Y-axis is constant (1) since we're counting the occurrences
+    }],
   };
 
   return (
-    <Grid container spacing={4}>
-      {/* KPI Cards */}
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Surveys</Typography>
-          <Typography variant="h4">{totalSurveys}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Average Satisfaction Score</Typography>
-          <Typography variant="h4">{averageSatisfactionScore}</Typography>
-        </Card>
-      </Grid>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Box sx={{ padding: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Customer Surveys Dashboard
+        </Typography>
 
-      {/* Highcharts */}
-      <Grid item xs={12}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={satisfactionScoreOptions} />
-        </Card>
-      </Grid>
+        <Grid container spacing={4}>
+          {/* KPIs Section */}
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Surveys</Typography>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                  {totalSurveys}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
 
-      {/* Tags */}
-      <Grid item xs={12}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Tags</Typography>
-          {data.map((record, index) => (
-            <div key={index}>
-              <Typography variant="subtitle1">{`Survey ${index + 1}:`}</Typography>
-              {record.tags.map((tag) => (
-                <Chip key={tag.id} label={tag.label} style={{ margin: '5px' }} />
-              ))}
-            </div>
-          ))}
-        </Card>
-      </Grid>
-    </Grid>
+        <Grid container spacing={4} sx={{ marginTop: 4 }}>
+          {/* Satisfaction Score Distribution Chart */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={satisfactionChartOptions} />
+          </Grid>
+
+          {/* Survey Timeline Chart */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={surveyTimelineChartOptions} />
+          </Grid>
+        </Grid>
+      </Box>
+    </Container>
   );
-};
-
-export default CustomerSurveysAnalytics;
+}

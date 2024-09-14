@@ -30,23 +30,25 @@ export default function RentalAgreementsDashboard({ fetchItems }) {
     const totalSecurity = data.reduce((acc, rental) => acc + Number(rental.securityDeposit), 0);
     setTotalRent(totalRentAmount);
     setTotalSecurityDeposit(totalSecurity);
-
-    // Count Renewal Agreements
-    const renewals = data.filter(rental => rental.tags.includes('renewal')).length;
+  
+    // Count Renewal Agreements (ensure tags exists)
+    const renewals = data.filter(rental => rental.tags && rental.tags.includes('renewal')).length;
     setRenewalAgreements(renewals);
-
+  
     // Rent Trends for Line Chart
     const trendData = data.map(rental => ({
-      date: new Date(rental.startDate).getTime(),
-      rent: Number(rental.monthlyRent),
+      date: new Date(rental.startDate).getTime(), // Convert date to timestamp
+      rent: Number(rental.monthlyRent), // Ensure monthlyRent is a number
     }));
     setRentTrends(trendData);
-
-    // Tag Distribution for Pie Chart
+  
+    // Tag Distribution for Pie Chart (ensure tags exists)
     const tagCounts = data.reduce((acc, rental) => {
-      rental.tags.forEach(tag => {
-        acc[tag] = (acc[tag] || 0) + 1;
-      });
+      if (rental.tags) {
+        rental.tags.forEach(tag => {
+          acc[tag] = (acc[tag] || 0) + 1;
+        });
+      }
       return acc;
     }, {});
     setTagDistribution(Object.keys(tagCounts).map(key => ({
@@ -54,7 +56,7 @@ export default function RentalAgreementsDashboard({ fetchItems }) {
       y: tagCounts[key],
     })));
   };
-
+  
   // Highcharts options for Rent Trends
   const rentTrendChartOptions = {
     chart: { type: 'line' },
@@ -63,10 +65,10 @@ export default function RentalAgreementsDashboard({ fetchItems }) {
     yAxis: { title: { text: 'Monthly Rent' } },
     series: [{
       name: 'Monthly Rent',
-      data: rentTrends.map(item => [item.date, item.rent]),
+      data: rentTrends.map(item => [item.date, item.rent]), // Properly formatted date and rent
     }],
   };
-
+  
   // Highcharts options for Tag Distribution
   const tagChartOptions = {
     chart: { type: 'pie' },

@@ -1,151 +1,115 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
+import React, { useState, useEffect } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { Card, Grid, Typography, Chip } from '@mui/material';
 
 const RevenueSharingAgreementsAnalytics = ({ fetchItems }) => {
   const [data, setData] = useState([]);
-  const [kpis, setKpis] = useState({
-    totalAgreements: 0,
-    activeAgreements: 0,
-    expiredAgreements: 0,
-    terminatedAgreements: 0,
-    averageRevenueShare: 0,
-  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
-      const agreements = await fetchItems();
-      setData(agreements);
-      calculateKPIs(agreements);
-    };
-
-    loadData();
+    async function fetchData() {
+      const response = await fetchItems();
+      setData(response || []); // Ensure data is an array
+      setLoading(false);
+    }
+    fetchData();
   }, [fetchItems]);
 
-  const calculateKPIs = (items) => {
-    const totalAgreements = items.length;
-    const activeAgreements = items.filter((item) => item.status === 'active').length;
-    const expiredAgreements = items.filter((item) => item.status === 'expired').length;
-    const terminatedAgreements = items.filter((item) => item.status === 'terminated').length;
-    const averageRevenueShare =
-      items.reduce((acc, curr) => acc + parseFloat(curr.revenueShare || 0), 0) / totalAgreements;
+  if (loading) return <Typography>Loading...</Typography>;
 
-    setKpis({
-      totalAgreements,
-      activeAgreements,
-      expiredAgreements,
-      terminatedAgreements,
-      averageRevenueShare: averageRevenueShare.toFixed(2),
-    });
+  // KPIs
+  const totalAgreements = data.length;
+  const avgRevenueShare = totalAgreements > 0
+    ? data.reduce((sum, record) => sum + (Number(record.revenueShare) || 0), 0) / totalAgreements
+    : 0;
+  const avgDuration = totalAgreements > 0
+    ? data.reduce((sum, record) => sum + (Number(record.duration) || 0), 0) / totalAgreements
+    : 0;
+
+  // Count agreements by status
+  const statusCounts = data.reduce((acc, record) => {
+    acc[record.status] = (acc[record.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const statusDistribution = Object.keys(statusCounts).map(status => ({
+    name: status.charAt(0).toUpperCase() + status.slice(1),
+    y: statusCounts[status],
+  }));
+
+  // Highcharts options for status distribution
+  const statusDistributionChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Status Distribution of Agreements' },
+    series: [{
+      name: 'Statuses',
+      colorByPoint: true,
+      data: statusDistribution,
+    }]
   };
 
-  const statusChart = {
-    chart: {
-      type: 'pie',
-    },
-    title: {
-      text: 'Agreement Status Distribution',
-    },
-    series: [
-      {
-        name: 'Agreements',
-        colorByPoint: true,
-        data: [
-          { name: 'Active', y: kpis.activeAgreements },
-          { name: 'Expired', y: kpis.expiredAgreements },
-          { name: 'Terminated', y: kpis.terminatedAgreements },
-        ],
-      },
-    ],
-  };
-
-  const revenueShareChart = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Revenue Share by Partner',
-    },
-    xAxis: {
-      categories: data.map((item) => item.partnerName),
-    },
-    yAxis: {
-      title: {
-        text: 'Revenue Share (%)',
-      },
-    },
-    series: [
-      {
-        name: 'Revenue Share',
-        data: data.map((item) => parseFloat(item.revenueShare || 0)),
-      },
-    ],
+  // Highcharts options for revenue share tracking
+  const revenueShareChartOptions = {
+    chart: { type: 'bar' },
+    title: { text: 'Revenue Share by Partner' },
+    xAxis: { categories: data.map(record => record.partnerName || 'Unknown') },
+    yAxis: { title: { text: 'Revenue Share (%)' } },
+    series: [{
+      name: 'Revenue Share (%)',
+      data: data.map(record => Number(record.revenueShare) || 0),
+    }]
   };
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Revenue Sharing Agreements Analytics
-      </Typography>
-
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Agreements</Typography>
-              <Typography variant="h4">{kpis.totalAgreements}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Active Agreements</Typography>
-              <Typography variant="h4">{kpis.activeAgreements}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Expired Agreements</Typography>
-              <Typography variant="h4">{kpis.expiredAgreements}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Terminated Agreements</Typography>
-              <Typography variant="h4">{kpis.terminatedAgreements}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+    <Grid container spacing={4}>
+      {/* KPI Cards */}
+      <Grid item xs={12} md={4}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Total Agreements</Typography>
+          <Typography variant="h4">{totalAgreements}</Typography>
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Average Revenue Share (%)</Typography>
+          <Typography variant="h4">{avgRevenueShare.toFixed(2)}%</Typography>
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Average Duration (years)</Typography>
+          <Typography variant="h4">{avgDuration.toFixed(2)}</Typography>
+        </Card>
       </Grid>
 
-      <Grid container spacing={3} mt={4}>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Average Revenue Share (%)</Typography>
-              <Typography variant="h4">{kpis.averageRevenueShare}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+      {/* Highcharts */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={statusDistributionChartOptions} />
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={revenueShareChartOptions} />
+        </Card>
       </Grid>
 
-      <Box mt={4}>
-        <HighchartsReact highcharts={Highcharts} options={statusChart} />
-      </Box>
-
-      <Box mt={4}>
-        <HighchartsReact highcharts={Highcharts} options={revenueShareChart} />
-      </Box>
-    </Box>
+      {/* Tags */}
+      <Grid item xs={12}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Tags</Typography>
+          {data.map((record, index) => (
+            <div key={index}>
+              <Typography variant="subtitle1">{record.partnerName}:</Typography>
+              {Array.isArray(record.tags) ? record.tags.map((tag, tagIndex) => (
+                <Chip key={tagIndex} label={tag.label} style={{ margin: '5px' }} />
+              )) : 'No Tags'}
+            </div>
+          ))}
+        </Card>
+      </Grid>
+    </Grid>
   );
 };
 

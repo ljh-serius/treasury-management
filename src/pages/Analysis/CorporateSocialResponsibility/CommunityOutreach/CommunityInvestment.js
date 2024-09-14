@@ -1,148 +1,114 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
+import React, { useState, useEffect } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { Card, Grid, Typography, Chip } from '@mui/material';
 
 const CommunityInvestmentAnalytics = ({ fetchItems }) => {
   const [data, setData] = useState([]);
-  const [kpis, setKpis] = useState({
-    totalInvestments: 0,
-    totalAmount: 0,
-    completedProjects: 0,
-    ongoingProjects: 0,
-    plannedProjects: 0,
-  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
-      const investments = await fetchItems();
-      setData(investments);
-      calculateKPIs(investments);
-    };
-
-    loadData();
+    async function fetchData() {
+      const response = await fetchItems();
+      setData(response || []); // Ensure data is an array
+      setLoading(false);
+    }
+    fetchData();
   }, [fetchItems]);
 
-  const calculateKPIs = (investments) => {
-    const totalInvestments = investments.length;
-    const totalAmount = investments.reduce((sum, item) => sum + item.investmentAmount, 0);
-    const completedProjects = investments.filter((inv) => inv.status === 'completed').length;
-    const ongoingProjects = investments.filter((inv) => inv.status === 'ongoing').length;
-    const plannedProjects = investments.filter((inv) => inv.status === 'planned').length;
+  if (loading) return <Typography>Loading...</Typography>;
 
-    setKpis({
-      totalInvestments,
-      totalAmount,
-      completedProjects,
-      ongoingProjects,
-      plannedProjects,
-    });
+  // KPIs
+  const totalInvestment = data.reduce((sum, record) => sum + Number(record.investmentAmount), 0);
+  const ongoingProjects = data.filter((record) => record.status === 'ongoing').length;
+  const completedProjects = data.filter((record) => record.status === 'completed').length;
+
+  // Community Benefited Distribution
+  const communityMap = data.reduce((acc, record) => {
+    acc[record.communityBenefited] = (acc[record.communityBenefited] || 0) + 1;
+    return acc;
+  }, {});
+
+  const communityDistribution = Object.keys(communityMap).map(community => ({
+    name: community,
+    y: communityMap[community],
+  }));
+
+  // Highcharts options for Community Benefited Distribution
+  const communityChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Community Benefited Distribution' },
+    series: [{
+      name: 'Communities',
+      colorByPoint: true,
+      data: communityDistribution,
+    }],
   };
 
-  const investmentStatusChart = {
-    chart: {
-      type: 'pie',
-    },
-    title: {
-      text: 'Investment Status Distribution',
-    },
-    series: [
-      {
-        name: 'Projects',
-        colorByPoint: true,
-        data: [
-          { name: 'Completed', y: kpis.completedProjects },
-          { name: 'Ongoing', y: kpis.ongoingProjects },
-          { name: 'Planned', y: kpis.plannedProjects },
-        ],
-      },
-    ],
-  };
-
-  const investmentAmountChart = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Investment Amount by Project',
-    },
+  // Highcharts options for Investment over Time
+  const investmentChartOptions = {
+    chart: { type: 'line' },
+    title: { text: 'Investment Over Time' },
     xAxis: {
-      categories: data.map((item) => item.projectName),
+      categories: data.map(record => new Date(record.startDate).getFullYear()),
+      title: { text: 'Year' }
     },
-    yAxis: {
-      title: {
-        text: 'Investment Amount (USD)',
-      },
-    },
-    series: [
-      {
-        name: 'Investment Amount',
-        data: data.map((item) => item.investmentAmount),
-      },
-    ],
+    yAxis: { title: { text: 'Investment Amount' } },
+    series: [{
+      name: 'Investment Amount',
+      data: data.map(record => record.investmentAmount),
+    }],
   };
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Community Investment Analytics
-      </Typography>
-
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Investments</Typography>
-              <Typography variant="h4">{kpis.totalInvestments}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Investment Amount</Typography>
-              <Typography variant="h4">${kpis.totalAmount.toFixed(2)}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Completed Projects</Typography>
-              <Typography variant="h4">{kpis.completedProjects}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Ongoing Projects</Typography>
-              <Typography variant="h4">{kpis.ongoingProjects}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Planned Projects</Typography>
-              <Typography variant="h4">{kpis.plannedProjects}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+    <Grid container spacing={4}>
+      {/* KPI Cards */}
+      <Grid item xs={12} md={4}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Total Investment Amount</Typography>
+          <Typography variant="h4">${totalInvestment.toFixed(2)}</Typography>
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Ongoing Projects</Typography>
+          <Typography variant="h4">{ongoingProjects}</Typography>
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Completed Projects</Typography>
+          <Typography variant="h4">{completedProjects}</Typography>
+        </Card>
       </Grid>
 
-      <Box mt={4}>
-        <HighchartsReact highcharts={Highcharts} options={investmentStatusChart} />
-      </Box>
+      {/* Highcharts */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={communityChartOptions} />
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={investmentChartOptions} />
+        </Card>
+      </Grid>
 
-      <Box mt={4}>
-        <HighchartsReact highcharts={Highcharts} options={investmentAmountChart} />
-      </Box>
-    </Box>
+      {/* Tags */}
+      <Grid item xs={12}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Tags</Typography>
+          {data.map((record, index) => (
+            <div key={index}>
+              <Typography variant="subtitle1">{record.projectName}:</Typography>
+              {Array.isArray(record.tags) ? record.tags.map((tag, tagIndex) => (
+                <Chip key={tagIndex} label={tag.label} style={{ margin: '5px' }} />
+              )) : 'No Tags'}
+            </div>
+          ))}
+        </Card>
+      </Grid>
+    </Grid>
   );
 };
 

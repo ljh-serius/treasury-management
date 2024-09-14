@@ -1,107 +1,109 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
+import { Card, Grid, Typography, Chip } from '@mui/material';
 
-export default function ResearchProposalsDashboard({ fetchItems }) {
-  const [proposalsData, setProposalsData] = useState([]);
-  const [totalProposals, setTotalProposals] = useState(0);
-  const [approvalStatusDistribution, setApprovalStatusDistribution] = useState([]);
-  const [budgetDistribution, setBudgetDistribution] = useState([]);
+const ResearchProposalsAnalytics = ({ fetchItems }) => {
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const data = await fetchItems();
-      setProposalsData(data);
-      processProposalsData(data);
+    async function fetchData() {
+      const response = await fetchItems();
+      setData(response || []); // Ensure data is an array
       setLoading(false);
-    };
-
+    }
     fetchData();
   }, [fetchItems]);
 
-  const processProposalsData = (data) => {
-    // Total Proposals
-    setTotalProposals(data.length);
+  if (loading) return <Typography>Loading...</Typography>;
 
-    // Approval Status Distribution for Pie Chart
-    const statusCounts = data.reduce((acc, proposal) => {
-      acc[proposal.approvalStatus] = (acc[proposal.approvalStatus] || 0) + 1;
-      return acc;
-    }, {});
-    setApprovalStatusDistribution(Object.keys(statusCounts).map(key => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),
-      y: statusCounts[key],
-    })));
+  // Calculate KPIs
+  const totalBudget = data.reduce((sum, record) => sum + (Number(record.budget) || 0), 0);
+  const approvedProposals = data.filter(record => record.approvalStatus === 'approved').length;
+  const pendingProposals = data.filter(record => record.approvalStatus === 'pending').length;
+  const rejectedProposals = data.filter(record => record.approvalStatus === 'rejected').length;
 
-    // Budget Distribution for Column Chart
-    setBudgetDistribution(data.map(proposal => ({
-      name: proposal.proposalTitle,
-      y: proposal.budget,
-    })));
-  };
-
-  // Highcharts options for Approval Status Distribution
+  // Highcharts options for proposal status distribution
   const statusChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Approval Status Distribution' },
+    title: { text: 'Proposal Approval Status Distribution' },
     series: [{
-      name: 'Approval Status',
+      name: 'Proposals',
       colorByPoint: true,
-      data: approvalStatusDistribution,
-    }],
+      data: [
+        { name: 'Approved', y: approvedProposals },
+        { name: 'Pending', y: pendingProposals },
+        { name: 'Rejected', y: rejectedProposals },
+      ]
+    }]
   };
 
-  // Highcharts options for Budget Distribution
+  // Highcharts options for budget allocation by department
   const budgetChartOptions = {
-    chart: { type: 'column' },
-    title: { text: 'Budget Distribution by Proposal' },
-    xAxis: { type: 'category', title: { text: 'Proposal Titles' } },
-    yAxis: { title: { text: 'Budget Amount' } },
+    chart: { type: 'bar' },
+    title: { text: 'Budget Allocation by Department' },
+    xAxis: { type: 'category', title: { text: 'Department' } },
+    yAxis: { title: { text: 'Budget' } },
     series: [{
       name: 'Budget',
-      data: budgetDistribution,
-    }],
+      data: data.map(record => ({
+        name: record.department || 'Unknown',
+        y: Number(record.budget) || 0
+      })),
+    }]
   };
 
   return (
-    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
-      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
-      <Box sx={{ padding: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Research Proposals Dashboard
-        </Typography>
+    <Grid container spacing={4}>
+      {/* KPI Cards */}
+      <Grid item xs={12} md={4}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Total Budget</Typography>
+          <Typography variant="h4">${totalBudget.toFixed(2)}</Typography>
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Approved Proposals</Typography>
+          <Typography variant="h4">{approvedProposals}</Typography>
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Pending Proposals</Typography>
+          <Typography variant="h4">{pendingProposals}</Typography>
+        </Card>
+      </Grid>
 
-        <Grid container spacing={4}>
-          {/* KPIs Section */}
-          <Grid item xs={12} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Total Proposals</Typography>
-                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  {totalProposals}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+      {/* Highcharts */}
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Card>
+          <HighchartsReact highcharts={Highcharts} options={budgetChartOptions} />
+        </Card>
+      </Grid>
 
-        <Grid container spacing={4} sx={{ marginTop: 4 }}>
-          {/* Approval Status Distribution Chart */}
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
-          </Grid>
-
-          {/* Budget Distribution Chart */}
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={budgetChartOptions} />
-          </Grid>
-        </Grid>
-      </Box>
-    </Container>
+      {/* Tags */}
+      <Grid item xs={12}>
+        <Card>
+          <Typography variant="h6" gutterBottom>Tags</Typography>
+          {data.map((record, index) => (
+            <div key={index}>
+              <Typography variant="subtitle1">{record.proposalTitle}:</Typography>
+              {Array.isArray(record.tags) ? record.tags.map((tag, tagIndex) => (
+                <Chip key={tagIndex} label={tag.label} style={{ margin: '5px' }} />
+              )) : 'No Tags'}
+            </div>
+          ))}
+        </Card>
+      </Grid>
+    </Grid>
   );
-}
+};
+
+export default ResearchProposalsAnalytics;

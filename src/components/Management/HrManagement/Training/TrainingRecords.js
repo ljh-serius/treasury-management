@@ -1,15 +1,25 @@
 export const fieldsConfig = {
-    trainingId: { label: 'Training ID', type: 'text', faker: 'datatype.uuid' },
+    recordId: { label: 'Record ID', type: 'text', faker: 'datatype.uuid' },
     employeeId: { label: 'Employee ID', type: 'text', faker: 'datatype.uuid' },
-    courseName: { label: 'Course Name', type: 'text', faker: 'company.bs' },
+    programName: { label: 'Program Name', type: 'text', faker: 'company.bsNoun' },
     completionDate: { label: 'Completion Date', type: 'date', faker: 'date.past' },
+    result: {
+        label: 'Result',
+        type: 'select',
+        options: [
+            { id: 'pass', label: 'Pass' },
+            { id: 'fail', label: 'Fail' },
+        ],
+        faker: 'random.arrayElement',
+    },
+    score: { label: 'Score', type: 'number', faker: 'datatype.number' },
     status: {
         label: 'Status',
         type: 'select',
         options: [
             { id: 'completed', label: 'Completed' },
-            { id: 'in_progress', label: 'In Progress' },
-            { id: 'not_started', label: 'Not Started' },
+            { id: 'pending', label: 'Pending' },
+            { id: 'failed', label: 'Failed' },
         ],
         faker: 'random.arrayElement',
     },
@@ -18,15 +28,12 @@ export const fieldsConfig = {
         type: 'select',
         options: [
             { id: 'urgent', label: 'Urgent' },
-            { id: 'review', label: 'Review' },
             { id: 'important', label: 'Important' },
-            { id: 'completed', label: 'Completed' },
-            { id: 'follow-up', label: 'Follow-Up' },
+            { id: 'review', label: 'Review' },
         ],
         multiple: true,
         faker: 'random.arrayElement',
     },
-    notes: { label: 'Notes', type: 'text', multiline: true, rows: 4, faker: 'lorem.paragraph' },
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     lastModifiedBy: { label: 'Last Modified By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
@@ -35,4 +42,3 @@ export const fieldsConfig = {
 
 export const entityName = 'Training Records';
 export const collectionName = 'training-records';
-

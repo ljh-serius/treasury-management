@@ -10,43 +10,45 @@ const EnergySavingsAnalytics = ({ fetchItems }) => {
   useEffect(() => {
     async function fetchData() {
       const response = await fetchItems();
-      setData(response);
+      setData(response || []); // Ensure data is an array
       setLoading(false);
     }
     fetchData();
-  }, []);
+  }, [fetchItems]);
 
   if (loading) return <Typography>Loading...</Typography>;
 
   // Calculate KPIs
-  const totalSavings = data.reduce((sum, record) => sum + record.totalSavings, 0);
-  const totalCostSavings = data.reduce((sum, record) => sum + record.costSavings, 0);
-  const averageReduction = data.reduce((sum, record) => sum + record.achievedReduction, 0) / data.length;
+  const totalSavings = data.reduce((sum, record) => sum + (Number(record.totalSavings) || 0), 0);
+  const totalCostSavings = data.reduce((sum, record) => sum + (Number(record.costSavings) || 0), 0);
+  const averageReduction = data.length > 0 
+    ? data.reduce((sum, record) => sum + (Number(record.achievedReduction) || 0), 0) / data.length
+    : 0;
 
   // Highcharts options for total savings over the years
   const totalSavingsChartOptions = {
     title: { text: 'Total Energy Savings Over the Years' },
-    xAxis: { categories: data.map((record) => record.year) },
+    xAxis: { categories: data.map((record) => record.year || 'Unknown') },
     yAxis: { title: { text: 'Total Savings (MWh)' } },
-    series: [{ name: 'Total Savings (MWh)', data: data.map((record) => record.totalSavings) }],
+    series: [{ name: 'Total Savings (MWh)', data: data.map((record) => Number(record.totalSavings) || 0) }],
   };
 
   // Highcharts options for cost savings over the years
   const costSavingsChartOptions = {
     title: { text: 'Cost Savings Over the Years' },
-    xAxis: { categories: data.map((record) => record.year) },
+    xAxis: { categories: data.map((record) => record.year || 'Unknown') },
     yAxis: { title: { text: 'Cost Savings' } },
-    series: [{ name: 'Cost Savings', data: data.map((record) => record.costSavings) }],
+    series: [{ name: 'Cost Savings', data: data.map((record) => Number(record.costSavings) || 0) }],
   };
 
   // Highcharts options for achieved reduction vs target
   const reductionChartOptions = {
     title: { text: 'Achieved Reduction vs Reduction Target' },
-    xAxis: { categories: data.map((record) => record.year) },
+    xAxis: { categories: data.map((record) => record.year || 'Unknown') },
     yAxis: { title: { text: 'Reduction (%)' } },
     series: [
-      { name: 'Reduction Target (%)', data: data.map((record) => record.reductionTarget) },
-      { name: 'Achieved Reduction (%)', data: data.map((record) => record.achievedReduction) },
+      { name: 'Reduction Target (%)', data: data.map((record) => Number(record.reductionTarget) || 0) },
+      { name: 'Achieved Reduction (%)', data: data.map((record) => Number(record.achievedReduction) || 0) },
     ],
   };
 
@@ -96,9 +98,9 @@ const EnergySavingsAnalytics = ({ fetchItems }) => {
           {data.map((record, index) => (
             <div key={index}>
               <Typography variant="subtitle1">{record.year}:</Typography>
-              {record.tags.map((tag) => (
-                <Chip key={tag.id} label={tag.label} style={{ margin: '5px' }} />
-              ))}
+              {Array.isArray(record.tags) ? record.tags.map((tag, tagIndex) => (
+                <Chip key={tagIndex} label={tag.label} style={{ margin: '5px' }} />
+              )) : 'No Tags'}
             </div>
           ))}
         </Card>

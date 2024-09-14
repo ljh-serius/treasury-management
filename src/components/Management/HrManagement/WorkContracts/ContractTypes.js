@@ -1,27 +1,16 @@
 export const fieldsConfig = {
-    contractId: { label: 'Contract ID', type: 'text', faker: 'datatype.uuid' },
-    employeeId: { label: 'Employee ID', type: 'text', faker: 'datatype.uuid' },
-    contractType: {
-        label: 'Contract Type',
-        type: 'select',
-        options: [
-            { id: 'full_time', label: 'Full Time' },
-            { id: 'part_time', label: 'Part Time' },
-            { id: 'contract', label: 'Contract' },
-            { id: 'temporary', label: 'Temporary' },
-        ],
-        faker: 'random.arrayElement',
-    },
-    startDate: { label: 'Start Date', type: 'date', faker: 'date.past' },
-    endDate: { label: 'End Date', type: 'date', faker: 'date.future' },
-    salary: { label: 'Salary', type: 'number', faker: 'finance.amount' },
-    status: {
-        label: 'Status',
+    contractTypeId: { label: 'Contract Type ID', type: 'text', faker: 'datatype.uuid' },
+    contractTypeName: { label: 'Contract Type Name', type: 'text', faker: 'company.bsNoun' },
+    description: { label: 'Description', type: 'text', faker: 'lorem.sentence' },
+    validFrom: { label: 'Valid From', type: 'date', faker: 'date.past' },
+    validTo: { label: 'Valid To', type: 'date', faker: 'date.future' },
+    contractStatus: {
+        label: 'Contract Status',
         type: 'select',
         options: [
             { id: 'active', label: 'Active' },
+            { id: 'expired', label: 'Expired' },
             { id: 'terminated', label: 'Terminated' },
-            { id: 'completed', label: 'Completed' },
         ],
         faker: 'random.arrayElement',
     },
@@ -30,10 +19,8 @@ export const fieldsConfig = {
         type: 'select',
         options: [
             { id: 'urgent', label: 'Urgent' },
-            { id: 'review', label: 'Review' },
             { id: 'important', label: 'Important' },
-            { id: 'completed', label: 'Completed' },
-            { id: 'follow-up', label: 'Follow-Up' },
+            { id: 'review', label: 'Review' },
         ],
         multiple: true,
         faker: 'random.arrayElement',
@@ -46,4 +33,3 @@ export const fieldsConfig = {
 
 export const entityName = 'Contract Types';
 export const collectionName = 'contract-types';
-

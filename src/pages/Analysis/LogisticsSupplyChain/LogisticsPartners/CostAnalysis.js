@@ -24,22 +24,22 @@ export default function CostAnalysisDashboard({ fetchItems }) {
 
   const processCostData = (data) => {
     // Total Cost
-    const total = data.reduce((acc, item) => acc + Number(item.totalCost), 0);
+    const total = data.reduce((acc, item) => acc + parseFloat(item.totalCost), 0);
     setTotalCost(total);
-
+  
     // Cost Breakdown (latest analysis)
     if (data.length > 0) {
       setCostBreakdown(data[data.length - 1].costBreakdown);
     }
-
+  
     // Cost Trends for Line Chart
     const trendsData = data.map(item => ({
-      date: new Date(item.analysisDate).getTime(),
-      cost: item.totalCost,
+      date: new Date(item.analysisDate).getTime(), // Ensure date is a timestamp
+      cost: parseFloat(item.totalCost), // Ensure cost is a number
     })).sort((a, b) => a.date - b.date);
     setCostTrends(trendsData);
   };
-
+  
   // Highcharts options for Cost Trends
   const costChartOptions = {
     chart: { type: 'line' },
@@ -48,7 +48,7 @@ export default function CostAnalysisDashboard({ fetchItems }) {
     yAxis: { title: { text: 'Total Cost' } },
     series: [{
       name: 'Total Cost',
-      data: costTrends.map(item => [item.date, item.cost]),
+      data: costTrends.map(item => [item.date, item.cost]), // Properly formatted date and cost
     }],
   };
 

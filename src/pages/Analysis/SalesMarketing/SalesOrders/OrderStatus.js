@@ -24,16 +24,27 @@ export default function OrderStatusDashboard({ fetchItems }) {
     fetchDataAsync();
   }, [fetchItems]);
 
+  const statusToNumber = (status) => {
+    switch (status) {
+      case 'pending':
+        return 1;
+      case 'shipped':
+        return 2;
+      default:
+        return 0;
+    }
+  };
+  
   const processOrderData = (data) => {
     // Total Orders
     setTotalOrders(data.length);
-
+  
     // Count Pending and Shipped Orders
     const pending = data.filter(order => order.status === 'pending').length;
     const shipped = data.filter(order => order.status === 'shipped').length;
     setPendingOrders(pending);
     setShippedOrders(shipped);
-
+  
     // Status Distribution for Pie Chart
     const statusCounts = data.reduce((acc, order) => {
       acc[order.status] = (acc[order.status] || 0) + 1;
@@ -43,15 +54,15 @@ export default function OrderStatusDashboard({ fetchItems }) {
       name: key.charAt(0).toUpperCase() + key.slice(1),
       y: statusCounts[key],
     })));
-
-    // Order Timeline for Line Chart
+  
+    // Order Timeline for Line Chart with numeric status values
     const timeline = data.map(order => ({
-      date: new Date(order.lastUpdated).getTime(),
-      status: order.status,
+      date: new Date(order.lastUpdated).getTime(), // Convert date to timestamp
+      status: statusToNumber(order.status), // Convert status to a number
     })).sort((a, b) => a.date - b.date);
     setOrderTimeline(timeline);
   };
-
+  
   // Highcharts options for Status Distribution
   const statusChartOptions = {
     chart: { type: 'pie' },
@@ -62,19 +73,22 @@ export default function OrderStatusDashboard({ fetchItems }) {
       data: statusDistribution,
     }],
   };
-
+  
   // Highcharts options for Order Timeline
   const timelineChartOptions = {
     chart: { type: 'line' },
     title: { text: 'Order Update Timeline' },
     xAxis: { type: 'datetime', title: { text: 'Date' } },
-    yAxis: { title: { text: 'Order Status' } },
+    yAxis: {
+      title: { text: 'Order Status' },
+      categories: ['Unknown', 'Pending', 'Shipped'], // Map numbers back to status labels
+    },
     series: [{
       name: 'Orders Over Time',
-      data: orderTimeline.map(item => [item.date, item.status]),
+      data: orderTimeline.map(item => [item.date, item.status]), // Use numeric status values
     }],
   };
-
+  
   return (
     <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
       <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
@@ -84,7 +98,7 @@ export default function OrderStatusDashboard({ fetchItems }) {
         <Typography variant="h4" gutterBottom>
           Order Status Dashboard
         </Typography>
-
+  
         <Grid container spacing={4}>
           {/* KPIs Section */}
           <Grid item xs={12} md={3}>
@@ -97,7 +111,7 @@ export default function OrderStatusDashboard({ fetchItems }) {
               </CardContent>
             </Card>
           </Grid>
-
+  
           <Grid item xs={12} md={3}>
             <Card>
               <CardContent>
@@ -108,7 +122,7 @@ export default function OrderStatusDashboard({ fetchItems }) {
               </CardContent>
             </Card>
           </Grid>
-
+  
           <Grid item xs={12} md={3}>
             <Card>
               <CardContent>
@@ -120,13 +134,13 @@ export default function OrderStatusDashboard({ fetchItems }) {
             </Card>
           </Grid>
         </Grid>
-
+  
         <Grid container spacing={4} sx={{ marginTop: 4 }}>
           {/* Status Distribution Chart */}
           <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
           </Grid>
-
+  
           {/* Order Timeline Chart */}
           <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={timelineChartOptions} />
@@ -135,4 +149,4 @@ export default function OrderStatusDashboard({ fetchItems }) {
       </Box>
     </Container>
   );
-}
+}  
