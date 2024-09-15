@@ -5,57 +5,54 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function AssetDisposalAnalytics({ fetchItems }) {
-  const [data, setData] = useState([]);
+export default function AssetDisposalDashboard({ fetchItems }) {
+  const [disposalData, setDisposalData] = useState([]);
+  const [statusDistribution, setStatusDistribution] = useState([]);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [totalDisposals, setTotalDisposals] = useState(0);
-  const [obsoleteAssets, setObsoleteAssets] = useState([]);
-  const [disposalDistribution, setDisposalDistribution] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const fetchedData = await fetchItems();
-      setData(fetchedData);
-      calculateKpis(fetchedData);
-      generateCharts(fetchedData);
+      const data = await fetchItems();
+      setDisposalData(data);
+      processDisposalData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const calculateKpis = (data) => {
-    setTotalDisposals(data.length);
-
-    const obsolete = data.filter((item) => item.tags.includes('obsolete'));
-    setObsoleteAssets(obsolete);
-  };
-
-  const generateCharts = (data) => {
-    const reasons = data.reduce((acc, item) => {
-      acc[item.disposalReason] = (acc[item.disposalReason] || 0) + 1;
+  const processDisposalData = (data) => {
+    // Tags Distribution
+    const tagCounts = data.reduce((acc, item) => {
+      item.tags.forEach(tag => {
+        acc[tag] = (acc[tag] || 0) + 1;
+      });
       return acc;
     }, {});
 
-    setDisposalDistribution(
-      Object.keys(reasons).map((key) => ({
-        name: key,
-        y: reasons[key],
-      }))
+    setStatusDistribution(Object.keys(tagCounts).map(key => ({
+      name: key,
+      y: tagCounts[key],
+    })));
+
+    // Total Eco Contribution
+    const totals = data.reduce(
+      (acc, item) => {
+        acc.ecoContribution += Number(item.ecoContribution) || 0;
+        return acc;
+      },
+      { ecoContribution: 0 }
     );
+
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
-  const disposalDistributionChart = {
+  const statusChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Reasons for Asset Disposal' },
-    series: [
-      {
-        name: 'Reasons',
-        colorByPoint: true,
-        data: disposalDistribution,
-      },
-    ],
+    title: { text: 'Asset Disposal Tags Distribution' },
+    series: [{ name: 'Assets', colorByPoint: true, data: statusDistribution }],
   };
 
   return (
@@ -65,36 +62,25 @@ export default function AssetDisposalAnalytics({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Asset Disposal Analytics
+          Asset Disposal Dashboard
         </Typography>
         <Grid container spacing={4}>
-          {/* KPIs */}
+          {/* KPI Section */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Asset Disposals</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {totalDisposals}
+                <Typography variant="h6">Total Eco Contribution</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
                 </Typography>
-                <Typography variant="body2">Total number of asset disposals.</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Obsolete Assets</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {obsoleteAssets.length}
-                </Typography>
-                <Typography variant="body2">Assets tagged as 'Obsolete'.</Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* Charts */}
+          {/* Chart Section */}
           <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={disposalDistributionChart} />
+            <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
           </Grid>
         </Grid>
       </Box>

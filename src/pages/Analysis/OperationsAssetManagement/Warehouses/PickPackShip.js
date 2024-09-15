@@ -77,7 +77,7 @@ export default function PickPackShipAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Orders</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue"  sx={{ fontWeight: 'bold' }}>
                   {totalOrders}
                 </Typography>
                 <Typography variant="body2">Total number of orders processed.</Typography>
@@ -88,7 +88,7 @@ export default function PickPackShipAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Priority Orders</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {priorityOrders.length}
                 </Typography>
                 <Typography variant="body2">Orders tagged as 'Priority'.</Typography>

@@ -73,7 +73,7 @@ export default function NonConformanceReportsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Reports</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalReports}
                 </Typography>
                 <Typography variant="body2">Total number of non-conformance reports.</Typography>
@@ -84,7 +84,7 @@ export default function NonConformanceReportsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">High Severity Reports</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {highSeverityReports.length}
                 </Typography>
                 <Typography variant="body2">Reports tagged as 'High Severity'.</Typography>

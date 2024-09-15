@@ -5,40 +5,42 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function ProductUpdatesDashboard({ fetchItems }) {
-  const [updateData, setUpdateData] = useState([]);
-  const [updateTypeDistribution, setUpdateTypeDistribution] = useState([]);
+export default function ProductDiscontinuationDashboard({ fetchItems }) {
+  const [discontinuationData, setDiscontinuationData] = useState([]);
+  const [tagsDistribution, setTagsDistribution] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       const data = await fetchItems();
-      setUpdateData(data);
-      processUpdateData(data);
+      setDiscontinuationData(data);
+      processDiscontinuationData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const processUpdateData = (data) => {
-    // Update Type Distribution
-    const updateTypeCounts = data.reduce((acc, update) => {
-      acc[update.updateType] = (acc[update.updateType] || 0) + 1;
+  const processDiscontinuationData = (data) => {
+    // Tags Distribution
+    const tagCounts = data.reduce((acc, item) => {
+      item.tags.forEach(tag => {
+        acc[tag] = (acc[tag] || 0) + 1;
+      });
       return acc;
     }, {});
 
-    setUpdateTypeDistribution(Object.keys(updateTypeCounts).map(key => ({
+    setTagsDistribution(Object.keys(tagCounts).map(key => ({
       name: key,
-      y: updateTypeCounts[key],
+      y: tagCounts[key],
     })));
   };
 
-  const updateTypeChartOptions = {
+  const tagsChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Product Update Type Distribution' },
-    series: [{ name: 'Updates', colorByPoint: true, data: updateTypeDistribution }],
+    title: { text: 'Reason for Product Discontinuation' },
+    series: [{ name: 'Products', colorByPoint: true, data: tagsDistribution }],
   };
 
   return (
@@ -48,25 +50,25 @@ export default function ProductUpdatesDashboard({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Product Updates Dashboard
+          Product Discontinuation Dashboard
         </Typography>
         <Grid container spacing={4}>
-          {/* Total Number of Updates */}
+          {/* Total Number of Discontinued Products */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Product Updates</Typography>
+                <Typography variant="h6">Total Discontinued Products</Typography>
                 <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
-                  {updateData.length}
+                  {discontinuationData.length}
                 </Typography>
-                <Typography variant="body2">Total number of product updates.</Typography>
+                <Typography variant="body2">Total number of discontinued products.</Typography>
               </CardContent>
             </Card>
           </Grid>
 
           {/* Chart Section */}
           <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={updateTypeChartOptions} />
+            <HighchartsReact highcharts={Highcharts} options={tagsChartOptions} />
           </Grid>
         </Grid>
       </Box>

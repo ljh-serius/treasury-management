@@ -71,7 +71,7 @@ export default function OfferLettersAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Offers</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalOffers}
                 </Typography>
                 <Typography variant="body2">Total number of offer letters issued.</Typography>
@@ -82,7 +82,7 @@ export default function OfferLettersAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Accepted Offers</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {acceptedOffers.length}
                 </Typography>
                 <Typography variant="body2">Offer letters that have been accepted.</Typography>

@@ -5,11 +5,11 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function WithholdingTaxesAnalytics({ fetchItems }) {
+export default function WithholdingTaxesDashboard({ fetchItems }) {
   const [taxesData, setTaxesData] = useState([]);
   const [statusDistribution, setStatusDistribution] = useState([]);
   const [totalWithheldAmount, setTotalWithheldAmount] = useState(0);
-  const [topPayers, setTopPayers] = useState([]);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,21 +36,24 @@ export default function WithholdingTaxesAnalytics({ fetchItems }) {
       y: statusCounts[key],
     })));
 
-    // Total Withheld Amount
-    const total = data.reduce((sum, tax) => sum + Number(tax.withheldAmount), 0);
-    setTotalWithheldAmount(total);
+    // Total Withheld Amount and Eco Contribution
+    const totals = data.reduce(
+      (acc, tax) => {
+        acc.totalWithheld += Number(tax.withheldAmount) || 0;
+        acc.ecoContribution += Number(tax.ecoContribution) || 0;
+        return acc;
+      },
+      { totalWithheld: 0, ecoContribution: 0 }
+    );
 
-    // Top 5 Payers
-    const topPayersList = data
-      .sort((a, b) => Number(b.withheldAmount) - Number(a.withheldAmount))
-      .slice(0, 5);
-    setTopPayers(topPayersList);
+    setTotalWithheldAmount(totals.totalWithheld);
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
   const statusChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Status Distribution' },
-    series: [{ name: 'Statuses', colorByPoint: true, data: statusDistribution }],
+    title: { text: 'Withholding Tax Status Distribution' },
+    series: [{ name: 'Taxes', colorByPoint: true, data: statusDistribution }],
   };
 
   return (
@@ -60,39 +63,35 @@ export default function WithholdingTaxesAnalytics({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Withholding Taxes Analytics
+          Withholding Taxes Dashboard
         </Typography>
         <Grid container spacing={4}>
           {/* KPI Section */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Withheld Amount</Typography>
                 <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   ${totalWithheldAmount.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total amount withheld for taxes.</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Top 5 Payers</Typography>
-                <ol>
-                  {topPayers.map(tax => (
-                    <li key={tax.withholdingId}>
-                      <Typography variant="body2">
-                        {tax.payer} - Withheld: ${Number(tax.withheldAmount).toFixed(2)}
-                      </Typography>
-                    </li>
-                  ))}
-                </ol>
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
               </CardContent>
             </Card>
           </Grid>
 
           {/* Chart Section */}
-          <Grid item xs={12}>
+          <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
           </Grid>
         </Grid>

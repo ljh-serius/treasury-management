@@ -72,7 +72,7 @@ export default function OvertimeManagementAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Overtime Hours</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalOvertimeHours}
                 </Typography>
                 <Typography variant="body2">Total overtime hours recorded.</Typography>
@@ -83,7 +83,7 @@ export default function OvertimeManagementAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Approved Overtime Entries</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {approvedOvertime.length}
                 </Typography>
                 <Typography variant="body2">Approved overtime entries.</Typography>

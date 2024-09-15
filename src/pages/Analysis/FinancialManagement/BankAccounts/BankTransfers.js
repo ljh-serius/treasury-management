@@ -5,180 +5,79 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function BankTransfersDashboard({ fetchItems }) {
-  const [transfersData, setTransfersData] = useState([]);
-  const [transfersStatusDistribution, setTransfersStatusDistribution] = useState([]);
-  const [amountByCurrency, setAmountByCurrency] = useState([]);
-  const [transfersOverTimeData, setTransfersOverTimeData] = useState([]);
-  const [averageAmountByStatus, setAverageAmountByStatus] = useState([]);
-  const [tagsDistribution, setTagsDistribution] = useState([]);
-  const [totalTransfers, setTotalTransfers] = useState(0);
-  const [totalAmountTransferred, setTotalAmountTransferred] = useState(0);
-  const [averageTransferAmount, setAverageTransferAmount] = useState(0);
+export default function CreditManagementAnalysisDashboard({ fetchItems }) {
+  const [creditData, setCreditData] = useState([]);
+  const [currencyDistribution, setCurrencyDistribution] = useState([]);
+  const [riskLevelDistribution, setRiskLevelDistribution] = useState([]);
+  const [totalCreditLimit, setTotalCreditLimit] = useState(0);
+  const [totalOutstandingBalance, setTotalOutstandingBalance] = useState(0);
+  const [totalLateFees, setTotalLateFees] = useState(0);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       const data = await fetchItems();
-      setTransfersData(data);
-      processTransfersData(data);
+      setCreditData(data);
+      processCreditData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const processTransfersData = (data) => {
-    // Total Number of Transfers
-    setTotalTransfers(data.length);
-
-    // Total Amount Transferred
-    const totalAmount = data.reduce((acc, transfer) => acc + Number(transfer.amount), 0);
-    setTotalAmountTransferred(totalAmount);
-
-    // Average Transfer Amount
-    setAverageTransferAmount(totalAmount / data.length);
-
-    // Transfers by Status
-    const statusCounts = data.reduce((acc, transfer) => {
-      acc[transfer.status] = (acc[transfer.status] || 0) + 1;
+  const processCreditData = (data) => {
+    // Currency Distribution
+    const currencyCounts = data.reduce((acc, credit) => {
+      acc[credit.currency] = (acc[credit.currency] || 0) + 1;
       return acc;
     }, {});
 
-    setTransfersStatusDistribution(Object.keys(statusCounts).map(key => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),  // Capitalize status
-      y: statusCounts[key],
-    })));
-
-    // Total Amount Transferred by Currency
-    const amountByCurrency = data.reduce((acc, transfer) => {
-      acc[transfer.currency] = (acc[transfer.currency] || 0) + Number(transfer.amount);
-      return acc;
-    }, {});
-
-    setAmountByCurrency(Object.keys(amountByCurrency).map(key => ({
+    setCurrencyDistribution(Object.keys(currencyCounts).map(key => ({
       name: key,
-      y: amountByCurrency[key],
+      y: currencyCounts[key],
     })));
 
-    // Transfers Over Time
-    const transfersByMonth = data.reduce((acc, transfer) => {
-      const month = new Date(transfer.transferDate).getMonth() + 1;
-      acc[month] = (acc[month] || 0) + 1;
+    // Risk Level Distribution
+    const riskLevelCounts = data.reduce((acc, credit) => {
+      acc[credit.riskLevel] = (acc[credit.riskLevel] || 0) + 1;
       return acc;
     }, {});
 
-    setTransfersOverTimeData(Object.keys(transfersByMonth).map(key => ({
-      name: `Month ${key}`,
-      y: transfersByMonth[key],
-    })));
-
-    // Average Transfer Amount by Status
-    const amountByStatus = data.reduce((acc, transfer) => {
-      acc[transfer.status] = acc[transfer.status] || { totalAmount: 0, count: 0 };
-      acc[transfer.status].totalAmount += Number(transfer.amount);
-      acc[transfer.status].count += 1;
-      return acc;
-    }, {});
-
-    setAverageAmountByStatus(Object.keys(amountByStatus).map(key => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),
-      y: amountByStatus[key].totalAmount / amountByStatus[key].count || 0,
-    })));
-
-    // Tags Distribution
-    const tagsCounts = data.reduce((acc, transfer) => {
-      transfer.tags.forEach(tag => {
-        acc[tag] = (acc[tag] || 0) + 1;
-      });
-      return acc;
-    }, {});
-
-    setTagsDistribution(Object.keys(tagsCounts).map(key => ({
+    setRiskLevelDistribution(Object.keys(riskLevelCounts).map(key => ({
       name: key,
-      y: tagsCounts[key],
+      y: riskLevelCounts[key],
     })));
+
+    // Total Credit Limit, Outstanding Balance, and Late Payment Fees
+    const totals = data.reduce(
+      (acc, credit) => {
+        acc.creditLimit += Number(credit.creditLimit) || 0;
+        acc.outstandingBalance += Number(credit.outstandingBalance) || 0;
+        acc.lateFees += Number(credit.latePaymentFee) || 0;
+        acc.ecoContribution += Number(credit.ecoContribution) || 0;
+        return acc;
+      },
+      { creditLimit: 0, outstandingBalance: 0, lateFees: 0, ecoContribution: 0 }
+    );
+
+    setTotalCreditLimit(totals.creditLimit);
+    setTotalOutstandingBalance(totals.outstandingBalance);
+    setTotalLateFees(totals.lateFees);
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
-  // Chart options for each chart
-  const transfersStatusChartOptions = {
-    chart: {
-      type: 'pie',
-    },
-    title: {
-      text: 'Transfers by Status',
-    },
-    series: [
-      {
-        name: 'Status',
-        colorByPoint: true,
-        data: transfersStatusDistribution,
-      },
-    ],
+  const currencyChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Currency Distribution' },
+    series: [{ name: 'Currencies', colorByPoint: true, data: currencyDistribution }],
   };
 
-  const amountByCurrencyChartOptions = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Total Amount Transferred by Currency',
-    },
-    series: [
-      {
-        name: 'Amount',
-        data: amountByCurrency,
-      },
-    ],
-  };
-
-  const transfersOverTimeChartOptions = {
-    chart: {
-      type: 'line',
-    },
-    title: {
-      text: 'Transfers Over Time',
-    },
-    xAxis: {
-      categories: transfersOverTimeData.map(data => data.name),
-    },
-    series: [
-      {
-        name: 'Number of Transfers',
-        data: transfersOverTimeData.map(data => data.y),
-      },
-    ],
-  };
-
-  const averageAmountByStatusChartOptions = {
-    chart: {
-      type: 'bar',
-    },
-    title: {
-      text: 'Average Transfer Amount by Status',
-    },
-    series: [
-      {
-        name: 'Average Amount',
-        data: averageAmountByStatus,
-      },
-    ],
-  };
-
-  const tagsChartOptions = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Tags Distribution',
-    },
-    series: [
-      {
-        name: 'Tags',
-        data: tagsDistribution,
-      },
-    ],
+  const riskLevelChartOptions = {
+    chart: { type: 'column' },
+    title: { text: 'Risk Level Distribution' },
+    series: [{ name: 'Risk Levels', data: riskLevelDistribution }],
   };
 
   return (
@@ -188,56 +87,61 @@ export default function BankTransfersDashboard({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Bank Transfers Dashboard
+          Credit Management Analysis Dashboard
         </Typography>
         <Grid container spacing={4}>
           {/* KPI Section */}
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Transfers</Typography>
+                <Typography variant="h6">Total Credit Limit</Typography>
                 <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  {totalTransfers}
+                  ${totalCreditLimit.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total credit limit across all customers.</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Amount Transferred</Typography>
-                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
-                  ${totalAmountTransferred.toFixed(2)}
+                <Typography variant="h6">Total Outstanding Balance</Typography>
+                <Typography variant="h4" color="red" sx={{ fontWeight: 'bold' }}>
+                  ${totalOutstandingBalance.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total outstanding balance across all customers.</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Average Transfer Amount</Typography>
+                <Typography variant="h6">Total Late Payment Fees</Typography>
                 <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
-                  ${averageTransferAmount.toFixed(2)}
+                  ${totalLateFees.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total late payment fees across all accounts.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
               </CardContent>
             </Card>
           </Grid>
 
           {/* Chart Section */}
           <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={transfersStatusChartOptions} />
+            <HighchartsReact highcharts={Highcharts} options={currencyChartOptions} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={amountByCurrencyChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={transfersOverTimeChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={averageAmountByStatusChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={12}>
-            <HighchartsReact highcharts={Highcharts} options={tagsChartOptions} />
+            <HighchartsReact highcharts={Highcharts} options={riskLevelChartOptions} />
           </Grid>
         </Grid>
       </Box>

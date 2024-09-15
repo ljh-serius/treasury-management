@@ -71,7 +71,7 @@ export default function InterviewSchedulingAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Interviews</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalInterviews}
                 </Typography>
                 <Typography variant="body2">Total number of interviews scheduled.</Typography>
@@ -82,7 +82,7 @@ export default function InterviewSchedulingAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Scheduled Interviews</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {scheduledInterviews.length}
                 </Typography>
                 <Typography variant="body2">Interviews currently scheduled.</Typography>

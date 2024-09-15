@@ -1,153 +1,115 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
-const FixedIncomeInvestmentsAnalytics = ({ fetchItems }) => {
-  const [data, setData] = useState([]);
-  const [kpis, setKpis] = useState({
-    totalInvestments: 0,
-    activeInvestments: 0,
-    maturedInvestments: 0,
-    soldInvestments: 0,
-    averageInterestRate: 0,
-  });
+export default function FixedIncomeInvestmentsDashboard({ fetchItems }) {
+  const [investmentsData, setInvestmentsData] = useState([]);
+  const [statusDistribution, setStatusDistribution] = useState([]);
+  const [totalInvestmentValue, setTotalInvestmentValue] = useState(0);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
+  const [averageInterestRate, setAverageInterestRate] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
-      const investments = await fetchItems();
-      setData(investments);
-      calculateKPIs(investments);
+    const fetchData = async () => {
+      setLoading(true);
+      const data = await fetchItems();
+      setInvestmentsData(data);
+      processInvestmentsData(data);
+      setLoading(false);
     };
 
-    loadData();
+    fetchData();
   }, [fetchItems]);
 
-  const calculateKPIs = (items) => {
-    const totalInvestments = items.length;
-    const activeInvestments = items.filter((item) => item.status === 'active').length;
-    const maturedInvestments = items.filter((item) => item.status === 'matured').length;
-    const soldInvestments = items.filter((item) => item.status === 'sold').length;
-    const averageInterestRate = (
-      items.reduce((acc, curr) => acc + parseFloat(curr.interestRate || 0), 0) / totalInvestments
-    ).toFixed(2);
+  const processInvestmentsData = (data) => {
+    // Status Distribution
+    const statusCounts = data.reduce((acc, investment) => {
+      acc[investment.status] = (acc[investment.status] || 0) + 1;
+      return acc;
+    }, {});
 
-    setKpis({
-      totalInvestments,
-      activeInvestments,
-      maturedInvestments,
-      soldInvestments,
-      averageInterestRate,
-    });
+    setStatusDistribution(Object.keys(statusCounts).map(key => ({
+      name: key,
+      y: statusCounts[key],
+    })));
+
+    // Total Investment Value and Eco Contribution
+    const totals = data.reduce(
+      (acc, investment) => {
+        acc.totalValue += Number(investment.faceValue) || 0;
+        acc.ecoContribution += Number(investment.ecoContribution) || 0;
+        acc.interestRate += Number(investment.interestRate) || 0;
+        return acc;
+      },
+      { totalValue: 0, ecoContribution: 0, interestRate: 0 }
+    );
+
+    setTotalInvestmentValue(totals.totalValue);
+    setEcoContributionTotal(totals.ecoContribution);
+    setAverageInterestRate(totals.interestRate / data.length);
   };
 
-  const statusChart = {
-    chart: {
-      type: 'pie',
-    },
-    title: {
-      text: 'Investment Status Distribution',
-    },
-    series: [
-      {
-        name: 'Investments',
-        colorByPoint: true,
-        data: [
-          { name: 'Active', y: kpis.activeInvestments },
-          { name: 'Matured', y: kpis.maturedInvestments },
-          { name: 'Sold', y: kpis.soldInvestments },
-        ],
-      },
-    ],
-  };
-
-  const interestRateChart = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Interest Rate by Issuer',
-    },
-    xAxis: {
-      categories: data.map((item) => item.issuerName),
-    },
-    yAxis: {
-      title: {
-        text: 'Interest Rate (%)',
-      },
-    },
-    series: [
-      {
-        name: 'Interest Rate',
-        data: data.map((item) => parseFloat(item.interestRate || 0)),
-      },
-    ],
+  const statusChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Investment Status Distribution' },
+    series: [{ name: 'Investments', colorByPoint: true, data: statusDistribution }],
   };
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Fixed Income Investments Analytics
-      </Typography>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Box sx={{ padding: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Fixed Income Investments Dashboard
+        </Typography>
+        <Grid container spacing={4}>
+          {/* KPI Section */}
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Investment Value</Typography>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                  ${totalInvestmentValue.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total face value of all investments.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Average Interest Rate</Typography>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  {averageInterestRate.toFixed(2)}%
+                </Typography>
+                <Typography variant="body2">Average interest rate across all investments.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Investments</Typography>
-              <Typography variant="h4">{kpis.totalInvestments}</Typography>
-            </CardContent>
-          </Card>
+          {/* Chart Section */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
+          </Grid>
         </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Active Investments</Typography>
-              <Typography variant="h4">{kpis.activeInvestments}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Matured Investments</Typography>
-              <Typography variant="h4">{kpis.maturedInvestments}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Sold Investments</Typography>
-              <Typography variant="h4">{kpis.soldInvestments}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={3} mt={4}>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Average Interest Rate (%)</Typography>
-              <Typography variant="h4">{kpis.averageInterestRate}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      <Box mt={4}>
-        <HighchartsReact highcharts={Highcharts} options={statusChart} />
       </Box>
-
-      <Box mt={4}>
-        <HighchartsReact highcharts={Highcharts} options={interestRateChart} />
-      </Box>
-    </Box>
+    </Container>
   );
-};
-
-export default FixedIncomeInvestmentsAnalytics;
+}

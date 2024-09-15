@@ -5,11 +5,11 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function TaxCreditsAnalytics({ fetchItems }) {
+export default function TaxCreditsDashboard({ fetchItems }) {
   const [creditsData, setCreditsData] = useState([]);
   const [statusDistribution, setStatusDistribution] = useState([]);
   const [totalCreditAmount, setTotalCreditAmount] = useState(0);
-  const [topCreditTypes, setTopCreditTypes] = useState([]);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,14 +17,14 @@ export default function TaxCreditsAnalytics({ fetchItems }) {
       setLoading(true);
       const data = await fetchItems();
       setCreditsData(data);
-      processCreditData(data);
+      processCreditsData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const processCreditData = (data) => {
+  const processCreditsData = (data) => {
     // Status Distribution
     const statusCounts = data.reduce((acc, credit) => {
       acc[credit.status] = (acc[credit.status] || 0) + 1;
@@ -36,21 +36,24 @@ export default function TaxCreditsAnalytics({ fetchItems }) {
       y: statusCounts[key],
     })));
 
-    // Total Credit Amount
-    const total = data.reduce((sum, credit) => sum + Number(credit.creditAmount), 0);
-    setTotalCreditAmount(total);
+    // Total Credit Amount and Eco Contribution
+    const totals = data.reduce(
+      (acc, credit) => {
+        acc.totalAmount += Number(credit.creditAmount) || 0;
+        acc.ecoContribution += Number(credit.ecoContribution) || 0;
+        return acc;
+      },
+      { totalAmount: 0, ecoContribution: 0 }
+    );
 
-    // Top 5 Credit Types
-    const topTypes = data
-      .sort((a, b) => Number(b.creditAmount) - Number(a.creditAmount))
-      .slice(0, 5);
-    setTopCreditTypes(topTypes);
+    setTotalCreditAmount(totals.totalAmount);
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
   const statusChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Status Distribution' },
-    series: [{ name: 'Statuses', colorByPoint: true, data: statusDistribution }],
+    title: { text: 'Credit Status Distribution' },
+    series: [{ name: 'Credits', colorByPoint: true, data: statusDistribution }],
   };
 
   return (
@@ -60,39 +63,35 @@ export default function TaxCreditsAnalytics({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Tax Credits Analytics
+          Tax Credits Dashboard
         </Typography>
         <Grid container spacing={4}>
           {/* KPI Section */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Credit Amount</Typography>
                 <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   ${totalCreditAmount.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total amount of tax credits claimed.</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Top 5 Credit Types</Typography>
-                <ol>
-                  {topCreditTypes.map(credit => (
-                    <li key={credit.creditId}>
-                      <Typography variant="body2">
-                        {credit.creditType} - Value: ${Number(credit.creditAmount).toFixed(2)}
-                      </Typography>
-                    </li>
-                  ))}
-                </ol>
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
               </CardContent>
             </Card>
           </Grid>
 
           {/* Chart Section */}
-          <Grid item xs={12}>
+          <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
           </Grid>
         </Grid>

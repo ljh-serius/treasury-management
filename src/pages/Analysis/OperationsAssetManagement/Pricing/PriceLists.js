@@ -73,7 +73,7 @@ export default function PriceListsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Price Lists</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalPriceLists}
                 </Typography>
                 <Typography variant="body2">Total number of price lists available.</Typography>
@@ -84,7 +84,7 @@ export default function PriceListsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Discounted Price Lists</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {discountedPriceLists.length}
                 </Typography>
                 <Typography variant="body2">Price lists tagged as 'Discounted'.</Typography>

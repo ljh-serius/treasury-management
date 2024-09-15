@@ -1,161 +1,115 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
-const EquityInvestmentsAnalytics = ({ fetchItems }) => {
-  const [data, setData] = useState([]);
-  const [kpis, setKpis] = useState({
-    totalInvestments: 0,
-    activeInvestments: 0,
-    soldInvestments: 0,
-    inactiveInvestments: 0,
-    totalShares: 0,
-    totalCurrentValue: 0,
-  });
+export default function EquityInvestmentsDashboard({ fetchItems }) {
+  const [investmentsData, setInvestmentsData] = useState([]);
+  const [statusDistribution, setStatusDistribution] = useState([]);
+  const [totalInvestmentValue, setTotalInvestmentValue] = useState(0);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
+  const [totalShares, setTotalShares] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
-      const investments = await fetchItems();
-      setData(investments);
-      calculateKPIs(investments);
+    const fetchData = async () => {
+      setLoading(true);
+      const data = await fetchItems();
+      setInvestmentsData(data);
+      processInvestmentsData(data);
+      setLoading(false);
     };
 
-    loadData();
+    fetchData();
   }, [fetchItems]);
 
-  const calculateKPIs = (items) => {
-    const totalInvestments = items.length;
-    const activeInvestments = items.filter((item) => item.status === 'active').length;
-    const soldInvestments = items.filter((item) => item.status === 'sold').length;
-    const inactiveInvestments = items.filter((item) => item.status === 'inactive').length;
-    const totalShares = items.reduce((acc, curr) => acc + (curr.sharesHeld || 0), 0);
-    const totalCurrentValue = items.reduce((acc, curr) => acc + (parseFloat(curr.currentValue || 0)), 0);
+  const processInvestmentsData = (data) => {
+    // Status Distribution
+    const statusCounts = data.reduce((acc, investment) => {
+      acc[investment.status] = (acc[investment.status] || 0) + 1;
+      return acc;
+    }, {});
 
-    setKpis({
-      totalInvestments,
-      activeInvestments,
-      soldInvestments,
-      inactiveInvestments,
-      totalShares,
-      totalCurrentValue: totalCurrentValue.toFixed(2),
-    });
+    setStatusDistribution(Object.keys(statusCounts).map(key => ({
+      name: key,
+      y: statusCounts[key],
+    })));
+
+    // Total Investment Value and Eco Contribution
+    const totals = data.reduce(
+      (acc, investment) => {
+        acc.totalValue += Number(investment.currentValue) || 0;
+        acc.ecoContribution += Number(investment.ecoContribution) || 0;
+        acc.totalShares += Number(investment.sharesHeld) || 0;
+        return acc;
+      },
+      { totalValue: 0, ecoContribution: 0, totalShares: 0 }
+    );
+
+    setTotalInvestmentValue(totals.totalValue);
+    setEcoContributionTotal(totals.ecoContribution);
+    setTotalShares(totals.totalShares);
   };
 
-  const statusChart = {
-    chart: {
-      type: 'pie',
-    },
-    title: {
-      text: 'Investment Status Distribution',
-    },
-    series: [
-      {
-        name: 'Investments',
-        colorByPoint: true,
-        data: [
-          { name: 'Active', y: kpis.activeInvestments },
-          { name: 'Sold', y: kpis.soldInvestments },
-          { name: 'Inactive', y: kpis.inactiveInvestments },
-        ],
-      },
-    ],
-  };
-
-  const companyValueChart = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Current Value by Company',
-    },
-    xAxis: {
-      categories: data.map((item) => item.companyName),
-    },
-    yAxis: {
-      title: {
-        text: 'Current Value (USD)',
-      },
-    },
-    series: [
-      {
-        name: 'Current Value',
-        data: data.map((item) => parseFloat(item.currentValue || 0)),
-      },
-    ],
+  const statusChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Investment Status Distribution' },
+    series: [{ name: 'Investments', colorByPoint: true, data: statusDistribution }],
   };
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Equity Investments Analytics
-      </Typography>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Box sx={{ padding: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Equity Investments Dashboard
+        </Typography>
+        <Grid container spacing={4}>
+          {/* KPI Section */}
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Investment Value</Typography>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                  ${totalInvestmentValue.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total current value of all investments.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Shares Held</Typography>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  {totalShares}
+                </Typography>
+                <Typography variant="body2">Total shares held across all investments.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Investments</Typography>
-              <Typography variant="h4">{kpis.totalInvestments}</Typography>
-            </CardContent>
-          </Card>
+          {/* Chart Section */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
+          </Grid>
         </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Active Investments</Typography>
-              <Typography variant="h4">{kpis.activeInvestments}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Sold Investments</Typography>
-              <Typography variant="h4">{kpis.soldInvestments}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Inactive Investments</Typography>
-              <Typography variant="h4">{kpis.inactiveInvestments}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Shares Held</Typography>
-              <Typography variant="h4">{kpis.totalShares}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Current Value (USD)</Typography>
-              <Typography variant="h4">{kpis.totalCurrentValue}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      <Box mt={4}>
-        <HighchartsReact highcharts={Highcharts} options={statusChart} />
       </Box>
-
-      <Box mt={4}>
-        <HighchartsReact highcharts={Highcharts} options={companyValueChart} />
-      </Box>
-    </Box>
+    </Container>
   );
-};
-
-export default EquityInvestmentsAnalytics;
+}

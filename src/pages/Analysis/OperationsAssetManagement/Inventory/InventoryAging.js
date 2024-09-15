@@ -5,57 +5,40 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function InventoryAgingAnalytics({ fetchItems }) {
-  const [data, setData] = useState([]);
+export default function InventoryAgingDashboard({ fetchItems }) {
+  const [agingData, setAgingData] = useState([]);
+  const [agingCategoryDistribution, setAgingCategoryDistribution] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [totalItems, setTotalItems] = useState(0);
-  const [slowMovingItems, setSlowMovingItems] = useState([]);
-  const [agingDistribution, setAgingDistribution] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const fetchedData = await fetchItems();
-      setData(fetchedData);
-      calculateKpis(fetchedData);
-      generateCharts(fetchedData);
+      const data = await fetchItems();
+      setAgingData(data);
+      processAgingData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const calculateKpis = (data) => {
-    setTotalItems(data.length);
-
-    const slowMoving = data.filter((item) => item.tags.includes('slow_moving'));
-    setSlowMovingItems(slowMoving);
-  };
-
-  const generateCharts = (data) => {
-    const aging = data.reduce((acc, item) => {
+  const processAgingData = (data) => {
+    // Aging Category Distribution
+    const agingCategoryCounts = data.reduce((acc, item) => {
       acc[item.agingCategory] = (acc[item.agingCategory] || 0) + 1;
       return acc;
     }, {});
 
-    setAgingDistribution(
-      Object.keys(aging).map((key) => ({
-        name: key,
-        y: aging[key],
-      }))
-    );
+    setAgingCategoryDistribution(Object.keys(agingCategoryCounts).map(key => ({
+      name: key,
+      y: agingCategoryCounts[key],
+    })));
   };
 
-  const agingDistributionChart = {
+  const agingCategoryChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Inventory Aging Distribution' },
-    series: [
-      {
-        name: 'Aging Categories',
-        colorByPoint: true,
-        data: agingDistribution,
-      },
-    ],
+    title: { text: 'Inventory Aging Category Distribution' },
+    series: [{ name: 'Aging', colorByPoint: true, data: agingCategoryDistribution }],
   };
 
   return (
@@ -65,36 +48,25 @@ export default function InventoryAgingAnalytics({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Inventory Aging Analytics
+          Inventory Aging Dashboard
         </Typography>
         <Grid container spacing={4}>
-          {/* KPIs */}
+          {/* Total Number of Aging Records */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Inventory Items</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {totalItems}
+                <Typography variant="h6">Total Aging Records</Typography>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  {agingData.length}
                 </Typography>
-                <Typography variant="body2">Total number of items in inventory.</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Slow Moving Items</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {slowMovingItems.length}
-                </Typography>
-                <Typography variant="body2">Items tagged as 'Slow Moving'.</Typography>
+                <Typography variant="body2">Total number of inventory aging records.</Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* Charts */}
-          <Grid item xs={12} md={12}>
-            <HighchartsReact highcharts={Highcharts} options={agingDistributionChart} />
+          {/* Chart Section */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={agingCategoryChartOptions} />
           </Grid>
         </Grid>
       </Box>

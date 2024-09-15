@@ -5,61 +5,51 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function ReorderPointsAnalytics({ fetchItems }) {
-  const [data, setData] = useState([]);
+export default function ReorderPointsDashboard({ fetchItems }) {
+  const [reorderData, setReorderData] = useState([]);
+  const [tagsDistribution, setTagsDistribution] = useState([]);
+  const [totalReorderQuantity, setTotalReorderQuantity] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [totalReorders, setTotalReorders] = useState(0);
-  const [criticalReorders, setCriticalReorders] = useState([]);
-  const [reorderDistribution, setReorderDistribution] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const fetchedData = await fetchItems();
-      setData(fetchedData);
-      calculateKpis(fetchedData);
-      generateCharts(fetchedData);
+      const data = await fetchItems();
+      setReorderData(data);
+      processReorderData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const calculateKpis = (data) => {
-    setTotalReorders(data.length);
-
-    const critical = data.filter((item) => item.tags.includes('critical'));
-    setCriticalReorders(critical);
-  };
-
-  const generateCharts = (data) => {
-    const reorders = data.reduce((acc, item) => {
-      acc[item.productName] = (acc[item.productName] || 0) + item.reorderQuantity;
+  const processReorderData = (data) => {
+    // Tags Distribution
+    const tagCounts = data.reduce((acc, item) => {
+      item.tags.forEach(tag => {
+        acc[tag] = (acc[tag] || 0) + 1;
+      });
       return acc;
     }, {});
 
-    setReorderDistribution(
-      Object.keys(reorders).map((key) => ({
-        name: key,
-        y: reorders[key],
-      }))
-    );
+    setTagsDistribution(Object.keys(tagCounts).map(key => ({
+      name: key,
+      y: tagCounts[key],
+    })));
+
+    // Total Reorder Quantity
+    const totalQuantity = data.reduce((acc, item) => {
+      acc += Number(item.reorderQuantity) || 0;
+      return acc;
+    }, 0);
+
+    setTotalReorderQuantity(totalQuantity);
   };
 
-  const reorderDistributionChart = {
-    chart: { type: 'bar' },
-    title: { text: 'Reorder Quantities by Product' },
-    xAxis: {
-      categories: reorderDistribution.map((item) => item.name),
-      title: { text: 'Products' },
-    },
-    yAxis: { title: { text: 'Reorder Quantity' } },
-    series: [
-      {
-        name: 'Reorder Quantities',
-        data: reorderDistribution.map((item) => item.y),
-      },
-    ],
+  const tagsChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Reorder Tags Distribution' },
+    series: [{ name: 'Reorders', colorByPoint: true, data: tagsDistribution }],
   };
 
   return (
@@ -69,36 +59,38 @@ export default function ReorderPointsAnalytics({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Reorder Points Analytics
+          Reorder Points Dashboard
         </Typography>
         <Grid container spacing={4}>
-          {/* KPIs */}
+          {/* Total Number of Reorder Points */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Reorders</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {totalReorders}
+                <Typography variant="h6">Total Reorder Points</Typography>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  {reorderData.length}
                 </Typography>
-                <Typography variant="body2">Total number of reorders made.</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Critical Reorders</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {criticalReorders.length}
-                </Typography>
-                <Typography variant="body2">Reorders tagged as 'Critical'.</Typography>
+                <Typography variant="body2">Total number of reorder points in the system.</Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* Charts */}
-          <Grid item xs={12} md={12}>
-            <HighchartsReact highcharts={Highcharts} options={reorderDistributionChart} />
+          {/* KPI Section */}
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Reorder Quantity</Typography>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                  {totalReorderQuantity}
+                </Typography>
+                <Typography variant="body2">Total quantity to be reordered.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Chart Section */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={tagsChartOptions} />
           </Grid>
         </Grid>
       </Box>

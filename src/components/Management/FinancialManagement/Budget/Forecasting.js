@@ -5,6 +5,8 @@ export const fieldsConfig = {
     actualAmount: { label: 'Actual Amount', type: 'number', faker: 'finance.amount' },
     fiscalYear: { label: 'Fiscal Year', type: 'number', faker: 'date.past' },
     accuracyPercentage: { label: 'Accuracy Percentage', type: 'number', faker: 'datatype.float' },
+    ecoContribution: { label: 'Eco Contribution', type: 'number', faker: 'finance.amount' },  // Eco-tax contribution (French-specific)
+    variance: { label: 'Variance', type: 'number', faker: 'finance.amount' },  // Forecast vs actual variance
     status: {
         label: 'Status',
         type: 'select',

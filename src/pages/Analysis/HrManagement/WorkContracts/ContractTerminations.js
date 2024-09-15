@@ -71,7 +71,7 @@ export default function ContractTerminationsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Terminations</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalTerminations}
                 </Typography>
                 <Typography variant="body2">Total number of contract terminations.</Typography>
@@ -82,7 +82,7 @@ export default function ContractTerminationsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Processed Terminations</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {processedTerminations.length}
                 </Typography>
                 <Typography variant="body2">Terminations that have been processed.</Typography>

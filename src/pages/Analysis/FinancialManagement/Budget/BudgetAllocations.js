@@ -5,13 +5,14 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function BudgetAllocationsAnalytics({ fetchItems }) {
+export default function BudgetAllocationsAnalysisDashboard({ fetchItems }) {
   const [allocationsData, setAllocationsData] = useState([]);
   const [statusDistribution, setStatusDistribution] = useState([]);
-  const [budgetVsActual, setBudgetVsActual] = useState([]);
+  const [varianceData, setVarianceData] = useState([]);
   const [totalBudgetedAmount, setTotalBudgetedAmount] = useState(0);
   const [totalActualAmount, setTotalActualAmount] = useState(0);
-  const [topDepartments, setTopDepartments] = useState([]);
+  const [totalLateFees, setTotalLateFees] = useState(0);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,14 +20,14 @@ export default function BudgetAllocationsAnalytics({ fetchItems }) {
       setLoading(true);
       const data = await fetchItems();
       setAllocationsData(data);
-      processAllocationData(data);
+      processAllocationsData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const processAllocationData = (data) => {
+  const processAllocationsData = (data) => {
     // Status Distribution
     const statusCounts = data.reduce((acc, allocation) => {
       acc[allocation.status] = (acc[allocation.status] || 0) + 1;
@@ -38,67 +39,46 @@ export default function BudgetAllocationsAnalytics({ fetchItems }) {
       y: statusCounts[key],
     })));
 
-    // Budget vs Actual
-    const budgetData = data.map(allocation => ({
-      budgeted: Number(allocation.budgetedAmount),
-      actual: Number(allocation.actualAmount),
-    }));
+    // Variance Data
+    const varianceCounts = data.reduce((acc, allocation) => {
+      const variance = Number(allocation.actualAmount) - Number(allocation.budgetedAmount);
+      acc[variance] = (acc[variance] || 0) + 1;
+      return acc;
+    }, {});
 
-    setBudgetVsActual(budgetData);
+    setVarianceData(Object.keys(varianceCounts).map(key => ({
+      name: `Variance: ${key}`,
+      y: varianceCounts[key],
+    })));
 
-    // Total Amounts
+    // Total Budgeted and Actual Amounts
     const totals = data.reduce(
       (acc, allocation) => {
-        acc.budgeted += Number(allocation.budgetedAmount) || 0;
-        acc.actual += Number(allocation.actualAmount) || 0;
+        acc.budgetedAmount += Number(allocation.budgetedAmount) || 0;
+        acc.actualAmount += Number(allocation.actualAmount) || 0;
+        acc.lateFees += Number(allocation.latePaymentFee) || 0;
+        acc.ecoContribution += Number(allocation.ecoContribution) || 0;
         return acc;
       },
-      { budgeted: 0, actual: 0 }
+      { budgetedAmount: 0, actualAmount: 0, lateFees: 0, ecoContribution: 0 }
     );
 
-    setTotalBudgetedAmount(totals.budgeted);
-    setTotalActualAmount(totals.actual);
-
-    // Top 5 Departments by Budgeted Amount
-    const topDepartmentsList = data
-      .sort((a, b) => Number(b.budgetedAmount) - Number(a.budgetedAmount))
-      .slice(0, 5);
-    setTopDepartments(topDepartmentsList);
+    setTotalBudgetedAmount(totals.budgetedAmount);
+    setTotalActualAmount(totals.actualAmount);
+    setTotalLateFees(totals.lateFees);
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
   const statusChartOptions = {
-    chart: {
-      type: 'pie',
-    },
-    title: {
-      text: 'Status Distribution',
-    },
-    series: [
-      {
-        name: 'Statuses',
-        colorByPoint: true,
-        data: statusDistribution,
-      },
-    ],
+    chart: { type: 'pie' },
+    title: { text: 'Status Distribution' },
+    series: [{ name: 'Status', colorByPoint: true, data: statusDistribution }],
   };
 
-  const budgetVsActualChartOptions = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Budget vs Actual Amounts',
-    },
-    series: [
-      {
-        name: 'Budgeted Amount',
-        data: budgetVsActual.map(data => data.budgeted),
-      },
-      {
-        name: 'Actual Amount',
-        data: budgetVsActual.map(data => data.actual),
-      },
-    ],
+  const varianceChartOptions = {
+    chart: { type: 'column' },
+    title: { text: 'Budget vs Actual Variance' },
+    series: [{ name: 'Variance', data: varianceData }],
   };
 
   return (
@@ -108,7 +88,7 @@ export default function BudgetAllocationsAnalytics({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Budget Allocations Analytics
+          Budget Allocations Analysis Dashboard
         </Typography>
         <Grid container spacing={4}>
           {/* KPI Section */}
@@ -119,9 +99,7 @@ export default function BudgetAllocationsAnalytics({ fetchItems }) {
                 <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   ${totalBudgetedAmount.toFixed(2)}
                 </Typography>
-                <Typography variant="body2">
-                  This represents the total budgeted amount across all allocations.
-                </Typography>
+                <Typography variant="body2">Total budgeted amount across all allocations.</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -132,25 +110,29 @@ export default function BudgetAllocationsAnalytics({ fetchItems }) {
                 <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   ${totalActualAmount.toFixed(2)}
                 </Typography>
-                <Typography variant="body2">
-                  This represents the total actual spending across all allocations.
-                </Typography>
+                <Typography variant="body2">Total actual amount spent across all allocations.</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Top 5 Departments by Budgeted Amount</Typography>
-                <ol>
-                  {topDepartments.map(allocation => (
-                    <li key={allocation.allocationId}>
-                      <Typography variant="body2">
-                        {allocation.department} - Budgeted: ${Number(allocation.budgetedAmount).toFixed(2)}
-                      </Typography>
-                    </li>
-                  ))}
-                </ol>
+                <Typography variant="h6">Total Late Payment Fees</Typography>
+                <Typography variant="h4" color="red" sx={{ fontWeight: 'bold' }}>
+                  ${totalLateFees.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total late payment fees across all allocations.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -160,7 +142,7 @@ export default function BudgetAllocationsAnalytics({ fetchItems }) {
             <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={budgetVsActualChartOptions} />
+            <HighchartsReact highcharts={Highcharts} options={varianceChartOptions} />
           </Grid>
         </Grid>
       </Box>

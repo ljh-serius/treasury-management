@@ -5,57 +5,40 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function NewProductDevelopmentAnalytics({ fetchItems }) {
-  const [data, setData] = useState([]);
+export default function ProductDevelopmentDashboard({ fetchItems }) {
+  const [developmentData, setDevelopmentData] = useState([]);
+  const [stageDistribution, setStageDistribution] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [totalDevelopments, setTotalDevelopments] = useState(0);
-  const [highPriorityDevelopments, setHighPriorityDevelopments] = useState([]);
-  const [developmentStageDistribution, setDevelopmentStageDistribution] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const fetchedData = await fetchItems();
-      setData(fetchedData);
-      calculateKpis(fetchedData);
-      generateCharts(fetchedData);
+      const data = await fetchItems();
+      setDevelopmentData(data);
+      processDevelopmentData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const calculateKpis = (data) => {
-    setTotalDevelopments(data.length);
-
-    const highPriority = data.filter((item) => item.tags.includes('high_priority'));
-    setHighPriorityDevelopments(highPriority);
-  };
-
-  const generateCharts = (data) => {
-    const stages = data.reduce((acc, item) => {
+  const processDevelopmentData = (data) => {
+    // Development Stage Distribution
+    const stageCounts = data.reduce((acc, item) => {
       acc[item.developmentStage] = (acc[item.developmentStage] || 0) + 1;
       return acc;
     }, {});
 
-    setDevelopmentStageDistribution(
-      Object.keys(stages).map((key) => ({
-        name: key,
-        y: stages[key],
-      }))
-    );
+    setStageDistribution(Object.keys(stageCounts).map(key => ({
+      name: key,
+      y: stageCounts[key],
+    })));
   };
 
-  const developmentStageDistributionChart = {
+  const stageChartOptions = {
     chart: { type: 'pie' },
     title: { text: 'Development Stage Distribution' },
-    series: [
-      {
-        name: 'Stages',
-        colorByPoint: true,
-        data: developmentStageDistribution,
-      },
-    ],
+    series: [{ name: 'Stages', colorByPoint: true, data: stageDistribution }],
   };
 
   return (
@@ -65,36 +48,25 @@ export default function NewProductDevelopmentAnalytics({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          New Product Development Analytics
+          New Product Development Dashboard
         </Typography>
         <Grid container spacing={4}>
-          {/* KPIs */}
+          {/* Total Number of Projects */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Developments</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {totalDevelopments}
+                <Typography variant="h6">Total Development Projects</Typography>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  {developmentData.length}
                 </Typography>
-                <Typography variant="body2">Total number of new product developments.</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">High Priority Developments</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {highPriorityDevelopments.length}
-                </Typography>
-                <Typography variant="body2">Developments tagged as 'High Priority'.</Typography>
+                <Typography variant="body2">Total number of product development projects.</Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* Charts */}
+          {/* Chart Section */}
           <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={developmentStageDistributionChart} />
+            <HighchartsReact highcharts={Highcharts} options={stageChartOptions} />
           </Grid>
         </Grid>
       </Box>

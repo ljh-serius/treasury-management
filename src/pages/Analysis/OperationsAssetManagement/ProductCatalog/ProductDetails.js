@@ -5,31 +5,29 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function InterestPaymentsDashboard({ fetchItems }) {
-  const [paymentsData, setPaymentsData] = useState([]);
+export default function ProductDetailsDashboard({ fetchItems }) {
+  const [productData, setProductData] = useState([]);
   const [statusDistribution, setStatusDistribution] = useState([]);
-  const [totalPaymentAmount, setTotalPaymentAmount] = useState(0);
-  const [totalLateFees, setTotalLateFees] = useState(0);
+  const [totalStock, setTotalStock] = useState(0);
   const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
-  const [averageInterestRate, setAverageInterestRate] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       const data = await fetchItems();
-      setPaymentsData(data);
-      processPaymentsData(data);
+      setProductData(data);
+      processProductData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const processPaymentsData = (data) => {
+  const processProductData = (data) => {
     // Status Distribution
-    const statusCounts = data.reduce((acc, payment) => {
-      acc[payment.status] = (acc[payment.status] || 0) + 1;
+    const statusCounts = data.reduce((acc, product) => {
+      acc[product.status] = (acc[product.status] || 0) + 1;
       return acc;
     }, {});
 
@@ -38,28 +36,24 @@ export default function InterestPaymentsDashboard({ fetchItems }) {
       y: statusCounts[key],
     })));
 
-    // Total Payment Amount and Late Payment Fees
+    // Total Stock Quantity and Eco Contribution
     const totals = data.reduce(
-      (acc, payment) => {
-        acc.paymentAmount += Number(payment.paymentAmount) || 0;
-        acc.lateFees += Number(payment.latePaymentFee) || 0;
-        acc.ecoContribution += Number(payment.ecoContribution) || 0;
-        acc.interestRate += Number(payment.interestRate) || 0;
+      (acc, product) => {
+        acc.totalStock += Number(product.stockQuantity) || 0;
+        acc.ecoContribution += Number(product.ecoContribution) || 0;
         return acc;
       },
-      { paymentAmount: 0, lateFees: 0, ecoContribution: 0, interestRate: 0 }
+      { totalStock: 0, ecoContribution: 0 }
     );
 
-    setTotalPaymentAmount(totals.paymentAmount);
-    setTotalLateFees(totals.lateFees);
+    setTotalStock(totals.totalStock);
     setEcoContributionTotal(totals.ecoContribution);
-    setAverageInterestRate(totals.interestRate / data.length);
   };
 
   const statusChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Status Distribution' },
-    series: [{ name: 'Status', colorByPoint: true, data: statusDistribution }],
+    title: { text: 'Product Status Distribution' },
+    series: [{ name: 'Products', colorByPoint: true, data: statusDistribution }],
   };
 
   return (
@@ -69,40 +63,30 @@ export default function InterestPaymentsDashboard({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Interest Payments Dashboard
+          Product Details Dashboard
         </Typography>
         <Grid container spacing={4}>
+          {/* Total Number of Products */}
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Products</Typography>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  {productData.length}
+                </Typography>
+                <Typography variant="body2">Total number of products in the inventory.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
           {/* KPI Section */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Payment Amount</Typography>
+                <Typography variant="h6">Total Stock Quantity</Typography>
                 <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  ${totalPaymentAmount.toFixed(2)}
+                  {totalStock}
                 </Typography>
-                <Typography variant="body2">Total payment amount across all loans.</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Average Interest Rate</Typography>
-                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
-                  {averageInterestRate.toFixed(2)}%
-                </Typography>
-                <Typography variant="body2">Average interest rate across all payments.</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Total Late Payment Fees</Typography>
-                <Typography variant="h4" color="red" sx={{ fontWeight: 'bold' }}>
-                  ${totalLateFees.toFixed(2)}
-                </Typography>
-                <Typography variant="body2">Total late payment fees across all payments.</Typography>
+                <Typography variant="body2">Total stock quantity across all products.</Typography>
               </CardContent>
             </Card>
           </Grid>

@@ -77,7 +77,7 @@ export default function InventoryLocationsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Inventory Locations</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalLocations}
                 </Typography>
                 <Typography variant="body2">Total number of inventory locations tracked.</Typography>
@@ -88,7 +88,7 @@ export default function InventoryLocationsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Critical Stock Locations</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {criticalStockLocations.length}
                 </Typography>
                 <Typography variant="body2">Locations tagged as 'Critical Stock'.</Typography>

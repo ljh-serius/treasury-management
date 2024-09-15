@@ -5,11 +5,12 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function VatGstRecordsAnalytics({ fetchItems }) {
+export default function VATGSTDashboard({ fetchItems }) {
   const [recordsData, setRecordsData] = useState([]);
   const [statusDistribution, setStatusDistribution] = useState([]);
-  const [totalVatAmount, setTotalVatAmount] = useState(0);
-  const [totalGstAmount, setTotalGstAmount] = useState(0);
+  const [totalVATAmount, setTotalVATAmount] = useState(0);
+  const [totalGSTAmount, setTotalGSTAmount] = useState(0);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,17 +37,26 @@ export default function VatGstRecordsAnalytics({ fetchItems }) {
       y: statusCounts[key],
     })));
 
-    // Total VAT and GST Amounts
-    const totalVat = data.reduce((sum, record) => sum + Number(record.vatAmount), 0);
-    const totalGst = data.reduce((sum, record) => sum + Number(record.gstAmount), 0);
-    setTotalVatAmount(totalVat);
-    setTotalGstAmount(totalGst);
+    // Total VAT, GST Amount, and Eco Contribution
+    const totals = data.reduce(
+      (acc, record) => {
+        acc.totalVAT += Number(record.vatAmount) || 0;
+        acc.totalGST += Number(record.gstAmount) || 0;
+        acc.ecoContribution += Number(record.ecoContribution) || 0;
+        return acc;
+      },
+      { totalVAT: 0, totalGST: 0, ecoContribution: 0 }
+    );
+
+    setTotalVATAmount(totals.totalVAT);
+    setTotalGSTAmount(totals.totalGST);
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
   const statusChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Status Distribution' },
-    series: [{ name: 'Statuses', colorByPoint: true, data: statusDistribution }],
+    title: { text: 'VAT/GST Status Distribution' },
+    series: [{ name: 'Records', colorByPoint: true, data: statusDistribution }],
   };
 
   return (
@@ -56,33 +66,46 @@ export default function VatGstRecordsAnalytics({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          VAT/GST Records Analytics
+          VAT/GST Records Dashboard
         </Typography>
         <Grid container spacing={4}>
           {/* KPI Section */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
                 <Typography variant="h6">Total VAT Amount</Typography>
                 <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  ${totalVatAmount.toFixed(2)}
+                  ${totalVATAmount.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total VAT amount across all records.</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
                 <Typography variant="h6">Total GST Amount</Typography>
                 <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
-                  ${totalGstAmount.toFixed(2)}
+                  ${totalGSTAmount.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total GST amount across all records.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
               </CardContent>
             </Card>
           </Grid>
 
           {/* Chart Section */}
-          <Grid item xs={12}>
+          <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
           </Grid>
         </Grid>

@@ -5,16 +5,13 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function ReconciliationStatementsDashboard({ fetchItems }) {
+export default function ReconciliationStatementsAnalysisDashboard({ fetchItems }) {
   const [statementsData, setStatementsData] = useState([]);
+  const [currencyDistribution, setCurrencyDistribution] = useState([]);
   const [statusDistribution, setStatusDistribution] = useState([]);
-  const [balanceByCurrency, setBalanceByCurrency] = useState([]);
-  const [statementsOverTimeData, setStatementsOverTimeData] = useState([]);
-  const [averageBalanceByStatus, setAverageBalanceByStatus] = useState([]);
-  const [tagsDistribution, setTagsDistribution] = useState([]);
-  const [totalStatements, setTotalStatements] = useState(0);
   const [totalBalance, setTotalBalance] = useState(0);
-  const [averageBalance, setAverageBalance] = useState(0);
+  const [totalLateFees, setTotalLateFees] = useState(0);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,155 +27,54 @@ export default function ReconciliationStatementsDashboard({ fetchItems }) {
   }, [fetchItems]);
 
   const processStatementsData = (data) => {
-    // Total Number of Reconciliation Statements
-    setTotalStatements(data.length);
+    // Currency Distribution
+    const currencyCounts = data.reduce((acc, statement) => {
+      acc[statement.currency] = (acc[statement.currency] || 0) + 1;
+      return acc;
+    }, {});
 
-    // Total Balance
-    const totalBalance = data.reduce((acc, statement) => acc + Number(statement.balance), 0);
-    setTotalBalance(totalBalance);
+    setCurrencyDistribution(Object.keys(currencyCounts).map(key => ({
+      name: key,
+      y: currencyCounts[key],
+    })));
 
-    // Average Balance
-    setAverageBalance(totalBalance / data.length);
-
-    // Reconciliation Status Distribution
+    // Status Distribution
     const statusCounts = data.reduce((acc, statement) => {
       acc[statement.status] = (acc[statement.status] || 0) + 1;
       return acc;
     }, {});
 
     setStatusDistribution(Object.keys(statusCounts).map(key => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),  // Capitalize status
+      name: key,
       y: statusCounts[key],
     })));
 
-    // Total Balance by Currency
-    const balanceByCurrency = data.reduce((acc, statement) => {
-      acc[statement.currency] = (acc[statement.currency] || 0) + Number(statement.balance);
-      return acc;
-    }, {});
+    // Total Balance, Late Payment Fees, and Eco Contribution
+    const totals = data.reduce(
+      (acc, statement) => {
+        acc.balance += Number(statement.balance) || 0;
+        acc.lateFees += Number(statement.latePaymentFee) || 0;
+        acc.ecoContribution += Number(statement.ecoContribution) || 0;
+        return acc;
+      },
+      { balance: 0, lateFees: 0, ecoContribution: 0 }
+    );
 
-    setBalanceByCurrency(Object.keys(balanceByCurrency).map(key => ({
-      name: key,
-      y: balanceByCurrency[key],
-    })));
-
-    // Reconciliation Statements Over Time
-    const statementsByMonth = data.reduce((acc, statement) => {
-      const month = new Date(statement.reconciliationDate).getMonth() + 1;
-      acc[month] = (acc[month] || 0) + 1;
-      return acc;
-    }, {});
-
-    setStatementsOverTimeData(Object.keys(statementsByMonth).map(key => ({
-      name: `Month ${key}`,
-      y: statementsByMonth[key],
-    })));
-
-    // Average Balance by Status
-    const balanceByStatus = data.reduce((acc, statement) => {
-      acc[statement.status] = acc[statement.status] || { totalBalance: 0, count: 0 };
-      acc[statement.status].totalBalance += Number(statement.balance);
-      acc[statement.status].count += 1;
-      return acc;
-    }, {});
-
-    setAverageBalanceByStatus(Object.keys(balanceByStatus).map(key => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),
-      y: balanceByStatus[key].totalBalance / balanceByStatus[key].count || 0,
-    })));
-
-    // Tags Distribution
-    const tagsCounts = data.reduce((acc, statement) => {
-      statement.tags.forEach(tag => {
-        acc[tag] = (acc[tag] || 0) + 1;
-      });
-      return acc;
-    }, {});
-
-    setTagsDistribution(Object.keys(tagsCounts).map(key => ({
-      name: key,
-      y: tagsCounts[key],
-    })));
+    setTotalBalance(totals.balance);
+    setTotalLateFees(totals.lateFees);
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
-  // Chart options for each chart
+  const currencyChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Currency Distribution' },
+    series: [{ name: 'Currencies', colorByPoint: true, data: currencyDistribution }],
+  };
+
   const statusChartOptions = {
-    chart: {
-      type: 'pie',
-    },
-    title: {
-      text: 'Reconciliation Status Distribution',
-    },
-    series: [
-      {
-        name: 'Status',
-        colorByPoint: true,
-        data: statusDistribution,
-      },
-    ],
-  };
-
-  const balanceByCurrencyChartOptions = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Total Balance by Currency',
-    },
-    series: [
-      {
-        name: 'Balance',
-        data: balanceByCurrency,
-      },
-    ],
-  };
-
-  const statementsOverTimeChartOptions = {
-    chart: {
-      type: 'line',
-    },
-    title: {
-      text: 'Reconciliation Statements Over Time',
-    },
-    xAxis: {
-      categories: statementsOverTimeData.map(data => data.name),
-    },
-    series: [
-      {
-        name: 'Number of Statements',
-        data: statementsOverTimeData.map(data => data.y),
-      },
-    ],
-  };
-
-  const averageBalanceByStatusChartOptions = {
-    chart: {
-      type: 'bar',
-    },
-    title: {
-      text: 'Average Balance by Status',
-    },
-    series: [
-      {
-        name: 'Average Balance',
-        data: averageBalanceByStatus,
-      },
-    ],
-  };
-
-  const tagsChartOptions = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Tags Distribution',
-    },
-    series: [
-      {
-        name: 'Tags',
-        data: tagsDistribution,
-      },
-    ],
+    chart: { type: 'column' },
+    title: { text: 'Statement Status Distribution' },
+    series: [{ name: 'Status', data: statusDistribution }],
   };
 
   return (
@@ -188,56 +84,50 @@ export default function ReconciliationStatementsDashboard({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Reconciliation Statements Dashboard
+          Reconciliation Statements Analysis Dashboard
         </Typography>
         <Grid container spacing={4}>
           {/* KPI Section */}
-          <Grid item xs={12} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Total Statements</Typography>
-                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  {totalStatements}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Balance</Typography>
-                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   ${totalBalance.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total balance across all reconciliation statements.</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Average Balance</Typography>
-                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
-                  ${averageBalance.toFixed(2)}
+                <Typography variant="h6">Total Late Payment Fees</Typography>
+                <Typography variant="h4" color="red" sx={{ fontWeight: 'bold' }}>
+                  ${totalLateFees.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total late payment fees across all statements.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
               </CardContent>
             </Card>
           </Grid>
 
           {/* Chart Section */}
           <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={currencyChartOptions} />
+          </Grid>
+          <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={balanceByCurrencyChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={statementsOverTimeChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={averageBalanceByStatusChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={12}>
-            <HighchartsReact highcharts={Highcharts} options={tagsChartOptions} />
           </Grid>
         </Grid>
       </Box>

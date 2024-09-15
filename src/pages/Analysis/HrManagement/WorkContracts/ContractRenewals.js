@@ -71,7 +71,7 @@ export default function ContractRenewalsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Renewals</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalRenewals}
                 </Typography>
                 <Typography variant="body2">Total number of contract renewals.</Typography>
@@ -82,7 +82,7 @@ export default function ContractRenewalsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Completed Renewals</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {completedRenewals.length}
                 </Typography>
                 <Typography variant="body2">Renewals that have been completed.</Typography>

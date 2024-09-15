@@ -5,7 +5,7 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function InvoiceAnalysisDashboard({ fetchItems }) {
+export default function VendorInvoiceAnalysisDashboard({ fetchItems }) {
   const [invoicesData, setInvoicesData] = useState([]);
   const [currencyDistribution, setCurrencyDistribution] = useState([]);
   const [paymentTermsDistribution, setPaymentTermsDistribution] = useState([]);
@@ -13,6 +13,9 @@ export default function InvoiceAnalysisDashboard({ fetchItems }) {
   const [topVendors, setTopVendors] = useState([]);
   const [totalAmountExclVAT, setTotalAmountExclVAT] = useState(0);
   const [totalAmountInclVAT, setTotalAmountInclVAT] = useState(0);
+  const [totalVatAmount, setTotalVatAmount] = useState(0);
+  const [latePaymentFees, setLatePaymentFees] = useState(0);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -67,13 +70,19 @@ export default function InvoiceAnalysisDashboard({ fetchItems }) {
       (acc, invoice) => {
         acc.exclVAT += Number(invoice.totalAmountExclVAT) || 0;
         acc.inclVAT += Number(invoice.totalAmountInclVAT) || 0;
+        acc.vatAmount += Number(invoice.vatAmount) || 0;
+        acc.lateFees += Number(invoice.latePaymentFee) || 0;
+        acc.ecoContribution += Number(invoice.ecoContribution) || 0;
         return acc;
       },
-      { exclVAT: 0, inclVAT: 0 }
+      { exclVAT: 0, inclVAT: 0, vatAmount: 0, lateFees: 0, ecoContribution: 0 }
     );
 
     setTotalAmountExclVAT(totals.exclVAT);
     setTotalAmountInclVAT(totals.inclVAT);
+    setTotalVatAmount(totals.vatAmount);
+    setLatePaymentFees(totals.lateFees);
+    setEcoContributionTotal(totals.ecoContribution);
 
     // Top 5 Vendors by Total Amount Excluding VAT
     const topVendorsList = data
@@ -138,7 +147,7 @@ export default function InvoiceAnalysisDashboard({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Invoice Analysis Dashboard
+          Vendor Invoice Analysis Dashboard
         </Typography>
         <Grid container spacing={4}>
           {/* KPI Section */}
@@ -150,7 +159,7 @@ export default function InvoiceAnalysisDashboard({ fetchItems }) {
                   ${totalAmountExclVAT.toFixed(2)}
                 </Typography>
                 <Typography variant="body2">
-                  This represents the total amount of all invoices excluding VAT.
+                  Total value of all invoices excluding VAT.
                 </Typography>
               </CardContent>
             </Card>
@@ -163,7 +172,46 @@ export default function InvoiceAnalysisDashboard({ fetchItems }) {
                   ${totalAmountInclVAT.toFixed(2)}
                 </Typography>
                 <Typography variant="body2">
-                  This represents the total amount of all invoices including VAT.
+                  Total value of all invoices including VAT.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">VAT Total</Typography>
+                <Typography variant="h4" color="purple" sx={{ fontWeight: 'bold' }}>
+                  ${totalVatAmount.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">
+                  Total VAT amount across all invoices.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Eco Contribution Total</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">
+                  Total Eco contribution across all invoices (specific to French regulations).
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Late Payment Fees</Typography>
+                <Typography variant="h4" color="red" sx={{ fontWeight: 'bold' }}>
+                  ${latePaymentFees.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">
+                  Total late payment fees across all invoices.
                 </Typography>
               </CardContent>
             </Card>

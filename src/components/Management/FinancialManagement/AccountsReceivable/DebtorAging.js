@@ -4,12 +4,18 @@ export const fieldsConfig = {
   dueDate: { label: 'Due Date', type: 'date', faker: 'date.future' },
   overdueDays: { label: 'Overdue Days', type: 'number', faker: 'datatype.number' },
   amount: { label: 'Amount', type: 'number', faker: 'finance.amount' },
-  // currency: {
-  //   label: 'Currency',
-  //   type: 'select',
-  //   options: [],  // Populate with actual currency options
-  //   faker: 'finance.currencyCode',
-  // },
+  currency: {
+    label: 'Currency',
+    type: 'select',
+    options: [
+      { id: 'USD', label: 'USD' },
+      { id: 'EUR', label: 'EUR' },
+      { id: 'GBP', label: 'GBP' },
+      { id: 'JPY', label: 'JPY' },
+      { id: 'AUD', label: 'AUD' },
+    ],
+    faker: 'finance.currencyCode',
+  },
   riskLevel: {
     label: 'Risk Level',
     type: 'select',
@@ -20,6 +26,8 @@ export const fieldsConfig = {
     ],
     faker: 'random.arrayElement',
   },
+  latePaymentFee: { label: 'Late Payment Fee', type: 'number', faker: 'finance.amount' },  // Late payment penalty field
+  ecoContribution: { label: 'Eco Contribution', type: 'number', faker: 'finance.amount' },  // French-specific eco-tax contribution field
   tags: {
     label: 'Tags',
     type: 'select',
@@ -39,14 +47,6 @@ export const fieldsConfig = {
   lastModifiedDate: { label: 'Last Modified Date', type: 'date', faker: 'date.recent' },
 };
 
-
-export const headCells = Object.keys(fieldsConfig).map(key => ({
-  id: key,
-  label: fieldsConfig[key].label,
-}));
-
-
 export const entityName = 'Debtor Aging';
-
 export const collectionName = 'debtor-aging';
 

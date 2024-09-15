@@ -68,7 +68,7 @@ export default function EmploymentHistoryAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Employment Records</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalRecords}
                 </Typography>
                 <Typography variant="body2">Total number of employment history records.</Typography>

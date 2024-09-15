@@ -1,123 +1,107 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Card, Grid, Typography, Chip } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
-const CarbonFootprintAnalytics = ({ fetchItems }) => {
-  const [data, setData] = useState([]);
+export default function CarbonFootprintDashboard({ fetchItems }) {
+  const [emissionsData, setEmissionsData] = useState([]);
+  const [scope1Total, setScope1Total] = useState(0);
+  const [scope2Total, setScope2Total] = useState(0);
+  const [scope3Total, setScope3Total] = useState(0);
+  const [totalEmissions, setTotalEmissions] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetchItems();
-      setData(response);
+    const fetchData = async () => {
+      setLoading(true);
+      const data = await fetchItems();
+      setEmissionsData(data);
+      processEmissionsData(data);
       setLoading(false);
-    }
+    };
+
     fetchData();
   }, [fetchItems]);
 
-  if (loading) return <Typography>Loading...</Typography>;
+  const processEmissionsData = (data) => {
+    // Calculate total emissions for each scope
+    const totals = data.reduce(
+      (acc, record) => {
+        acc.scope1 += Number(record.scope1Emissions) || 0;
+        acc.scope2 += Number(record.scope2Emissions) || 0;
+        acc.scope3 += Number(record.scope3Emissions) || 0;
+        acc.totalEmissions += Number(record.totalEmissions) || 0;
+        return acc;
+      },
+      { scope1: 0, scope2: 0, scope3: 0, totalEmissions: 0 }
+    );
 
-  // Calculate KPIs
-  const totalEmissions = data.reduce((sum, record) => sum + record.totalEmissions, 0);
-  const totalScope1 = data.reduce((sum, record) => sum + record.scope1Emissions, 0);
-  const totalScope2 = data.reduce((sum, record) => sum + record.scope2Emissions, 0);
-  const totalScope3 = data.reduce((sum, record) => sum + record.scope3Emissions, 0);
-  const avgReductionTarget = data.reduce((sum, record) => sum + record.reductionTarget, 0) / data.length;
-  const avgAchievedReduction = data.reduce((sum, record) => sum + record.achievedReduction, 0) / data.length;
-
-  // Highcharts options for total emissions over time
-  const emissionsChartOptions = {
-    title: { text: 'Total Emissions Over Time (tons CO2e)' },
-    xAxis: { categories: data.map((record) => record.year) },
-    yAxis: { title: { text: 'Emissions (tons CO2e)' } },
-    series: [
-      { name: 'Total Emissions', data: data.map((record) => record.totalEmissions) },
-      { name: 'Scope 1 Emissions', data: data.map((record) => record.scope1Emissions) },
-      { name: 'Scope 2 Emissions', data: data.map((record) => record.scope2Emissions) },
-      { name: 'Scope 3 Emissions', data: data.map((record) => record.scope3Emissions) },
-    ],
+    setScope1Total(totals.scope1);
+    setScope2Total(totals.scope2);
+    setScope3Total(totals.scope3);
+    setTotalEmissions(totals.totalEmissions);
   };
 
-  // Highcharts options for achieved vs target reduction
-  const reductionChartOptions = {
-    title: { text: 'Reduction Target vs Achieved Reduction (%)' },
-    xAxis: { categories: data.map((record) => record.year) },
-    yAxis: { title: { text: 'Reduction (%)' } },
+  const emissionsChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Total Emissions Distribution' },
     series: [
-      { name: 'Reduction Target', data: data.map((record) => record.reductionTarget) },
-      { name: 'Achieved Reduction', data: data.map((record) => record.achievedReduction) },
+      {
+        name: 'Emissions',
+        colorByPoint: true,
+        data: [
+          { name: 'Scope 1 Emissions', y: scope1Total },
+          { name: 'Scope 2 Emissions', y: scope2Total },
+          { name: 'Scope 3 Emissions', y: scope3Total },
+        ],
+      },
     ],
   };
 
   return (
-    <Grid container spacing={4}>
-      {/* KPI Cards */}
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Emissions (tons CO2e)</Typography>
-          <Typography variant="h4">{totalEmissions.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Scope 1 Emissions (tons CO2e)</Typography>
-          <Typography variant="h4">{totalScope1.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Scope 2 Emissions (tons CO2e)</Typography>
-          <Typography variant="h4">{totalScope2.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Total Scope 3 Emissions (tons CO2e)</Typography>
-          <Typography variant="h4">{totalScope3.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Average Reduction Target (%)</Typography>
-          <Typography variant="h4">{avgReductionTarget.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Average Achieved Reduction (%)</Typography>
-          <Typography variant="h4">{avgAchievedReduction.toFixed(2)}</Typography>
-        </Card>
-      </Grid>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Box sx={{ padding: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Carbon Footprint Dashboard
+        </Typography>
+        <Grid container spacing={4}>
+          {/* Total Number of Records */}
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Records</Typography>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  {emissionsData.length}
+                </Typography>
+                <Typography variant="body2">Total number of carbon footprint records tracked.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
 
-      {/* Highcharts */}
-      <Grid item xs={12}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={emissionsChartOptions} />
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card>
-          <HighchartsReact highcharts={Highcharts} options={reductionChartOptions} />
-        </Card>
-      </Grid>
+          {/* KPI Section */}
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Emissions (tons CO2e)</Typography>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                  {totalEmissions.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total emissions across all scopes (Scope 1, 2, 3).</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
 
-      {/* Tags */}
-      <Grid item xs={12}>
-        <Card>
-          <Typography variant="h6" gutterBottom>Tags</Typography>
-          {data.map((record, index) => (
-            <div key={index}>
-              <Typography variant="subtitle1">{record.year}:</Typography>
-              {record.tags.map((tag) => (
-                <Chip key={tag.id} label={tag.label} style={{ margin: '5px' }} />
-              ))}
-            </div>
-          ))}
-        </Card>
-      </Grid>
-    </Grid>
+          {/* Chart Section */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={emissionsChartOptions} />
+          </Grid>
+        </Grid>
+      </Box>
+    </Container>
   );
-};
-
-export default CarbonFootprintAnalytics;
+}

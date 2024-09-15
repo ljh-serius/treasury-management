@@ -77,7 +77,7 @@ export default function SupplierPerformanceAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Suppliers</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalSuppliers}
                 </Typography>
                 <Typography variant="body2">Total number of suppliers evaluated.</Typography>
@@ -88,7 +88,7 @@ export default function SupplierPerformanceAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Preferred Suppliers</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4"  color="green" sx={{ fontWeight: 'bold' }}>
                   {preferredSuppliers.length}
                 </Typography>
                 <Typography variant="body2">Suppliers tagged as 'Preferred'.</Typography>

@@ -1,149 +1,101 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
-const TaxFilingsAnalytics = ({ fetchItems }) => {
-  const [data, setData] = useState([]);
-  const [kpis, setKpis] = useState({
-    totalFilings: 0,
-    filedFilings: 0,
-    dueFilings: 0,
-    overdueFilings: 0,
-    totalTaxAmount: 0,
-  });
+export default function TaxFilingsDashboard({ fetchItems }) {
+  const [filingsData, setFilingsData] = useState([]);
+  const [statusDistribution, setStatusDistribution] = useState([]);
+  const [totalTaxAmount, setTotalTaxAmount] = useState(0);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
-      const filings = await fetchItems();
-      setData(filings);
-      calculateKPIs(filings);
+    const fetchData = async () => {
+      setLoading(true);
+      const data = await fetchItems();
+      setFilingsData(data);
+      processFilingsData(data);
+      setLoading(false);
     };
 
-    loadData();
+    fetchData();
   }, [fetchItems]);
 
-  const calculateKPIs = (items) => {
-    const totalFilings = items.length;
-    const filedFilings = items.filter((item) => item.status === 'filed').length;
-    const dueFilings = items.filter((item) => item.status === 'due').length;
-    const overdueFilings = items.filter((item) => item.status === 'overdue').length;
-    const totalTaxAmount = items.reduce((acc, curr) => acc + parseFloat(curr.taxAmount || 0), 0);
+  const processFilingsData = (data) => {
+    // Status Distribution
+    const statusCounts = data.reduce((acc, filing) => {
+      acc[filing.status] = (acc[filing.status] || 0) + 1;
+      return acc;
+    }, {});
 
-    setKpis({
-      totalFilings,
-      filedFilings,
-      dueFilings,
-      overdueFilings,
-      totalTaxAmount: totalTaxAmount.toFixed(2),
-    });
+    setStatusDistribution(Object.keys(statusCounts).map(key => ({
+      name: key,
+      y: statusCounts[key],
+    })));
+
+    // Total Tax Amount and Eco Contribution
+    const totals = data.reduce(
+      (acc, filing) => {
+        acc.totalAmount += Number(filing.taxAmount) || 0;
+        acc.ecoContribution += Number(filing.ecoContribution) || 0;
+        return acc;
+      },
+      { totalAmount: 0, ecoContribution: 0 }
+    );
+
+    setTotalTaxAmount(totals.totalAmount);
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
-  const statusChart = {
-    chart: {
-      type: 'pie',
-    },
-    title: {
-      text: 'Tax Filing Status Distribution',
-    },
-    series: [
-      {
-        name: 'Filings',
-        colorByPoint: true,
-        data: [
-          { name: 'Filed', y: kpis.filedFilings },
-          { name: 'Due', y: kpis.dueFilings },
-          { name: 'Overdue', y: kpis.overdueFilings },
-        ],
-      },
-    ],
-  };
-
-  const taxAmountChart = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Tax Amounts by Year',
-    },
-    xAxis: {
-      categories: data.map((item) => item.taxYear),
-    },
-    yAxis: {
-      title: {
-        text: 'Tax Amount',
-      },
-    },
-    series: [
-      {
-        name: 'Tax Amount',
-        data: data.map((item) => parseFloat(item.taxAmount || 0)),
-      },
-    ],
+  const statusChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Filing Status Distribution' },
+    series: [{ name: 'Filings', colorByPoint: true, data: statusDistribution }],
   };
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Tax Filings Analytics
-      </Typography>
+    <Container maxWidth="xl" sx={{ paddingTop: 3, paddingBottom: 7 }}>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Box sx={{ padding: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Tax Filings Dashboard
+        </Typography>
+        <Grid container spacing={4}>
+          {/* KPI Section */}
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Tax Amount</Typography>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                  ${totalTaxAmount.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total amount of taxes filed.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Filings</Typography>
-              <Typography variant="h4">{kpis.totalFilings}</Typography>
-            </CardContent>
-          </Card>
+          {/* Chart Section */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
+          </Grid>
         </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Filed Filings</Typography>
-              <Typography variant="h4">{kpis.filedFilings}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Due Filings</Typography>
-              <Typography variant="h4">{kpis.dueFilings}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Overdue Filings</Typography>
-              <Typography variant="h4">{kpis.overdueFilings}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Tax Amount</Typography>
-              <Typography variant="h4">${kpis.totalTaxAmount}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      <Box mt={4}>
-        <HighchartsReact highcharts={Highcharts} options={statusChart} />
       </Box>
-
-      <Box mt={4}>
-        <HighchartsReact highcharts={Highcharts} options={taxAmountChart} />
-      </Box>
-    </Box>
+    </Container>
   );
-};
-
-export default TaxFilingsAnalytics;
+}

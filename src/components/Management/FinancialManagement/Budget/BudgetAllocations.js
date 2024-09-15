@@ -4,20 +4,22 @@ export const fieldsConfig = {
     budgetedAmount: { label: 'Budgeted Amount', type: 'number', faker: 'finance.amount' },
     actualAmount: { label: 'Actual Amount', type: 'number', faker: 'finance.amount' },
     fiscalYear: { label: 'Fiscal Year', type: 'number', faker: 'date.past' },
-tags: {
-    label: 'Tags',
-    type: 'select',
-    options: [
-        { id: 'urgent', label: 'Urgent' },
-        { id: 'review', label: 'Review' },
-        { id: 'important', label: 'Important' },
-        { id: 'completed', label: 'Completed' },
-        { id: 'follow-up', label: 'Follow-Up' },
-    ],
-    multiple: true,
-    faker: 'random.arrayElement',
-},
-
+    ecoContribution: { label: 'Eco Contribution', type: 'number', faker: 'finance.amount' },  // Eco-tax contribution (French-specific)
+    variance: { label: 'Variance', type: 'number', faker: 'finance.amount' },  // Budget vs actual variance
+    latePaymentFee: { label: 'Late Payment Fee', type: 'number', faker: 'finance.amount' },  // Penalty for late payments
+    tags: {
+        label: 'Tags',
+        type: 'select',
+        options: [
+            { id: 'urgent', label: 'Urgent' },
+            { id: 'review', label: 'Review' },
+            { id: 'important', label: 'Important' },
+            { id: 'completed', label: 'Completed' },
+            { id: 'follow-up', label: 'Follow-Up' },
+        ],
+        multiple: true,
+        faker: 'random.arrayElement',
+    },
     status: {
         label: 'Status',
         type: 'select',

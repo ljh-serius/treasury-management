@@ -8,13 +8,9 @@ import Backdrop from '@mui/material/Backdrop';
 export default function ChartOfAccountsDashboard({ fetchItems }) {
   const [accountsData, setAccountsData] = useState([]);
   const [accountTypeDistribution, setAccountTypeDistribution] = useState([]);
-  const [balanceByAccountType, setBalanceByAccountType] = useState([]);
-  const [currencyDistribution, setCurrencyDistribution] = useState([]);
-  const [averageBalanceByAccountType, setAverageBalanceByAccountType] = useState([]);
-  const [tagsDistribution, setTagsDistribution] = useState([]);
-  const [totalAccounts, setTotalAccounts] = useState(0);
   const [totalBalance, setTotalBalance] = useState(0);
-  const [averageAccountBalance, setAverageAccountBalance] = useState(0);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
+  const [totalLateFees, setTotalLateFees] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,146 +26,37 @@ export default function ChartOfAccountsDashboard({ fetchItems }) {
   }, [fetchItems]);
 
   const processAccountsData = (data) => {
-    // Total Number of Accounts
-    setTotalAccounts(data.length);
-
-    // Total Balance
-    const totalBalance = data.reduce((acc, account) => acc + Number(account.balance), 0);
-    setTotalBalance(totalBalance);
-
-    // Average Account Balance
-    setAverageAccountBalance(totalBalance / data.length);
-
-    // Accounts by Type
+    // Account Type Distribution
     const accountTypeCounts = data.reduce((acc, account) => {
       acc[account.accountType] = (acc[account.accountType] || 0) + 1;
       return acc;
     }, {});
 
     setAccountTypeDistribution(Object.keys(accountTypeCounts).map(key => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),  // Capitalize account type
+      name: key,
       y: accountTypeCounts[key],
     })));
 
-    // Total Balance by Account Type
-    const balanceByType = data.reduce((acc, account) => {
-      acc[account.accountType] = (acc[account.accountType] || 0) + Number(account.balance);
-      return acc;
-    }, {});
+    // Total Balance, Late Payment Fees, and Eco Contribution
+    const totals = data.reduce(
+      (acc, account) => {
+        acc.balance += Number(account.balance) || 0;
+        acc.ecoContribution += Number(account.ecoContribution) || 0;
+        acc.lateFees += Number(account.latePaymentFee) || 0;
+        return acc;
+      },
+      { balance: 0, ecoContribution: 0, lateFees: 0 }
+    );
 
-    setBalanceByAccountType(Object.keys(balanceByType).map(key => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),  // Capitalize account type
-      y: balanceByType[key],
-    })));
-
-    // Average Balance by Account Type
-    const accountCounts = Object.values(accountTypeCounts);
-    setAverageBalanceByAccountType(Object.keys(balanceByType).map((key, index) => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),
-      y: balanceByType[key] / accountCounts[index],
-    })));
-
-    // Accounts by Currency
-    const currencyCounts = data.reduce((acc, account) => {
-      acc[account.currency] = (acc[account.currency] || 0) + 1;
-      return acc;
-    }, {});
-
-    setCurrencyDistribution(Object.keys(currencyCounts).map(key => ({
-      name: key,
-      y: currencyCounts[key],
-    })));
-
-    // Tags Distribution
-    const tagsCounts = data.reduce((acc, account) => {
-      account.tags.forEach(tag => {
-        acc[tag] = (acc[tag] || 0) + 1;
-      });
-      return acc;
-    }, {});
-
-    setTagsDistribution(Object.keys(tagsCounts).map(key => ({
-      name: key,
-      y: tagsCounts[key],
-    })));
+    setTotalBalance(totals.balance);
+    setEcoContributionTotal(totals.ecoContribution);
+    setTotalLateFees(totals.lateFees);
   };
 
-  // Chart options for each chart
   const accountTypeChartOptions = {
-    chart: {
-      type: 'pie',
-    },
-    title: {
-      text: 'Accounts by Type',
-    },
-    series: [
-      {
-        name: 'Account Types',
-        colorByPoint: true,
-        data: accountTypeDistribution,
-      },
-    ],
-  };
-
-  const balanceByAccountTypeChartOptions = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Total Balance by Account Type',
-    },
-    series: [
-      {
-        name: 'Total Balance',
-        data: balanceByAccountType,
-      },
-    ],
-  };
-
-  const currencyChartOptions = {
-    chart: {
-      type: 'pie',
-    },
-    title: {
-      text: 'Accounts by Currency',
-    },
-    series: [
-      {
-        name: 'Currencies',
-        colorByPoint: true,
-        data: currencyDistribution,
-      },
-    ],
-  };
-
-  const averageBalanceByAccountTypeChartOptions = {
-    chart: {
-      type: 'bar',
-    },
-    title: {
-      text: 'Average Balance by Account Type',
-    },
-    series: [
-      {
-        name: 'Average Balance',
-        data: averageBalanceByAccountType,
-      },
-    ],
-  };
-
-  const tagsChartOptions = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Tags Distribution',
-    },
-    series: [
-      {
-        name: 'Tags',
-        data: tagsDistribution,
-      },
-    ],
+    chart: { type: 'pie' },
+    title: { text: 'Account Type Distribution' },
+    series: [{ name: 'Account Types', colorByPoint: true, data: accountTypeDistribution }],
   };
 
   return (
@@ -179,37 +66,40 @@ export default function ChartOfAccountsDashboard({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Chart Of Accounts Dashboard
+          Chart of Accounts Dashboard
         </Typography>
         <Grid container spacing={4}>
           {/* KPI Section */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Accounts</Typography>
-                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  {totalAccounts}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
                 <Typography variant="h6">Total Balance</Typography>
-                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   ${totalBalance.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total balance across all accounts.</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Average Account Balance</Typography>
+                <Typography variant="h6">Total Eco Contribution</Typography>
                 <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
-                  ${averageAccountBalance.toFixed(2)}
+                  ${ecoContributionTotal.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Late Payment Fees</Typography>
+                <Typography variant="h4" color="red" sx={{ fontWeight: 'bold' }}>
+                  ${totalLateFees.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total late payment fees across all accounts.</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -217,18 +107,6 @@ export default function ChartOfAccountsDashboard({ fetchItems }) {
           {/* Chart Section */}
           <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={accountTypeChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={balanceByAccountTypeChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={currencyChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={averageBalanceByAccountTypeChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={12}>
-            <HighchartsReact highcharts={Highcharts} options={tagsChartOptions} />
           </Grid>
         </Grid>
       </Box>

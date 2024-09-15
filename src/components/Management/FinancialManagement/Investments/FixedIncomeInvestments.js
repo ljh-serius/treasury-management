@@ -15,6 +15,7 @@ export const fieldsConfig = {
     interestRate: { label: 'Interest Rate (%)', type: 'number', faker: 'finance.amount' },
     maturityDate: { label: 'Maturity Date', type: 'date', faker: 'date.future' },
     purchaseDate: { label: 'Purchase Date', type: 'date', faker: 'date.past' },
+    ecoContribution: { label: 'Eco Contribution', type: 'number', faker: 'finance.amount' },  // Eco-tax contribution (French-specific)
     tags: {
         label: 'Tags',
         type: 'select',

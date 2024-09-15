@@ -73,7 +73,7 @@ export default function WarehouseLayoutsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Layouts</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalLayouts}
                 </Typography>
                 <Typography variant="body2">Total number of warehouse layouts.</Typography>
@@ -84,7 +84,7 @@ export default function WarehouseLayoutsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">High Utilization Layouts</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {highUtilizationLayouts.length}
                 </Typography>
                 <Typography variant="body2">Layouts tagged as 'High Utilization'.</Typography>

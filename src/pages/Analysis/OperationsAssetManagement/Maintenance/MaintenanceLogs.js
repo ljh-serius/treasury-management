@@ -77,7 +77,7 @@ export default function MaintenanceLogsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Maintenance Logs</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalLogs}
                 </Typography>
                 <Typography variant="body2">Total number of maintenance logs.</Typography>
@@ -88,7 +88,7 @@ export default function MaintenanceLogsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Emergency Logs</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {emergencyLogs.length}
                 </Typography>
                 <Typography variant="body2">Logs tagged as 'Emergency'.</Typography>

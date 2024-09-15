@@ -6,7 +6,13 @@ export const fieldsConfig = {
     currency: {
         label: 'Currency',
         type: 'select',
-        options: [],  // Populate with actual currency options
+        options: [
+            { id: 'USD', label: 'USD' },
+            { id: 'EUR', label: 'EUR' },
+            { id: 'GBP', label: 'GBP' },
+            { id: 'JPY', label: 'JPY' },
+            { id: 'AUD', label: 'AUD' },
+        ],
         faker: 'finance.currencyCode',
     },
     riskLevel: {
@@ -19,6 +25,8 @@ export const fieldsConfig = {
         ],
         faker: 'random.arrayElement',
     },
+    latePaymentFee: { label: 'Late Payment Fee', type: 'number', faker: 'finance.amount' },  // Penalty for late payments
+    ecoContribution: { label: 'Eco Contribution', type: 'number', faker: 'finance.amount' },  // Eco-tax contribution (French-specific)
     tags: {
         label: 'Tags',
         type: 'select',
@@ -32,19 +40,11 @@ export const fieldsConfig = {
         multiple: true,
         faker: 'random.arrayElement',
     },
-
     createdBy: { label: 'Created By', type: 'text', faker: 'name.fullName' },
     lastModifiedBy: { label: 'Last Modified By', type: 'text', faker: 'name.fullName' },
     createdDate: { label: 'Created Date', type: 'date', faker: 'date.past' },
     lastModifiedDate: { label: 'Last Modified Date', type: 'date', faker: 'date.recent' },
 };
 
-export const headCells = Object.keys(fieldsConfig).map(key => ({
-    id: key,
-    label: fieldsConfig[key].label,
-}));
-
-
 export const entityName = 'Credit Management';
-
 export const collectionName = 'credit-management';

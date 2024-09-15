@@ -71,7 +71,7 @@ export default function CertificationsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Certifications</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalCertifications}
                 </Typography>
                 <Typography variant="body2">Total number of certifications issued.</Typography>
@@ -82,7 +82,7 @@ export default function CertificationsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Expired Certifications</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="yellow" sx={{ fontWeight: 'bold' }}>
                   {expiredCertifications.length}
                 </Typography>
                 <Typography variant="body2">Certifications that have expired.</Typography>

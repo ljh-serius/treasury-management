@@ -65,7 +65,7 @@ export default function SalaryStructureAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Employees</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalEmployees}
                 </Typography>
                 <Typography variant="body2">Total number of employees with salary records.</Typography>

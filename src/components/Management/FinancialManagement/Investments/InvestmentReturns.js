@@ -14,6 +14,7 @@ export const fieldsConfig = {
     returnAmount: { label: 'Return Amount', type: 'number', faker: 'finance.amount' },
     returnDate: { label: 'Return Date', type: 'date', faker: 'date.past' },
     roi: { label: 'ROI (%)', type: 'number', faker: 'finance.amount' },
+    ecoContribution: { label: 'Eco Contribution', type: 'number', faker: 'finance.amount' },  // Eco-tax contribution (French-specific)
     tags: {
         label: 'Tags',
         type: 'select',

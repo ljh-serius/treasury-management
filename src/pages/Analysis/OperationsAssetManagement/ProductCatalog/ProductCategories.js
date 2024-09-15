@@ -5,57 +5,54 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function ProductCategoriesAnalytics({ fetchItems }) {
-  const [data, setData] = useState([]);
+export default function ProductCategoriesDashboard({ fetchItems }) {
+  const [categoryData, setCategoryData] = useState([]);
+  const [tagsDistribution, setTagsDistribution] = useState([]);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [totalCategories, setTotalCategories] = useState(0);
-  const [popularCategories, setPopularCategories] = useState([]);
-  const [categoryDistribution, setCategoryDistribution] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const fetchedData = await fetchItems();
-      setData(fetchedData);
-      calculateKpis(fetchedData);
-      generateCharts(fetchedData);
+      const data = await fetchItems();
+      setCategoryData(data);
+      processCategoryData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const calculateKpis = (data) => {
-    setTotalCategories(data.length);
-
-    const popular = data.filter((item) => item.tags.includes('popular'));
-    setPopularCategories(popular);
-  };
-
-  const generateCharts = (data) => {
-    const categories = data.reduce((acc, item) => {
-      acc[item.categoryName] = (acc[item.categoryName] || 0) + 1;
+  const processCategoryData = (data) => {
+    // Tags Distribution
+    const tagCounts = data.reduce((acc, category) => {
+      category.tags.forEach(tag => {
+        acc[tag] = (acc[tag] || 0) + 1;
+      });
       return acc;
     }, {});
 
-    setCategoryDistribution(
-      Object.keys(categories).map((key) => ({
-        name: key,
-        y: categories[key],
-      }))
+    setTagsDistribution(Object.keys(tagCounts).map(key => ({
+      name: key,
+      y: tagCounts[key],
+    })));
+
+    // Total Eco Contribution
+    const totals = data.reduce(
+      (acc, category) => {
+        acc.ecoContribution += Number(category.ecoContribution) || 0;
+        return acc;
+      },
+      { ecoContribution: 0 }
     );
+
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
-  const categoryDistributionChart = {
+  const tagsChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Category Distribution' },
-    series: [
-      {
-        name: 'Categories',
-        colorByPoint: true,
-        data: categoryDistribution,
-      },
-    ],
+    title: { text: 'Product Category Tags Distribution' },
+    series: [{ name: 'Categories', colorByPoint: true, data: tagsDistribution }],
   };
 
   return (
@@ -65,40 +62,40 @@ export default function ProductCategoriesAnalytics({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Product Categories Analytics
+          Product Categories Dashboard
         </Typography>
         <Grid container spacing={4}>
-          {/* KPIs */}
+          {/* Total Number of Categories */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Categories</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {totalCategories}
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  {categoryData.length}
                 </Typography>
-                <Typography variant="body2">Total number of product categories available.</Typography>
+                <Typography variant="body2">Total number of product categories.</Typography>
               </CardContent>
             </Card>
           </Grid>
+          {/* KPI Section */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Popular Categories</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {popularCategories.length}
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
                 </Typography>
-                <Typography variant="body2">Categories tagged as 'Popular'.</Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* Charts */}
+          {/* Chart Section */}
           <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={categoryDistributionChart} />
+            <HighchartsReact highcharts={Highcharts} options={tagsChartOptions} />
           </Grid>
         </Grid>
       </Box>
     </Container>
   );
 }
-    

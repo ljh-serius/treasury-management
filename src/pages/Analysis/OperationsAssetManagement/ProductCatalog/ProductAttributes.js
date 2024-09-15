@@ -5,57 +5,54 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function ProductAttributesAnalytics({ fetchItems }) {
-  const [data, setData] = useState([]);
+export default function ProductAttributesDashboard({ fetchItems }) {
+  const [attributeData, setAttributeData] = useState([]);
+  const [tagsDistribution, setTagsDistribution] = useState([]);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [totalAttributes, setTotalAttributes] = useState(0);
-  const [customizableAttributes, setCustomizableAttributes] = useState([]);
-  const [attributeDistribution, setAttributeDistribution] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const fetchedData = await fetchItems();
-      setData(fetchedData);
-      calculateKpis(fetchedData);
-      generateCharts(fetchedData);
+      const data = await fetchItems();
+      setAttributeData(data);
+      processAttributeData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const calculateKpis = (data) => {
-    setTotalAttributes(data.length);
-
-    const customizable = data.filter((item) => item.tags.includes('customizable'));
-    setCustomizableAttributes(customizable);
-  };
-
-  const generateCharts = (data) => {
-    const types = data.reduce((acc, item) => {
-      acc[item.valueType] = (acc[item.valueType] || 0) + 1;
+  const processAttributeData = (data) => {
+    // Tags Distribution
+    const tagCounts = data.reduce((acc, attribute) => {
+      attribute.tags.forEach(tag => {
+        acc[tag] = (acc[tag] || 0) + 1;
+      });
       return acc;
     }, {});
 
-    setAttributeDistribution(
-      Object.keys(types).map((key) => ({
-        name: key,
-        y: types[key],
-      }))
+    setTagsDistribution(Object.keys(tagCounts).map(key => ({
+      name: key,
+      y: tagCounts[key],
+    })));
+
+    // Total Eco Contribution
+    const totals = data.reduce(
+      (acc, attribute) => {
+        acc.ecoContribution += Number(attribute.ecoContribution) || 0;
+        return acc;
+      },
+      { ecoContribution: 0 }
     );
+
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
-  const attributeDistributionChart = {
+  const tagsChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Attribute Type Distribution' },
-    series: [
-      {
-        name: 'Attributes',
-        colorByPoint: true,
-        data: attributeDistribution,
-      },
-    ],
+    title: { text: 'Product Attribute Tags Distribution' },
+    series: [{ name: 'Attributes', colorByPoint: true, data: tagsDistribution }],
   };
 
   return (
@@ -65,36 +62,37 @@ export default function ProductAttributesAnalytics({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Product Attributes Analytics
+          Product Attributes Dashboard
         </Typography>
         <Grid container spacing={4}>
-          {/* KPIs */}
+          {/* Total Number of Attributes */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Attributes</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {totalAttributes}
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  {attributeData.length}
                 </Typography>
                 <Typography variant="body2">Total number of product attributes.</Typography>
               </CardContent>
             </Card>
           </Grid>
+          {/* KPI Section */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Customizable Attributes</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {customizableAttributes.length}
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
                 </Typography>
-                <Typography variant="body2">Attributes tagged as 'Customizable'.</Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* Charts */}
+          {/* Chart Section */}
           <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={attributeDistributionChart} />
+            <HighchartsReact highcharts={Highcharts} options={tagsChartOptions} />
           </Grid>
         </Grid>
       </Box>

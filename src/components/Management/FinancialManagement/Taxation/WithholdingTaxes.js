@@ -3,6 +3,7 @@ export const fieldsConfig = {
     taxYear: { label: 'Tax Year', type: 'number', faker: 'date.past' },
     withheldAmount: { label: 'Withheld Amount', type: 'number', faker: 'finance.amount' },
     payer: { label: 'Payer', type: 'text', faker: 'company.name' },
+    ecoContribution: { label: 'Eco Contribution', type: 'number', faker: 'finance.amount' },  // Eco-tax contribution (French-specific)
     status: {
         label: 'Status',
         type: 'select',

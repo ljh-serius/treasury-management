@@ -74,7 +74,7 @@ export default function ShiftSchedulesAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Shifts</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalShifts}
                 </Typography>
                 <Typography variant="body2">Total number of shifts scheduled.</Typography>
@@ -85,7 +85,7 @@ export default function ShiftSchedulesAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Completed Shifts</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {completedShifts.length}
                 </Typography>
                 <Typography variant="body2">Shifts that have been completed.</Typography>
@@ -96,7 +96,7 @@ export default function ShiftSchedulesAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Overtime Hours</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="purple" sx={{ fontWeight: 'bold' }}>
                   {overtimeHoursTotal}
                 </Typography>
                 <Typography variant="body2">Total overtime hours worked across shifts.</Typography>

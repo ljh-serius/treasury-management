@@ -71,7 +71,7 @@ export default function BonusesIncentivesAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Bonuses</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalBonuses}
                 </Typography>
                 <Typography variant="body2">Total number of bonuses awarded.</Typography>
@@ -82,7 +82,7 @@ export default function BonusesIncentivesAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Paid Bonuses</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {paidBonuses.length}
                 </Typography>
                 <Typography variant="body2">Bonuses that have been paid.</Typography>

@@ -73,7 +73,7 @@ export default function WorkOrdersAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Work Orders</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue"  sx={{ fontWeight: 'bold' }}>
                   {totalWorkOrders}
                 </Typography>
                 <Typography variant="body2">Total number of work orders.</Typography>
@@ -84,7 +84,7 @@ export default function WorkOrdersAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Urgent Work Orders</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4"  color="green" sx={{ fontWeight: 'bold' }}>
                   {urgentOrders.length}
                 </Typography>
                 <Typography variant="body2">Work orders tagged as 'Urgent'.</Typography>

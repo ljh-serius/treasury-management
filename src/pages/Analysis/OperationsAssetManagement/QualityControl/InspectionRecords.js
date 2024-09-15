@@ -73,7 +73,7 @@ export default function InspectionRecordsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Inspections</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalInspections}
                 </Typography>
                 <Typography variant="body2">Total number of inspections conducted.</Typography>
@@ -84,7 +84,7 @@ export default function InspectionRecordsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Failed Inspections</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {failedInspections.length}
                 </Typography>
                 <Typography variant="body2">Inspections tagged as 'Failed'.</Typography>

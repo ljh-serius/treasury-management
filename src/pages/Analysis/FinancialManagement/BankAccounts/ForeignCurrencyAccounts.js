@@ -5,180 +5,76 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function ForeignCurrencyAmountsDashboard({ fetchItems }) {
-  const [accountsData, setAccountsData] = useState([]);
+export default function ForeignCurrencyAmountsAnalysisDashboard({ fetchItems }) {
+  const [currencyData, setCurrencyData] = useState([]);
+  const [currencyDistribution, setCurrencyDistribution] = useState([]);
   const [statusDistribution, setStatusDistribution] = useState([]);
-  const [balanceByCurrency, setBalanceByCurrency] = useState([]);
-  const [accountsOverTimeData, setAccountsOverTimeData] = useState([]);
-  const [averageBalanceByStatus, setAverageBalanceByStatus] = useState([]);
-  const [tagsDistribution, setTagsDistribution] = useState([]);
-  const [totalAccounts, setTotalAccounts] = useState(0);
   const [totalBalance, setTotalBalance] = useState(0);
-  const [averageBalance, setAverageBalance] = useState(0);
+  const [totalLateFees, setTotalLateFees] = useState(0);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       const data = await fetchItems();
-      setAccountsData(data);
-      processAccountsData(data);
+      setCurrencyData(data);
+      processCurrencyData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const processAccountsData = (data) => {
-    // Total Number of Accounts
-    setTotalAccounts(data.length);
+  const processCurrencyData = (data) => {
+    // Currency Distribution
+    const currencyCounts = data.reduce((acc, currency) => {
+      acc[currency.currency] = (acc[currency.currency] || 0) + 1;
+      return acc;
+    }, {});
 
-    // Total Balance Across All Accounts
-    const totalBalance = data.reduce((acc, account) => acc + Number(account.balance), 0);
-    setTotalBalance(totalBalance);
+    setCurrencyDistribution(Object.keys(currencyCounts).map(key => ({
+      name: key,
+      y: currencyCounts[key],
+    })));
 
-    // Average Account Balance
-    setAverageBalance(totalBalance / data.length);
-
-    // Accounts by Status
-    const statusCounts = data.reduce((acc, account) => {
-      acc[account.status] = (acc[account.status] || 0) + 1;
+    // Status Distribution
+    const statusCounts = data.reduce((acc, currency) => {
+      acc[currency.status] = (acc[currency.status] || 0) + 1;
       return acc;
     }, {});
 
     setStatusDistribution(Object.keys(statusCounts).map(key => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),  // Capitalize status
+      name: key,
       y: statusCounts[key],
     })));
 
-    // Total Balance by Currency
-    const balanceByCurrency = data.reduce((acc, account) => {
-      acc[account.currency] = (acc[account.currency] || 0) + Number(account.balance);
-      return acc;
-    }, {});
+    // Total Balance, Late Payment Fees, and Eco Contribution
+    const totals = data.reduce(
+      (acc, currency) => {
+        acc.balance += Number(currency.balance) || 0;
+        acc.lateFees += Number(currency.latePaymentFee) || 0;
+        acc.ecoContribution += Number(currency.ecoContribution) || 0;
+        return acc;
+      },
+      { balance: 0, lateFees: 0, ecoContribution: 0 }
+    );
 
-    setBalanceByCurrency(Object.keys(balanceByCurrency).map(key => ({
-      name: key,
-      y: balanceByCurrency[key],
-    })));
-
-    // Accounts Over Time
-    const accountsByMonth = data.reduce((acc, account) => {
-      const month = new Date(account.createdDate).getMonth() + 1;
-      acc[month] = (acc[month] || 0) + 1;
-      return acc;
-    }, {});
-
-    setAccountsOverTimeData(Object.keys(accountsByMonth).map(key => ({
-      name: `Month ${key}`,
-      y: accountsByMonth[key],
-    })));
-
-    // Average Balance by Status
-    const balanceByStatus = data.reduce((acc, account) => {
-      acc[account.status] = acc[account.status] || { totalBalance: 0, count: 0 };
-      acc[account.status].totalBalance += Number(account.balance);
-      acc[account.status].count += 1;
-      return acc;
-    }, {});
-
-    setAverageBalanceByStatus(Object.keys(balanceByStatus).map(key => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),
-      y: balanceByStatus[key].totalBalance / balanceByStatus[key].count || 0,
-    })));
-
-    // Tags Distribution
-    const tagsCounts = data.reduce((acc, account) => {
-      account.tags.forEach(tag => {
-        acc[tag] = (acc[tag] || 0) + 1;
-      });
-      return acc;
-    }, {});
-
-    setTagsDistribution(Object.keys(tagsCounts).map(key => ({
-      name: key,
-      y: tagsCounts[key],
-    })));
+    setTotalBalance(totals.balance);
+    setTotalLateFees(totals.lateFees);
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
-  // Chart options for each chart
+  const currencyChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Currency Distribution' },
+    series: [{ name: 'Currencies', colorByPoint: true, data: currencyDistribution }],
+  };
+
   const statusChartOptions = {
-    chart: {
-      type: 'pie',
-    },
-    title: {
-      text: 'Accounts by Status',
-    },
-    series: [
-      {
-        name: 'Status',
-        colorByPoint: true,
-        data: statusDistribution,
-      },
-    ],
-  };
-
-  const balanceByCurrencyChartOptions = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Total Balance by Currency',
-    },
-    series: [
-      {
-        name: 'Balance',
-        data: balanceByCurrency,
-      },
-    ],
-  };
-
-  const accountsOverTimeChartOptions = {
-    chart: {
-      type: 'line',
-    },
-    title: {
-      text: 'Accounts Over Time',
-    },
-    xAxis: {
-      categories: accountsOverTimeData.map(data => data.name),
-    },
-    series: [
-      {
-        name: 'Number of Accounts',
-        data: accountsOverTimeData.map(data => data.y),
-      },
-    ],
-  };
-
-  const averageBalanceByStatusChartOptions = {
-    chart: {
-      type: 'bar',
-    },
-    title: {
-      text: 'Average Balance by Status',
-    },
-    series: [
-      {
-        name: 'Average Balance',
-        data: averageBalanceByStatus,
-      },
-    ],
-  };
-
-  const tagsChartOptions = {
-    chart: {
-      type: 'column',
-    },
-    title: {
-      text: 'Tags Distribution',
-    },
-    series: [
-      {
-        name: 'Tags',
-        data: tagsDistribution,
-      },
-    ],
+    chart: { type: 'column' },
+    title: { text: 'Account Status Distribution' },
+    series: [{ name: 'Status', data: statusDistribution }],
   };
 
   return (
@@ -188,56 +84,50 @@ export default function ForeignCurrencyAmountsDashboard({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Foreign Currency Amounts Dashboard
+          Foreign Currency Amounts Analysis Dashboard
         </Typography>
         <Grid container spacing={4}>
           {/* KPI Section */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Accounts</Typography>
-                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  {totalAccounts}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
                 <Typography variant="h6">Total Balance</Typography>
-                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   ${totalBalance.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total balance across all accounts.</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Average Balance</Typography>
-                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
-                  ${averageBalance.toFixed(2)}
+                <Typography variant="h6">Total Late Payment Fees</Typography>
+                <Typography variant="h4" color="red" sx={{ fontWeight: 'bold' }}>
+                  ${totalLateFees.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total late payment fees across all accounts.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
               </CardContent>
             </Card>
           </Grid>
 
           {/* Chart Section */}
           <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={currencyChartOptions} />
+          </Grid>
+          <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={balanceByCurrencyChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={accountsOverTimeChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={averageBalanceByStatusChartOptions} />
-          </Grid>
-          <Grid item xs={12} md={12}>
-            <HighchartsReact highcharts={Highcharts} options={tagsChartOptions} />
           </Grid>
         </Grid>
       </Box>

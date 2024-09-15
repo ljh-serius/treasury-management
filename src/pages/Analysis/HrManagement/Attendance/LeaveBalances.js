@@ -93,7 +93,7 @@ export default function LeaveBalancesDashboard({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Employees</Typography>
-                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalEmployees}
                 </Typography>
               </CardContent>

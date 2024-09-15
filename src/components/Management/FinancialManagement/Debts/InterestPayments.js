@@ -15,6 +15,8 @@ export const fieldsConfig = {
         ],
         faker: 'random.arrayElement',
     },
+    ecoContribution: { label: 'Eco Contribution', type: 'number', faker: 'finance.amount' },  // Eco-tax contribution (French-specific)
+    latePaymentFee: { label: 'Late Payment Fee', type: 'number', faker: 'finance.amount' },  // Penalty for late payments
     tags: {
         label: 'Tags',
         type: 'select',

@@ -73,7 +73,7 @@ export default function LogisticsRoutesAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Routes</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue"  sx={{ fontWeight: 'bold' }}>
                   {totalRoutes}
                 </Typography>
                 <Typography variant="body2">Total number of logistics routes.</Typography>
@@ -84,7 +84,7 @@ export default function LogisticsRoutesAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Critical Routes</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {criticalRoutes.length}
                 </Typography>
                 <Typography variant="body2">Routes tagged as 'Critical'.</Typography>

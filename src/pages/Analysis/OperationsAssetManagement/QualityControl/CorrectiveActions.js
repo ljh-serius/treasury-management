@@ -73,7 +73,7 @@ export default function CorrectiveActionsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Corrective Actions</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalActions}
                 </Typography>
                 <Typography variant="body2">Total number of corrective actions taken.</Typography>
@@ -84,7 +84,7 @@ export default function CorrectiveActionsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Overdue Actions</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {overdueActions.length}
                 </Typography>
                 <Typography variant="body2">Actions that are overdue.</Typography>

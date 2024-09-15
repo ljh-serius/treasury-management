@@ -1,83 +1,61 @@
 import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Box, Typography, Grid, Card, CardContent, Container, CircularProgress, Backdrop } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
 export default function AssetDepreciationDashboard({ fetchItems }) {
-  const [assetData, setAssetData] = useState([]);
-  const [totalAssets, setTotalAssets] = useState(0);
-  const [totalDepreciation, setTotalDepreciation] = useState(0);
-  const [currentAssetValue, setCurrentAssetValue] = useState(0);
-  const [activeAssets, setActiveAssets] = useState(0);
-  const [depreciationTrends, setDepreciationTrends] = useState([]);
+  const [depreciationData, setDepreciationData] = useState([]);
   const [statusDistribution, setStatusDistribution] = useState([]);
+  const [totalDepreciation, setTotalDepreciation] = useState(0);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDataAsync = async () => {
+    const fetchData = async () => {
       setLoading(true);
       const data = await fetchItems();
-      setAssetData(data);
-      processAssetData(data);
+      setDepreciationData(data);
+      processDepreciationData(data);
       setLoading(false);
     };
 
-    fetchDataAsync();
+    fetchData();
   }, [fetchItems]);
 
-  const processAssetData = (data) => {
-    // Total Assets
-    setTotalAssets(data.length);
-
-    // Total Depreciation and Current Value
-    const totalDepreciationValue = data.reduce((acc, asset) => acc + (Number(asset.purchasePrice) - Number(asset.currentValue)), 0);
-    setTotalDepreciation(totalDepreciationValue);
-    const totalCurrentValue = data.reduce((acc, asset) => acc + Number(asset.currentValue), 0);
-    setCurrentAssetValue(totalCurrentValue);
-
-    // Count Active Assets
-    const active = data.filter(asset => asset.status === 'active').length;
-    setActiveAssets(active);
-
-    // Depreciation Trends for Line Chart
-    const trendData = data.map(asset => ({
-      date: new Date(asset.lastModifiedDate).getTime(),
-      value: Number(asset.currentValue),
-    })).sort((a, b) => a.date - b.date);
-    setDepreciationTrends(trendData);
-
-    // Status Distribution for Pie Chart
-    const statusCounts = data.reduce((acc, asset) => {
-      acc[asset.status] = (acc[asset.status] || 0) + 1;
+  const processDepreciationData = (data) => {
+    // Status Distribution
+    const statusCounts = data.reduce((acc, item) => {
+      item.tags.forEach(tag => {
+        acc[tag] = (acc[tag] || 0) + 1;
+      });
       return acc;
     }, {});
+
     setStatusDistribution(Object.keys(statusCounts).map(key => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),
+      name: key,
       y: statusCounts[key],
     })));
+
+    // Total Accumulated Depreciation and Eco Contribution
+    const totals = data.reduce(
+      (acc, item) => {
+        acc.totalDepreciation += Number(item.accumulatedDepreciation) || 0;
+        acc.ecoContribution += Number(item.ecoContribution) || 0;
+        return acc;
+      },
+      { totalDepreciation: 0, ecoContribution: 0 }
+    );
+
+    setTotalDepreciation(totals.totalDepreciation);
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
-  // Highcharts options for Depreciation Trends
-  const depreciationChartOptions = {
-    chart: { type: 'line' },
-    title: { text: 'Asset Depreciation Trends' },
-    xAxis: { type: 'datetime', title: { text: 'Date' } },
-    yAxis: { title: { text: 'Current Value' } },
-    series: [{
-      name: 'Current Value',
-      data: depreciationTrends.map(item => [item.date, item.value]),
-    }],
-  };
-
-  // Highcharts options for Status Distribution
   const statusChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Asset Status Distribution' },
-    series: [{
-      name: 'Assets',
-      colorByPoint: true,
-      data: statusDistribution,
-    }],
+    title: { text: 'Asset Depreciation Status Distribution' },
+    series: [{ name: 'Assets', colorByPoint: true, data: statusDistribution }],
   };
 
   return (
@@ -87,63 +65,34 @@ export default function AssetDepreciationDashboard({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Assets Depreciation Dashboard
+          Asset Depreciation Dashboard
         </Typography>
-
         <Grid container spacing={4}>
-          {/* KPIs Section */}
-          <Grid item xs={12} md={3}>
+          {/* KPI Section */}
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Assets</Typography>
+                <Typography variant="h6">Total Accumulated Depreciation</Typography>
                 <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  {totalAssets}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Total Depreciation</Typography>
-                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
                   ${totalDepreciation.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total accumulated depreciation across all assets.</Typography>
               </CardContent>
             </Card>
           </Grid>
-
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Current Asset Value</Typography>
-                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
-                  ${currentAssetValue.toFixed(2)}
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Active Assets</Typography>
-                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
-                  {activeAssets}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-
-        <Grid container spacing={4} sx={{ marginTop: 4 }}>
-          {/* Depreciation Trends Chart */}
-          <Grid item xs={12} md={6}>
-            <HighchartsReact highcharts={Highcharts} options={depreciationChartOptions} />
-          </Grid>
-
-          {/* Status Distribution Chart */}
+          {/* Chart Section */}
           <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
           </Grid>

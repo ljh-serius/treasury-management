@@ -77,7 +77,7 @@ export default function QualityStandardsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Quality Standards</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue"  sx={{ fontWeight: 'bold' }}>
                   {totalStandards}
                 </Typography>
                 <Typography variant="body2">Total number of quality standards tracked.</Typography>
@@ -88,7 +88,7 @@ export default function QualityStandardsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Critical Standards</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {criticalStandards.length}
                 </Typography>
                 <Typography variant="body2">Standards tagged as 'Critical'.</Typography>

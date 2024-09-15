@@ -3,6 +3,7 @@ export const fieldsConfig = {
     taxYear: { label: 'Tax Year', type: 'number', faker: 'date.past' },
     auditAmount: { label: 'Audit Amount', type: 'number', faker: 'finance.amount' },
     auditor: { label: 'Auditor', type: 'text', faker: 'company.name' },
+    ecoContribution: { label: 'Eco Contribution', type: 'number', faker: 'finance.amount' },  // Eco-tax contribution (French-specific)
     status: {
         label: 'Status',
         type: 'select',
@@ -18,6 +19,7 @@ export const fieldsConfig = {
     lastModifiedBy: { label: 'Last Modified By', type: 'text', faker: 'name.fullName' },
     lastModifiedDate: { label: 'Last Modified Date', type: 'date', faker: 'date.recent' },
 };
+
 
 export const entityName = 'Tax Audits';
 export const collectionName = 'tax-audits';

@@ -71,7 +71,7 @@ export default function TrainingProgramsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Programs</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
                   {totalPrograms}
                 </Typography>
                 <Typography variant="body2">Total number of training programs.</Typography>
@@ -82,7 +82,7 @@ export default function TrainingProgramsAnalytics({ fetchItems }) {
             <Card>
               <CardContent>
                 <Typography variant="h6">Ongoing Programs</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   {ongoingPrograms.length}
                 </Typography>
                 <Typography variant="body2">Training programs currently ongoing.</Typography>

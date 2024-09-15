@@ -5,11 +5,11 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function TaxAuditsAnalytics({ fetchItems }) {
+export default function TaxAuditsDashboard({ fetchItems }) {
   const [auditsData, setAuditsData] = useState([]);
   const [statusDistribution, setStatusDistribution] = useState([]);
   const [totalAuditAmount, setTotalAuditAmount] = useState(0);
-  const [topAuditors, setTopAuditors] = useState([]);
+  const [ecoContributionTotal, setEcoContributionTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,21 +36,24 @@ export default function TaxAuditsAnalytics({ fetchItems }) {
       y: statusCounts[key],
     })));
 
-    // Total Audit Amount
-    const total = data.reduce((sum, audit) => sum + Number(audit.auditAmount), 0);
-    setTotalAuditAmount(total);
+    // Total Audit Amount and Eco Contribution
+    const totals = data.reduce(
+      (acc, audit) => {
+        acc.totalAmount += Number(audit.auditAmount) || 0;
+        acc.ecoContribution += Number(audit.ecoContribution) || 0;
+        return acc;
+      },
+      { totalAmount: 0, ecoContribution: 0 }
+    );
 
-    // Top 5 Auditors
-    const topAuditorsList = data
-      .sort((a, b) => Number(b.auditAmount) - Number(a.auditAmount))
-      .slice(0, 5);
-    setTopAuditors(topAuditorsList);
+    setTotalAuditAmount(totals.totalAmount);
+    setEcoContributionTotal(totals.ecoContribution);
   };
 
   const statusChartOptions = {
     chart: { type: 'pie' },
-    title: { text: 'Status Distribution' },
-    series: [{ name: 'Statuses', colorByPoint: true, data: statusDistribution }],
+    title: { text: 'Audit Status Distribution' },
+    series: [{ name: 'Audits', colorByPoint: true, data: statusDistribution }],
   };
 
   return (
@@ -60,39 +63,35 @@ export default function TaxAuditsAnalytics({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Tax Audits Analytics
+          Tax Audits Dashboard
         </Typography>
         <Grid container spacing={4}>
           {/* KPI Section */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
                 <Typography variant="h6">Total Audit Amount</Typography>
                 <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
                   ${totalAuditAmount.toFixed(2)}
                 </Typography>
+                <Typography variant="body2">Total amount under tax audits.</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Top 5 Auditors</Typography>
-                <ol>
-                  {topAuditors.map(audit => (
-                    <li key={audit.auditId}>
-                      <Typography variant="body2">
-                        {audit.auditor} - Audit Amount: ${Number(audit.auditAmount).toFixed(2)}
-                      </Typography>
-                    </li>
-                  ))}
-                </ol>
+                <Typography variant="h6">Eco Contribution</Typography>
+                <Typography variant="h4" color="orange" sx={{ fontWeight: 'bold' }}>
+                  ${ecoContributionTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total eco-tax contributions (French-specific).</Typography>
               </CardContent>
             </Card>
           </Grid>
 
           {/* Chart Section */}
-          <Grid item xs={12}>
+          <Grid item xs={12} md={6}>
             <HighchartsReact highcharts={Highcharts} options={statusChartOptions} />
           </Grid>
         </Grid>

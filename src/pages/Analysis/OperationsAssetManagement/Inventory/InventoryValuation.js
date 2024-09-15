@@ -5,63 +5,51 @@ import { Box, Typography, Grid, Card, CardContent, Container } from '@mui/materi
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-export default function InventoryValuationAnalytics({ fetchItems }) {
-  const [data, setData] = useState([]);
+export default function InventoryValuationDashboard({ fetchItems }) {
+  const [valuationData, setValuationData] = useState([]);
+  const [tagsDistribution, setTagsDistribution] = useState([]);
+  const [totalInventoryValuation, setTotalInventoryValuation] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [totalValuation, setTotalValuation] = useState(0);
-  const [rawMaterialValuation, setRawMaterialValuation] = useState(0);
-  const [valuationDistribution, setValuationDistribution] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const fetchedData = await fetchItems();
-      setData(fetchedData);
-      calculateKpis(fetchedData);
-      generateCharts(fetchedData);
+      const data = await fetchItems();
+      setValuationData(data);
+      processValuationData(data);
       setLoading(false);
     };
 
     fetchData();
   }, [fetchItems]);
 
-  const calculateKpis = (data) => {
-    const total = data.reduce((acc, item) => acc + item.totalValuation, 0);
-    setTotalValuation(total);
-
-    const rawMaterial = data.filter((item) => item.tags.includes('raw_material'));
-    const rawMaterialVal = rawMaterial.reduce((acc, item) => acc + item.totalValuation, 0);
-    setRawMaterialValuation(rawMaterialVal);
-  };
-
-  const generateCharts = (data) => {
-    const valuation = data.reduce((acc, item) => {
-      acc[item.productName] = (acc[item.productName] || 0) + item.totalValuation;
+  const processValuationData = (data) => {
+    // Tags Distribution
+    const tagCounts = data.reduce((acc, item) => {
+      item.tags.forEach(tag => {
+        acc[tag] = (acc[tag] || 0) + 1;
+      });
       return acc;
     }, {});
 
-    setValuationDistribution(
-      Object.keys(valuation).map((key) => ({
-        name: key,
-        y: valuation[key],
-      }))
-    );
+    setTagsDistribution(Object.keys(tagCounts).map(key => ({
+      name: key,
+      y: tagCounts[key],
+    })));
+
+    // Total Inventory Valuation
+    const totalValuation = data.reduce((acc, item) => {
+      acc += Number(item.totalValuation) || 0;
+      return acc;
+    }, 0);
+
+    setTotalInventoryValuation(totalValuation);
   };
 
-  const valuationDistributionChart = {
-    chart: { type: 'column' },
-    title: { text: 'Inventory Valuation by Product' },
-    xAxis: {
-      categories: valuationDistribution.map((item) => item.name),
-      title: { text: 'Products' },
-    },
-    yAxis: { title: { text: 'Total Valuation (USD)' } },
-    series: [
-      {
-        name: 'Valuation',
-        data: valuationDistribution.map((item) => item.y),
-      },
-    ],
+  const tagsChartOptions = {
+    chart: { type: 'pie' },
+    title: { text: 'Inventory Tags Distribution' },
+    series: [{ name: 'Valuation', colorByPoint: true, data: tagsDistribution }],
   };
 
   return (
@@ -71,36 +59,38 @@ export default function InventoryValuationAnalytics({ fetchItems }) {
       </Backdrop>
       <Box sx={{ padding: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Inventory Valuation Analytics
+          Inventory Valuation Dashboard
         </Typography>
         <Grid container spacing={4}>
-          {/* KPIs */}
+          {/* Total Number of Valuations */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Total Inventory Valuation</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  ${totalValuation.toFixed(2)}
+                <Typography variant="h6">Total Valuation Records</Typography>
+                <Typography variant="h4" color="blue" sx={{ fontWeight: 'bold' }}>
+                  {valuationData.length}
                 </Typography>
-                <Typography variant="body2">Total valuation of all inventory items.</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Raw Material Valuation</Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  ${rawMaterialValuation.toFixed(2)}
-                </Typography>
-                <Typography variant="body2">Valuation of inventory tagged as 'Raw Material'.</Typography>
+                <Typography variant="body2">Total number of inventory valuation records.</Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* Charts */}
-          <Grid item xs={12} md={12}>
-            <HighchartsReact highcharts={Highcharts} options={valuationDistributionChart} />
+          {/* KPI Section */}
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Total Inventory Valuation</Typography>
+                <Typography variant="h4" color="green" sx={{ fontWeight: 'bold' }}>
+                  ${totalInventoryValuation.toFixed(2)}
+                </Typography>
+                <Typography variant="body2">Total value of inventory across all products.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Chart Section */}
+          <Grid item xs={12} md={6}>
+            <HighchartsReact highcharts={Highcharts} options={tagsChartOptions} />
           </Grid>
         </Grid>
       </Box>
