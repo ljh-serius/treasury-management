@@ -1,1 +1,0 @@
-(self.webpackChunktresorerie_management=self.webpackChunktresorerie_management||[]).push([[96605],{96605:()=>{}}]);
